@@ -3,7 +3,6 @@ using CemSys3.DTOs.SweetAlert;
 using CemSys3.Interfaces.Login;
 using CemSys3.ViewModels.Login;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace CemSys3.Controllers
 {
@@ -45,6 +44,7 @@ namespace CemSys3.Controllers
                 HttpContext.Session.SetString("NombreUsuario", $"{result.NombreEmpleado} {result.ApellidoEmpleado}");
                 HttpContext.Session.SetInt32("IdUsuario", result.UsuarioId.Value);
                 HttpContext.Session.SetInt32("IdRol", result.RolId.Value);
+                HttpContext.Session.SetString("IsAuthenticated", "true");
 
                 return RedirectToAction("Index", "Home"); //ridirige al home
             }
@@ -57,6 +57,13 @@ namespace CemSys3.Controllers
             };
 
             return View(viewModel);
+        }
+
+        [HttpGet]
+        public IActionResult CerrarSesion()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Index", "Login");
         }
 
 
