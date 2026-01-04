@@ -1,0 +1,14 @@
+﻿@using CemSys3.DTOs.SweetAlert
+@model SweetAlertDTO
+
+@if (Model != null && !string.IsNullOrEmpty(Model.Mensaje))
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+            //Convertimos el objeto C# a JSON para JS
+            const alertDto = @Html.Raw(Json.Serialize(Model));
+            AlertService.showFromDto(alertDto);
+        });
+    </script>
+}
