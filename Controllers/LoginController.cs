@@ -53,7 +53,7 @@ namespace CemSys3.Controllers
             {
                 Titulo = "Error de acceso",
                 Mensaje = result.ErrorMessage,
-                Tipo = "error"
+                Tipo = "error" //tipo de alerta
             };
 
             return View(viewModel);
