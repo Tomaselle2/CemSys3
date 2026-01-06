@@ -12,6 +12,8 @@ namespace CemSys3.Interfaces.Usuario
         Task Modificar(UsuarioRequestDTO dto); //modifica un usuario existente como administrador
         Task<IEnumerable<RolDTO>> ObtenerRoles(); //obtiene la lista de roles disponibles
         Task<IEnumerable<UsuarioRequestDTO>> ListadoUsuarios(); //obtiene el listado de usuarios
+        Task<UsuarioRequestDTO> GetUserById(int Id); //obtiene un usuario por el id
+        Task Delete(int Id); //elimina un usuario
 
     }
 }

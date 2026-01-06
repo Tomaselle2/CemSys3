@@ -107,5 +107,84 @@ namespace CemSys3.Controllers
 
             return RedirectToAction("AdminUsers");
         }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> Editar(int Id) 
+        {
+            try
+            {
+                UsuarioRequestDTO usuario = await _usuarioService.GetUserById(Id); //busca el usuario por id
+
+                if (usuario == null)
+                {
+                    TempData.SetSweetAlert(
+                         new SweetAlertDTO
+                         {
+                             Titulo = "Error",
+                             Mensaje = "Usuario no encontrado.",
+                             Tipo = "error"
+                         }
+                    );
+                }
+
+                UsuarioAdministradorVM viewModel = new UsuarioAdministradorVM //armo el VM
+                {
+                    Id = usuario.Id,
+                    NombreEmpleado = usuario.NombreEmpleado,
+                    ApellidoEmpleado = usuario.ApellidoEmpleado,
+                    Correo = usuario.Correo,
+                    NombreUsuario = usuario.NombreUsuario,
+                    IdRol = usuario.IdRol,
+                    Roles = await _usuarioService.ObtenerRoles(),
+                    Usuarios = await _usuarioService.ListadoUsuarios()
+                };
+
+                return View("AdminUsers", viewModel);
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(
+                     new SweetAlertDTO
+                     {
+                         Titulo = "Error",
+                         Mensaje = "Ocurrió un error al buscar el usuario: " + ex.Message,
+                         Tipo = "error"
+                     }
+                );
+                return RedirectToAction("AdminUsers");
+            }
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> Eliminar(int Id)
+        {
+            try
+            {
+                await _usuarioService.Delete(Id);
+                TempData.SetSweetAlert(
+                     new SweetAlertDTO
+                     {
+                         Titulo = "Éxito",
+                         Mensaje = "Usuario eliminado correctamente.",
+                         Tipo = "success"
+                     }
+                );
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(
+                     new SweetAlertDTO
+                     {
+                         Titulo = "Error",
+                         Mensaje = "Ocurrió un error al eliminar el usuario: " + ex.Message,
+                         Tipo = "error"
+                     }
+                );
+            }
+            return RedirectToAction("AdminUsers");
+        }
+
     }
 }

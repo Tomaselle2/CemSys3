@@ -101,19 +101,19 @@
                                         <td>@opc.Correo.ToLower()</td>
                                         <td>@((RolUsuario)opc.IdRol)</td>
                                         <td>
-                                            <form asp-action="Modificar" method="get" style="display: inline-block;">
-                                                <input type="hidden" asp-for="Id" value="@opc.Id" />
-                                                <button type="submit" class="btn-modificar btn-sm" title="Modificar">
+                                            <form asp-action="Editar" asp-controller="Usuario" method="get" style="display: inline-block;">
+                                                <input type="hidden" asp-for="Id" value="@opc.Id" name="Id" />
+                                                <button type="submit" class="btn btn-primary btn-sm" title="Editar">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
                                             </form>
-                                            <form asp-action="Eliminar" method="post" style="display: inline-block;" id="formularioEliminar_@opc.Id">
-                                                <input type="hidden" asp-for="Id" value="@opc.Id" />
+                                            <form asp-action="Eliminar" method="get" style="display: inline-block;" id="formularioEliminar"
+                                                  onsubmit="return confirmarEliminacion(this, '¿Esta seguro de eliminar al usuario @opc.NombreEmpleado @opc.ApellidoEmpleado?')">
+                                                <input type="hidden" asp-for="Id" name="Id" value="@opc.Id" />
 
-                                                @* <button type="button" class="btn-eliminar btn-sm" title="Eliminar"
-                                                        onclick="confirmarEliminacion('formularioEliminar_@opc.Id', '¿Desea eliminar el usuario @opc.Usuario1')">
+                                                <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
                                                     <i class="bi bi-trash"></i>
-                                                </button> *@
+                                                </button>
                                             </form>
                                         </td>
                                     </tr>

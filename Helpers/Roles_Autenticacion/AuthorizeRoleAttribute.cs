@@ -29,7 +29,7 @@ namespace CemSys3.Helpers.Roles_Autenticacion
             var userRole = session.GetInt32("IdRol");
             if (userRole == null || !_allowedRoles.Contains((RolUsuario)userRole))
             {
-                context.Result = new RedirectResult("~/");
+                context.Result = new RedirectToActionResult("AccesoDenegado", "Error", null);
                 return;
             }
 
