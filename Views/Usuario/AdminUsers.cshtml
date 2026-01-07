@@ -6,14 +6,14 @@
     ViewData["Title"] = "Administrar Usuarios";
 }
 
-<h1>Administrar usuarios</h1>
+<h1 class="title-page">Administrar usuarios</h1>
 
 <!--Formulario de registro-->
 <div class="accordion" id="accordionPanelsStayOpenExample">
     <div class="accordion-item">
         <h2 class="accordion-header" id="panelsStayOpen-headingOne">
             <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
-               @*  @(Model.EsEdicion ? "Modificar usuario" : "Nuevo usuario") *@
+                 @(Model.EsEdicion ? "Modificar usuario" : "Nuevo usuario") 
             </button>
         </h2>
         <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
@@ -53,11 +53,10 @@
                             </select>
                             <span asp-validation-for="IdRol" class="text-danger"></span>
                         </div>
-
-                        <div>
-                             @* <input type="hidden" asp-for="Redirigir" value="@redirigir" /> *@
-                             <input class="btn @Model.ClaseBoton" type="submit" value="@Model.TextoBoton" />
-                        </div>
+                    </div>
+                    <div class="form-button-registrar">
+                        @* <input type="hidden" asp-for="Redirigir" value="@redirigir" /> *@
+                        <input class="btn @Model.ClaseBoton" type="submit" value="@Model.TextoBoton" />
                     </div>
                 </form>
                 @* Fin cuerpo del acordeon *@
@@ -103,7 +102,7 @@
                                         <td>
                                             <form asp-action="Editar" asp-controller="Usuario" method="get" style="display: inline-block;">
                                                 <input type="hidden" asp-for="Id" value="@opc.Id" name="Id" />
-                                                <button type="submit" class="btn btn-primary btn-sm" title="Editar">
+                                                <button type="submit" class="btn btn-primary btn-sm btn-lista" title="Editar">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
                                             </form>
@@ -111,7 +110,7 @@
                                                   onsubmit="return confirmarEliminacion(this, '¿Esta seguro de eliminar al usuario @opc.NombreEmpleado @opc.ApellidoEmpleado?')">
                                                 <input type="hidden" asp-for="Id" name="Id" value="@opc.Id" />
 
-                                                <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                <button type="submit" class="btn btn-danger btn-sm btn-lista" title="Eliminar">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>

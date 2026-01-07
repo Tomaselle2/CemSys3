@@ -1,10 +1,16 @@
-﻿<!DOCTYPE html>
+﻿@using CemSys3.Enumerables
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - CemSys3</title>
     <script type="importmap"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com"> <!--Google font-->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <!--Google font-->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet"> <!--Google font-->
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/CemSys3.styles.css" asp-append-version="true" />
@@ -13,24 +19,80 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">CemSys3</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+        <nav class="sidebar bg-white border-end p-3">
+            <a class="navbar-brand mb-4 d-block text-center" asp-area="" asp-controller="Home" asp-action="Index">
+                <img src="~/img/icon.png" alt="CemSys Logo" style="height: 40px;" />
+            </a>
+
+            <ul class="nav flex-column">
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark icono-menu" asp-controller="Usuarios" asp-action="IndexPerfilUsuario">
+                        <i class="bi bi-person"></i> <span class="nav-text">@Context.Session.GetString("NombreUsuario")</span>
+                    </a>
+                </li>
+
+                @if (Context.Session.GetInt32("IdRol") == (int)RolUsuario.Empleado) //empleado
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-dark icono-menu" asp-controller="Home" asp-action="Index">
+                            <i class="bi bi-file-earmark"></i> <span class="nav-text">Trámites</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-dark icono-menu" asp-controller="ContratoConcesion" asp-action="Index">
+                            <i class="bi bi-journal-text"></i> <span class="nav-text">Concesiones</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-dark icono-menu" asp-controller="Introduccion" asp-action="Index">
+                            <i class="bi bi-person-up"></i><span class="nav-text">Introducciones</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-dark icono-menu" asp-controller="Secciones" asp-action="Index">
+                            <i class="bi bi-grid-3x3"></i>
+                            <span class="nav-text">Secciones</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-dark icono-menu" asp-controller="Personas" asp-action="Index">
+                            <i class="bi bi-person-vcard"></i> <span class="nav-text">Personas</span>
+                        </a>
+                    </li>
+                }
+
+
+
+
+                @if (Context.Session.GetInt32("IdRol") == (int)RolUsuario.Administrador) //Administrador
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-dark icono-menu" asp-controller="Reportes" asp-action="Index">
+                            <i class="bi bi-bar-chart"></i> <span class="nav-text">Reportes</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark icono-menu" asp-controller="Configuracion" asp-action="Index">
+                            <i class="bi bi-gear"></i> <span class="nav-text">Configuración</span>
+                        </a>
+                    </li>
+                }
+
+
+                <li class="nav-item">
+                    <a class="nav-link cerrar-sesion" asp-controller="Login" asp-action="CerrarSesion">
+                        <i class="bi bi-box-arrow-right"></i> <span class="nav-text">Cerrar sesión</span>
+                    </a>
+                </li>
+
+
+
+            </ul>
         </nav>
     </header>
     <div class="container">
@@ -39,11 +101,7 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - CemSys3 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="~/js/site-alerts.js"></script> <!--para mostrar las alertas de SweetAlert personalizado-->
     <script src="~/js/confirmaciones.js"></script> <!--para mostrar confirmaciones SweetAlert personalizado-->

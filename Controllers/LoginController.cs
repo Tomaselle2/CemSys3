@@ -63,7 +63,7 @@ namespace CemSys3.Controllers
         public IActionResult CerrarSesion()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Index", "Login");
+            return RedirectToAction("Login");
         }
 
 
