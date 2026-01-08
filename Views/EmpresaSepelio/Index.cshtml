@@ -1,19 +1,19 @@
-﻿@using CemSys3.ViewModels.Usuario
-@using CemSys3.Enumerables
-@model UsuarioAdministradorVM
+﻿@using CemSys3.DTOs.Paginacion
+@using CemSys3.ViewModels.EmpresaSepelio
+@model EmpresaSepelioVM
 
 @{
-    ViewData["Title"] = "Administrar Usuarios";
+    ViewData["Title"] = "Administrar Empresas";
 }
 
-<h1 class="title-page">Administrar usuarios</h1>
+<h1 class="title-page">Administrar empresas</h1>
 
 <!--Formulario de registro-->
 <div class="accordion" id="accordionPanelsStayOpenExample">
     <div class="accordion-item">
         <h2 class="accordion-header" id="panelsStayOpen-headingOne">
             <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
-                 @(Model.EsEdicion ? "Modificar usuario" : "Nuevo usuario") 
+                @(Model.EsEdicion ? "Modificar empresa" : "Nueva empresa")
             </button>
         </h2>
         <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
@@ -24,38 +24,11 @@
                     <div class="form-columns-container3">
                         <div>
                             <label class="form-label" for="nombre">Nombre</label>
-                            <input class="form-control" type="text" asp-for="NombreEmpleado" required maxlength="50" id="nombre" />
-                            <span asp-validation-for="NombreEmpleado" class="text-danger"></span>
-                        </div>
-
-                        <div>
-                            <label class="form-label" for="apellido">Apellido</label>
-                            <input class="form-control" type="text" asp-for="ApellidoEmpleado" required maxlength="50" id="apellido" />
-                            <span asp-validation-for="ApellidoEmpleado" class="text-danger"></span>
-                        </div>
-
-                        <div>
-                            <label class="form-label" for="nombreUsuario">Usuario</label>
-                            <input class="form-control" type="text" asp-for="NombreUsuario" required maxlength="50" id="nombreUsuario" />
-                            <span asp-validation-for="NombreUsuario" class="text-danger"></span>
-                        </div>
-
-                        <div>
-                            <label class="form-label" for="correo">Correo</label>
-                            <input class="form-control" type="email" asp-for="Correo" required maxlength="50" id="correo" />
-                            <span asp-validation-for="Correo" class="text-danger"></span>
-                        </div>
-
-                        <div>
-                            <label for="rol" class="form-label">Rol del usuario</label>
-                            <select class="form-select" asp-for="IdRol" id="rol" asp-items="@(new SelectList(Model.Roles, "Id", "Rol"))" required>
-                                <option value="">--Elija una opción--</option>
-                            </select>
-                            <span asp-validation-for="IdRol" class="text-danger"></span>
+                            <input class="form-control" type="text" asp-for="Nombre" required maxlength="50" id="nombre" />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
                         </div>
                     </div>
                     <div class="form-button-registrar">
-                        @* <input type="hidden" asp-for="Redirigir" value="@redirigir" /> *@
                         <input class="btn @Model.ClaseBoton" type="submit" value="@Model.TextoBoton" />
                     </div>
                 </form>
@@ -70,12 +43,12 @@
     <div class="accordion-item">
         <h2 class="accordion-header" id="panelsStayOpen-headingOne">
             <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
-                Usuarios registrados
+                Empresas registradas
             </button>
         </h2>
         <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
             @* cuerpo del acordion *@
-            @if (Model.Usuarios.Any())
+            @if (Model.ListadoEmpresas.Any())
             {
                 <div class="card shadow-sm">
                     <div class="card-body p-0">
@@ -83,32 +56,26 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Nombre</th>
-                                    <th>Apellido</th>
-                                    <th>Usuario</th>
-                                    <th>Correo</th>
-                                    <th>Rol</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var opc in Model.Usuarios)
+                                @foreach (var opc in Model.ListadoEmpresas)
                                 {
                                     <tr>
-                                        <td>@opc.NombreEmpleado.ToUpper()</td>
-                                        <td>@opc.ApellidoEmpleado.ToUpper()</td>
-                                        <td>@opc.NombreUsuario</td>
-                                        <td>@opc.Correo.ToLower()</td>
-                                        <td>@((RolUsuario)opc.IdRol)</td>
+                                        <td>@opc.Nombre.ToUpper()</td>
                                         <td>
-                                            <form asp-action="Editar" asp-controller="Usuario" method="get" style="display: inline-block;">
-                                                <input type="hidden" asp-for="Id" value="@opc.Id" name="Id" />
+                                            <form asp-action="Editar" asp-controller="EmpresaSepelio" method="get" style="display: inline-block;">
+
+                                                <input type="hidden" asp-for="Id" value="@opc.Id" name="id" />
+
                                                 <button type="submit" class="btn btn-warning btn-sm btn-lista" title="Editar">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
                                             </form>
-                                            <form asp-action="Eliminar" method="get" style="display: inline-block;" id="formularioEliminar"
-                                                  onsubmit="return confirmarEliminacion(this, '¿Esta seguro de eliminar al usuario @opc.NombreEmpleado @opc.ApellidoEmpleado?')">
-                                                <input type="hidden" asp-for="Id" name="Id" value="@opc.Id" />
+                                            <form asp-action="Eliminar" asp-controller="EmpresaSepelio" method="get" style="display: inline-block;" id="formularioEliminar"
+                                                  onsubmit="return confirmarEliminacion(this, '¿Esta seguro de eliminar a la empresa @opc.Nombre?')">
+                                                <input type="hidden" asp-for="Id" name="id" value="@opc.Id" />
 
                                                 <button type="submit" class="btn btn-danger btn-sm btn-lista" title="Eliminar">
                                                     <i class="bi bi-trash"></i>
@@ -122,7 +89,26 @@
                     </div>
                 </div>
             }
+            else
+            {
+                <div class="alert alert-info mt-3" role="alert">
+                    <i class="bi bi-info-circle me-2"></i> No se encontraron registros de empresas.
+                </div>
+            }
             @* Fin cuerpo del acordeon *@
+
+            @* Paginador *@
+            @if (Model.Paginacion.TotalPaginas > 0)
+            {
+                @await Html.PartialAsync("_Paginador", new PaginacionDTO
+                {
+                    PaginaActual = Model.Paginacion.PaginaActual,
+                    TotalPaginas = Model.Paginacion.TotalPaginas,
+                    TotalRegistros = Model.Paginacion.TotalRegistros,
+                    Accion = "index",
+                    Controlador = "EmpresaSepelio"
+                    })
+                }
         </div>
     </div>
 </div>
@@ -133,4 +119,5 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+
 

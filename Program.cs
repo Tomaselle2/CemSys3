@@ -1,5 +1,7 @@
+using CemSys3.Business.EmpresaSepelio;
 using CemSys3.Business.Login;
 using CemSys3.Business.Usuario;
+using CemSys3.Interfaces.EmpresaSepelio;
 using CemSys3.Interfaces.Login;
 using CemSys3.Interfaces.Usuario;
 using CemSys3.Models;
@@ -26,6 +28,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 //Inyectar dependencias de servicios personalizados
 builder.Services.AddScoped<ILogin, LoginService>();
 builder.Services.AddScoped<IUsuario, UsuarioService>();
+builder.Services.AddScoped<IEmpresaSepelio, EmpresaSepelioService>();
+
 
 var app = builder.Build();
 app.UseSession();
