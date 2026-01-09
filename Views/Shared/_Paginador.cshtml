@@ -1,56 +1,52 @@
 ﻿@using CemSys3.DTOs.Paginacion
 @model PaginacionDTO
 
-<nav aria-label="Paginador" class="mt-3">
-    <ul class="pagination justify-content-center">
-        @* Botón anterior *@
+@{
+    // Aseguramos que el diccionario de parámetros no sea nulo
+    var parametrosBase = Model.Parametros ?? new Dictionary<string, string>();
+}
+
+<nav aria-label="Paginador" class="mt-4">
+    <ul class="pagination justify-content-center mb-2">
+
+        @* --- Botón Anterior --- *@
         @if (Model.PaginaActual > 1)
         {
             <li class="page-item">
                 @{
-                    // Crea un diccionario de parámetros temporales
-                    var prevParams = new Dictionary<string, string>(Model.Parametros);
-                    // Sobrescribe la clave 'pagina' con el valor de la página anterior
+                    var prevParams = new Dictionary<string, string>(parametrosBase);
                     prevParams["pagina"] = (Model.PaginaActual - 1).ToString();
+                    prevParams["porPagina"] = Model.RegistrosPorPagina.ToString();
                 }
-                <a class="page-link"
-                   asp-action="@Model.Accion"
-                   asp-controller="@Model.Controlador"
-                   asp-all-route-data="prevParams">
-                    @* Usa el nuevo diccionario aquí *@
+                <a class="page-link" asp-action="@Model.Accion" asp-controller="@Model.Controlador" asp-all-route-data="prevParams">
                     <i class="bi bi-chevron-left"></i>
                 </a>
             </li>
         }
-        @* Páginas numéricas *@
+
+        @* --- Lógica de Números --- *@
         @{
             int paginaInicio = Math.Max(1, Model.PaginaActual - 2);
             int paginaFin = Math.Min(Model.TotalPaginas, Model.PaginaActual + 2);
         }
-        @* Primera página si no está en el rango *@
+
+        @* Primera página *@
         @if (paginaInicio > 1)
         {
             <li class="page-item">
                 @{
-                    // Crea un diccionario de parámetros temporales para la primera página
-                    var firstPageParams = new Dictionary<string, string>(Model.Parametros);
-                    firstPageParams["pagina"] = "1";
+                    var firstParams = new Dictionary<string, string>(parametrosBase);
+                    firstParams["pagina"] = "1";
+                    firstParams["porPagina"] = Model.RegistrosPorPagina.ToString();
                 }
-                <a class="page-link"
-                   asp-action="@Model.Accion"
-                   asp-controller="@Model.Controlador"
-                   asp-all-route-data="firstPageParams">
-                    @* Usa el nuevo diccionario aquí *@
-                    1
-                </a>
+                <a class="page-link" asp-action="@Model.Accion" asp-controller="@Model.Controlador" asp-all-route-data="firstParams">1</a>
             </li>
             @if (paginaInicio > 2)
             {
-                <li class="page-item disabled">
-                    <span class="page-link">...</span>
-                </li>
+                <li class="page-item disabled"><span class="page-link">...</span></li>
             }
         }
+
         @* Páginas del rango *@
         @for (int i = paginaInicio; i <= paginaFin; i++)
         {
@@ -61,73 +57,76 @@
                 }
                 else
                 {
-                    var parametrosConPagina = new Dictionary<string, string>(Model.Parametros);
-                    parametrosConPagina["pagina"] = i.ToString();
+                    var pageParams = new Dictionary<string, string>(parametrosBase);
+                    pageParams["pagina"] = i.ToString();
+                    pageParams["porPagina"] = Model.RegistrosPorPagina.ToString();
 
-                    <a class="page-link"
-                       asp-action="@Model.Accion"
-                       asp-controller="@Model.Controlador"
-                       asp-all-route-data="parametrosConPagina">
-                        @i
-                    </a>
+                    <a class="page-link" asp-action="@Model.Accion" asp-controller="@Model.Controlador" asp-all-route-data="pageParams">@i</a>
                 }
             </li>
         }
 
-
-        @* Última página si no está en el rango *@
+        @* Última página *@
         @if (paginaFin < Model.TotalPaginas)
         {
             @if (paginaFin < Model.TotalPaginas - 1)
             {
-                <li class="page-item disabled">
-                    <span class="page-link">...</span>
-                </li>
+                <li class="page-item disabled"><span class="page-link">...</span></li>
             }
             <li class="page-item">
                 @{
-                    // Crea un diccionario de parámetros temporales para la última página
-                    var lastPageParams = new Dictionary<string, string>(Model.Parametros);
-                    lastPageParams["pagina"] = Model.TotalPaginas.ToString();
+                    var lastParams = new Dictionary<string, string>(parametrosBase);
+                    lastParams["pagina"] = Model.TotalPaginas.ToString();
+                    lastParams["porPagina"] = Model.RegistrosPorPagina.ToString();
                 }
-                <a class="page-link"
-                   asp-action="@Model.Accion"
-                   asp-controller="@Model.Controlador"
-                   asp-all-route-data="lastPageParams">
-                    @* Usa el nuevo diccionario aquí *@
-                    @Model.TotalPaginas
-                </a>
+                <a class="page-link" asp-action="@Model.Accion" asp-controller="@Model.Controlador" asp-all-route-data="lastParams">@Model.TotalPaginas</a>
             </li>
         }
-        @* Botón siguiente *@
+
+        @* --- Botón Siguiente --- *@
         @if (Model.PaginaActual < Model.TotalPaginas)
         {
             <li class="page-item">
                 @{
-                    // Crea un diccionario de parámetros temporales
-                    var nextParams = new Dictionary<string, string>(Model.Parametros);
-                    // Sobrescribe la clave 'pagina' con el valor de la página siguiente
+                    var nextParams = new Dictionary<string, string>(parametrosBase);
                     nextParams["pagina"] = (Model.PaginaActual + 1).ToString();
+                    nextParams["porPagina"] = Model.RegistrosPorPagina.ToString();
                 }
-                <a class="page-link"
-                   asp-action="@Model.Accion"
-                   asp-controller="@Model.Controlador"
-                   asp-all-route-data="nextParams">
-                    @* Usa el nuevo diccionario aquí *@
+                <a class="page-link" asp-action="@Model.Accion" asp-controller="@Model.Controlador" asp-all-route-data="nextParams">
                     <i class="bi bi-chevron-right"></i>
                 </a>
             </li>
         }
     </ul>
-    @* Información de paginación *@
-    <div class="text-center mt-2">
+
+    @* --- Información y Selector --- *@
+    <div class="d-flex justify-content-center align-items-center flex-wrap gap-3">
         <small class="text-muted">
-            Página @Model.PaginaActual de @Model.TotalPaginas
-            @if (Model.TotalRegistros > 0)
-            {
-                <span> - @Model.TotalRegistros registro(s) total(es)</span>
-            }
+            Página <strong>@Model.PaginaActual</strong> de @Model.TotalPaginas
+            (@Model.TotalRegistros registros)
         </small>
+
+        <div class="d-flex align-items-center">
+            <label class="me-2 small text-muted">Mostrar:</label>
+            <select id="selectRegistros" class="form-select form-select-sm mb-2" style="width: 80px;">
+                <!option value="10" @(Model.RegistrosPorPagina == 10 ? "selected" : "")>10</!option>
+                <!option value="50" @(Model.RegistrosPorPagina == 50 ? "selected" : "")>50</!option>
+                <!option value="100" @(Model.RegistrosPorPagina == 100 ? "selected" : "")>100</!option>
+            </select>
+        </div>
     </div>
 </nav>
 
+<script>
+    document.getElementById("selectRegistros")?.addEventListener("change", function () {
+        const porPagina = this.value;
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Mantener el filtro actual si existe
+        const filtro = urlParams.get('filtro') || '';
+
+        // Redirigir usando 'porPagina' (nombre exacto del parámetro en tu Controller)
+        const url = `@Url.Action(Model.Accion, Model.Controlador)?pagina=1&porPagina=${porPagina}&filtro=${filtro}`;
+        window.location.href = url;
+    });
+</script>
