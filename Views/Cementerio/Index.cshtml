@@ -1,21 +1,21 @@
 ﻿@using CemSys3.DTOs.Paginacion
-@using CemSys3.ViewModels.EmpresaSepelio
-@model EmpresaSepelioVM
+@using CemSys3.ViewModels.Cementerio
+@model CementerioVM
 
 @{
-    ViewData["Title"] = "Administrar Empresas";
+    ViewData["Title"] = "Administrar cementerios";
 }
 
 <a asp-action="Index" asp-controller="Configuracion" class="btn btn-secondary m-3" title="Configuración"><i class="bi bi-arrow-left"></i></a>
 
-<h1 class="title-page">Administrar empresas</h1>
+<h1 class="title-page">Administrar cementerios</h1>
 
 <!--Formulario de registro-->
 <div class="accordion" id="accordionPanelsStayOpenExample">
     <div class="accordion-item">
         <h2 class="accordion-header" id="panelsStayOpen-headingOne">
             <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
-                @(Model.EsEdicion ? "Modificar empresa" : "Nueva empresa")
+                @(Model.EsEdicion ? "Modificar cementerio" : "Registrar cementerio")
             </button>
         </h2>
         <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
@@ -45,12 +45,12 @@
     <div class="accordion-item">
         <h2 class="accordion-header" id="panelsStayOpen-headingOne">
             <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
-                Empresas registradas
+                Cementerios registrados
             </button>
         </h2>
         <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
             @* cuerpo del acordion *@
-            @if (Model.ListadoEmpresas.Any())
+            @if (Model.ListadoCementerios.Any())
             {
                 <div class="card shadow-sm">
                     <div class="card-body p-0">
@@ -62,12 +62,12 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var opc in Model.ListadoEmpresas)
+                                @foreach (var opc in Model.ListadoCementerios)
                                 {
                                     <tr>
                                         <td>@opc.Nombre.ToUpper()</td>
                                         <td>
-                                            <form asp-action="Editar" asp-controller="EmpresaSepelio" method="get" style="display: inline-block;">
+                                            <form asp-action="Editar" asp-controller="Cementerio" method="get" style="display: inline-block;">
 
                                                 <input type="hidden" asp-for="Id" value="@opc.Id" name="id" />
 
@@ -75,8 +75,8 @@
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
                                             </form>
-                                            <form asp-action="Eliminar" asp-controller="EmpresaSepelio" method="get" style="display: inline-block;" id="formularioEliminar"
-                                                  onsubmit="return confirmarEliminacion(this, '¿Esta seguro de eliminar a la empresa @opc.Nombre?')">
+                                            <form asp-action="Eliminar" asp-controller="Cementerio" method="get" style="display: inline-block;" id="formularioEliminar"
+                                                  onsubmit="return confirmarEliminacion(this, '¿Esta seguro de eliminar el cementerio @opc.Nombre?')">
                                                 <input type="hidden" asp-for="Id" name="id" value="@opc.Id" />
 
                                                 <button type="submit" class="btn btn-danger btn-sm btn-lista" title="Eliminar">
@@ -94,7 +94,7 @@
             else
             {
                 <div class="alert alert-info mt-3" role="alert">
-                    <i class="bi bi-info-circle me-2"></i> No se encontraron registros de empresas.
+                    <i class="bi bi-info-circle me-2"></i> No se encontraron registros de cementerios.
                 </div>
             }
             @* Fin cuerpo del acordeon *@
@@ -105,14 +105,14 @@
                 @await Html.PartialAsync("_Paginador", new PaginacionDTO
                 {
                     PaginaActual = Model.Paginacion.PaginaActual,
-                    TotalPaginas = Model.Paginacion.TotalPaginas,
-                    TotalRegistros = Model.Paginacion.TotalRegistros,
-                    RegistrosPorPagina = Model.Paginacion.RegistrosPorPagina,
-                    Accion = "Index",
-                    Controlador = "EmpresaSepelio",
-                    Parametros = Model.Paginacion.Parametros
-                    })
-                }
+                        TotalPaginas = Model.Paginacion.TotalPaginas,
+                        TotalRegistros = Model.Paginacion.TotalRegistros,
+                        RegistrosPorPagina = Model.Paginacion.RegistrosPorPagina,
+                        Accion = "Index",
+                        Controlador = "Cementerio",
+                        Parametros = Model.Paginacion.Parametros
+                        })
+                        }
         </div>
     </div>
 </div>
@@ -123,5 +123,4 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
-
 

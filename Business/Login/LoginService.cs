@@ -34,7 +34,7 @@ namespace CemSys3.Business.Login
                 };
 
             // 1️_ Buscar usuario (SOLO por usuario)
-            CemSys3.Models.Usuario usuario = await _contex.Usuarios
+            var usuario = await _contex.Usuarios
                 .FirstOrDefaultAsync(u =>
                     u.Visibilidad == true &&
                     u.Usuario1 == datosLogin.Usuario);

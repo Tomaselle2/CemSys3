@@ -21,7 +21,7 @@ namespace CemSys3.Helpers.Roles_Autenticacion
             var isAuthenticated = session.GetString("IsAuthenticated");
             if (string.IsNullOrEmpty(isAuthenticated) || isAuthenticated != "true")
             {
-                context.Result = new RedirectToActionResult("Index", "Login", null);
+                context.Result = new RedirectToActionResult("Login", "Login", null);
                 return;
             }
 
