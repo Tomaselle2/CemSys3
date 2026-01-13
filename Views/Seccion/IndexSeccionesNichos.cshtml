@@ -1,0 +1,165 @@
+﻿@using CemSys3.DTOs.Paginacion
+@using CemSys3.ViewModels.Seccion
+@using CemSys3.Helpers.Enumerable
+@using CemSys3.Enumerables
+@model SeccionVM
+
+@{
+    ViewData["Title"] = "Secciones de nichos";
+    string vistaRedirigir = Model.TipoParcelaId switch
+    {
+        (int)TipoParcelaEnum.Nicho => "IndexSeccionesNichos",
+        (int)TipoParcelaEnum.Fosa => "IndexSeccionesFosas",
+        (int)TipoParcelaEnum.Panteon => "IndexSeccionesPanteones",
+        _ => "IndexSeccionesPanteones"
+    };
+}
+
+<h1 class="title-page">Gestión de Secciones de Nichos</h1>
+
+<!--Formulario de registro-->
+<div class="accordion" id="accordionPanelsStayOpenExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                @(Model.EsEdicion ? "Modificar sección" : "Nueva sección")
+            </button>
+        </h2>
+        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            <div class="accordion-body">
+                @* cuerpo del acordion *@
+                <form asp-action="Guardar" method="post" class="form-box">
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="TipoParcelaId" />
+                    <div class="form-columns-container3">
+                        <div>
+                            <label for="nombre" class="form-label">Nombre</label>
+                            <input class="form-control" type="text" asp-for="Nombre" required maxlength="50" id="nombre" />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+
+                        <div>
+                            <label for="nroNichos" class="form-label">Cantidad de nichos</label>
+                            <input class="form-control" type="number" asp-for="NroParcelas" required id="nroNichos" min="1" />
+                            <span asp-validation-for="NroParcelas" class="text-danger"></span>
+                        </div>
+
+                        <div>
+                            <label for="nroFilas" class="form-label">Cantidad de filas</label>
+                            <input class="form-control" type="number" asp-for="Filas" required id="nroFilas" min="1" />
+                            <span asp-validation-for="Filas" class="text-danger"></span>
+                        </div>
+
+                        <div>
+                            <label for="tipoNumeracion" class="form-label">Tipo de numeración</label>
+                            <select class="form-select" asp-for="TipoNumeracionParcelaId" asp-items="@EnumHelper.GetSelectListItems<TipoNumeracionParcelaEnum>()" required>
+                                <option value="">--Elija una opción--</option>
+                            </select>
+                            <span asp-validation-for="TipoNumeracionParcelaId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-button-registrar">
+                        <input class="btn @Model.ClaseBoton" type="submit" value="@Model.TextoBoton" />
+                    </div>
+                </form>
+                @* Fin cuerpo del acordeon *@
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Tabla -->
+<div class="accordion" id="accordionPanelsStayOpenExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                Secciones registradas
+            </button>
+        </h2>
+        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            @* cuerpo del acordion *@
+            @if (Model.ListadoSecciones.Any())
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Nichos</th>
+                                    <th>Filas</th>
+                                    <th>Tipo de numeración</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var opc in Model.ListadoSecciones)
+                                {
+                                    <tr>
+                                        <td>@opc.Nombre.ToUpper()</td>
+                                        <td>@opc.NroParcelas</td>
+                                        <td>@opc.Filas</td>
+                                        <td>@(EnumHelper.GetDisplayNameByValue<TipoNumeracionParcelaEnum>(opc.TipoNumeracionParcelaId))</td>
+                                        <td>
+                                            <form asp-action="Editar" asp-controller="Seccion" method="get" style="display: inline-block;">
+
+                                                <input type="hidden" asp-for="Id" value="@opc.Id" name="id" />
+                                                <input type="hidden" asp-for="TipoParcelaId" value="@opc.TipoParcelaId" name="TipoParcelaId" />
+
+                                                <button type="submit" class="btn btn-warning btn-sm btn-lista" title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                            </form>
+                                            <form asp-action="Eliminar" asp-controller="Seccion" method="get" style="display: inline-block;" id="formularioEliminar"
+                                                  onsubmit="return confirmarEliminacion(this, '¿Esta seguro de eliminar la sección @opc.Nombre.ToUpper()?')">
+                                                <input type="hidden" asp-for="Id" name="id" value="@opc.Id" />
+                                                <input type="hidden" asp-for="TipoParcelaId" value="@opc.TipoParcelaId" name="TipoParcelaId" />
+
+
+                                                <button type="submit" class="btn btn-danger btn-sm btn-lista" title="Eliminar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mt-3" role="alert">
+                    <i class="bi bi-info-circle me-2"></i> No se encontraron registros de secciones.
+                </div>
+            }
+            @* Fin cuerpo del acordeon *@
+
+            @* Paginador *@
+            @if (Model.Paginacion.TotalPaginas > 0)
+            {
+                @await Html.PartialAsync("_Paginador", new PaginacionDTO
+                {
+                    PaginaActual = Model.Paginacion.PaginaActual,
+                        TotalPaginas = Model.Paginacion.TotalPaginas,
+                        TotalRegistros = Model.Paginacion.TotalRegistros,
+                        RegistrosPorPagina = Model.Paginacion.RegistrosPorPagina,
+                        Accion = @vistaRedirigir,
+                        Controlador = "Seccion",
+                        Parametros = Model.Paginacion.Parametros
+                })
+            }
+        </div>
+    </div>
+</div>
+
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
