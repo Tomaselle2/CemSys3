@@ -1,11 +1,13 @@
 using CemSys3.Business.Cementerio;
 using CemSys3.Business.EmpresaSepelio;
 using CemSys3.Business.Login;
+using CemSys3.Business.Parcela;
 using CemSys3.Business.Seccion;
 using CemSys3.Business.Usuario;
 using CemSys3.Interfaces.Cementerio;
 using CemSys3.Interfaces.EmpresaSepelio;
 using CemSys3.Interfaces.Login;
+using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Seccion;
 using CemSys3.Interfaces.Usuario;
 using CemSys3.Models;
@@ -35,6 +37,7 @@ builder.Services.AddScoped<IUsuario, UsuarioService>();
 builder.Services.AddScoped<IEmpresaSepelio, EmpresaSepelioService>();
 builder.Services.AddScoped<ICementerio, CementerioService>();
 builder.Services.AddScoped<ISeccion, SeccionService>();
+builder.Services.AddScoped<IParcela, ParcelaService>();
 
 
 

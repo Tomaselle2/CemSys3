@@ -20,6 +20,11 @@ namespace CemSys3.Controllers
             _seccionService = seccion;
         }
 
+        public IActionResult Index()
+        {
+            return View();
+        }
+
         //vista de secciones de nichos
         [HttpGet]
         [AuthorizeRole(RolUsuario.Administrador, RolUsuario.Empleado)]
