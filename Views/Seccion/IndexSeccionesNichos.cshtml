@@ -96,6 +96,7 @@
                                     <th>Nichos</th>
                                     <th>Filas</th>
                                     <th>Tipo de numeración</th>
+                                    <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -107,8 +108,9 @@
                                         <td>@opc.NroParcelas</td>
                                         <td>@opc.Filas</td>
                                         <td>@(EnumHelper.GetDisplayNameByValue<TipoNumeracionParcelaEnum>(opc.TipoNumeracionParcelaId))</td>
+                                        <td>@(opc.Visibilidad == true ? "Activa" : "Inactiva")</td>
                                         <td>
-                                            @if (Context.Session.GetInt32("IdRol") == (int)RolUsuario.Administrador) //Administrador
+                                            @if (Context.Session.GetInt32("IdRol") == (int)RolUsuario.Administrador && opc.Visibilidad == true) //Administrador
                                             {
                                                 <form asp-action="Editar" asp-controller="Seccion" method="get" style="display: inline-block;">
 

@@ -91,7 +91,7 @@ namespace CemSys3.Business.Seccion
         {
             PaginadoResponse<SeccionRequestDTO> resultado = new PaginadoResponse<SeccionRequestDTO>();
 
-            var query = _context.Secciones.Where(s => s.TipoParcelaId == tipoId && s.Visibilidad == true);
+            var query = _context.Secciones.Where(s => s.TipoParcelaId == tipoId);
 
             // Filtros
             if (!string.IsNullOrWhiteSpace(filtro))

@@ -3,6 +3,7 @@ using CemSys3.DTOs.Seccion;
 using CemSys3.Enumerables;
 using CemSys3.Interfaces;
 using CemSys3.Interfaces.Parcela;
+using CemSys3.Interfaces.Seccion;
 using CemSys3.Models;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 
@@ -15,6 +16,7 @@ namespace CemSys3.Business.Parcela
         {
             _context = context;
         }
+
         public async Task Add(SeccionRequestDTO dto)
         {
             switch (dto.TipoParcelaId)
@@ -121,5 +123,48 @@ namespace CemSys3.Business.Parcela
             }
         }
 
+        public async Task<GenericResultDTO> AddOne(int secccionId)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                Seccione? seccion = await _context.Secciones.FindAsync(secccionId);
+                if (seccion == null)
+                    throw new Exception("La seccion no existe");
+
+                Models.Parcela parcela = new Models.Parcela();
+                parcela.NroParcela = seccion.NroParcelas + 1; //el nro de parcela es el nro de parcelas actual + 1
+                parcela.SeccionId = secccionId;
+                parcela.Visibilidad = true;
+                parcela.CantidadDifuntos = 0;
+                parcela.NroFila = seccion.Filas;
+                parcela.InformacionAdicional = string.Empty;
+                parcela.NombrePanteon = string.Empty;
+                parcela.TipoParcelaId = seccion.TipoParcelaId;
+
+                //se actualiza el nro de parcelas de la seccion
+                seccion.NroParcelas += 1;
+
+                await _context.Parcelas.AddAsync(parcela);
+
+                //se guarda todo el contexto. 
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return new GenericResultDTO()
+                {
+                    Success = true,
+                    Message = "Parcela agregada correctamente",
+                    Id = parcela.Id
+                };
+            }
+            catch (Exception ex) 
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
     }
 }

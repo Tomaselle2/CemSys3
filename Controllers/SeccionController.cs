@@ -1,9 +1,11 @@
-﻿using CemSys3.DTOs.Paginacion;
+﻿using CemSys3.DTOs.Generics;
+using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Seccion;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
+using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Seccion;
 using CemSys3.ViewModels.Seccion;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +16,12 @@ namespace CemSys3.Controllers
     public class SeccionController : Controller
     {
         private readonly ISeccion _seccionService;
+        private readonly IParcela _parcelaService;
 
-        public SeccionController(ISeccion seccion)
+        public SeccionController(ISeccion seccion, IParcela parcelaService)
         {
             _seccionService = seccion;
+            _parcelaService = parcelaService;
         }
 
         public IActionResult Index()
@@ -252,6 +256,39 @@ namespace CemSys3.Controllers
                 {
                     Titulo = "Error",
                     Mensaje = "Ocurrió un error al eliminar la sección: " + ex.Message,
+                    Tipo = "error"
+                });
+            }
+
+            return RedirectToAction(vistaRedirigir);
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> AddOne(int id, int TipoParcelaId)
+        {
+            string vistaRedirigir = ObtenerVistaRedirigir(TipoParcelaId);
+
+            try
+            {
+                GenericResultDTO resultado = await _parcelaService.AddOne(id);
+
+                if(resultado.Id != null && resultado.Id > 0)
+                {
+                    TempData.SetSweetAlert(new SweetAlertDTO
+                    {
+                        Titulo = "Éxito",
+                        Mensaje = resultado.Message,
+                        Tipo = "success"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "Ocurrió un error al agregar una parcela: " + ex.Message,
                     Tipo = "error"
                 });
             }
