@@ -30,6 +30,18 @@ namespace CemSys3.Helpers.Enumerable
             return items;
         }
 
+        public static List<SelectListItem> GetSelectListItems<T>(int selectedValue) where T : Enum
+        {
+            var items = GetSelectListItems<T>();
+
+            foreach (var item in items)
+            {
+                item.Selected = item.Value == selectedValue.ToString();
+            }
+
+            return items;
+        }
+
         //para obtener el nombre del enum por su valor
         public static string GetDisplayNameByValue<T>(int value) where T : Enum
         {

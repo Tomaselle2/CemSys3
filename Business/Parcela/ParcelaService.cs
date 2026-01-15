@@ -1,4 +1,6 @@
 ﻿using CemSys3.DTOs.Generics;
+using CemSys3.DTOs.Paginacion;
+using CemSys3.DTOs.Parcela;
 using CemSys3.DTOs.Seccion;
 using CemSys3.Enumerables;
 using CemSys3.Interfaces;
@@ -6,6 +8,8 @@ using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Seccion;
 using CemSys3.Models;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace CemSys3.Business.Parcela
 {
@@ -165,6 +169,61 @@ namespace CemSys3.Business.Parcela
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+
+        public async Task<PaginadoResponse<ParcelaIndexRequestDTO>> GetAllPaginadoBySeccion(int seccionId, int filtro = 0, int pagina = 1, int porPagina = 10)
+        {
+            PaginadoResponse<ParcelaIndexRequestDTO> resultado = new PaginadoResponse<ParcelaIndexRequestDTO>();
+
+            var query = _context.Parcelas
+               .Where(s =>s.SeccionId == seccionId);
+
+            // Filtro por estado de ocupación
+            switch (filtro)
+            {
+                case 1: //ocupados
+                    query = query.Where(e => e.CantidadDifuntos > 0);
+                    break;
+                case 2: //desocupados o libres
+                    query = query.Where(e => e.CantidadDifuntos == 0);
+                    break;
+                case 0: //todos
+                default:
+                    // No aplicar filtro
+                    break;
+            }
+
+            // Total de registros
+            var total = await query.CountAsync();
+
+            // Paginación
+            resultado.Paginacion.TotalPaginas = (int)Math.Ceiling(total / (double)porPagina);
+            resultado.Paginacion.PaginaActual = Math.Max(1, Math.Min(pagina, resultado.Paginacion.TotalPaginas));
+            resultado.Paginacion.RegistrosPorPagina = porPagina;
+            resultado.Paginacion.Accion = "Index";
+            resultado.Paginacion.Controlador = "Parcela";
+            resultado.Paginacion.TotalRegistros = total;
+
+            // Obtener datos paginados
+            resultado.Items = await query
+                .OrderBy(e => e.Id)
+                .Skip((resultado.Paginacion.PaginaActual - 1) * porPagina)
+                .Take(porPagina)
+                .Select(e => new ParcelaIndexRequestDTO
+                {
+                    Id = e.Id,
+                    Visibilidad = e.Visibilidad,
+                    NroParcela = e.NroParcela,
+                    NroFila = e.NroFila,
+                    CantidadDifuntos = e.CantidadDifuntos,
+                    NombrePanteon = e.NombrePanteon,
+                    SeccionId = e.SeccionId,
+                    TipoNichoId = e.TipoNichoId,
+                    TipoPanteonId = e.TipoPanteonId,
+                    TipoParcelaId = e.TipoParcelaId,
+                }).ToListAsync();
+
+            return resultado;
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using CemSys3.DTOs.Generics;
+using CemSys3.DTOs.Paginacion;
+using CemSys3.DTOs.Parcela;
 using CemSys3.DTOs.Seccion;
 
 namespace CemSys3.Interfaces.Parcela
@@ -9,5 +11,11 @@ namespace CemSys3.Interfaces.Parcela
 
         //para agregar una parcela a una seccion de fosa o panteon
         Task<GenericResultDTO> AddOne(int secccionId);
+
+        Task<PaginadoResponse<ParcelaIndexRequestDTO>> GetAllPaginadoBySeccion(
+            int seccionId,
+            int filtro = 0,
+            int pagina = 1,
+            int porPagina = 10);
     }
 }

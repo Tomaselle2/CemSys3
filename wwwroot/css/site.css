@@ -73,8 +73,30 @@ body {
     font-weight: bold;
 }
 
+/*Se usa para lanzar una confirmacion via JS*/
 .js-confirm{
 
+}
+
+/* Clase reutilizable para encabezados de página */
+.page-header-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 576px) {
+    .page-header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+        .page-header-container .btn {
+            margin-bottom: 0.5rem;
+        }
 }
 
 

@@ -30,7 +30,7 @@
                             <span asp-validation-for="Nombre" class="text-danger"></span>
                         </div>
                     </div>
-                    <div class="form-button-registrar js-submit-once">
+                    <div class="form-button-registrar">
                         <input class="btn @Model.ClaseBoton" type="submit" value="@Model.TextoBoton" />
                     </div>
                 </form>
@@ -76,7 +76,9 @@
                                                 </button>
                                             </form>
                                             <form asp-action="Eliminar" asp-controller="EmpresaSepelio" method="get" style="display: inline-block;" id="formularioEliminar"
-                                                  onsubmit="return confirmarEliminacion(this, '¿Esta seguro de eliminar a la empresa @opc.Nombre?')">
+                                                  data-confirm-title="Confirmar eliminación"
+                                                  data-confirm-message="¿Está seguro de eliminar la empresa @opc.Nombre.ToUpper()?"
+                                                  data-confirm-icon="warning" class="js-confirm">
                                                 <input type="hidden" asp-for="Id" name="id" value="@opc.Id" />
 
                                                 <button type="submit" class="btn btn-danger btn-sm btn-lista" title="Eliminar">

@@ -50,6 +50,18 @@ namespace CemSys3.Enumerables
         Panteon = 3,
     }
 
+    public enum OcupacionParcelaEnum
+    {
+        [Display(Name = "Todos")]
+        Todas = 0,
+
+        [Display(Name = "Ocupados")]
+        Ocupado = 1,
+
+        [Display(Name = "Desocupdos")]
+        Desocupado = 2,
+    }
+
     public class Enumerables
     {
     }

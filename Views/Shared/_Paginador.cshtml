@@ -100,7 +100,7 @@
     </ul>
 
     @* --- Información y Selector --- *@
-    <div class="d-flex justify-content-center align-items-center flex-wrap gap-3">
+    @* <div class="d-flex justify-content-center align-items-center flex-wrap gap-3">
         <small class="text-muted">
             Página <strong>@Model.PaginaActual</strong> de @Model.TotalPaginas
             (@Model.TotalRegistros registros)
@@ -114,10 +114,43 @@
                 <!option value="100" @(Model.RegistrosPorPagina == 100 ? "selected" : "")>100</!option>
             </select>
         </div>
+    </div> *@
+
+    <div class="d-flex justify-content-center align-items-center gap-2 mt-2">
+        <small class="text-muted">
+            Página <strong>@Model.PaginaActual</strong> de @Model.TotalPaginas
+            (@Model.TotalRegistros registros)
+        </small>
+        <form method="get"
+              asp-action="@Model.Accion"
+              asp-controller="@Model.Controlador"
+              class="d-flex align-items-center gap-2">
+
+            @foreach (var param in parametrosBase)
+            {
+                if (param.Key != "porPagina" && param.Key != "pagina")
+                {
+                    <input type="hidden" name="@param.Key" value="@param.Value" />
+                }
+            }
+
+            <input type="hidden" name="pagina" value="1" />
+
+            <span class="small text-muted">Mostrar</span>
+
+            <select name="porPagina"
+                    class="form-select form-select-sm mb-2"
+                    style="width: 90px"
+                    onchange="this.form.submit()">
+                <option value="10" selected="@(Model.RegistrosPorPagina == 10)">10</option>
+                <option value="50" selected="@(Model.RegistrosPorPagina == 50)">50</option>
+                <option value="100" selected="@(Model.RegistrosPorPagina == 100)">100</option>
+            </select>
+        </form>
     </div>
 </nav>
 
-<script>
+@* <script>
     document.getElementById("selectRegistros")?.addEventListener("change", function () {
         const porPagina = this.value;
         const urlParams = new URLSearchParams(window.location.search);
@@ -129,4 +162,4 @@
         const url = `@Url.Action(Model.Accion, Model.Controlador)?pagina=1&porPagina=${porPagina}&filtro=${filtro}`;
         window.location.href = url;
     });
-</script>
+</script> *@

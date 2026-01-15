@@ -1,0 +1,53 @@
+﻿@using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.Parcela
+@using CemSys3.Enumerables
+@using CemSys3.Helpers
+@model ParcelaIndexVM
+
+@if (Model.ListadoParcelas != null && Model.ListadoParcelas.Any())
+{
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Parcela</th>
+                        <th>Tipo de panteón</th>
+                        <th>Nombre panteón</th>
+                        <th>Ocupación</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var opc in Model.ListadoParcelas)
+                    {
+                        <tr>
+                            <td>Lote @opc.NroParcela</td>
+                            <td>@(opc.TipoPanteonId.HasValue ? EnumHelper.GetDisplayNameByValue<TipoPanteonEnum>(opc.TipoPanteonId.Value) : "Sin tipo")</td>
+                            <td>@opc.NombrePanteon.ToUpper()</td>
+                            <td>@(opc.CantidadDifuntos == 0 ? "Desocupado" : $"Ocupado {opc.CantidadDifuntos} difunto/s")</td>
+                            <td>@(opc.Visibilidad == true ? "Activo" : "Inactivo")</td>
+                            <td>
+
+                                <form asp-action="HistorialParela" asp-controller="Parcela" method="get" style="display: inline-block;">
+                                    <input type="hidden" value="@opc.SeccionId" name="seccionId" /> <!--Manda la seccionId-->
+
+                                    <button type="submit" class="btn btn-secondary btn-sm btn-lista" title="Historial">
+                                        <i class="bi bi-clock-history"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info mt-3" role="alert">
+        <i class="bi bi-info-circle me-2"></i> No se encontraron registros de parcelas.
+    </div>
+}

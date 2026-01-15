@@ -133,6 +133,17 @@
                                                     </button>
                                                 </form>
                                             }
+
+                                            @if (Context.Session.GetInt32("IdRol") == (int)RolUsuario.Empleado) //Empleado
+                                            {
+                                                <form asp-action="Index" asp-controller="Parcela" method="get" style="display: inline-block;">
+                                                    <input type="hidden" name="seccionId" value="@opc.Id" />
+
+                                                    <button type="submit" class="btn btn-secondary btn-lista btn-sm" title="Inspeccionar">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                </form>
+                                            }
                                         </td>
                                     </tr>
                                 }

@@ -1,6 +1,7 @@
 ﻿using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Seccion;
+using CemSys3.Enumerables;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Seccion;
 using CemSys3.Models;
@@ -102,12 +103,20 @@ namespace CemSys3.Business.Seccion
             // Total de registros
             var total = await query.CountAsync();
 
+            string vista = tipoId switch
+            {
+                (int)TipoParcelaEnum.Nicho => "IndexSeccionesNichos",
+                (int)TipoParcelaEnum.Fosa => "IndexSeccionesFosas",
+                (int)TipoParcelaEnum.Panteon => "IndexSeccionesPanteones",
+                _ => "IndexSeccionesNichos"
+            };
+
             // Paginación
             resultado.Paginacion.TotalPaginas = (int)Math.Ceiling(total / (double)porPagina);
             resultado.Paginacion.PaginaActual = Math.Max(1, Math.Min(pagina, resultado.Paginacion.TotalPaginas));
             resultado.Paginacion.RegistrosPorPagina = porPagina;
-            resultado.Paginacion.Accion = "Index"; //cambiar
-            resultado.Paginacion.Controlador = "EmpresaSepelio"; //cambiar
+            resultado.Paginacion.Accion = vista; 
+            resultado.Paginacion.Controlador = "Seccion"; 
             resultado.Paginacion.TotalRegistros = total;
 
             // Obtener datos paginados

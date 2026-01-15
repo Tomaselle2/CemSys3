@@ -1,0 +1,117 @@
+﻿@using CemSys3.DTOs.Paginacion
+@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.Parcela
+@model ParcelaIndexVM
+
+@{
+    ViewData["Title"] = "Parcelas";
+
+    if (Model.ListadoParcelas != null && Model.ListadoParcelas.Any())
+    {
+        ViewData["Title"] = $"Parcelas - Sección {Model.NombreSeccion}";
+    }
+
+    string vistaRedirigir = Model.TipoParcelaId switch
+    {
+        (int)TipoParcelaEnum.Nicho => "IndexSeccionesNichos",
+        (int)TipoParcelaEnum.Fosa => "IndexSeccionesFosas",
+        (int)TipoParcelaEnum.Panteon => "IndexSeccionesPanteones",
+        _ => "IndexSeccionesPanteones"
+    };
+}
+
+<div class="page-header-container">
+    <a asp-action="@vistaRedirigir" asp-controller="Seccion" class="btn btn-secondary me-3" title="Secciones">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <h1 class="title-page">Listado de parcelas de la sección @Model.NombreSeccion</h1>
+</div>
+
+<!-- Tabla -->
+<div class="accordion" id="accordionPanelsStayOpenExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                Parcelas registradas
+            </button>
+        </h2>
+
+        <div class="d-flex justify-content-start p-2">
+            <form method="get"
+                  asp-action="Index"
+                  asp-controller="Parcela"
+                  class="d-flex align-items-center gap-2">
+
+                @* Mantener contexto *@
+                <input type="hidden" name="seccionId" value="@(Model.Paginacion.Parametros.TryGetValue("seccionId", out var s) ? s : "")"/>
+                <input type="hidden" name="pagina" value="1" />
+                <input type="hidden" name="porPagina" value="@Model.Paginacion.RegistrosPorPagina" />
+
+                <label class="small text-muted">Ocupación</label>
+
+                @{
+                    int filtroSeleccionado = 0;
+                    if (Model.Paginacion.Parametros != null && Model.Paginacion.Parametros.ContainsKey("filtro"))
+                    {
+                        int.TryParse(Model.Paginacion.Parametros["filtro"], out filtroSeleccionado);
+                    }
+                }
+                <select name="filtro"
+                        class="form-select form-select-sm"
+                        style="width: 160px"
+                        asp-items="EnumHelper.GetSelectListItems<OcupacionParcelaEnum>(filtroSeleccionado)"
+                        onchange="this.form.submit()">
+                </select>
+            </form>
+        </div>
+        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            @* cuerpo del acordion *@
+            @switch(Model.TipoParcelaId)
+            {
+                case (int)TipoParcelaEnum.Nicho:
+                    {
+                        @await Html.PartialAsync("ParcelaIndexPV/_TablaNicho", Model)
+                        break;
+                    }
+                case (int)TipoParcelaEnum.Panteon:
+                    {
+                        @await Html.PartialAsync("ParcelaIndexPV/_TablaPanteon", Model)
+                        break;
+                    }
+                case (int)TipoParcelaEnum.Fosa:
+                    {
+                        @await Html.PartialAsync("ParcelaIndexPV/_TablaFosa", Model)
+                        break;
+                    }
+                default:
+                    {
+                        <div class="alert alert-danger mt-3" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i> Tipo de parcela no reconocido.
+                        </div>
+                        break;
+                    }
+            }
+            @* Fin cuerpo del acordeon *@
+
+            @* Paginador *@
+            @if (Model.Paginacion.TotalPaginas > 0)
+            {
+                @await Html.PartialAsync("_Paginador", new PaginacionDTO
+                {
+                    PaginaActual = Model.Paginacion.PaginaActual,
+                        TotalPaginas = Model.Paginacion.TotalPaginas,
+                        TotalRegistros = Model.Paginacion.TotalRegistros,
+                        RegistrosPorPagina = Model.Paginacion.RegistrosPorPagina,
+                        Accion = "Index",
+                        Controlador = "Parcela",
+                        Parametros = Model.Paginacion.Parametros
+                        })
+                    }
+        </div>
+    </div>
+</div>
+
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />
