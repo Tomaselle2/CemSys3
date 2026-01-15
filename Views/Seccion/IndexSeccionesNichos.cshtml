@@ -62,7 +62,7 @@
                                 <span asp-validation-for="TipoNumeracionParcelaId" class="text-danger"></span>
                             </div>
                         </div>
-                        <div class="form-button-registrar js-submit-once">
+                        <div class="form-button-registrar">
                             <input class="btn @Model.ClaseBoton" type="submit" value="@Model.TextoBoton" />
                         </div>
                     </form>
@@ -121,8 +121,11 @@
                                                         <i class="bi bi-pencil"></i>
                                                     </button>
                                                 </form>
-                                                <form asp-action="Eliminar" asp-controller="Seccion" method="get" style="display: inline-block;" id="formularioEliminar"
-                                                      onsubmit="return confirmarEliminacion(this, '¿Esta seguro de eliminar la sección @opc.Nombre.ToUpper()?')">
+                                                <form asp-action="Eliminar" asp-controller="Seccion" method="get" style="display: inline-block;" id="formularioEliminar" class="js-confirm"
+                                                      data-confirm-title="Confirmar eliminación"
+                                                      data-confirm-message="¿Está seguro de eliminar la sección @opc.Nombre.ToUpper()?"
+                                                      data-confirm-icon="warning">
+                                                    
                                                     <input type="hidden" asp-for="Id" name="id" value="@opc.Id" />
                                                     <input type="hidden" asp-for="TipoParcelaId" value="@opc.TipoParcelaId" name="TipoParcelaId" />
 

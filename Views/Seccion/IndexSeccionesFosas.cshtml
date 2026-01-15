@@ -51,7 +51,7 @@
                                 <span asp-validation-for="NroParcelas" class="text-danger"></span>
                             </div>
                         </div>
-                        <div class="form-button-registrar js-submit-once">
+                        <div class="form-button-registrar">
                             <input class="btn @Model.ClaseBoton" type="submit" value="@Model.TextoBoton" />
                         </div>
                     </form>
@@ -96,8 +96,7 @@
                                         <td>
                                             @if (Context.Session.GetInt32("IdRol") == (int)RolUsuario.Administrador && opc.Visibilidad == true) //Administrador
                                             {
-                                                <form asp-action="Editar" asp-controller="Seccion" method="get" style="display: inline-block;">
-
+                                                <form asp-action="Editar" asp-controller="Seccion" method="get" style="display: inline-block;"> 
                                                     <input type="hidden" asp-for="Id" value="@opc.Id" name="id" />
                                                     <input type="hidden" asp-for="TipoParcelaId" value="@opc.TipoParcelaId" name="TipoParcelaId" />
 
@@ -105,18 +104,26 @@
                                                         <i class="bi bi-pencil"></i>
                                                     </button>
                                                 </form>
-                                                <form asp-action="AddOne" asp-controller="Seccion" method="get" style="display: inline-block;"
-                                                      onsubmit="confirmarSubmit(event)">
+                                                <form asp-action="AddOne" asp-controller="Seccion" class="js-confirm"
+                                                      method="get" style="display: inline-block;"
+                                                      data-confirm-title="Confirmar acción"
+                                                      data-confirm-message="¿Está seguro de agregar una fosa más?"
+                                                      data-confirm-icon="question">
+                                                    
                                                     <input type="hidden" asp-for="Id" name="id" value="@opc.Id" />
                                                     <input type="hidden" asp-for="TipoParcelaId" value="@opc.TipoParcelaId" name="TipoParcelaId" />
 
 
-                                                    <button type="submit" class="btn btn-info btn-sm btn-lista" title="Agregar fosa">
+                                                    <button type="submit" class="btn btn-info btn-sm btn-lista js-confirm" title="Agregar fosa">
                                                         <i class="bi bi-plus-square"></i>
                                                     </button>
                                                 </form>
-                                                <form asp-action="Eliminar" asp-controller="Seccion" method="get" style="display: inline-block;" id="formularioEliminar"
-                                                      onsubmit="return confirmarEliminacion(this, '¿Esta seguro de eliminar la sección @opc.Nombre.ToUpper()?')">
+                                                <form asp-action="Eliminar" asp-controller="Seccion" class="js-confirm"
+                                                      method="get" style="display: inline-block;" id="formularioEliminar"
+                                                      data-confirm-title="Confirmar eliminación"
+                                                      data-confirm-message="¿Está seguro de eliminar la sección @opc.Nombre.ToUpper()?"
+                                                      data-confirm-icon="warning">
+
                                                     <input type="hidden" asp-for="Id" name="id" value="@opc.Id" />
                                                     <input type="hidden" asp-for="TipoParcelaId" value="@opc.TipoParcelaId" name="TipoParcelaId" />
 
@@ -166,7 +173,7 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
+    @* <script>
     async function confirmarSubmit(event) {
 
         event.preventDefault(); // Prevenir el envío inmediato
@@ -182,6 +189,6 @@
             form.submit(); // Solo enviar si confirmó
         }
     }
-    </script>
+    </script> *@
 }
 

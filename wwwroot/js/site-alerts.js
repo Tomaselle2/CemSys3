@@ -31,5 +31,29 @@
             cancelButtonText: 'Cancelar'
         });
         return result.isConfirmed;
+    },
+
+     blockButton: function (button, text = 'Procesando...') {
+         if (!button) return;
+
+         button.disabled = true;
+
+         const soloSpinner = button.classList.contains('btn-lista');
+
+         // 🔹 INPUT type="submit"
+         if (button.tagName === 'INPUT') {
+             if (!soloSpinner) {
+                 button.value = text;
+             }
+             return;
+         }
+
+         // 🔹 BUTTON
+         if (soloSpinner) {
+             button.innerHTML = `<span class="spinner-border spinner-border-sm"></span>`;
+         } else {
+             button.innerHTML =
+                 `<span class="spinner-border spinner-border-sm"></span> ${text}`;
+         }
     }
 };

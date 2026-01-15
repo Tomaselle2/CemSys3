@@ -50,7 +50,7 @@
                                 <span asp-validation-for="NroParcelas" class="text-danger"></span>
                             </div>
                         </div>
-                        <div class="form-button-registrar js-submit-once">
+                        <div class="form-button-registrar">
                             <input class="btn @Model.ClaseBoton" type="submit" value="@Model.TextoBoton" />
                         </div>
                     </form>
@@ -105,8 +105,11 @@
                                                         <i class="bi bi-pencil"></i>
                                                     </button>
                                                 </form>
-                                                <form asp-action="AddOne" asp-controller="Seccion" method="get" style="display: inline-block;"
-                                                      onsubmit="confirmarSubmit(event)">
+                                                <form asp-action="AddOne" asp-controller="Seccion" method="get" style="display: inline-block;" class="js-confirm"
+                                                      data-confirm-title="Confirmar acción"
+                                                      data-confirm-message="¿Está seguro de agregar un lote más?"
+                                                      data-confirm-icon="question">
+                                                    
                                                     <input type="hidden" asp-for="Id" name="id" value="@opc.Id" />
                                                     <input type="hidden" asp-for="TipoParcelaId" value="@opc.TipoParcelaId" name="TipoParcelaId" />
 
@@ -115,8 +118,11 @@
                                                         <i class="bi bi-plus-square"></i>
                                                     </button>
                                                 </form>
-                                                <form asp-action="Eliminar" asp-controller="Seccion" method="get" style="display: inline-block;" id="formularioEliminar"
-                                                      onsubmit="return confirmarEliminacion(this, '¿Esta seguro de eliminar la sección @opc.Nombre.ToUpper()?')">
+                                                <form asp-action="Eliminar" asp-controller="Seccion" method="get" style="display: inline-block;" id="formularioEliminar" class="js-confirm"
+                                                      data-confirm-title="Confirmar eliminación"
+                                                      data-confirm-message="¿Está seguro de eliminar la sección @opc.Nombre.ToUpper()?"
+                                                      data-confirm-icon="warning">
+                                                    
                                                     <input type="hidden" asp-for="Id" name="id" value="@opc.Id" />
                                                     <input type="hidden" asp-for="TipoParcelaId" value="@opc.TipoParcelaId" name="TipoParcelaId" />
 
@@ -166,23 +172,6 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        async function confirmarSubmit(event) {
-
-            event.preventDefault(); // Prevenir el envío inmediato
-            const form = event.target;
-
-            const confirmado = await AlertService.confirm(
-                'Confirmar acción',
-                '¿Está seguro de agregar una parcela más?',
-                'question'
-            );
-
-            if (confirmado) {
-                form.submit(); // Solo enviar si confirmó
-            }
-        }
-    </script>
 }
 
 

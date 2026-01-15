@@ -1,8 +1,28 @@
-﻿document.addEventListener("submit", function (e) {
-    const btn = e.target.querySelector(".js-submit-once");
+﻿document.addEventListener("submit", async function (e) {
 
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
+    const form = e.target;
+    const submitter = e.submitter;
+
+    if (!submitter) return;
+
+    //Formularios con confirmación
+    if (form.classList.contains("js-confirm")) {
+
+        e.preventDefault(); //frena submit automático
+
+        const confirmado = await AlertService.confirm(
+            form.dataset.confirmTitle || 'Confirmar',
+            form.dataset.confirmMessage || '¿Desea continuar?',
+            form.dataset.confirmIcon || 'warning'
+        );
+
+        if (!confirmado) return; // cancelar → no bloquea nada
+
+        AlertService.blockButton(submitter);
+        form.submit();
+        return;
     }
+
+    //Formularios normales
+    AlertService.blockButton(submitter);
 });
