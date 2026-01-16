@@ -150,6 +150,12 @@ namespace CemSys3.Business.Parcela
                 //se actualiza el nro de parcelas de la seccion
                 seccion.NroParcelas += 1;
 
+                //si es panteon, se asigna el tipo de panteon por defecto
+                if (seccion.TipoParcelaId == (int)TipoParcelaEnum.Panteon)
+                {
+                    parcela.TipoPanteonId = (int)TipoPanteonEnum.ConNichos;
+                }
+
                 await _context.Parcelas.AddAsync(parcela);
 
                 //se guarda todo el contexto. 
@@ -164,7 +170,7 @@ namespace CemSys3.Business.Parcela
                     Id = parcela.Id
                 };
             }
-            catch (Exception ex) 
+            catch (Exception) 
             {
                 await transaction.RollbackAsync();
                 throw;

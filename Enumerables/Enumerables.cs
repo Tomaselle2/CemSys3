@@ -50,6 +50,7 @@ namespace CemSys3.Enumerables
         Panteon = 3,
     }
 
+    //para filtro de parcelas ocupadas o desocupadas
     public enum OcupacionParcelaEnum
     {
         [Display(Name = "Todos")]
@@ -60,6 +61,31 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Desocupdos")]
         Desocupado = 2,
+    }
+
+    public enum TemaTarifariaEnum
+    {
+        [Display(Name = "General")]
+        General = 1,
+
+        [Display(Name = "Contribución")]
+        Contribucion = 2,
+
+        [Display(Name = "Concesión nicho")]
+        ConcesionNicho = 3,
+
+        [Display(Name = "Concesión fosa")]
+        ConcesionFosa = 4,
+
+        [Display(Name = "Registro civil")]
+        RegistroCivil = 5,
+
+        [Display(Name = "Derecho de oficina")]
+        DerechoDeOficina = 6,
+
+        [Display(Name = "Fondo de ayuda")]
+        Fondo = 7,
+
     }
 
     public class Enumerables

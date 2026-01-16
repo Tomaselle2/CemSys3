@@ -1,4 +1,5 @@
-﻿using CemSys3.DTOs.Generics;
+﻿
+using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Seccion;
 using CemSys3.Enumerables;
@@ -59,7 +60,7 @@ namespace CemSys3.Business.Seccion
                     Id = seccion.Id
                 };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 await transaction.RollbackAsync();
                 throw;

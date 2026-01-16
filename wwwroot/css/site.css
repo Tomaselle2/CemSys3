@@ -83,7 +83,7 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: .5rem;
 }
 
 /* Ajustes responsivos */
@@ -297,7 +297,7 @@ body {
     margin-right: auto;
     margin-bottom: 20px;
     margin-top: 10px;
-    padding: 20px;
+    padding: 5px;
 }
 
 .acordeon-fijo {
