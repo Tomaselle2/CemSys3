@@ -1,4 +1,7 @@
-﻿namespace CemSys3.Models;
+﻿using System;
+using System.Collections.Generic;
+
+namespace CemSys3.Models;
 
 public partial class Usuario
 {

@@ -535,6 +535,9 @@ public partial class AppDbContext : DbContext
                 .HasColumnType("decimal(15, 2)")
                 .HasColumnName("precio");
             entity.Property(e => e.SeccionId).HasColumnName("seccionId");
+            entity.Property(e => e.Visibilidad)
+                .HasDefaultValue(true)
+                .HasColumnName("visibilidad");
 
             entity.HasOne(d => d.ConceptoTarifaria).WithMany(p => p.PreciosTarifaria)
                 .HasForeignKey(d => d.ConceptoTarifariaId)
