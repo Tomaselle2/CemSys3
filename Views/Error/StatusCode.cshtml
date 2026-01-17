@@ -1,0 +1,28 @@
+﻿@model int
+
+@{
+    ViewData["Title"] = "Error";
+}
+
+<h1>Error @Model</h1>
+
+@if (Model == 404)
+{
+    <p>La página que buscás no existe.</p>
+}
+else if (Model == 403)
+{
+    <p>No tenés permisos para acceder a este recurso.</p>
+}
+else
+{
+    <div class="error-page">
+        <h1>Ups 😕</h1>
+        <p>Ocurrió un error inesperado.</p>
+        <p>Por favor, intentá nuevamente más tarde.</p>
+
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+            Volver al inicio
+        </a>
+    </div>
+}

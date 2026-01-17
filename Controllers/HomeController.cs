@@ -1,11 +1,14 @@
-using System.Diagnostics;
+using CemSys3.Enumerables;
+using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace CemSys3.Controllers
 {
     public class HomeController : Controller
     {
+        [AuthorizeRole(RolUsuario.Administrador, RolUsuario.Empleado)]
         public IActionResult Index()
         {
             return View();
