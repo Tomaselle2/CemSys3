@@ -15,9 +15,13 @@
     };
 }
 
-<a asp-action="Index" asp-controller="Seccion" class="btn btn-secondary m-3" title="Secciones"><i class="bi bi-arrow-left"></i></a>
 
-<h1 class="title-page">Gestión de secciones de panteones</h1>
+
+
+<div class="page-header-container">
+    <a asp-action="Index" asp-controller="Seccion" class="btn btn-secondary m-3" title="Secciones"><i class="bi bi-arrow-left"></i></a>
+    <h1 class="title-page">Gestión de secciones de panteones</h1>
+</div>
 
 <!--Formulario de registro-->
 @if (Context.Session.GetInt32("IdRol") == (int)RolUsuario.Administrador) //Administrador

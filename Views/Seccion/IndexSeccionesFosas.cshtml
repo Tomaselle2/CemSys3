@@ -14,9 +14,11 @@
         _ => "IndexSeccionesPanteones"
     };
 }
-<a asp-action="Index" asp-controller="Seccion" class="btn btn-secondary m-3" title="Secciones"><i class="bi bi-arrow-left"></i></a>
 
-<h1 class="title-page">Gestión de secciones de fosas</h1>
+<div class="page-header-container">
+    <a asp-action="Index" asp-controller="Seccion" class="btn btn-secondary m-3" title="Secciones"><i class="bi bi-arrow-left"></i></a>
+    <h1 class="title-page">Gestión de secciones de fosas</h1>
+</div>
 
 <!--Formulario de registro-->
 @if (Context.Session.GetInt32("IdRol") == (int)RolUsuario.Administrador) //Administrador
@@ -184,22 +186,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    @* <script>
-    async function confirmarSubmit(event) {
-
-        event.preventDefault(); // Prevenir el envío inmediato
-        const form = event.target;
-
-        const confirmado = await AlertService.confirm(
-            'Confirmar acción',
-            '¿Está seguro de agregar una parcela más?',
-            'question'
-        );
-
-        if (confirmado) {
-            form.submit(); // Solo enviar si confirmó
-        }
-    }
-    </script> *@
 }
 

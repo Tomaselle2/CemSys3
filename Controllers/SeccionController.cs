@@ -236,7 +236,7 @@ namespace CemSys3.Controllers
                         Tipo = "error"
                     });
 
-                    return RedirectToAction("Index");
+                    return RedirectToAction(vistaRedirigir);
                 }
 
                 await _seccionService.Delete(id);

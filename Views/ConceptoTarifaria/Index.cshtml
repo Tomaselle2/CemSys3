@@ -1,22 +1,27 @@
 ﻿@using CemSys3.DTOs.Paginacion
-@using CemSys3.ViewModels.Cementerio
-@model CementerioVM
+@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.ConceptoTarifaria
+@model ConceptoTarifariaVM
 
 @{
-    ViewData["Title"] = "Administrar cementerios";
+    ViewData["Title"] = "Conceptos tarifaria";
 }
 
 <div class="page-header-container">
-    <a asp-action="Index" asp-controller="Configuracion" class="btn btn-secondary m-3" title="Configuración"><i class="bi bi-arrow-left"></i></a>
-    <h1 class="title-page">Administrar cementerios</h1>
+    <a asp-action="Index" asp-controller="Configuracion" class="btn btn-secondary me-3" title="Configuración">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <h1 class="title-page">Conceptos de la tarifaria</h1>
 </div>
 
-<!--Formulario de registro-->
+
+<!--Formulario-->
 <div class="accordion" id="accordionPanelsStayOpenExample">
     <div class="accordion-item">
         <h2 class="accordion-header" id="panelsStayOpen-headingOne">
             <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
-                @(Model.EsEdicion ? "Modificar cementerio" : "Registrar cementerio")
+                @(Model.EsEdicion ? "Modificar concepto" : "Nuevo concepto")
             </button>
         </h2>
         <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
@@ -24,15 +29,24 @@
                 @* cuerpo del acordion *@
                 <form asp-action="Guardar" method="post" class="form-box">
                     <input type="hidden" asp-for="Id" />
+                    
                     <div class="form-columns-container3">
                         <div>
-                            <label class="form-label" for="nombre">Nombre</label>
+                            <label for="nombre" class="form-label">Nombre</label>
                             <input class="form-control" type="text" asp-for="Nombre" required maxlength="50" id="nombre" />
                             <span asp-validation-for="Nombre" class="text-danger"></span>
                         </div>
+
+                        <div>
+                            <label for="tipoNumeracion" class="form-label">Tema</label>
+                            <select class="form-select" asp-for="TemaId" asp-items="@EnumHelper.GetSelectListItems<TemaTarifariaEnum>()" required>
+                                <option value="">--Elija una opción--</option>
+                            </select>
+                            <span asp-validation-for="TemaId" class="text-danger"></span>
+                        </div>
                     </div>
                     <div class="form-button-registrar">
-                        <input class="btn @Model.ClaseBoton" type="submit" value="@Model.TextoBoton" />
+                        <button class="btn @Model.ClaseBoton" type="submit">@Model.TextoBoton</button>
                     </div>
                 </form>
                 @* Fin cuerpo del acordeon *@
@@ -46,63 +60,56 @@
     <div class="accordion-item">
         <h2 class="accordion-header" id="panelsStayOpen-headingOne">
             <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
-                Cementerios registrados
+                Conceptos registrados
             </button>
         </h2>
         <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
             @* cuerpo del acordion *@
-            @if (Model.ListadoCementerios.Any())
+            @if (Model.ListadoConceptos.Any())
             {
-                <div class="card shadow-sm table-container position-relative">
-
-                    <!-- Loader de la tabla -->
-                    <div class="table-loader d-none">
-                        <div class="spinner"></div>
-                    </div>
-
-                    <div class="card-body p-0" id="tabla-contenido">
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
                         <table class="table table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th>Nombre</th>
+                                    <th>Tema</th>
+                                    <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var opc in Model.ListadoCementerios)
+                                @foreach (var opc in Model.ListadoConceptos)
                                 {
                                     <tr>
                                         <td>@opc.Nombre.ToUpper()</td>
+                                        <td>@(EnumHelper.GetDisplayNameByValue<TemaTarifariaEnum>(opc.TemaId))</td>
+                                        <td>@(opc.Visibilidad == true ? "Activo" : "Inactivo")</td>
                                         <td>
-                                            <form asp-action="Editar"
-                                                  asp-controller="Cementerio"
-                                                  method="get"
-                                                  style="display: inline-block;">
+                                            @if (opc.Visibilidad == true)
+                                            {
+                                                <form asp-action="Editar" asp-controller="ConceptoTarifaria" method="get" style="display: inline-block;">
+                                                    <input type="hidden" asp-for="Id" value="@opc.Id" name="id" />
 
-                                                <input type="hidden" name="id" value="@opc.Id" />
+                                                    <button type="submit" class="btn btn-warning btn-sm btn-lista" title="Editar">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                </form>
+                                                
+                                                <form asp-action="Eliminar" asp-controller="ConceptoTarifaria" class="js-confirm"
+                                                      method="get" style="display: inline-block;" id="formularioEliminar"
+                                                      data-confirm-title="Confirmar eliminación"
+                                                      data-confirm-message="¿Está seguro de eliminar el concepto @opc.Nombre.ToUpper()?"
+                                                      data-confirm-icon="warning">
 
-                                                <button type="submit"
-                                                        class="btn btn-warning btn-sm btn-lista">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                            </form>
+                                                    <input type="hidden" asp-for="Id" name="id" value="@opc.Id" />
 
-                                            <form asp-action="Eliminar"
-                                                  asp-controller="Cementerio"
-                                                  method="get"
-                                                  style="display: inline-block;"
-                                                  class="js-confirm"
-                                                  data-confirm-title="Confirmar eliminación"
-                                                  data-confirm-message="¿Está seguro de eliminar el cementerio @opc.Nombre.ToUpper()?"
-                                                  data-confirm-icon="warning">
 
-                                                <input type="hidden" name="id" value="@opc.Id" />
-
-                                                <button type="submit"
-                                                        class="btn btn-danger btn-sm btn-lista">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
+                                                    <button type="submit" class="btn btn-danger btn-sm btn-lista" title="Eliminar">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            }
                                         </td>
                                     </tr>
                                 }
@@ -114,7 +121,7 @@
             else
             {
                 <div class="alert alert-info mt-3" role="alert">
-                    <i class="bi bi-info-circle me-2"></i> No se encontraron registros de cementerios.
+                    <i class="bi bi-info-circle me-2"></i> No se encontraron registros de conceptos de la tarifaria.
                 </div>
             }
             @* Fin cuerpo del acordeon *@
@@ -129,10 +136,10 @@
                         TotalRegistros = Model.Paginacion.TotalRegistros,
                         RegistrosPorPagina = Model.Paginacion.RegistrosPorPagina,
                         Accion = "Index",
-                        Controlador = "Cementerio",
+                        Controlador = "ConceptoTarifaria",
                         Parametros = Model.Paginacion.Parametros
-                        })
-                        }
+                    })
+                }
         </div>
     </div>
 </div>
@@ -143,4 +150,3 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
-
