@@ -68,8 +68,8 @@ namespace CemSys3.Enumerables
         [Display(Name = "General")]
         General = 1,
 
-        [Display(Name = "Contribución")]
-        Contribucion = 2,
+        [Display(Name = "Inhumación")]
+        Inhumacion = 2,
 
         [Display(Name = "Concesión nicho")]
         ConcesionNicho = 3,
