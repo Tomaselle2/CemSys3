@@ -1,0 +1,1144 @@
+﻿@using CemSys3.DTOs.Paginacion
+@using CemSys3.ViewModels.Tarifaria
+@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@model TarifariaVM
+
+@{
+    ViewData["Title"] = "Tarifaria";
+
+    var aniosOrdenados = new[] { 25, 15, 10, 5 };
+
+    var mapaAnios = new Dictionary<int, int>
+    {
+        { 25, (int)AniosConcesionEnum.anio25 },
+        { 15, (int)AniosConcesionEnum.anio15 },
+        { 10, (int)AniosConcesionEnum.anio10 },
+        { 5,  (int)AniosConcesionEnum.anio5  }
+    };
+}
+
+<div class="page-header-container">
+    <a asp-action="Index" asp-controller="Configuracion" class="btn btn-secondary m-3" title="Configuración"><i class="bi bi-arrow-left"></i></a>
+    <h1 class="title-page">Tarifaria</h1>
+</div>
+
+<!-- Formulario precios generales-->
+<div class="accordion" id="accordionGenerales">
+    @* ID único para el acordeón principal *@
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsGenerales-headingOne">
+            <button class="accordion-button nueva-seccion" type="button" data-bs-toggle="collapse" data-bs-target="#panelsGenerales-collapseOne" aria-expanded="false" aria-controls="panelsGenerales-collapseOne">
+                Generales
+            </button>
+        </h2>
+        <div id="panelsGenerales-collapseOne" class="accordion-collapse collapse" aria-labelledby="panelsGenerales-headingOne" data-bs-parent="#accordionGenerales">
+            @* Agregado data-bs-parent y 'show' para que inicie abierto si lo deseas *@
+            <div class="accordion-body" style="padding: 0">
+                <form id="formPreciosGenerales" class="form-box">
+                    @* ID único para el formulario *@
+                    <input type="hidden" id="tarifarioIdGenerales" value="@((int)TemaTarifariaEnum.General)" /> @* ID único para el campo oculto *@
+
+                    @if (Model.ListadoPrecios != null && Model.ListadoPrecios.Any())
+                    {
+                        <div class="card shadow-sm">
+                            <div class="card-body p-0">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Concepto</th>
+                                            <th>Precio</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            var conceptosGenerales = Model.ListadoPrecios
+                                            .Where(p => p.TemaId == (int)TemaTarifariaEnum.General)
+                                            .OrderBy(p => p.NombreConcepto)
+                                            .ToList();
+                                        }
+
+                                        @foreach (var precio in conceptosGenerales)
+                                        {
+                                            <tr>
+                                                <td>@precio.NombreConcepto.ToUpper()</td>
+                                                <td>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">$</span>
+                                                        <input type="number"
+                                                               class="form-control precio-input" @* Clase común *@
+                                                               data-precio-id="@precio.Id"
+                                                               data-concepto-id="@precio.ConceptoTarifariaId"
+                                                               value="@precio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                               step="0.01"
+                                                               min="0"
+                                                               placeholder="0.00" />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            @if (conceptosGenerales.Any())
+                            {
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-end">
+                                        <button type="button" class="btn btn-success btn-guardar-precios" data-form-id="formPreciosGenerales">
+                                            @* Clase común y data-form-id *@
+                                            <i class="fas fa-save"></i> Guardar Cambios
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle"></i>
+                            No hay precios configurados para esta tarifaria.
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Formulario precios introduccion-->
+<div class="accordion" id="accordionPrincipal">
+    @* Cambiamos el ID del acordeón principal a algo más genérico *@
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsIntroduccion-headingOne">
+            <button class="accordion-button nueva-seccion" type="button" data-bs-toggle="collapse" data-bs-target="#panelsIntroduccion-collapseOne" aria-expanded="false" aria-controls="panelsIntroduccion-collapseOne">
+                Introducción
+            </button>
+        </h2>
+        <div id="panelsIntroduccion-collapseOne" class="accordion-collapse collapse " aria-labelledby="panelsIntroduccion-headingOne" data-bs-parent="#accordionPrincipal">
+            @* Este es el padre del acordeón de Introducción *@
+            <div class="accordion-body" style="padding: 0">
+                @* **CONTENEDOR DE SUB-ACORDEONES** *@
+                <div class="accordion" id="accordionSubconjuntosIntroduccion">
+                    @* Nuevo acordeón padre para los subconjuntos *@
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="panelsContribucion-headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsContribucion-collapseOne" aria-expanded="false" aria-controls="panelsContribucion-collapseOne">
+                                Inhumación
+                            </button>
+                        </h2>
+                        <div id="panelsContribucion-collapseOne" class="accordion-collapse collapse" aria-labelledby="panelsContribucion-headingOne" data-bs-parent="#accordionSubconjuntosIntroduccion">
+                            @* Apunta al nuevo padre *@
+                            <div class="accordion-body" style="padding: 0">
+                                <form id="formPreciosContribucion" class="form-box">
+                                    <input type="hidden" id="tarifarioIdContribucion" value="@((int)TemaTarifariaEnum.Inhumacion)" />
+
+                                    @if (Model.ListadoPrecios != null && Model.ListadoPrecios.Any())
+                                    {
+                                        <div class="card shadow-sm">
+                                            <div class="card-body p-0">
+                                                <table class="table table-hover mb-0">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Concepto</th>
+                                                            <th>Precio</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @{
+                                                            //concepto Contribucion
+                                                            var conceptosContribucion = Model.ListadoPrecios
+                                                            .Where(p => p.TemaId == (int)TemaTarifariaEnum.Inhumacion)
+                                                            .OrderBy(p => p.NombreConcepto)
+                                                            .ToList();
+                                                        }
+
+                                                        @foreach (var precio in conceptosContribucion)
+                                                        {
+                                                            <tr>
+                                                                <td>@precio.NombreConcepto.ToUpper()</td>
+                                                                <td>
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text">$</span>
+                                                                        <input type="number"
+                                                                               class="form-control precio-input"
+                                                                               data-precio-id="@precio.Id"
+                                                                               data-concepto-id="@precio.ConceptoTarifariaId"
+                                                                               value="@precio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                                               step="0.01"
+                                                                               min="0"
+                                                                               placeholder="0.00" />
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        }
+
+                                                        @if (!conceptosContribucion.Any())
+                                                        {
+                                                            <tr>
+                                                                <td colspan="2" class="text-center text-muted py-4">
+                                                                    <i class="fas fa-info-circle"></i>
+                                                                    No hay conceptos de inhumación configurados para esta tarifaria.
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            @if (conceptosContribucion.Any())
+                                            {
+                                                <div class="card-footer">
+                                                    <div class="d-flex justify-content-end">
+                                                        <button type="button" class="btn btn-success btn-guardar-precios" data-form-id="formPreciosContribucion">
+                                                            <i class="fas fa-save"></i> Guardar Cambios
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert alert-info" role="alert">
+                                            <i class="fas fa-info-circle"></i>
+                                            No hay precios configurados para esta tarifaria.
+                                        </div>
+                                    }
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="panelsRegistroCivil-headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsRegistroCivil-collapseOne" aria-expanded="false" aria-controls="panelsRegistroCivil-collapseOne">
+                                Registro Civil
+                            </button>
+                        </h2>
+                        <div id="panelsRegistroCivil-collapseOne" class="accordion-collapse collapse" aria-labelledby="panelsRegistroCivil-headingOne" data-bs-parent="#accordionSubconjuntosIntroduccion">
+                            @* Apunta al nuevo padre *@
+                            <div class="accordion-body" style="padding: 0">
+                                <form id="formPreciosRegistroCivil" class="form-box">
+                                    <input type="hidden" id="tarifarioIdRegistroCivil" value="@((int)TemaTarifariaEnum.RegistroCivil)" />
+                                    @Html.AntiForgeryToken()
+
+                                    @if (Model.ListadoPrecios != null && Model.ListadoPrecios.Any())
+                                    {
+                                        <div class="card shadow-sm">
+                                            <div class="card-body p-0">
+                                                <table class="table table-hover mb-0">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Concepto</th>
+                                                            <th>Precio</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @{
+                                                            //concepto Registro civil
+                                                            var conceptosRegistroCivil = Model.ListadoPrecios
+                                                            .Where(p => p.TemaId == (int)TemaTarifariaEnum.RegistroCivil)
+                                                            .OrderBy(p => p.NombreConcepto)
+                                                            .ToList();
+                                                        }
+
+                                                        @foreach (var precio in conceptosRegistroCivil)
+                                                        {
+                                                            <tr>
+                                                                <td>@precio.NombreConcepto.ToUpper()</td>
+                                                                <td>
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text">$</span>
+                                                                        <input type="number"
+                                                                               class="form-control precio-input"
+                                                                               data-precio-id="@precio.Id"
+                                                                               data-concepto-id="@precio.ConceptoTarifariaId"
+                                                                               value="@precio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                                               step="0.01"
+                                                                               min="0"
+                                                                               placeholder="0.00" />
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        }
+
+                                                        @if (!conceptosRegistroCivil.Any())
+                                                        {
+                                                            <tr>
+                                                                <td colspan="2" class="text-center text-muted py-4">
+                                                                    <i class="fas fa-info-circle"></i>
+                                                                    No hay conceptos de registro civil configurados para esta tarifaria.
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            @if (conceptosRegistroCivil.Any())
+                                            {
+                                                <div class="card-footer">
+                                                    <div class="d-flex justify-content-end">
+                                                        <button type="button" class="btn btn-success btn-guardar-precios" data-form-id="formPreciosRegistroCivil">
+                                                            <i class="fas fa-save"></i> Guardar Cambios
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert alert-info" role="alert">
+                                            <i class="fas fa-info-circle"></i>
+                                            No hay precios configurados para esta tarifaria.
+                                        </div>
+                                    }
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="panelsDerechoOficina-headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsDerechoOficina-collapseOne" aria-expanded="false" aria-controls="panelsDerechoOficina-collapseOne">
+                                Derecho de Oficina
+                            </button>
+                        </h2>
+                        <div id="panelsDerechoOficina-collapseOne" class="accordion-collapse collapse" aria-labelledby="panelsDerechoOficina-headingOne" data-bs-parent="#accordionSubconjuntosIntroduccion">
+                            @* Apunta al nuevo padre *@
+                            <div class="accordion-body" style="padding: 0">
+                                <form id="formPreciosDerechoOficina" class="form-box">
+                                    <input type="hidden" id="tarifarioIdDerechoOficina" value="@((int)TemaTarifariaEnum.DerechoDeOficina)" />
+                                    @Html.AntiForgeryToken()
+
+                                    @if (Model.ListadoPrecios != null && Model.ListadoPrecios.Any())
+                                    {
+                                        <div class="card shadow-sm">
+                                            <div class="card-body p-0">
+                                                <table class="table table-hover mb-0">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Concepto</th>
+                                                            <th>Precio</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @{
+                                                            //concepto Derecho de oficina
+                                                            var conceptosDerechoOficina = Model.ListadoPrecios
+                                                            .Where(p => p.TemaId == (int)TemaTarifariaEnum.DerechoDeOficina)
+                                                            .OrderBy(p => p.NombreConcepto)
+                                                            .ToList();
+                                                        }
+
+                                                        @foreach (var precio in conceptosDerechoOficina)
+                                                        {
+                                                            <tr>
+                                                                <td>@precio.NombreConcepto.ToUpper()</td>
+                                                                <td>
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text">$</span>
+                                                                        <input type="number"
+                                                                               class="form-control precio-input"
+                                                                               data-precio-id="@precio.Id"
+                                                                               data-concepto-id="@precio.ConceptoTarifariaId"
+                                                                               value="@precio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                                               step="0.01"
+                                                                               min="0"
+                                                                               placeholder="0.00" />
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        }
+
+                                                        @if (!conceptosDerechoOficina.Any())
+                                                        {
+                                                            <tr>
+                                                                <td colspan="2" class="text-center text-muted py-4">
+                                                                    <i class="fas fa-info-circle"></i>
+                                                                    No hay conceptos de derecho de oficina configurados para esta tarifaria.
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            @if (conceptosDerechoOficina.Any())
+                                            {
+                                                <div class="card-footer">
+                                                    <div class="d-flex justify-content-end">
+                                                        <button type="button" class="btn btn-success btn-guardar-precios" data-form-id="formPreciosDerechoOficina">
+                                                            <i class="fas fa-save"></i> Guardar Cambios
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert alert-info" role="alert">
+                                            <i class="fas fa-info-circle"></i>
+                                            No hay precios configurados para esta tarifaria.
+                                        </div>
+                                    }
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                </div> @* Cierre del nuevo acordeón para los subconjuntos *@
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Formulario precios de fosas-->
+<div class="accordion" id="accordionFosa">
+    @* ID único para el acordeón principal *@
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsFosa-headingOne">
+            <button class="accordion-button nueva-seccion" type="button" data-bs-toggle="collapse" data-bs-target="#panelsFosa-collapseOne" aria-expanded="false" aria-controls="panelsFosa-collapseOne">
+                Precios concesión fosa
+            </button>
+        </h2>
+        <div id="panelsFosa-collapseOne" class="accordion-collapse collapse" aria-labelledby="panelsFosa-headingOne" data-bs-parent="#accordionFosa">
+            @* Agregado data-bs-parent y 'show' para que inicie abierto si lo deseas *@
+            <div class="accordion-body" style="padding: 0">
+                <form id="formFosa" class="form-box">
+                    @* ID único para el formulario *@
+                    <input type="hidden" id="tarifarioIdGenerales" value="@((int)TemaTarifariaEnum.ConcesionFosa)" /> @* ID único para el campo oculto *@
+
+                    @if (Model.ListadoPrecios != null && Model.ListadoPrecios.Any())
+                    {
+                        <div class="card shadow-sm">
+                            <div class="card-body p-0">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Concepto</th>
+                                            <th>Precio</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            var conceptosFosa = Model.ListadoPrecios
+                                            .Where(p => p.TemaId == (int)TemaTarifariaEnum.ConcesionFosa)
+                                            .OrderBy(p => p.NombreConcepto)
+                                            .ToList();
+                                        }
+
+                                        @foreach (var precio in conceptosFosa)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @(precio.AniosConcesionId.HasValue
+                                                        ? EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(precio.AniosConcesionId.Value)
+                                                    : "")
+                                                </td>
+                                                <td>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">$</span>
+                                                        <input type="number"
+                                                               class="form-control precio-input" @* Clase común *@
+                                                               data-precio-id="@precio.Id"
+                                                               data-concepto-id="@precio.ConceptoTarifariaId"
+                                                               value="@precio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                               step="0.01"
+                                                               min="0"
+                                                               placeholder="0.00" />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            @if (conceptosFosa.Any())
+                            {
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-end">
+                                        <button type="button" class="btn btn-success btn-guardar-precios" data-form-id="formFosa">
+                                            @* Clase común y data-form-id *@
+                                            <i class="fas fa-save"></i> Guardar Cambios
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle"></i>
+                            No hay precios configurados para esta tarifaria.
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- Formulario precios nichos -->
+<div class="accordion" id="accordionNichosPrincipal">
+    <div class="accordion-item">
+
+        <h2 class="accordion-header" id="headingNichos">
+            <button class="accordion-button nueva-seccion"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseNichosPrincipal"
+                    aria-expanded="false">
+                Secciones – Nichos
+            </button>
+        </h2>
+
+        <div id="collapseNichosPrincipal" class="accordion-collapse collapse" aria-labelledby="headingNichos"
+             data-bs-parent="#accordionNichosPrincipal">
+            <div class="accordion-body p-0">
+
+                <div class="accordion" id="accordionSubNichos">
+                @foreach (var seccion in Model.ListadoSeccionesNicho)
+                {
+                    var filas = seccion.Filas;
+
+                    var preciosSeccion = Model.ListadoPrecios
+                        .Where(p => p.SeccionId == seccion.Id &&
+                                    p.TemaId == (int)TemaTarifariaEnum.ConcesionNicho)
+                        .ToList();
+
+                    <div class="d-flex align-items-stretch mb-2">
+
+                    <input type="checkbox"
+                           class="form-check-input me-2 mt-3"
+                           name="seccionesSeleccionadas"
+                           data-id-seccion="@seccion.Id"
+                           data-filas-seccion="@filas" />
+
+                    <div class="accordion w-100">
+                        <div class="accordion-item">
+
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#seccion-@seccion.Id">
+                                    @seccion.Nombre (@filas filas) 
+                                </button>
+                            </h2>
+                            <div id="seccion-@seccion.Id" class="accordion-collapse collapse">
+                                <div class="accordion-body p-0">
+                                <form id="formSeccion-@seccion.Id" class="form-box">
+                                    @Html.AntiForgeryToken()
+                                    <table class="table table-bordered mb-0">
+
+                                        <thead>
+                                            <tr>
+                                                <th style="width:120px;"></th>
+                                                @foreach (var anio in aniosOrdenados)
+                                                {
+                                                    <th class="text-center">@anio años</th>
+                                                }
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            @for (int fila = filas; fila >= 1; fila--)
+                                            {
+                                                <tr>
+                                                    <td class="fw-bold text-center">Fila @fila</td>
+
+                                                    @foreach (var anio in aniosOrdenados)
+                                                    {
+                                                        var precio = preciosSeccion.FirstOrDefault(p =>
+                                                        p.NroFila == fila &&
+                                                        p.AniosConcesionId == mapaAnios[anio]);
+
+                                                        <td>
+                                                            <div class="input-group input-group-sm">
+                                                                <span class="input-group-text">$</span>
+                                                                <input type="number"
+                                                                        class="form-control precio-input text-center"
+                                                                        data-precio-id="@(precio?.Id ?? 0)"
+                                                                        data-seccion-id="@seccion.Id"
+                                                                        data-nro-fila="@fila"
+                                                                        data-anios-concesion="@anio"
+                                                                        data-concepto-id="@(precio?.ConceptoTarifariaId ?? 0)"
+                                                                        value="@(precio?.Precio.ToString("0.00"))"
+                                                                        step="0.01"
+                                                                        min="0" 
+                                                                        placeholder="0.00" />
+                                                            </div>
+                                                        </td>
+                                                    }
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                                <div class="card-footer p-3">
+                                                    <div class="d-flex justify-content-end">
+                                                        <button type="button" class="btn btn-success btn-guardar-precios" data-form-id="formSeccion-@seccion.Id">
+                                                            <i class="fas fa-save"></i> Guardar Cambios
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+                    <div class="d-flex justify-content-end p-3">
+                        <button type="button"
+                                class="btn btn-outline-dark"
+                                id="btnCombinarPrecios"
+                                disabled>
+                            <i class="fas fa-save"></i> Combinar precios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+<!-- Formulario precios fondo-->
+<div class="accordion" id="accordionFondo">
+    @* ID único para el acordeón principal *@
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsFondo-headingOne">
+            <button class="accordion-button nueva-seccion" type="button" data-bs-toggle="collapse" data-bs-target="#panelsFondo-collapseOne" aria-expanded="false" aria-controls="panelsFondo-collapseOne">
+                Fondo
+            </button>
+        </h2>
+        <div id="panelsFondo-collapseOne" class="accordion-collapse collapse" aria-labelledby="panelsFondo-headingOne" data-bs-parent="#accordionFondo">
+            @* Agregado data-bs-parent y 'show' para que inicie abierto si lo deseas *@
+            <div class="accordion-body" style="padding: 0">
+                <form id="formPreciosFondo" class="form-box">
+                    @* ID único para el formulario *@
+                    <input type="hidden" id="tarifarioIdFondo" value="@((int)TemaTarifariaEnum.Fondo)" /> @* ID único para el campo oculto *@
+                    @Html.AntiForgeryToken()
+
+                    @if (Model.ListadoPrecios != null && Model.ListadoPrecios.Any())
+                    {
+                        <div class="card shadow-sm">
+                            <div class="card-body p-0">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Concepto</th>
+                                            <th>Valor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            var conceptosFondo = Model.ListadoPrecios
+                                            .Where(p => p.TemaId == (int)TemaTarifariaEnum.Fondo)
+                                            .OrderBy(p => p.NombreConcepto)
+                                            .ToList();
+                                        }
+
+                                        @foreach (var precio in conceptosFondo)
+                                        {
+                                            <tr>
+                                                <td>@precio.NombreConcepto.ToUpper()</td>
+                                                <td>
+                                                    <div class="input-group">
+                                                        @* <span class="input-group-text">$</span> *@
+                                                        <input type="number"
+                                                               class="form-control precio-input" @* Clase común *@
+                                                               data-precio-id="@precio.Id"
+                                                               data-concepto-id="@precio.ConceptoTarifariaId"
+                                                               value="@precio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                               step="0.01"
+                                                               min="0"
+                                                               placeholder="0.00" />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+
+                                        @if (!conceptosFondo.Any())
+                                        {
+                                            <tr>
+                                                <td colspan="2" class="text-center text-muted py-4">
+                                                    <i class="fas fa-info-circle"></i>
+                                                    No hay conceptos de fondo configurados para esta tarifaria.
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            @if (conceptosFondo.Any())
+                            {
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-end">
+                                        <button type="button" class="btn btn-success btn-guardar-precios" data-form-id="formPreciosFondo">
+                                            @* Clase común y data-form-id *@
+                                            <i class="fas fa-save"></i> Guardar Cambios
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle"></i>
+                            No hay precios configurados para esta tarifaria.
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- Modal para combinar precios -->
+<div class="modal fade" id="modalCombinarPrecios" tabindex="-1" aria-labelledby="modalCombinarPreciosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCombinarPreciosLabel">Combinar Precios</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="contenedorTablaCombinarPrecios"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btnGuardarPreciosCombinados">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
+@section Scripts{
+   <script>
+               // Ejecutar al cargar para validar estado inicial del botón
+        actualizarEstadoBotonCombinar();
+
+        // Función para combinar los precios
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnCombinar = document.getElementById('btnCombinarPrecios');
+
+            if (btnCombinar) {
+                btnCombinar.addEventListener('click', function (event) {
+                    event.stopImmediatePropagation();
+                    event.preventDefault();
+                    console.log('Botón Combinar precios presionado');
+
+                    var listaSeccionesSeleccionadas = obtenerSeccionesSeleccionadas();
+                    console.log(listaSeccionesSeleccionadas);
+
+
+                    if (todasLasFilasSonIguales(listaSeccionesSeleccionadas)) {
+                        console.log("todas son iguales");
+
+                        // Generar la tabla y mostrar el modal
+                        generarTablaModalPrecios(listaSeccionesSeleccionadas);
+                        var modal = new bootstrap.Modal(document.getElementById('modalCombinarPrecios'));
+                        modal.show();
+
+                        // AGREGAR EL EVENT LISTENER DESPUÉS DE MOSTRAR EL MODAL
+                        const btnGuardar = document.getElementById('btnGuardarPreciosCombinados');
+                        if (btnGuardar) {
+                            btnGuardar.replaceWith(btnGuardar.cloneNode(true));
+                            document.getElementById('btnGuardarPreciosCombinados').addEventListener('click', guardarPreciosCombinados);
+                        }
+                    } else {
+                        // Mostrar el mensaje con la vista
+                        AlertService.show('Error', 'Las secciones deben tener la misma cantidad de filas para combinar precios', 'error');
+                    }
+                });
+            }
+        });
+
+        // Verifica que todas las filas sean iguales
+        function todasLasFilasSonIguales(listaSecciones) {
+            if (listaSecciones.length === 0) return false;
+
+            const filasReferencia = listaSecciones[0].filas;
+
+            return listaSecciones.every(seccion => seccion.filas === filasReferencia);
+        }
+
+        // Función para obtener las secciones seleccionadas
+        function obtenerSeccionesSeleccionadas() {
+            var seccionesSeleccionadas = document.querySelectorAll('input[name="seccionesSeleccionadas"]:checked');
+            var datosSeccion = Array.from(seccionesSeleccionadas).map(cb => {
+                return {
+                    id: parseInt(cb.dataset.idSeccion),
+                    filas: parseInt(cb.dataset.filasSeccion)
+                }
+            });
+            return datosSeccion;
+        }
+
+        // Habilita o deshabilita el botón según la cantidad de secciones seleccionadas
+        function actualizarEstadoBotonCombinar() {
+            const btnCombinar = document.getElementById('btnCombinarPrecios');
+            const lista = obtenerSeccionesSeleccionadas();
+
+            if (btnCombinar) {
+                btnCombinar.disabled = (lista.length < 2);
+            }
+        }
+
+        // Agregar el evento a todos los checkboxes
+        document.querySelectorAll('input[name="seccionesSeleccionadas"]').forEach(function (checkbox) {
+            checkbox.addEventListener('change', actualizarEstadoBotonCombinar)
+        });
+
+        function generarTablaModalPrecios(seccionesSeleccionadas) {
+            // Todas las secciones tienen la misma cantidad de filas
+            let filas = seccionesSeleccionadas[0].filas;
+            let anios = [25, 15, 10, 5];
+            let inputOriginal = document.querySelector(`.precio-input[data-seccion-id="${seccionesSeleccionadas[0].id}"]`);
+            let conceptoTarifariaId = inputOriginal ? inputOriginal.dataset.conceptoId : 0;
+
+            // Construye la tabla
+            let html = `<table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fila</th>`;
+            anios.forEach(anio => html += `<th>${anio} años</th>`);
+            html += `</tr></thead><tbody>`;
+
+            for (let fila = filas; fila >= 1; fila--) {
+                html += `<tr>
+                            <td>Fila ${fila}</td>`;
+                anios.forEach(anio => {
+                    html += `<td>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number"
+                                        class="form-control precio-input-modal text-center"
+                                        data-nro-fila="${fila}"
+                                        data-anios-concesion="${anio}"
+                                        data-concepto-id="${conceptoTarifariaId}"
+                                        value="0.00"
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="0.00"
+                                        style="font-size: 0.875rem;" />
+                                </div>
+                            </td>`;
+                });
+                html += `</tr>`;
+            }
+
+            html += `</tbody></table>`;
+
+            document.getElementById('contenedorTablaCombinarPrecios').innerHTML = html;
+        }
+
+        // Función para guardar los precios combinados
+        function guardarPreciosCombinados() {
+            let precios = [];
+            let todosValidos = true;
+            let seccionesSeleccionadas = obtenerSeccionesSeleccionadas();
+
+            document.querySelectorAll('.precio-input-modal').forEach(input => {
+                let precio = parseFloat(input.value) || 0;
+
+                let nroFila = parseInt(input.dataset.nroFila);
+                let aniosConcesion = parseInt(input.dataset.aniosConcesion);
+                let conceptoTarifariaId = parseInt(input.dataset.conceptoId || 0);
+
+                // Para cada sección seleccionada, agrega un precio
+                seccionesSeleccionadas.forEach(seccion => {
+                    let inputOriginal = document.querySelector(`.precio-input[data-seccion-id="${seccion.id}"][data-nro-fila="${nroFila}"][data-anios-concesion="${aniosConcesion}"]`);
+                    let idPrecio = inputOriginal ? parseInt(inputOriginal.dataset.precioId) : 0;
+
+                    precios.push({
+                        Id: idPrecio,
+                        SeccionId: seccion.id,
+                        NroFila: nroFila,
+                        AniosConcesion: aniosConcesion,
+                        Precio: precio,
+                        ConceptoTarifariaId: conceptoTarifariaId
+                    });
+                });
+            });
+
+            console.log(precios);
+
+            fetch('@Url.Action("ActualizarPreciosTarifaria", "Tarifaria")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify(precios)
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        AlertService.show('Éxito', result.message, 'success');
+
+
+                        // Actualizar los inputs originales con los nuevos valores
+                        actualizarInputsOriginales(precios);
+
+                        var modal = bootstrap.Modal.getInstance(document.getElementById('modalCombinarPrecios'));
+                        modal.hide();
+
+                        // Opcional: Limpiar las selecciones de checkboxes
+                        document.querySelectorAll('input[name="seccionesSeleccionadas"]:checked').forEach(checkbox => {
+                            checkbox.checked = false;
+                        });
+
+                        // Actualizar estado del botón
+                        actualizarEstadoBotonCombinar();
+
+                    } else {
+                        AlertService.show('Error', result.message, 'error');
+
+                    }
+                    console.log(result);
+                })
+                .catch(error => {
+                    AlertService.show('Error de conexión', 'Por favor, intente nuevamente.', 'error');
+                });
+        }
+
+        // Actualizar los inputs originales en la página
+        function actualizarInputsOriginales(preciosActualizados) {
+            preciosActualizados.forEach(precio => {
+                // Buscar el input original correspondiente
+                let inputOriginal = document.querySelector(
+                    `.precio-input[data-seccion-id="${precio.SeccionId}"][data-nro-fila="${precio.NroFila}"][data-anios-concesion="${precio.AniosConcesion}"]`
+                );
+
+                if (inputOriginal) {
+                    // Actualizar el valor del input
+                    inputOriginal.value = precio.Precio.toFixed(2);
+
+                    // Opcional: Agregar un efecto visual para indicar que se actualizó
+                    inputOriginal.classList.add('border-success');
+                    setTimeout(() => {
+                        inputOriginal.classList.remove('border-success');
+                    }, 2000);
+                }
+            });
+        }
+
+        // Script para guardar precios individuales
+        document.addEventListener('DOMContentLoaded', function () {
+            // Selecciona todos los botones con la clase 'btn-guardar-precios'
+            const btnsGuardar = document.querySelectorAll('.btn-guardar-precios');
+
+            // Itera sobre cada botón y agrega un event listener
+            btnsGuardar.forEach(btn => {
+                btn.addEventListener('click', function (event) {
+                    // 'this' se refiere al botón clickeado
+                    const formId = this.dataset.formId;
+                    const formElement = document.getElementById(formId);
+
+                    if (formElement) {
+                        actualizarPrecios(formElement, this);
+                    } else {
+                        console.error('No se encontró el formulario con ID:', formId);
+                    }
+                });
+            });
+        });
+
+        // La función ahora recibe el formulario específico y el botón que la llamó
+        async function actualizarPrecios(formElement, clickedButton) {
+            const precios = [];
+            let todosValidos = true;
+
+            // Recopilar solo los precios de los inputs dentro de ESTE formulario
+            const inputsPrecios = formElement.querySelectorAll('.precio-input');
+            inputsPrecios.forEach(input => {
+                const precio = parseFloat(input.value) || 0;
+
+                if (precio < 0) {
+                    todosValidos = false;
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+
+                precios.push({
+                    Id: parseInt(input.dataset.precioId),
+                    ConceptoTarifariaId: parseInt(input.dataset.conceptoId),
+                    Precio: precio
+                });
+            });
+
+            if (!todosValidos) {
+                AlertService.show('Error de validación', 'Por favor, ingrese valores válidos para todos los precios.', 'error');
+                return;
+            }
+
+            const requestVerificationToken = formElement.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+            // Mostrar loading en el botón específico que fue clickeado
+            clickedButton.disabled = true;
+            clickedButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+            try {
+                const response = await fetch('@Url.Action("ActualizarPreciosTarifaria", "Tarifaria")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': requestVerificationToken
+                    },
+                    body: JSON.stringify(precios)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    AlertService.show('Éxito', result.message, 'success');
+                } else {
+                    AlertService.show('Error', result.message, 'error');
+                }
+
+            } catch (error) {
+                AlertService.show('Error de conexión', 'Por favor, intente nuevamente.', 'error');
+                console.error('Error:', error);
+            } finally {
+                // Restaurar el botón clickeado
+                clickedButton.disabled = false;
+                clickedButton.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
+            }
+        }
+
+
+   </script>
+
+   <script>
+
+               document.addEventListener('DOMContentLoaded', function () {
+            // Selecciona todos los botones con la clase 'btn-guardar-precios'
+            const btnsGuardar = document.querySelectorAll('.btn-guardar-precios');
+
+            // Itera sobre cada botón y agrega un event listener
+            btnsGuardar.forEach(btn => {
+                btn.addEventListener('click', function (event) {
+                    // 'this' se refiere al botón clickeado
+                    const formId = this.dataset.formId; // Obtiene el ID del formulario desde el atributo data-form-id
+                    const formElement = document.getElementById(formId); // Obtiene el elemento del formulario
+
+                    if (formElement) {
+                        // Llamamos a actualizarPrecios pasando el formulario y el botón clickeado
+                        // para que pueda extraer los datos relevantes de ESE formulario
+                        actualizarPrecios(formElement, this);
+                    } else {
+                        console.error('No se encontró el formulario con ID:', formId);
+                    }
+                });
+            });
+        });
+
+        // La función ahora recibe el formulario específico y el botón que la llamó
+        async function actualizarPrecios(formElement, clickedButton) {
+            const precios = [];
+            let todosValidos = true;
+
+
+            // Recopilar solo los precios de los inputs dentro de ESTE formulario
+            const inputsPrecios = formElement.querySelectorAll('.precio-input');
+            inputsPrecios.forEach(input => {
+                const precio = parseFloat(input.value) || 0;
+
+                if (precio < 0) {
+                    todosValidos = false;
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+
+                precios.push({
+                    Id: parseInt(input.dataset.precioId),
+                    ConceptoTarifariaId: parseInt(input.dataset.conceptoId),
+                    Precio: precio
+                });
+            });
+
+            if (!todosValidos) {
+                AlertService.show('Error de validación', 'Por favor, ingrese valores válidos para todos los precios.', 'error');
+                return;
+            }
+
+
+            const requestVerificationToken = formElement.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+            // Mostrar loading en el botón específico que fue clickeado
+            clickedButton.disabled = true;
+            clickedButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+            try {
+                // Realizar la llamada con fetch
+                const response = await fetch('@Url.Action("ActualizarPreciosTarifaria", "Tarifaria")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': requestVerificationToken
+                    },
+                    // ¡Importante! Aquí enviamos directamente el array de precios,
+                    // sin envolverlo en un objeto con 'tarifarioId'.
+                    body: JSON.stringify(precios)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    AlertService.show('Éxito', result.message, 'success');
+                } else {
+                    AlertService.show('Error', result.message, 'error');
+                }
+
+            } catch (error) {
+                AlertService.show('Error de conexión', 'Por favor, intente nuevamente.', 'error');
+                console.error('Error:', error);
+            } finally {
+                // Restaurar el botón clickeado
+                clickedButton.disabled = false;
+                clickedButton.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
+            }
+        }
+   </script>
+}

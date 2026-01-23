@@ -85,7 +85,24 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Fondo de ayuda")]
         Fondo = 7,
+    }
 
+    public enum AniosConcesionEnum
+    {
+        [Display(Name = "1 año")]
+        anio1 = 1,
+
+        [Display(Name = "5 años")]
+        anio5 = 2,
+
+        [Display(Name = "10 años")]
+        anio10 = 3,
+
+        [Display(Name = "15 años")]
+        anio15 = 4,
+
+        [Display(Name = "25 años")]
+        anio25 = 5
     }
 
     public class Enumerables

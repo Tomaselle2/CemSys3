@@ -3,15 +3,17 @@ using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Seccion;
 using CemSys3.Enumerables;
+using CemSys3.Helpers.Enumerable;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Seccion;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CemSys3.Business.Seccion
 {
-    public class SeccionService : ISeccion
+    public class SeccionService : ISeccion, ISeccionNichoTarifaria
     {
         private readonly AppDbContext _context;
         private readonly IParcela _parcelaService;
@@ -21,7 +23,7 @@ namespace CemSys3.Business.Seccion
             _parcelaService = parcelaService;
         }
 
-        //esto se convina con el servicio de parcelas para crearlas automaticamente. y agrega la seccion a la tarifaria vigente en caso de existir. Es una transaccion.
+        //esto se convina con el servicio de parcelas para crearlas automaticamente. y agrega los precios a la tarifaria. Es una transaccion.
         public async Task<GenericResultDTO> Add(SeccionRequestDTO dto)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -48,6 +50,9 @@ namespace CemSys3.Business.Seccion
                 //se crean las parcelas automaticamente
                 await _parcelaService.Add(dto);
 
+                //agrego los precios de la seccion a la tarifaria
+                await AgregarPreciosConcesionNicho(seccion);
+
                 //se guarda todo el contexto. 
                 await _context.SaveChangesAsync();
 
@@ -64,6 +69,39 @@ namespace CemSys3.Business.Seccion
             {
                 await transaction.RollbackAsync();
                 throw;
+            }
+        }
+
+        //agrega los precios a la tarifaria de una nueva seccion
+        private async Task AgregarPreciosConcesionNicho(Seccione seccion)
+        {
+            //obtiene todos los valores de los id de los años
+            var valoresAnios = Enum.GetValues(typeof(AniosConcesionEnum));
+
+            //obtengo el id de concepto tarifaria de concesion nicho
+            int conceptoId = await _context.ConceptosTarifaria
+                .Where(c => c.TemaId == (int)TemaTarifariaEnum.ConcesionNicho)
+                .Select(c => c.Id)
+                .FirstOrDefaultAsync();            
+            
+            //recorro todas las filas
+            for (int i = 0; i < seccion.Filas; i++)
+            {
+                //recorro todas las cantidades de años disponibles
+                for (int j = 0; j < valoresAnios.Length; j++) {
+
+                    PreciosTarifaria precio = new PreciosTarifaria
+                    {
+                        Precio = 0.00m,
+                        NroFila = i+1,
+                        ConceptoTarifariaId = conceptoId,
+                        AniosConcesionId = j+1,
+                        SeccionId = seccion.Id,
+                        Visibilidad = true
+                    };
+
+                    await _context.PreciosTarifarias.AddAsync(precio);
+                }
             }
         }
 
@@ -145,6 +183,19 @@ namespace CemSys3.Business.Seccion
             Seccione seccion = await _context.Secciones.FindAsync(dto.Id) ?? throw new KeyNotFoundException("Sección no encontrada");
             seccion.Nombre = dto.Nombre.ToLower().Trim();
             await _context.SaveChangesAsync();
+        }
+
+
+
+        //-----------------------------------ISeccionNichoTarifaria----------------------------------------------------
+        public async Task<IEnumerable<SeccionNichoTarifariaDTO>> GetAllSeccionesNichosParaTarifaria()
+        {
+            return await _context.Secciones.Where(s => s.Visibilidad == true && s.TipoParcelaId == (int)TipoParcelaEnum.Nicho).Select(sec => new SeccionNichoTarifariaDTO
+            {
+                Id = sec.Id,
+                Nombre = sec.Nombre.ToUpper(),
+                Filas = sec.Filas
+            }).ToListAsync();
         }
     }
 }

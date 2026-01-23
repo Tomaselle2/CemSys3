@@ -133,6 +133,11 @@ INSERT INTO PreciosTarifarias (precio, conceptoTarifariaId, visibilidad) values
 (0.50, 23, 1), --% de precios de nichos urnarios de secc 16-18
 (0.25, 24, 1); --% de precios de nichos urnarios de secc 16-18
 
+--para fosas
+INSERT INTO PreciosTarifarias (precio, conceptoTarifariaId, visibilidad, nroFila, aniosConcesionId) values 
+(0.00, 17, 1, 1, 4), --15 años
+(0.00, 17, 1, 1, 5); --25 años
+
 
 INSERT INTO EstadosTramites (estado, tipoTramiteId)
 VALUES 
