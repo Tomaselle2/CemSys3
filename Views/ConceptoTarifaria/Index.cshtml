@@ -32,13 +32,13 @@
                     
                     <div class="form-columns-container3">
                         <div>
-                            <label for="nombre" class="form-label">Nombre</label>
+                            <label for="nombre" class="form-label">Nombre<span class="obligatorio"> * </span></label>
                             <input class="form-control" type="text" asp-for="Nombre" required maxlength="50" id="nombre" />
                             <span asp-validation-for="Nombre" class="text-danger"></span>
                         </div>
 
                         <div>
-                            <label for="tipoNumeracion" class="form-label">Tema</label>
+                            <label for="tipoNumeracion" class="form-label">Tema<span class="obligatorio"> * </span></label>
                             <select class="form-select" asp-for="TemaId" asp-items="@EnumHelper.GetSelectListItems<TemaTarifariaEnum>()" required>
                                 <option value="">--Elija una opción--</option>
                             </select>

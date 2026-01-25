@@ -1,5 +1,7 @@
 ﻿using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.Tarifaria;
+using CemSys3.Enumerables;
+using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Seccion;
 using CemSys3.Interfaces.Tarifaria;
 using CemSys3.ViewModels.Tarifaria;
@@ -19,6 +21,8 @@ namespace CemSys3.Controllers
             _seccionTarifariaService = seccionTarifariaNicho;
         }
 
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
         public async Task<IActionResult> Index()
         {
             TarifariaVM viewModel = new TarifariaVM();

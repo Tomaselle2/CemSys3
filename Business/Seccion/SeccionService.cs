@@ -106,11 +106,57 @@ namespace CemSys3.Business.Seccion
         }
 
         //hay que recorrer todas las parcelas y asegurarse de que esten vacias antes de eliminar la seccion. Y colocar en false la visibilidad de todas las parcelas de esa seccion.
-        public async Task Delete(int id) 
+        public async Task Delete(int id)
         {
-            Seccione seccion = await _context.Secciones.FindAsync(id) ?? throw new KeyNotFoundException("Sección no encontrada");
-            seccion.Visibilidad = false;
-            await _context.SaveChangesAsync();
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                // 1. Buscar la sección
+                var seccion = await _context.Secciones.FindAsync(id)
+                    ?? throw new KeyNotFoundException("Sección no encontrada");
+
+                // 2. Verificar si hay parcelas con difuntos
+                bool tieneDifuntos = await _context.Parcelas
+                    .Where(p => p.SeccionId == id && p.CantidadDifuntos != 0)
+                    .AnyAsync();
+
+                if (tieneDifuntos)
+                {
+                    throw new InvalidOperationException(
+                        "No se puede eliminar la sección porque contiene parcelas con difuntos.");
+                }
+
+                // 3. Deshabilitar todas las parcelas (actualización masiva más eficiente)
+                await _context.Parcelas
+                    .Where(p => p.SeccionId == id)
+                    .ExecuteUpdateAsync(p =>
+                        p.SetProperty(x => x.Visibilidad, false));
+
+                // 4. Deshabilitar precios de tarifaria
+                await _context.PreciosTarifarias
+                    .Where(p => p.SeccionId == id)
+                    .ExecuteUpdateAsync(p =>
+                        p.SetProperty(x => x.Visibilidad, false));
+
+                // 5. Ocultar la sección
+                seccion.Visibilidad = false;
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+
+                // Relanzar excepción personalizada según el tipo
+                throw ex switch
+                {
+                    KeyNotFoundException => ex,
+                    InvalidOperationException => ex,
+                    _ => new Exception("Error al eliminar la sección", ex)
+                };
+            }
         }
 
         public async Task<SeccionRequestDTO> Get(int id)

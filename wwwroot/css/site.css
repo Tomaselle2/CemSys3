@@ -99,7 +99,10 @@ body {
         }
 }
 
-
+/*Para marcar campos obligatorios en formularios*/
+.obligatorio {
+    color: #ff1b13;
+}
 
 
 

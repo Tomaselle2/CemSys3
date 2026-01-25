@@ -26,7 +26,7 @@
                     <input type="hidden" asp-for="Id" />
                     <div class="form-columns-container3">
                         <div>
-                            <label class="form-label" for="nombre">Nombre</label>
+                            <label class="form-label" for="nombre">Nombre<span class="obligatorio"> * </span></label>
                             <input class="form-control" type="text" asp-for="Nombre" required maxlength="50" id="nombre" />
                             <span asp-validation-for="Nombre" class="text-danger"></span>
                         </div>

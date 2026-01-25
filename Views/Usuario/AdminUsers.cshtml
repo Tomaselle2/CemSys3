@@ -26,31 +26,31 @@
                     <input type="hidden" asp-for="Id" />
                     <div class="form-columns-container3">
                         <div>
-                            <label class="form-label" for="nombre">Nombre</label>
+                            <label class="form-label" for="nombre">Nombre<span class="obligatorio"> * </span></label>
                             <input class="form-control" type="text" asp-for="NombreEmpleado" required maxlength="50" id="nombre" />
                             <span asp-validation-for="NombreEmpleado" class="text-danger"></span>
                         </div>
 
                         <div>
-                            <label class="form-label" for="apellido">Apellido</label>
+                            <label class="form-label" for="apellido">Apellido<span class="obligatorio"> * </span></label>
                             <input class="form-control" type="text" asp-for="ApellidoEmpleado" required maxlength="50" id="apellido" />
                             <span asp-validation-for="ApellidoEmpleado" class="text-danger"></span>
                         </div>
 
                         <div>
-                            <label class="form-label" for="nombreUsuario">Usuario</label>
+                            <label class="form-label" for="nombreUsuario">Usuario<span class="obligatorio"> * </span></label>
                             <input class="form-control" type="text" asp-for="NombreUsuario" required maxlength="50" id="nombreUsuario" />
                             <span asp-validation-for="NombreUsuario" class="text-danger"></span>
                         </div>
 
                         <div>
-                            <label class="form-label" for="correo">Correo</label>
+                            <label class="form-label" for="correo">Correo<span class="obligatorio"> * </span></label>
                             <input class="form-control" type="email" asp-for="Correo" required maxlength="50" id="correo" />
                             <span asp-validation-for="Correo" class="text-danger"></span>
                         </div>
 
                         <div>
-                            <label for="rol" class="form-label">Rol del usuario</label>
+                            <label for="rol" class="form-label">Rol del usuario<span class="obligatorio"> * </span></label>
                             <select class="form-select" asp-for="IdRol" id="rol" asp-items="@(new SelectList(Model.Roles, "Id", "Rol"))" required>
                                 <option value="">--Elija una opción--</option>
                             </select>
