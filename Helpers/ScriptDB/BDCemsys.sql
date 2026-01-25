@@ -170,7 +170,7 @@ CREATE TABLE [dbo].[Personas] (
 
 CREATE TABLE [dbo].[ConceptosTarifaria] (
     [id] int NOT NULL IDENTITY(1,1),
-    [nombre] nvarchar(50) NOT NULL,
+    [nombre] nvarchar(70) NOT NULL,
     [visibilidad] bit NOT NULL DEFAULT 1,
     [temaId] int NOT NULL,
     PRIMARY KEY ([id]),

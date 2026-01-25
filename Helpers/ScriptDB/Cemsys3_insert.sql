@@ -123,8 +123,6 @@ INSERT INTO PreciosTarifarias (precio, conceptoTarifariaId, visibilidad) values
 (0.00, 13, 1),
 (0.00, 14, 1),
 (0.00, 15, 1),
-(0.00, 16, 1),
-(0.00, 17, 1),
 (0.05, 18, 1), --fondo %
 (0.00, 19, 1), --monto minimo fondo
 (1.00, 20, 1), --% de aumento de inhumación de otras localidades
