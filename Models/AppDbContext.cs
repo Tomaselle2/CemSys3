@@ -79,11 +79,12 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AnioConcesion>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__AnioConc__3213E83F4A73FB53");
+            entity.HasKey(e => e.Id).HasName("PK__AnioConc__3213E83F95CD1983");
 
             entity.ToTable("AnioConcesion");
 
@@ -93,7 +94,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Archivo>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Archivos__3213E83FDEDBEEEB");
+            entity.HasKey(e => e.Id).HasName("PK__Archivos__3213E83FE37F285A");
 
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("(newid())")
@@ -129,7 +130,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<CantidadCuota>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Cantidad__3213E83F9FF8EBCC");
+            entity.HasKey(e => e.Id).HasName("PK__Cantidad__3213E83F2B972157");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Cuota).HasColumnName("cuota");
@@ -137,7 +138,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<CategoriasPersona>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Categori__3213E83F21E1F677");
+            entity.HasKey(e => e.Id).HasName("PK__Categori__3213E83F2E821AB3");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Categoria)
@@ -147,7 +148,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Cementerio>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Cementer__3213E83F2FBC4407");
+            entity.HasKey(e => e.Id).HasName("PK__Cementer__3213E83F243806A3");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Nombre)
@@ -160,11 +161,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ConceptosTarifarium>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Concepto__3213E83F14C051BF");
+            entity.HasKey(e => e.Id).HasName("PK__Concepto__3213E83F1D6786F2");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Nombre)
-                .HasMaxLength(50)
+                .HasMaxLength(70)
                 .HasColumnName("nombre");
             entity.Property(e => e.TemaId).HasColumnName("temaId");
             entity.Property(e => e.Visibilidad)
@@ -179,7 +180,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Concesione>(entity =>
         {
-            entity.HasKey(e => e.TramiteId).HasName("PK__Concesio__324535475D7C2C9D");
+            entity.HasKey(e => e.TramiteId).HasName("PK__Concesio__3245354763A1F775");
 
             entity.Property(e => e.TramiteId)
                 .ValueGeneratedNever()
@@ -233,7 +234,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<EmpresasFunebre>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Empresas__3213E83F0D3DB5E6");
+            entity.HasKey(e => e.Id).HasName("PK__Empresas__3213E83FAA26C7AD");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Nombre)
@@ -246,7 +247,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<EstadosDifunto>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__EstadosD__3213E83FB141CB84");
+            entity.HasKey(e => e.Id).HasName("PK__EstadosD__3213E83F0619C309");
 
             entity.ToTable("EstadosDifunto");
 
@@ -258,7 +259,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<EstadosTramite>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__EstadosT__3213E83F46E12B2E");
+            entity.HasKey(e => e.Id).HasName("PK__EstadosT__3213E83FBF583BA4");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Estado)
@@ -277,7 +278,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<HistorialEstadoTramite>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Historia__3213E83F15E9AE86");
+            entity.HasKey(e => e.Id).HasName("PK__Historia__3213E83FDE36DFCE");
 
             entity.ToTable("HistorialEstadoTramite");
 
@@ -301,7 +302,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<HistorialTitularesConcesione>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Historia__3213E83F6BD64DA2");
+            entity.HasKey(e => e.Id).HasName("PK__Historia__3213E83F979E2F2F");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ConcesionId).HasColumnName("concesionId");
@@ -324,7 +325,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Introduccione>(entity =>
         {
-            entity.HasKey(e => e.TramiteId).HasName("PK__Introduc__324535479FB599E0");
+            entity.HasKey(e => e.TramiteId).HasName("PK__Introduc__324535472AC0363E");
 
             entity.Property(e => e.TramiteId)
                 .ValueGeneratedNever()
@@ -371,19 +372,26 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Nota>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Notas__3213E83F355D7747");
+            entity.HasKey(e => e.Id).HasName("PK__Notas__3213E83FB75DC518");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Color)
                 .HasMaxLength(16)
                 .HasColumnName("color");
-            entity.Property(e => e.Descripcion)
-                .HasMaxLength(1)
-                .HasColumnName("descripcion");
+            entity.Property(e => e.Descripcion).HasColumnName("descripcion");
+            entity.Property(e => e.EstadoId).HasColumnName("estadoId");
             entity.Property(e => e.Nombre)
-                .HasMaxLength(1)
+                .HasMaxLength(100)
                 .HasColumnName("nombre");
             entity.Property(e => e.TipoNotaId).HasColumnName("tipoNotaId");
+            entity.Property(e => e.Visibilidad)
+                .HasDefaultValue(true, "DF_Notas_visibilidad")
+                .HasColumnName("visibilidad");
+
+            entity.HasOne(d => d.Estado).WithMany(p => p.Nota)
+                .HasForeignKey(d => d.EstadoId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Notas__estadoId__3A4CA8FD");
 
             entity.HasOne(d => d.TipoNota).WithMany(p => p.Nota)
                 .HasForeignKey(d => d.TipoNotaId)
@@ -393,7 +401,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Parcela>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Parcelas__3213E83F8272F082");
+            entity.HasKey(e => e.Id).HasName("PK__Parcelas__3213E83F8BC8A0AA");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CantidadDifuntos).HasColumnName("cantidadDifuntos");
@@ -431,7 +439,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ParcelaDifunto>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ParcelaD__3213E83F6D60374C");
+            entity.HasKey(e => e.Id).HasName("PK__ParcelaD__3213E83FB800C78C");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.DifuntoId).HasColumnName("difuntoId");
@@ -466,7 +474,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Persona>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Personas__3213E83FA27B954E");
+            entity.HasKey(e => e.Id).HasName("PK__Personas__3213E83FC731F292");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Apellido)
@@ -525,7 +533,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<PreciosTarifaria>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__PreciosT__3213E83F7E08FDEB");
+            entity.HasKey(e => e.Id).HasName("PK__PreciosT__3213E83F70664763");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AniosConcesionId).HasColumnName("aniosConcesionId");
@@ -551,7 +559,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<RolesUsuario>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RolesUsu__3213E83FECD04301");
+            entity.HasKey(e => e.Id).HasName("PK__RolesUsu__3213E83FA1EBBF55");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Rol)
@@ -561,7 +569,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Seccione>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Seccione__3213E83FC76BAB90");
+            entity.HasKey(e => e.Id).HasName("PK__Seccione__3213E83F1533CEC7");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Filas).HasColumnName("filas");
@@ -588,15 +596,18 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Tarea>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Tareas__3213E83FA36BC5FD");
+            entity.HasKey(e => e.Id).HasName("PK__Tareas__3213E83F69936915");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Descripcion)
-                .HasMaxLength(1)
+                .HasMaxLength(60)
                 .HasColumnName("descripcion");
             entity.Property(e => e.Estado).HasColumnName("estado");
             entity.Property(e => e.NotaId).HasColumnName("notaId");
             entity.Property(e => e.TramiteId).HasColumnName("tramiteId");
+            entity.Property(e => e.Visibilidad)
+                .HasDefaultValue(true)
+                .HasColumnName("visibilidad");
 
             entity.HasOne(d => d.Nota).WithMany(p => p.Tareas)
                 .HasForeignKey(d => d.NotaId)
@@ -609,7 +620,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TemasTarifarium>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TemasTar__3213E83F1450C1F4");
+            entity.HasKey(e => e.Id).HasName("PK__TemasTar__3213E83F18348392");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Nombre)
@@ -622,7 +633,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TipoNicho>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TipoNich__3213E83FCFCC900E");
+            entity.HasKey(e => e.Id).HasName("PK__TipoNich__3213E83F0C858BE3");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Tipo)
@@ -632,7 +643,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TipoNotum>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TipoNota__3213E83F0F39236B");
+            entity.HasKey(e => e.Id).HasName("PK__TipoNota__3213E83FB3060DEA");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Descripcion).HasMaxLength(30);
@@ -641,7 +652,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TipoNumeracionParcela>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TipoNume__3213E83F1B1FC187");
+            entity.HasKey(e => e.Id).HasName("PK__TipoNume__3213E83FEC9914F0");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.TipoNumeracion)
@@ -651,7 +662,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TipoPanteon>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TipoPant__3213E83FFB5D83A5");
+            entity.HasKey(e => e.Id).HasName("PK__TipoPant__3213E83FF519A6D8");
 
             entity.ToTable("TipoPanteon");
 
@@ -663,7 +674,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TipoParcela>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TipoParc__3213E83F5E131AE3");
+            entity.HasKey(e => e.Id).HasName("PK__TipoParc__3213E83F77C8FC21");
 
             entity.ToTable("TipoParcela");
 
@@ -675,7 +686,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TipoTramite>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TipoTram__3213E83FC2F5F773");
+            entity.HasKey(e => e.Id).HasName("PK__TipoTram__3213E83F62BBEBED");
 
             entity.ToTable("TipoTramite");
 
@@ -690,7 +701,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Tramite>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Tramites__3213E83F2005CF2A");
+            entity.HasKey(e => e.Id).HasName("PK__Tramites__3213E83F5080DFFB");
 
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
@@ -723,7 +734,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TramitePersona>(entity =>
         {
-            entity.HasKey(e => new { e.TramiteId, e.PersonaId }).HasName("PK__TramiteP__770E40CA1B32B3A2");
+            entity.HasKey(e => new { e.TramiteId, e.PersonaId }).HasName("PK__TramiteP__770E40CA0FC816C6");
 
             entity.ToTable("TramitePersona");
 
@@ -746,7 +757,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TramitesParcela>(entity =>
         {
-            entity.HasKey(e => new { e.TramiteId, e.ParcelaId }).HasName("PK__Tramites__47EF37AD82619C0C");
+            entity.HasKey(e => new { e.TramiteId, e.ParcelaId }).HasName("PK__Tramites__47EF37AD612F2143");
 
             entity.ToTable("TramitesParcela");
 
@@ -767,7 +778,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Usuario>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Usuarios__3213E83FB11BAC17");
+            entity.HasKey(e => e.Id).HasName("PK__Usuarios__3213E83F27923839");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Apellido)

@@ -15,6 +15,12 @@ public partial class Nota
 
     public string? Color { get; set; }
 
+    public bool Visibilidad { get; set; }
+
+    public int EstadoId { get; set; }
+
+    public virtual EstadosTramite Estado { get; set; } = null!;
+
     public virtual ICollection<Tarea> Tareas { get; set; } = new List<Tarea>();
 
     public virtual TipoNotum TipoNota { get; set; } = null!;

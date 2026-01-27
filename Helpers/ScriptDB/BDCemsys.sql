@@ -201,13 +201,25 @@ CREATE TABLE [dbo].[Secciones] (
 
 CREATE TABLE [dbo].[Notas] (
     [id] int NOT NULL IDENTITY(1,1),
-    [nombre] nvarchar NOT NULL,
+    [nombre] nvarchar(100) NOT NULL,
     [tipoNotaId] int NOT NULL,
-    [descripcion] nvarchar,
+    [descripcion] nvarchar(max),
     [color] nvarchar(16),
+	estadoId int,
+	visibilidad bit NOT NULL DEFAULT 1,
     PRIMARY KEY ([id]),
+	foreign key (estadoId) references EstadosTramites(id),
     CONSTRAINT [Notas_tipoNotaId_fk] FOREIGN KEY([tipoNotaId]) REFERENCES [dbo].[TipoNota]([id])
 );
+
+-- 1. Alter the 'nombre' column
+--ALTER TABLE Notas add estadoId int NOT NULL foreign key (estadoId) references EstadosTramites(id);
+
+-- 2. Alter the 'descripcion' column
+--ALTER TABLE Notas ALTER COLUMN descripcion NVARCHAR(MAX) NULL;
+
+-- 3. Add the 'visibilidad' column with a default value
+--ALTER TABLE Notas ADD visibilidad BIT NOT NULL CONSTRAINT DF_Notas_visibilidad DEFAULT 1;
 
 -- Tablas con dependencias de segundo nivel
 CREATE TABLE [dbo].[Tramites] (
@@ -258,13 +270,15 @@ CREATE TABLE [dbo].[PreciosTarifarias] (
 CREATE TABLE [dbo].[Tareas] (
     [id] int NOT NULL IDENTITY(1,1),
     [estado] bit NOT NULL,
-    [descripcion] nvarchar NOT NULL,
+    [descripcion] nvarchar(60) NOT NULL,
     [notaId] int,
     [tramiteId] int,
+	[visibilidad] bit not null default 1,
     PRIMARY KEY ([id]),
     CONSTRAINT [Tareas_notaId_fk] FOREIGN KEY([notaId]) REFERENCES [dbo].[Notas]([id]),
     CONSTRAINT [Tareas_tramiteId_fk] FOREIGN KEY([tramiteId]) REFERENCES [dbo].[Tramites]([id])
 );
+
 
 -- Tablas con dependencias de tercer nivel
 CREATE TABLE [dbo].[Archivos] (

@@ -15,9 +15,9 @@ public partial class PreciosTarifaria
 
     public int? AniosConcesionId { get; set; }
 
-    public int? SeccionId { get; set; }
-
     public bool? Visibilidad { get; set; }
+
+    public int? SeccionId { get; set; }
 
     public virtual ConceptosTarifarium ConceptoTarifaria { get; set; } = null!;
 
