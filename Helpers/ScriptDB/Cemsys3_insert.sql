@@ -57,12 +57,13 @@ INSERT INTO EstadosDifunto (estado) VALUES
 
 -- INSERT para TipoTramite
 INSERT INTO TipoTramite (tipo) VALUES 
-('Introducción'),
-('Autorización para cremación'),
-('Autorización para reducción'),
-('Contrato de concesión'),
-('Autorización para traslado'),
-('Cambio de titularidad');
+('Ingreso'), --1
+('Autorización para cremación'), --2
+('Autorización para reducción'), --3
+('Contrato de concesión'), --4
+('Autorización para traslado'), --5
+('Cambio de titularidad'), --6
+('Nota'); --7
 
 -- INSERT para TipoParcela
 INSERT INTO TipoParcela (tipo) VALUES 
@@ -139,8 +140,10 @@ INSERT INTO PreciosTarifarias (precio, conceptoTarifariaId, visibilidad, nroFila
 
 INSERT INTO EstadosTramites (estado, tipoTramiteId)
 VALUES 
-('Registrado', 1), --introduccion
-('Finalizado', 1);
+('Registrado', 1), --ingreso
+('Finalizado', 1), --ingreso
+('Pendiente', 7), --nota
+('Finalizado', 7); --nota
 --(4, 'Iniciado'), --contrato de conescion
 --(4, 'Pendiente de documentación'),
 --(4, 'Activa'),

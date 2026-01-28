@@ -19,9 +19,15 @@ public partial class Nota
 
     public int EstadoId { get; set; }
 
+    public int? TramiteId { get; set; }
+
+    public DateTime FechaCreacion { get; set; }
+
     public virtual EstadosTramite Estado { get; set; } = null!;
 
     public virtual ICollection<Tarea> Tareas { get; set; } = new List<Tarea>();
 
     public virtual TipoNotum TipoNota { get; set; } = null!;
+
+    public virtual Tramite? Tramite { get; set; }
 }

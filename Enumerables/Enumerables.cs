@@ -50,6 +50,19 @@ namespace CemSys3.Enumerables
         Panteon = 3,
     }
 
+    public enum TipoNotaEnum
+    {
+        [Display(Name = "Todos")]
+        Todos = 0,
+
+        [Display(Name = "Ingreso")]
+        Ingreso = 1,
+
+        [Display(Name = "Recordatorio")]
+        Recordatorio = 2,
+
+        
+    }
     //para filtro de parcelas ocupadas o desocupadas
     public enum OcupacionParcelaEnum
     {
@@ -103,6 +116,22 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "25 años")]
         anio25 = 5
+    }
+
+    //Estados de los tramites y notas
+    public enum EstadosEnum
+    {
+        [Display(Name = "Registrado")]
+        IngresoRegistrado = 1,
+
+        [Display(Name = "Finalizado")]
+        IngresoFinalizado = 2,
+
+        [Display(Name = "Pendiente")]
+        NotaPendiente = 3,
+
+        [Display(Name = "Finalizado")]
+        NotaFinalizado = 4,
     }
 
     public class Enumerables

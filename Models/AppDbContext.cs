@@ -79,7 +79,6 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AnioConcesion>(entity =>
@@ -380,10 +379,12 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("color");
             entity.Property(e => e.Descripcion).HasColumnName("descripcion");
             entity.Property(e => e.EstadoId).HasColumnName("estadoId");
+            entity.Property(e => e.FechaCreacion).HasColumnName("fechaCreacion");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(100)
                 .HasColumnName("nombre");
             entity.Property(e => e.TipoNotaId).HasColumnName("tipoNotaId");
+            entity.Property(e => e.TramiteId).HasColumnName("tramiteId");
             entity.Property(e => e.Visibilidad)
                 .HasDefaultValue(true, "DF_Notas_visibilidad")
                 .HasColumnName("visibilidad");
@@ -397,6 +398,10 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.TipoNotaId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("Notas_tipoNotaId_fk");
+
+            entity.HasOne(d => d.Tramite).WithMany(p => p.Nota)
+                .HasForeignKey(d => d.TramiteId)
+                .HasConstraintName("FK__Notas__tramiteId__4D5F7D71");
         });
 
         modelBuilder.Entity<Parcela>(entity =>

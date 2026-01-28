@@ -2,16 +2,20 @@ using CemSys3.Business.Cementerio;
 using CemSys3.Business.ConceptoTarifaria;
 using CemSys3.Business.EmpresaSepelio;
 using CemSys3.Business.Login;
+using CemSys3.Business.Notas;
 using CemSys3.Business.Parcela;
 using CemSys3.Business.Seccion;
+using CemSys3.Business.Tarea;
 using CemSys3.Business.Tarifaria;
 using CemSys3.Business.Usuario;
 using CemSys3.Interfaces.Cementerio;
 using CemSys3.Interfaces.ConceptoTarifaria;
 using CemSys3.Interfaces.EmpresaSepelio;
 using CemSys3.Interfaces.Login;
+using CemSys3.Interfaces.Notas;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Seccion;
+using CemSys3.Interfaces.Tarea;
 using CemSys3.Interfaces.Tarifaria;
 using CemSys3.Interfaces.Usuario;
 using CemSys3.Models;
@@ -45,6 +49,9 @@ builder.Services.AddScoped<ISeccionNichoTarifaria, SeccionService>();
 builder.Services.AddScoped<IParcela, ParcelaService>();
 builder.Services.AddScoped<IConceptoTarifaria, ConceptoTarifariaService>();
 builder.Services.AddScoped<ITarifaria, TarifariaService>();
+builder.Services.AddScoped<INotas, NotaService>();
+builder.Services.AddScoped<ITarea, TareaService>();
+
 
 
 

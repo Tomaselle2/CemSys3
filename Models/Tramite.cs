@@ -27,6 +27,8 @@ public partial class Tramite
 
     public virtual Introduccione? Introduccione { get; set; }
 
+    public virtual ICollection<Nota> Nota { get; set; } = new List<Nota>();
+
     public virtual ICollection<ParcelaDifunto> ParcelaDifuntoTramiteIngresos { get; set; } = new List<ParcelaDifunto>();
 
     public virtual ICollection<ParcelaDifunto> ParcelaDifuntoTramiteRetiros { get; set; } = new List<ParcelaDifunto>();

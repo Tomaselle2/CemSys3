@@ -207,16 +207,19 @@ CREATE TABLE [dbo].[Notas] (
     [color] nvarchar(16),
 	estadoId int,
 	visibilidad bit NOT NULL DEFAULT 1,
+	tramiteId int null,
+	fechaCreacion datetime2 not null,
     PRIMARY KEY ([id]),
 	foreign key (estadoId) references EstadosTramites(id),
+	foreign key (tramiteId) references Tramites(id),
     CONSTRAINT [Notas_tipoNotaId_fk] FOREIGN KEY([tipoNotaId]) REFERENCES [dbo].[TipoNota]([id])
 );
 
 -- 1. Alter the 'nombre' column
---ALTER TABLE Notas add estadoId int NOT NULL foreign key (estadoId) references EstadosTramites(id);
+--ALTER TABLE Notas add tramiteId int NULL foreign key (tramiteId) references Tramites(id);
 
 -- 2. Alter the 'descripcion' column
---ALTER TABLE Notas ALTER COLUMN descripcion NVARCHAR(MAX) NULL;
+--ALTER TABLE Notas add fechaCreacion datetime2 not null;
 
 -- 3. Add the 'visibilidad' column with a default value
 --ALTER TABLE Notas ADD visibilidad BIT NOT NULL CONSTRAINT DF_Notas_visibilidad DEFAULT 1;
