@@ -35,7 +35,7 @@ namespace CemSys3.Business.Notas
                     Color = dto.Color,
                     Visibilidad = dto.Visibilidad,
                     FechaCreacion = DateTime.Now,
-                    EstadoId = (int)EstadosEnum.NotaPendiente
+                    EstadoId = (int)EstadosNotaEnum.NotaPendiente
                 };
 
                 await _context.Notas.AddAsync(nuevaNota);
@@ -100,47 +100,59 @@ namespace CemSys3.Business.Notas
             // Filtro por estado de la nota
             var query = _context.Notas.Where(n=> n.EstadoId == estadoId);
 
-            // Filtro por tipo de nota
-            switch (filtroTipoNota)
+            if(query != null)
             {
-                case 1: //Ingreso
-                    query = query.Where(e => e.TipoNotaId == (int)TipoNotaEnum.Ingreso);
-                    break;
-                case 2: //Recordatorio
-                    query = query.Where(e => e.TipoNotaId == (int)TipoNotaEnum.Recordatorio);
-                    break;
-                case 0: //todos
-                default:
-                    // No aplicar filtro
-                    break;
-            }
-
-            // Total de registros
-            var total = await query.CountAsync();
-
-            // Paginación
-            resultado.Paginacion.TotalPaginas = (int)Math.Ceiling(total / (double)porPagina);
-            resultado.Paginacion.PaginaActual = Math.Max(1, Math.Min(pagina, resultado.Paginacion.TotalPaginas));
-            resultado.Paginacion.RegistrosPorPagina = porPagina;
-            resultado.Paginacion.Accion = "Index";
-            resultado.Paginacion.Controlador = "Nota";
-            resultado.Paginacion.TotalRegistros = total;
-
-            // Obtener datos paginados
-            resultado.Items = await query
-                .OrderBy(e => e.Id)
-                .Skip((resultado.Paginacion.PaginaActual - 1) * porPagina)
-                .Take(porPagina)
-                .Select( s=> new NotaDTO
+                // Filtro por tipo de nota
+                switch (filtroTipoNota)
                 {
-                    Id = s.Id,
-                    Nombre = s.Nombre,
-                    TipoNotaId = s.TipoNotaId,
-                    Descripcion = s.Descripcion,
-                    Color = s.Color,
-                    Visibilidad = s.Visibilidad,
-                    EstadoId = s.EstadoId
-                }).OrderByDescending(f => f.FechaCreacion).ToListAsync();
+                    case 1: //Ingreso
+                        query = query.Where(e => e.TipoNotaId == (int)TipoNotaEnum.Ingreso);
+                        break;
+                    case 2: //Recordatorio
+                        query = query.Where(e => e.TipoNotaId == (int)TipoNotaEnum.Recordatorio);
+                        break;
+                    case 0: //todos
+                        break;
+                    default:
+                        // No aplicar filtro
+                        break;
+                }
+            }
+            
+            // Total de registros
+            var total = query != null ? await query.CountAsync() : 0;
+
+            if(total > 0 && query != null)
+            {
+                // Paginación
+                resultado.Paginacion.TotalPaginas = (int)Math.Ceiling(total / (double)porPagina);
+                resultado.Paginacion.PaginaActual = Math.Max(1, Math.Min(pagina, resultado.Paginacion.TotalPaginas));
+                resultado.Paginacion.RegistrosPorPagina = porPagina;
+                resultado.Paginacion.Accion = "Index";
+                resultado.Paginacion.Controlador = "Nota";
+                resultado.Paginacion.TotalRegistros = total;
+
+                // Obtener datos paginados - ORDENAR ANTES de la proyección
+                resultado.Items = await query
+                    .OrderByDescending(e => e.FechaCreacion) // Ordenar por fecha antes de paginar
+                    .Skip((resultado.Paginacion.PaginaActual - 1) * porPagina)
+                    .Take(porPagina)
+                    .Select(s => new NotaDTO
+                    {
+                        Id = s.Id,
+                        Nombre = s.Nombre,
+                        TipoNotaId = s.TipoNotaId,
+                        Descripcion = s.Descripcion,
+                        Color = s.Color,
+                        Visibilidad = s.Visibilidad,
+                        EstadoId = s.EstadoId,
+                        FechaCreacion = s.FechaCreacion // Incluir la fecha
+                    })
+                    .ToListAsync();
+            }else
+            {
+                resultado.Items = new List<NotaDTO>();
+            }
 
             return resultado;
         }

@@ -118,15 +118,19 @@ namespace CemSys3.Enumerables
         anio25 = 5
     }
 
-    //Estados de los tramites y notas
-    public enum EstadosEnum
+    //Estados de los tramites
+    public enum EstadosIngresoEnum
     {
         [Display(Name = "Registrado")]
         IngresoRegistrado = 1,
 
         [Display(Name = "Finalizado")]
         IngresoFinalizado = 2,
+    }
 
+    //Estados de notas
+    public enum EstadosNotaEnum
+    {
         [Display(Name = "Pendiente")]
         NotaPendiente = 3,
 
