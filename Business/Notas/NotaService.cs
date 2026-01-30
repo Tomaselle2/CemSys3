@@ -33,7 +33,7 @@ namespace CemSys3.Business.Notas
                     TipoNotaId = dto.TipoNotaId,
                     Descripcion = dto.Descripcion,
                     Color = dto.Color,
-                    Visibilidad = dto.Visibilidad,
+                    Visibilidad = true,
                     FechaCreacion = DateTime.Now,
                     EstadoId = (int)EstadosNotaEnum.NotaPendiente
                 };
@@ -159,49 +159,55 @@ namespace CemSys3.Business.Notas
 
         public async Task Update(NotaDTO dto)
         {
-            using var Transaction = await _context.Database.BeginTransactionAsync();
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                Nota nota = await _context.Notas.FindAsync(dto.Id) ?? throw new Exception("Nota no encontrada");
+                var nota = await _context.Notas.FindAsync(dto.Id)
+                    ?? throw new Exception("Nota no encontrada");
+
                 nota.Nombre = dto.Nombre;
                 nota.Descripcion = dto.Descripcion;
                 nota.Color = dto.Color;
 
-                IEnumerable<TareaDTO> tareasExistentes = await _tareaService.GetAllByNota(nota.Id);
-
-                // Actualizar tareas existentes y agregar nuevas tareas
                 foreach (var tareaDto in dto.Tareas)
                 {
-                    var tareaExistente = tareasExistentes.FirstOrDefault(t => t.Id == tareaDto.Id);
-
-                    if (tareaExistente != null)
+                    // ELIMINAR
+                    if (tareaDto.Eliminada && tareaDto.Id > 0)
                     {
-                        // Actualizar tarea existente
-                        tareaExistente.Descripcion = tareaDto.Descripcion;
-                        tareaExistente.Estado = tareaDto.Estado;
-                        await _tareaService.Update(tareaExistente);
+                        await _tareaService.Delete(tareaDto.Id);
+                        continue;
                     }
+
+                    // ACTUALIZAR
+                    if (tareaDto.Id > 0)
+                    {
+                        await _tareaService.Update(new TareaDTO
+                        {
+                            Id = tareaDto.Id,
+                            Descripcion = tareaDto.Descripcion,
+                            Estado = tareaDto.Estado
+                        });
+                    }
+                    // AGREGAR
                     else
                     {
-                        // Agregar nueva tarea
-                        TareaDTO nuevaTarea = new TareaDTO
+                        await _tareaService.Add(new TareaDTO
                         {
-                            NotaId = nota.Id,
+                            NotaId = dto.Id,
                             Descripcion = tareaDto.Descripcion,
                             Estado = tareaDto.Estado,
                             Visibilidad = true
-                        };
-                        await _tareaService.Add(nuevaTarea);
+                        });
                     }
                 }
-                
+
                 await _context.SaveChangesAsync();
-                await Transaction.CommitAsync();
+                await transaction.CommitAsync();
             }
-            catch (Exception)
+            catch
             {
-                await Transaction.RollbackAsync();
+                await transaction.RollbackAsync();
                 throw;
             }
         }

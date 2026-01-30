@@ -17,6 +17,9 @@ document.addEventListener("click", function (e) {
     if (link.hasAttribute("data-no-loader")) return;
     if (link.getAttribute("href")?.startsWith("#")) return;
 
+    //si es HTMX
+    if (link.hasAttribute("hx-get") || link.hasAttribute("hx-post")) return;
+
     Loader.show();
 });
 
@@ -25,6 +28,9 @@ document.addEventListener("submit", async function (e) {
 
     const form = e.target;
     const submitter = e.submitter;
+
+    //si es HTMX
+    if (form.hasAttribute("hx-post")) return;
 
     if (!submitter) return;
 

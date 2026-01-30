@@ -14,5 +14,8 @@
 
         public bool Visibilidad { get; set; }
 
+        public bool Eliminada { get; set; }
+
+
     }
 }

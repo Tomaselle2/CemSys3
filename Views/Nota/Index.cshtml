@@ -12,6 +12,23 @@
     <h1 class="title-page">Notas</h1>
 </div>
 
+<div class="dropdown m-lg-2">
+    <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+       <i class="bi bi-plus"></i> Nota
+    </button>
+    <ul class="dropdown-menu">
+        <li>
+            <a class="dropdown-item" style="cursor: pointer"
+               hx-get="@Url.Action("ModalIngreso", "Nota")"
+               hx-target="#modal-container"
+               hx-swap="innerHTML">
+                Ingreso
+            </a>
+        </li>
+        <li><a class="dropdown-item" href="#">Recordatorio</a></li>
+    </ul>
+</div>
+
 <!--Filtro-->
 <div class="d-flex justify-content-start p-2">
     <form method="get"
@@ -68,6 +85,7 @@
         </select>
     </form>
 </div>
+
 <!--Grilla de notas-->
 @if (Model.ListaNotas != null && Model.ListaNotas.Any())
 {
@@ -76,46 +94,28 @@
             @foreach (var nota in Model.ListaNotas)
             {
                 <div class="col">
-                    <div class="card h-100 @GetCardColorClass(nota.Color)" style="border-left: 5px solid @GetColorHex(nota.Color);">
+                    <div class="card h-100 cursor-pointer"
+                         style="background-color: @nota.Color;"
+                         hx-get="@Url.Action(action: "Visualizar", controller: "Nota", values: new { id = nota.Id })"
+                         hx-target="#modal-container"
+                         hx-swap="innerHTML"
+                         role="button"
+                         tabindex="0">
+
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <span class="badge @GetEstadoBadgeClass(nota.EstadoId)">@GetEstadoNombre(nota.EstadoId)</span>
-                            <small class="text-muted">@nota.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</small>
+                            <span class="badge bg-primary">
+                                @(EnumHelper.GetDisplayNameByValue<TipoNotaEnum>(nota.TipoNotaId))
+                            </span>
+                            <span class="badge bg-black">
+                                @(EnumHelper.GetDisplayNameByValue<EstadosNotaEnum>(nota.EstadoId))
+                            </span>
                         </div>
+
                         <div class="card-body">
                             <h5 class="card-title">@nota.Nombre</h5>
-                            <p class="card-text">@nota.Descripcion</p>
-
-                            <!-- Información adicional -->
-                            <div class="mt-3">
-                                <div class="d-flex justify-content-between">
-                                    <span class="badge bg-secondary">
-                                        @GetTipoNotaNombre(nota.TipoNotaId)
-                                    </span>
-                                    <span class="badge @GetVisibilidadBadgeClass(nota.Visibilidad ? "activa" : "inactiva")">
-                                        @nota.Visibilidad
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer bg-transparent">
-                            <div class="d-flex justify-content-end gap-2">
-                                <!-- Botones de acción -->
-                                <button class="btn btn-sm btn-outline-secondary"
-                                        onclick="editarNota(@nota.Id)">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger"
-                                        onclick="eliminarNota(@nota.Id, '@nota.Nombre')">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                                @if (nota.EstadoId == (int)EstadosNotaEnum.NotaPendiente)
-                                {
-                                    <button class="btn btn-sm btn-success"
-                                            onclick="marcarFinalizada(@nota.Id)">
-                                        <i class="bi bi-check-circle"></i> Finalizar
-                                    </button>
-                                }
-                            </div>
+                            <p class="card-text" style="white-space: pre-wrap;">
+@(nota.Descripcion ?? "Sin descripción")
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -145,111 +145,18 @@ else
     </div>
 }
 
-@{
-    // Funciones helper para estilos
-    string GetCardColorClass(string color)
-    {
-        return color?.ToLower() switch
-        {
-            "primary" => "text-bg-primary",
-            "secondary" => "text-bg-secondary",
-            "success" => "text-bg-success",
-            "danger" => "text-bg-danger",
-            "warning" => "text-bg-warning",
-            "info" => "text-bg-info",
-            "light" => "text-bg-light",
-            "dark" => "text-bg-dark",
-            _ => "text-bg-primary"
-        };
-    }
+<div id="modal-container"></div>
 
-    string GetColorHex(string color)
-    {
-        return color?.ToLower() switch
-        {
-            "primary" => "#0d6efd",
-            "secondary" => "#6c757d",
-            "success" => "#198754",
-            "danger" => "#dc3545",
-            "warning" => "#ffc107",
-            "info" => "#0dcaf0",
-            "light" => "#f8f9fa",
-            "dark" => "#212529",
-            _ => "#0d6efd"
-        };
-    }
 
-    string GetEstadoBadgeClass(int estadoId)
-    {
-        return estadoId switch
-        {
-            (int)EstadosNotaEnum.NotaPendiente => "bg-warning",
-            (int)EstadosNotaEnum.NotaFinalizado => "bg-success",
-            _ => "bg-secondary"
-        };
-    }
 
-    string GetEstadoNombre(int estadoId)
-    {
-        return estadoId switch
-        {
-            (int)EstadosNotaEnum.NotaPendiente => "Pendiente",
-            (int)EstadosNotaEnum.NotaFinalizado => "Finalizado",
-            _ => "Desconocido"
-        };
-    }
 
-    string GetTipoNotaNombre(int tipoNotaId)
-    {
-        return tipoNotaId switch
-        {
-            (int)TipoNotaEnum.Ingreso => "Ingreso",
-            (int)TipoNotaEnum.Recordatorio => "Recordatorio",
-            _ => "Desconocido"
-        };
-    }
-
-    string GetVisibilidadBadgeClass(string visibilidad)
-    {
-        return visibilidad?.ToLower() switch
-        {
-            "publica" => "bg-success",
-            "privada" => "bg-info",
-            _ => "bg-secondary"
-        };
-    }
-}
-
-<!-- Scripts para las acciones -->
-<script>
-    function editarNota(id) {
-        // Redirigir a la página de edición
-        window.location.href = '@Url.Action("Edit", "Nota")' + '/' + id;
-    }
-
-    function eliminarNota(id, nombre) {
-        if (confirm(`¿Está seguro que desea eliminar la nota "${nombre}"?`)) {
-            $.post('@Url.Action("Delete", "Nota")', { id: id })
-                .done(function(response) {
-                    location.reload();
-                })
-                .fail(function() {
-                    alert('Error al eliminar la nota');
-                });
-        }
-    }
-
-    function marcarFinalizada(id) {
-        $.post('@Url.Action("MarcarFinalizada", "Nota")', { id: id })
-            .done(function(response) {
-                location.reload();
-            })
-            .fail(function() {
-                alert('Error al marcar como finalizada');
-            });
-    }
-</script>
 
 @* Renderizamos el manejador pasándole el DTO del modelo *@
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+}
+
 

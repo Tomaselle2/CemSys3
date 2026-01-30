@@ -1,0 +1,260 @@
+﻿@using CemSys3.ViewModels.Nota
+@model NotaModalVM
+
+<style>
+    .color-box {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        cursor: pointer;
+        border: 2px solid rgba(0,0,0,.2);
+    }
+
+        .color-box:hover {
+            border-color: #000;
+        }
+</style>
+
+<div class="modal fade show"
+     style="display:block"
+     tabindex="-1"
+     data-bs-backdrop="static"
+     data-bs-keyboard="false">
+
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content"
+             style="background-color:@Model.Color">
+
+            <form hx-post="/Nota/Guardar"
+                  hx-target="#modal-container"
+                  hx-swap="innerHTML"
+                  onsubmit="return validarTareas()">
+
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="TipoNotaId" />
+                <input type="hidden" asp-for="Color" id="ColorHidden" />
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Nota Ingreso</h5>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- selector de color -->
+                    <div class="mb-2 d-flex gap-2">
+                        @foreach (var color in new[] { "#e3f2fd", "#e8f5e9", "#fff3e0", "#ede7f6", "#F5DADE" })
+                        {
+                            <div class="color-box"
+                                 style="background:@color"
+                                 onclick="setColor('@color')"></div>
+                        }
+                    </div>
+
+                    <div>
+                        <input class="form-control mb-2" asp-for="Nombre" placeholder="Nombre" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+                   
+
+                    <div>
+                        <textarea class="form-control mb-3 auto-resize"
+                                  asp-for="Descripcion"
+                                  placeholder="Descripción"
+                                  oninput="autoResize(this)"></textarea>
+                        <span asp-validation-for="Descripcion" class="text-danger"></span>
+                    </div>
+                    
+
+                    <hr />
+                    <h6>Tareas</h6>
+
+                    <div id="tareas">
+                        @for (int i = 0; i < Model.Tareas.Count; i++)
+                        {
+                            <div class="d-flex gap-2 mb-2 task-row align-items-center">
+                                <input type="hidden" asp-for="Tareas[i].Id" />
+                                <input type="hidden" asp-for="Tareas[i].Eliminada" class="eliminada-flag" />
+
+                                <input type="checkbox"
+                                       class="form-check-input border border-dark border-1"
+                                       asp-for="Tareas[i].Estado" />
+
+                                <input class="form-control flex-grow-1"
+                                       asp-for="Tareas[i].Descripcion" />
+
+                                <button type="button"
+                                        title="Eliminar tarea"
+                                        class="btn btn-danger btn-sm btn-eliminar"
+                                        onclick="marcarEliminada(this)">
+                                    ✖
+                                </button>
+
+                                <button type="button"
+                                    title="Restaurar tarea"
+                                        class="btn btn-warning btn-sm btn-restaurar d-none"
+                                        onclick="restaurar(this)">
+                                    ↩
+                                </button>
+                            </div>
+                        }
+                    </div>
+
+                    <button type="button"
+                            title="Agregar tarea"
+                            class="btn btn-sm btn-outline-primary"
+                            onclick="agregarTarea()">
+                        <i class="bi bi-plus"></i>
+                        Tarea
+                    </button>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                    <button type="button"
+                            class="btn btn-secondary"
+                            onclick="cerrarModal()">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    }
+
+    // ajustar al cargar
+    document.querySelectorAll('.auto-resize').forEach(t => autoResize(t));
+
+    function setColor(color) {
+        document.querySelector('.modal-content').style.backgroundColor = color;
+        document.getElementById('ColorHidden').value = color;
+    }
+
+        function agregarTarea() {
+        const idx = document.querySelectorAll('#tareas .task-row').length;
+
+    document.getElementById('tareas').insertAdjacentHTML('beforeend', `
+        <div class="d-flex gap-2 mb-2 task-row align-items-center">
+            <input type="hidden" name="Tareas[${idx}].Id" value="0" />
+            <input type="hidden" name="Tareas[${idx}].Eliminada" value="false" class="eliminada-flag" />
+
+            <input type="checkbox"
+                   class="form-check-input border border-dark border-1"
+                   name="Tareas[${idx}].Estado" />
+
+            <input class="form-control flex-grow-1"
+                   name="Tareas[${idx}].Descripcion" />
+
+            <button type="button"
+                    class="btn btn-danger btn-sm btn-eliminar"
+                    onclick="marcarEliminada(this)">✖</button>
+
+            <button type="button"
+                    class="btn btn-warning btn-sm btn-restaurar d-none"
+                    onclick="restaurar(this)">↩</button>
+        </div>
+    `);
+    }
+
+    // ajustar al agregar nuevas tareas o al hacer swap con htmx
+    document.addEventListener("htmx:afterSwap", function (e) {
+        e.target.querySelectorAll?.('.auto-resize').forEach(t => {
+            t.style.height = 'auto';
+            t.style.height = t.scrollHeight + 'px';
+        });
+    });
+
+    // reactivar validación jQuery después de swap con htmx
+    document.addEventListener("htmx:afterSwap", function (e) {
+        if (window.jQuery && $.validator) {
+            const form = e.target.querySelector("form");
+            if (!form) return;
+
+            $(form).removeData("validator");
+            $(form).removeData("unobtrusiveValidation");
+            $.validator.unobtrusive.parse(form);
+        }
+    });
+
+    function cerrarModal() {
+        document.getElementById('modal-container').innerHTML = '';
+    }
+
+    function restaurar(btn) {
+        const row = btn.closest('.task-row');
+
+        row.querySelector('.eliminada-flag').value = "false";
+        row.classList.remove('eliminada');
+
+        row.querySelector('.btn-restaurar').classList.add('d-none');
+        row.querySelector('.btn-eliminar').classList.remove('d-none');
+    }
+
+    function marcarEliminada(btn) {
+        const row = btn.closest('.task-row');
+
+        row.querySelector('.eliminada-flag').value = "true";
+        row.classList.add('eliminada');
+
+        row.querySelector('.btn-eliminar').classList.add('d-none');
+        row.querySelector('.btn-restaurar').classList.remove('d-none');
+    }
+
+    function validarTareas() {
+        const tareas = document.querySelectorAll('#tareas .task-row');
+        let todasValidas = true;
+        const indicesAEliminar = [];
+
+        tareas.forEach((row, index) => {
+            const descripcionInput = row.querySelector('input[name$=".Descripcion"]');
+            const eliminadaFlag = row.querySelector('.eliminada-flag');
+            const descripcion = descripcionInput ? descripcionInput.value.trim() : '';
+
+            // Si la tarea está vacía y no está ya marcada como eliminada
+            if (descripcion === '' && eliminadaFlag.value !== 'true') {
+                indicesAEliminar.push(index);
+                // Opcional: mostrar advertencia visual
+                descripcionInput.style.border = '2px solid red';
+                todasValidas = false;
+            } else if (descripcionInput) {
+                descripcionInput.style.border = ''; // Quitar borde rojo si lo tenía
+            }
+        });
+
+        // Eliminar tareas vacías del DOM
+        indicesAEliminar.reverse().forEach(index => {
+            const row = document.querySelectorAll('#tareas .task-row')[index];
+            if (row) {
+                row.remove();
+            }
+        });
+
+        // Reindexar los nombres de los inputs
+        reindexarTareas();
+
+        return todasValidas;
+    }
+
+    function reindexarTareas() {
+        const rows = document.querySelectorAll('#tareas .task-row');
+        rows.forEach((row, newIndex) => {
+            // Actualizar los nombres de los inputs
+            const inputs = row.querySelectorAll('input');
+            inputs.forEach(input => {
+                const name = input.getAttribute('name');
+                if (name) {
+                    const newName = name.replace(/\[\d+\]/, `[${newIndex}]`);
+                    input.setAttribute('name', newName);
+                }
+            });
+        });
+    }
+
+</script>
+
+

@@ -486,3 +486,21 @@ body {
         display: none;
     }
 
+
+
+/* ------------------------ para notas ---------------------------------------------- */
+.card.cursor-pointer:hover {
+    transform: scale(1.01);
+    box-shadow: 0 0 10px rgba(0,0,0,.2);
+}
+
+.task-row.eliminada {
+    opacity: 0.5;
+    text-decoration: line-through;
+}
+
+.task-row.eliminada input[type="text"] {
+    pointer-events: none;
+    background-color: #eee;
+}
+

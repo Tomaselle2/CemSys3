@@ -1,6 +1,7 @@
 ﻿using CemSys3.DTOs.Nota;
 using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.SweetAlert;
+using CemSys3.DTOs.Tarea;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Notas;
@@ -55,6 +56,101 @@ namespace CemSys3.Controllers
                 };
             }
             return View(viewModel);
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public IActionResult ModalIngreso()
+        {
+            var vm = new NotaModalVM
+            {
+                TipoNotaId = (int)TipoNotaEnum.Ingreso,
+                Color = "#e3f2fd",
+                Descripcion =
+@"• Fecha y hora: 
+• Ubicación: 
+• Contacto: 
+• Empresa: ",
+                Tareas = new List<TareaDTO>
+                {
+                    new() { Descripcion = "Recibir acta de defunción", Estado = false },
+                    new() { Descripcion = "Cargar difunto en Progam", Estado = false },
+                    new() { Descripcion = "Realizar contrato de concesión", Estado = false },
+                    new() { Descripcion = "Cobrar ingreso", Estado = false },
+                    new() { Descripcion = "Realizar ingreso en CemSys", Estado = false }
+                }
+            };
+
+            return PartialView("_ModalNota", vm);
+        }
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> Guardar(NotaModalVM vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                return PartialView("_ModalNota", vm); // NO CIERRA MODAL
+            }
+
+            try
+            {
+                var dto = new NotaDTO
+                {
+                    Id = vm.Id ?? 0,
+                    Nombre = vm.Nombre.Trim(),
+                    Descripcion = vm.Descripcion,
+                    Color = vm.Color,
+                    TipoNotaId = vm.TipoNotaId,
+                    Tareas = vm.Tareas
+                };
+
+                if (vm.Id.HasValue)
+                    await _notaService.Update(dto);
+                else
+                    await _notaService.Add(dto);
+
+                return Content("""
+            <script>
+                Swal.fire('Éxito','Nota guardada','success')
+                    .then(()=> location.reload());
+            </script>
+        """);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return PartialView("_ModalNota", vm);
+            }
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> Visualizar(int id)
+        {
+            var nota = await _notaService.Get(id);
+
+            if (nota == null)
+            {
+                return Content("""
+            <script>
+                Swal.fire('Error','No se encontro la nota','error')
+                    .then(()=> location.reload());
+            </script>
+        """);
+            }
+
+            NotaModalVM viewModel = new NotaModalVM
+            {
+                Id = nota.Id,
+                Nombre = nota.Nombre,
+                Descripcion = nota.Descripcion ?? "",
+                Color = nota.Color ?? "#e3f2fd",
+                TipoNotaId = nota.TipoNotaId,
+                Tareas = nota.Tareas
+            };
+
+            return PartialView("_ModalNota", viewModel);
         }
     }
 }
