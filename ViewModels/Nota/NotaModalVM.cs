@@ -17,6 +17,8 @@ namespace CemSys3.ViewModels.Nota
         [Required(ErrorMessage = "El tipo de nota es obligatorio")]
         public int TipoNotaId { get; set; }
 
+        public bool NotaFinalizada { get; set; } = false;
+
         public List<TareaDTO> Tareas { get; set; } = new();
     }
 }

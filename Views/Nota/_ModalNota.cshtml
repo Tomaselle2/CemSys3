@@ -50,12 +50,13 @@
                         }
                     </div>
 
+                    <!-- Nombre de la nota-->
                     <div>
                         <input class="form-control mb-2" asp-for="Nombre" placeholder="Nombre" />
                         <span asp-validation-for="Nombre" class="text-danger"></span>
                     </div>
                    
-
+                    <!-- Descripcion de la nota-->
                     <div>
                         <textarea class="form-control mb-3 auto-resize"
                                   asp-for="Descripcion"
@@ -64,7 +65,7 @@
                         <span asp-validation-for="Descripcion" class="text-danger"></span>
                     </div>
                     
-
+                    <!-- Tareas de la nota-->
                     <hr />
                     <h6>Tareas</h6>
 
@@ -110,6 +111,16 @@
 
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success">Guardar</button>
+
+                    <input type="hidden" asp-for="NotaFinalizada" id="Finalizada" value="false" />
+
+                    <button type="button"
+                        id="btnFinalizar"
+                        class="btn btn-primary d-none"
+                        onclick="finalizarNota()">
+                        Finalizar nota
+                    </button>
+
                     <button type="button"
                             class="btn btn-secondary"
                             onclick="cerrarModal()">
@@ -122,6 +133,14 @@
 </div>
 
 <script>
+
+    // evaluar estado inicial al abrir el modal
+    document.addEventListener("htmx:afterSwap", function (e) {
+        if (e.target.id === "modal-container") {
+            evaluarFinalizacion();
+        }
+    });
+
     function autoResize(textarea) {
         textarea.style.height = 'auto';
         textarea.style.height = textarea.scrollHeight + 'px';
@@ -135,7 +154,7 @@
         document.getElementById('ColorHidden').value = color;
     }
 
-        function agregarTarea() {
+    function agregarTarea() {
         const idx = document.querySelectorAll('#tareas .task-row').length;
 
     document.getElementById('tareas').insertAdjacentHTML('beforeend', `
@@ -159,6 +178,8 @@
                     onclick="restaurar(this)">↩</button>
         </div>
     `);
+        evaluarFinalizacion();
+
     }
 
     // ajustar al agregar nuevas tareas o al hacer swap con htmx
@@ -193,6 +214,7 @@
 
         row.querySelector('.btn-restaurar').classList.add('d-none');
         row.querySelector('.btn-eliminar').classList.remove('d-none');
+        evaluarFinalizacion();
     }
 
     function marcarEliminada(btn) {
@@ -253,6 +275,50 @@
                 }
             });
         });
+    }
+
+    //Finalizar nota
+    function evaluarFinalizacion() {
+        const filas = document.querySelectorAll('#tareas .task-row');
+        let todasCompletas = true;
+        let hayTareas = false;
+
+        filas.forEach(row => {
+            const eliminada = row.querySelector('.eliminada-flag')?.value === "true";
+            if (eliminada) return;
+
+            hayTareas = true;
+
+            const checkbox = row.querySelector('input[type="checkbox"]');
+            if (!checkbox.checked) {
+                todasCompletas = false;
+            }
+        });
+
+        const btn = document.getElementById('btnFinalizar');
+
+        if (todasCompletas && hayTareas) {
+            btn.classList.remove('d-none');
+        } else {
+            btn.classList.add('d-none');
+        }
+    }
+
+    // Evaluar al cambiar una tarea
+    document.addEventListener('change', function (e) {
+        if (e.target.matches('#tareas input[type="checkbox"]')) {
+            evaluarFinalizacion();
+        }
+    });
+
+    function finalizarNota() {
+        // marcar la nota como finalizada
+        document.getElementById('Finalizada').value = "true";
+
+        const form = document.querySelector('.modal-content form');
+
+        // dispara submit REAL (HTMX + validaciones)
+        form.requestSubmit();
     }
 
 </script>

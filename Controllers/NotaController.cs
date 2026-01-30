@@ -105,6 +105,13 @@ namespace CemSys3.Controllers
                     Tareas = vm.Tareas
                 };
 
+
+                // Asignar estado según si la nota está finalizada o no
+                if (vm.NotaFinalizada == true)
+                    dto.EstadoId = (int)EstadosNotaEnum.NotaFinalizado;
+                else
+                    dto.EstadoId = (int)EstadosNotaEnum.NotaPendiente; //ya viene por defecto como pendiente pero por las dudas
+
                 if (vm.Id.HasValue)
                     await _notaService.Update(dto);
                 else

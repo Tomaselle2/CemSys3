@@ -168,15 +168,6 @@ CREATE TABLE [dbo].[Personas] (
     CONSTRAINT [Personas_estadoDifuntoId_fk] FOREIGN KEY([estadoDifuntoId]) REFERENCES [dbo].[EstadosDifunto]([id])
 );
 
-CREATE TABLE [dbo].[ConceptosTarifaria] (
-    [id] int NOT NULL IDENTITY(1,1),
-    [nombre] nvarchar(70) NOT NULL,
-    [visibilidad] bit NOT NULL DEFAULT 1,
-    [temaId] int NOT NULL,
-    PRIMARY KEY ([id]),
-    CONSTRAINT [ConceptosTarifaria_temaId_fk] FOREIGN KEY([temaId]) REFERENCES [dbo].[TemasTarifaria]([id])
-);
-
 CREATE TABLE [dbo].[EstadosTramites] (
     [id] int NOT NULL IDENTITY(1,1),
     [estado] nvarchar(50) NOT NULL,
@@ -184,6 +175,28 @@ CREATE TABLE [dbo].[EstadosTramites] (
     [tipoTramiteId] int NOT NULL,
     PRIMARY KEY ([id]),
     CONSTRAINT [EstadosTramites_tipoTramiteId_fk] FOREIGN KEY([tipoTramiteId]) REFERENCES [dbo].[TipoTramite]([id])
+);
+
+CREATE TABLE [dbo].[Tramites] (
+    [id] int NOT NULL,
+    [visibilidad] bit NOT NULL DEFAULT 1,
+    [fechaCreacion] datetime NOT NULL,
+    [tipoTramiteId] int NOT NULL,
+    [usuarioId] int NOT NULL,
+    [estadoActualId] int NOT NULL,
+    PRIMARY KEY ([id]),
+    CONSTRAINT [Tramites_estadoActualId_fk] FOREIGN KEY([estadoActualId]) REFERENCES [dbo].[EstadosTramites]([id]),
+    CONSTRAINT [Tramites_tipoTramiteId_fk] FOREIGN KEY([tipoTramiteId]) REFERENCES [dbo].[TipoTramite]([id]),
+    CONSTRAINT [Tramites_usuarioId_fk] FOREIGN KEY([usuarioId]) REFERENCES [dbo].[Usuarios]([id])
+);
+
+CREATE TABLE [dbo].[ConceptosTarifaria] (
+    [id] int NOT NULL IDENTITY(1,1),
+    [nombre] nvarchar(70) NOT NULL,
+    [visibilidad] bit NOT NULL DEFAULT 1,
+    [temaId] int NOT NULL,
+    PRIMARY KEY ([id]),
+    CONSTRAINT [ConceptosTarifaria_temaId_fk] FOREIGN KEY([temaId]) REFERENCES [dbo].[TemasTarifaria]([id])
 );
 
 CREATE TABLE [dbo].[Secciones] (
@@ -200,17 +213,12 @@ CREATE TABLE [dbo].[Secciones] (
 );
 
 CREATE TABLE [dbo].[Notas] (
-    [id] int NOT NULL IDENTITY(1,1),
+    [tramiteId] int Primary key NOT NULL,
     [nombre] nvarchar(100) NOT NULL,
     [tipoNotaId] int NOT NULL,
     [descripcion] nvarchar(max),
     [color] nvarchar(16),
-	estadoId int,
 	visibilidad bit NOT NULL DEFAULT 1,
-	tramiteId int null,
-	fechaCreacion datetime2 not null,
-    PRIMARY KEY ([id]),
-	foreign key (estadoId) references EstadosTramites(id),
 	foreign key (tramiteId) references Tramites(id),
     CONSTRAINT [Notas_tipoNotaId_fk] FOREIGN KEY([tipoNotaId]) REFERENCES [dbo].[TipoNota]([id])
 );
@@ -225,18 +233,7 @@ CREATE TABLE [dbo].[Notas] (
 --ALTER TABLE Notas ADD visibilidad BIT NOT NULL CONSTRAINT DF_Notas_visibilidad DEFAULT 1;
 
 -- Tablas con dependencias de segundo nivel
-CREATE TABLE [dbo].[Tramites] (
-    [id] int NOT NULL,
-    [visibilidad] bit NOT NULL DEFAULT 1,
-    [fechaCreacion] datetime NOT NULL,
-    [tipoTramiteId] int NOT NULL,
-    [usuarioId] int NOT NULL,
-    [estadoActualId] int NOT NULL,
-    PRIMARY KEY ([id]),
-    CONSTRAINT [Tramites_estadoActualId_fk] FOREIGN KEY([estadoActualId]) REFERENCES [dbo].[EstadosTramites]([id]),
-    CONSTRAINT [Tramites_tipoTramiteId_fk] FOREIGN KEY([tipoTramiteId]) REFERENCES [dbo].[TipoTramite]([id]),
-    CONSTRAINT [Tramites_usuarioId_fk] FOREIGN KEY([usuarioId]) REFERENCES [dbo].[Usuarios]([id])
-);
+
 
 CREATE TABLE [dbo].[Parcelas] (
     [id] int NOT NULL IDENTITY(1,1),
@@ -278,7 +275,7 @@ CREATE TABLE [dbo].[Tareas] (
     [tramiteId] int,
 	[visibilidad] bit not null default 1,
     PRIMARY KEY ([id]),
-    CONSTRAINT [Tareas_notaId_fk] FOREIGN KEY([notaId]) REFERENCES [dbo].[Notas]([id]),
+    CONSTRAINT [Tareas_notaId_fk] FOREIGN KEY([notaId]) REFERENCES [dbo].[Notas]([tramiteId]),
     CONSTRAINT [Tareas_tramiteId_fk] FOREIGN KEY([tramiteId]) REFERENCES [dbo].[Tramites]([id])
 );
 

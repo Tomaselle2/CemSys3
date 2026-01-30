@@ -1,7 +1,9 @@
-﻿using CemSys3.DTOs.Nota;
+﻿using CemSys3.DTOs.HistorialEstado;
+using CemSys3.DTOs.Nota;
 using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Tarea;
 using CemSys3.Enumerables;
+using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Notas;
 using CemSys3.Interfaces.Tarea;
 using CemSys3.Models;
@@ -14,10 +16,12 @@ namespace CemSys3.Business.Notas
     {
         private readonly AppDbContext _context;
         private readonly ITarea _tareaService;
-        public NotaService(AppDbContext context, ITarea tareaService)
+        private readonly IHistorialEstados _historialEstadoService;
+        public NotaService(AppDbContext context, ITarea tareaService, IHistorialEstados historialEstadosService)
         {
             _context = context;
             _tareaService = tareaService;
+            _historialEstadoService = historialEstadosService;
         }
 
         public async Task Add(NotaDTO dto)
@@ -57,6 +61,15 @@ namespace CemSys3.Business.Notas
                         await _tareaService.Add(nuevaTarea);
                     }
                 }
+
+                //se registra el historial de estados
+                HistorialEstadosDTO dtoHistorial = new HistorialEstadosDTO
+                {
+                    Fecha = DateTime.Now,
+                    TramiteId = (int)TipoTramiteEnum.Nota,
+                    EstadoTramiteId = nuevaNota.EstadoId
+                };
+                await _historialEstadoService.Add(dtoHistorial);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -169,6 +182,19 @@ namespace CemSys3.Business.Notas
                 nota.Nombre = dto.Nombre;
                 nota.Descripcion = dto.Descripcion;
                 nota.Color = dto.Color;
+                nota.EstadoId = dto.EstadoId;
+
+                //se registra el historial de estados
+                if (nota.EstadoId == (int)EstadosNotaEnum.NotaFinalizado)
+                {
+                    HistorialEstadosDTO dtoHistorial = new HistorialEstadosDTO
+                    {
+                        Fecha = DateTime.Now,
+                        TramiteId = (int)TipoTramiteEnum.Nota,
+                        EstadoTramiteId = nota.EstadoId
+                    };
+                    await _historialEstadoService.Add(dtoHistorial);
+                }
 
                 foreach (var tareaDto in dto.Tareas)
                 {

@@ -17,6 +17,30 @@ namespace CemSys3.Enumerables
         Antigua = 2,
     }
 
+    public enum TipoTramiteEnum
+    {
+        [Display(Name = "Ingreso")]
+        Ingreso = 1,
+
+        [Display(Name = "Autorización para cremación")]
+        Cremacion = 2,
+
+        [Display(Name = "Autorización para reducción")]
+        Reduccion = 3,
+
+        [Display(Name = "Contrato de concesión")]
+        ContratoConcesion = 4,
+
+        [Display(Name = "Autorización para traslado")]
+        Traslado = 5,
+
+        [Display(Name = "Cambio de titularidad")]
+        CambioTitular = 6,
+
+        [Display(Name = "Nota")]
+        Nota = 7,
+    }
+
     public enum  TipoNichoEnum
     {
         [Display(Name = "Féretro")]
