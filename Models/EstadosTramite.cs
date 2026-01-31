@@ -15,8 +15,6 @@ public partial class EstadosTramite
 
     public virtual ICollection<HistorialEstadoTramite> HistorialEstadoTramites { get; set; } = new List<HistorialEstadoTramite>();
 
-    public virtual ICollection<Nota> Nota { get; set; } = new List<Nota>();
-
     public virtual TipoTramite TipoTramite { get; set; } = null!;
 
     public virtual ICollection<Tramite> Tramites { get; set; } = new List<Tramite>();

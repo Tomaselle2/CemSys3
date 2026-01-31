@@ -33,6 +33,7 @@
                 <input type="hidden" asp-for="Id" />
                 <input type="hidden" asp-for="TipoNotaId" />
                 <input type="hidden" asp-for="Color" id="ColorHidden" />
+                <input type="hidden" asp-for="UsuarioId" value="@Context.Session.GetInt32("IdUsuario")" />
 
                 <div class="modal-header">
                     <h5 class="modal-title">Nota Ingreso</h5>

@@ -102,6 +102,7 @@ namespace CemSys3.Controllers
                     Descripcion = vm.Descripcion,
                     Color = vm.Color,
                     TipoNotaId = vm.TipoNotaId,
+                    UsurioId = vm.UsuarioId,
                     Tareas = vm.Tareas
                 };
 
@@ -126,8 +127,15 @@ namespace CemSys3.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return PartialView("_ModalNota", vm);
+                return Content($$"""
+                <script>
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: '{{ex.Message.Replace("'", "\\'")}}'
+                    });
+                </script>
+            """);
             }
         }
 
@@ -135,29 +143,46 @@ namespace CemSys3.Controllers
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> Visualizar(int id)
         {
-            var nota = await _notaService.Get(id);
-
-            if (nota == null)
+            try
             {
-                return Content("""
+                var nota = await _notaService.Get(id);
+
+                if (nota == null)
+                {
+                    return Content("""
             <script>
                 Swal.fire('Error','No se encontro la nota','error')
                     .then(()=> location.reload());
             </script>
         """);
+                }
+
+                NotaModalVM viewModel = new NotaModalVM
+                {
+                    Id = nota.Id,
+                    Nombre = nota.Nombre,
+                    Descripcion = nota.Descripcion ?? "",
+                    Color = nota.Color ?? "#e3f2fd",
+                    TipoNotaId = nota.TipoNotaId,
+                    Tareas = nota.Tareas
+                };
+
+                return PartialView("_ModalNota", viewModel);
             }
-
-            NotaModalVM viewModel = new NotaModalVM
+            catch (Exception ex)
             {
-                Id = nota.Id,
-                Nombre = nota.Nombre,
-                Descripcion = nota.Descripcion ?? "",
-                Color = nota.Color ?? "#e3f2fd",
-                TipoNotaId = nota.TipoNotaId,
-                Tareas = nota.Tareas
-            };
-
-            return PartialView("_ModalNota", viewModel);
+                return Content($$"""
+                <script>
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: '{{ex.Message.Replace("'", "\\'")}}'
+                    })
+                    .then(()=> location.reload());
+                </script>
+                """);
+            }
+            
         }
     }
 }

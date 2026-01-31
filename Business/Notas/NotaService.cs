@@ -2,10 +2,12 @@
 using CemSys3.DTOs.Nota;
 using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Tarea;
+using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Notas;
 using CemSys3.Interfaces.Tarea;
+using CemSys3.Interfaces.Tramite;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Transactions;
@@ -17,11 +19,13 @@ namespace CemSys3.Business.Notas
         private readonly AppDbContext _context;
         private readonly ITarea _tareaService;
         private readonly IHistorialEstados _historialEstadoService;
-        public NotaService(AppDbContext context, ITarea tareaService, IHistorialEstados historialEstadosService)
+        private readonly ITramite _tramiteService;
+        public NotaService(AppDbContext context, ITarea tareaService, IHistorialEstados historialEstadosService, ITramite tramiteService)
         {
             _context = context;
             _tareaService = tareaService;
             _historialEstadoService = historialEstadosService;
+            _tramiteService = tramiteService;
         }
 
         public async Task Add(NotaDTO dto)
@@ -30,16 +34,28 @@ namespace CemSys3.Business.Notas
 
             try
             {
+                //se registra el trámite
+                TramiteDTO tramiteDTO = new TramiteDTO
+                {
+                    FechaCreacion = DateTime.Now,
+                    TipoTramiteId = (int)TipoTramiteEnum.Nota,
+                    UsuarioId = dto.UsurioId,
+                    EstadoActualId = (int)EstadosNotaEnum.NotaPendiente,
+                    Visibilidad = true
+                };
+                int tramiteId = await _tramiteService.Add(tramiteDTO);
+                await _context.SaveChangesAsync(); //guardar el trámite para obtener el Id
+
+
                 //se registra la nota
                 Nota nuevaNota = new Nota
                 {
+                    TramiteId = tramiteId,
                     Nombre = dto.Nombre,
                     TipoNotaId = dto.TipoNotaId,
                     Descripcion = dto.Descripcion,
                     Color = dto.Color,
                     Visibilidad = true,
-                    FechaCreacion = DateTime.Now,
-                    EstadoId = (int)EstadosNotaEnum.NotaPendiente
                 };
 
                 await _context.Notas.AddAsync(nuevaNota);
@@ -53,7 +69,7 @@ namespace CemSys3.Business.Notas
                     {
                         TareaDTO nuevaTarea = new TareaDTO
                         {
-                            NotaId = nuevaNota.Id,
+                            NotaId = nuevaNota.TramiteId,
                             Estado = tareaDto.Estado,
                             Descripcion = tareaDto.Descripcion,
                             Visibilidad = true
@@ -66,8 +82,8 @@ namespace CemSys3.Business.Notas
                 HistorialEstadosDTO dtoHistorial = new HistorialEstadosDTO
                 {
                     Fecha = DateTime.Now,
-                    TramiteId = (int)TipoTramiteEnum.Nota,
-                    EstadoTramiteId = nuevaNota.EstadoId
+                    TramiteId = tramiteId,
+                    EstadoTramiteId = (int)EstadosNotaEnum.NotaPendiente
                 };
                 await _historialEstadoService.Add(dtoHistorial);
 
@@ -86,21 +102,21 @@ namespace CemSys3.Business.Notas
             NotaDTO notaDTO = new NotaDTO();
 
             //obtener la nota por id
-            Nota nota = await _context.Notas.FindAsync(id) ?? throw new Exception("Nota no encontrada");
+            Nota nota = await _context.Notas.Include(t=>t.Tramite).Where(n=> n.TramiteId == id).FirstOrDefaultAsync() ?? throw new Exception("Nota no encontrada");
 
             //obtener todas las tareas asociadas a la nota
-            IEnumerable<TareaDTO> tareas = await _tareaService.GetAllByNota(nota.Id);
+            IEnumerable<TareaDTO> tareas = await _tareaService.GetAllByNota(nota.TramiteId);
 
             //mapear la nota a NotaDTO
-            notaDTO.Id = nota.Id;
+            notaDTO.Id = nota.TramiteId;
             notaDTO.Nombre = nota.Nombre;
             notaDTO.TipoNotaId = nota.TipoNotaId;
             notaDTO.Descripcion = nota.Descripcion;
             notaDTO.Color = nota.Color;
             notaDTO.Visibilidad = nota.Visibilidad;
-            notaDTO.EstadoId = nota.EstadoId;
-            notaDTO.FechaCreacion = nota.FechaCreacion;
-            notaDTO.TramiteId = nota.TramiteId;
+            notaDTO.EstadoId = nota.Tramite.EstadoActualId;
+            notaDTO.FechaCreacion = nota.Tramite.FechaCreacion;
+            notaDTO.TramiteId = nota.TramiteId; //si esta asociada a un tramite
             notaDTO.Tareas = tareas.ToList();
 
             return notaDTO;
@@ -111,7 +127,7 @@ namespace CemSys3.Business.Notas
             PaginadoResponse<NotaDTO> resultado = new PaginadoResponse<NotaDTO>();
 
             // Filtro por estado de la nota
-            var query = _context.Notas.Where(n=> n.EstadoId == estadoId);
+            var query = _context.Notas.Include(t=> t.Tramite).Where(n=> n.Tramite.EstadoActualId == estadoId);
 
             if(query != null)
             {
@@ -147,19 +163,19 @@ namespace CemSys3.Business.Notas
 
                 // Obtener datos paginados - ORDENAR ANTES de la proyección
                 resultado.Items = await query
-                    .OrderByDescending(e => e.FechaCreacion) // Ordenar por fecha antes de paginar
+                    .OrderByDescending(e => e.Tramite.FechaCreacion) // Ordenar por fecha antes de paginar
                     .Skip((resultado.Paginacion.PaginaActual - 1) * porPagina)
                     .Take(porPagina)
                     .Select(s => new NotaDTO
                     {
-                        Id = s.Id,
+                        Id = s.TramiteId,
                         Nombre = s.Nombre,
                         TipoNotaId = s.TipoNotaId,
                         Descripcion = s.Descripcion,
                         Color = s.Color,
                         Visibilidad = s.Visibilidad,
-                        EstadoId = s.EstadoId,
-                        FechaCreacion = s.FechaCreacion // Incluir la fecha
+                        EstadoId = s.Tramite.EstadoActualId,
+                        FechaCreacion = s.Tramite.FechaCreacion // Incluir la fecha
                     })
                     .ToListAsync();
             }else
@@ -176,24 +192,35 @@ namespace CemSys3.Business.Notas
 
             try
             {
-                var nota = await _context.Notas.FindAsync(dto.Id)
+                Models.Nota nota = await _context.Notas
+                    .Include(n => n.Tramite)
+                    .FirstOrDefaultAsync(n => n.TramiteId == dto.Id)
                     ?? throw new Exception("Nota no encontrada");
 
                 nota.Nombre = dto.Nombre;
                 nota.Descripcion = dto.Descripcion;
                 nota.Color = dto.Color;
-                nota.EstadoId = dto.EstadoId;
+                nota.Tramite.EstadoActualId = dto.EstadoId;
 
                 //se registra el historial de estados
-                if (nota.EstadoId == (int)EstadosNotaEnum.NotaFinalizado)
+                if (nota.Tramite.EstadoActualId == (int)EstadosNotaEnum.NotaFinalizado)
                 {
                     HistorialEstadosDTO dtoHistorial = new HistorialEstadosDTO
                     {
                         Fecha = DateTime.Now,
-                        TramiteId = (int)TipoTramiteEnum.Nota,
-                        EstadoTramiteId = nota.EstadoId
+                        TramiteId = nota.TramiteId,
+                        EstadoTramiteId = (int)EstadosNotaEnum.NotaFinalizado
                     };
                     await _historialEstadoService.Add(dtoHistorial);
+
+                    //se actualiza el estado actual del trámite
+                    TramiteDTO tramiteActualizar = new TramiteDTO
+                    {
+                        Id = nota.TramiteId,
+                        EstadoActualId = (int)EstadosNotaEnum.NotaFinalizado
+                    };
+
+                    await _tramiteService.Update(tramiteActualizar);
                 }
 
                 foreach (var tareaDto in dto.Tareas)

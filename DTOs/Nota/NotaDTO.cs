@@ -17,8 +17,12 @@ namespace CemSys3.DTOs.Nota
         public bool Visibilidad { get; set; }
 
         public int EstadoId { get; set; }
+
         public int? TramiteId { get; set; }
+
         public DateTime FechaCreacion { get; set; }
+
+        public int UsurioId { get; set; }
 
         public List<TareaDTO> Tareas { get; set; } = new();
     }
