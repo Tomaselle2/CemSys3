@@ -77,7 +77,8 @@ namespace CemSys3.Controllers
                     new() { Descripcion = "Cargar difunto en Progam", Estado = false },
                     new() { Descripcion = "Realizar contrato de concesión", Estado = false },
                     new() { Descripcion = "Cobrar ingreso", Estado = false },
-                    new() { Descripcion = "Realizar ingreso en CemSys", Estado = false }
+                    new() { Descripcion = "Realizar ingreso en CemSys", Estado = false },
+                    new() { Descripcion = "Marcar en el plano", Estado = false }
                 }
             };
 
