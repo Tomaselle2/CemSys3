@@ -19,6 +19,7 @@ namespace CemSys3.ViewModels.Nota
 
         public bool NotaFinalizada { get; set; } = false;
         public int UsuarioId { get; set; }
+        public int EstadoId { get; set; }
 
         public List<TareaDTO> Tareas { get; set; } = new();
     }

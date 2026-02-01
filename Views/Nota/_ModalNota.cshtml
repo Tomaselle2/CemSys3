@@ -1,4 +1,6 @@
-﻿@using CemSys3.ViewModels.Nota
+﻿@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.Nota
 @model NotaModalVM
 
 <style>
@@ -34,9 +36,13 @@
                 <input type="hidden" asp-for="TipoNotaId" />
                 <input type="hidden" asp-for="Color" id="ColorHidden" />
                 <input type="hidden" asp-for="UsuarioId" value="@Context.Session.GetInt32("IdUsuario")" />
+                <input type="hidden" asp-for="EstadoId"/>
 
-                <div class="modal-header">
+                <div class="modal-header d-flex justify-content-between align-items-center">
                     <h5 class="modal-title">Nota Ingreso</h5>
+                    <span class="badge bg-black">
+                        @(Model.EstadoId != 0 ? EnumHelper.GetDisplayNameByValue<EstadosNotaEnum>(Model.EstadoId) : "Sin guardar")
+                    </span>
                 </div>
 
                 <div class="modal-body">
@@ -53,13 +59,14 @@
 
                     <!-- Nombre de la nota-->
                     <div>
-                        <input class="form-control mb-2" asp-for="Nombre" placeholder="Nombre" />
+                        <input class="form-control mb-2" id="NombreNota" asp-for="Nombre" placeholder="Nombre" />
                         <span asp-validation-for="Nombre" class="text-danger"></span>
                     </div>
                    
                     <!-- Descripcion de la nota-->
                     <div>
                         <textarea class="form-control mb-3 auto-resize"
+                                  id="DescripcionNota"
                                   asp-for="Descripcion"
                                   placeholder="Descripción"
                                   oninput="autoResize(this)"></textarea>
@@ -102,6 +109,7 @@
                     </div>
 
                     <button type="button"
+                            id="btnAgregarTarea"
                             title="Agregar tarea"
                             class="btn btn-sm btn-outline-primary"
                             onclick="agregarTarea()">
@@ -111,7 +119,10 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Guardar</button>
+                    @if(Model.EstadoId != (int)EstadosNotaEnum.NotaFinalizado)
+                    {
+                         <button type="submit" class="btn btn-success">Guardar</button>
+                    }
 
                     <input type="hidden" asp-for="NotaFinalizada" id="Finalizada" value="false" />
 
@@ -134,11 +145,29 @@
 </div>
 
 <script>
-
     // evaluar estado inicial al abrir el modal
     document.addEventListener("htmx:afterSwap", function (e) {
         if (e.target.id === "modal-container") {
             evaluarFinalizacion();
+        }
+
+        const btnAgregarTarea = document.getElementById('btnAgregarTarea');
+
+        if(esNotaFinalizada()){
+            //agrega la clase para desactivar el boton
+            btnAgregarTarea.classList.add('disabled');
+
+            document.getElementById('DescripcionNota').disabled = true;
+
+            //desactivar el titulo del modal
+            document.querySelector('#NombreNota').disabled = true;
+
+            //desactivar el check de las tareas
+            document.querySelectorAll('#tareas input[type="checkbox"]').forEach(cb => cb.disabled = true);
+
+            //desactivar la eliminacion de tareas
+            document.querySelectorAll('.btn-eliminar').forEach(btn => btn.disabled = true);
+            return;
         }
     });
 
@@ -165,7 +194,11 @@
 
             <input type="checkbox"
                    class="form-check-input border border-dark border-1"
-                   name="Tareas[${idx}].Estado" />
+                   name="Tareas[${idx}].Estado" 
+                   value="true" />
+            
+            <input type="hidden" name="Tareas[${idx}].Estado" value="false" />
+
 
             <input class="form-control flex-grow-1"
                    name="Tareas[${idx}].Descripcion" />
@@ -280,6 +313,10 @@
 
     //Finalizar nota
     function evaluarFinalizacion() {
+        if(esNotaFinalizada()){
+            return;
+        }
+
         const filas = document.querySelectorAll('#tareas .task-row');
         let todasCompletas = true;
         let hayTareas = false;
@@ -313,6 +350,10 @@
     });
 
     function finalizarNota() {
+        if(esNotaFinalizada()){
+            return;
+        }
+
         // marcar la nota como finalizada
         document.getElementById('Finalizada').value = "true";
 
@@ -320,6 +361,11 @@
 
         // dispara submit REAL (HTMX + validaciones)
         form.requestSubmit();
+    }
+
+    function esNotaFinalizada() {
+        const estado = document.querySelector('input[name="EstadoId"]')?.value;
+        return estado === "@((int)EstadosNotaEnum.NotaFinalizado)";
     }
 
 </script>

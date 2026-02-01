@@ -103,7 +103,8 @@ namespace CemSys3.Controllers
                     Color = vm.Color,
                     TipoNotaId = vm.TipoNotaId,
                     UsurioId = vm.UsuarioId,
-                    Tareas = vm.Tareas
+                    Tareas = vm.Tareas,
+                    EstadoId = vm.EstadoId
                 };
 
 
@@ -164,8 +165,14 @@ namespace CemSys3.Controllers
                     Descripcion = nota.Descripcion ?? "",
                     Color = nota.Color ?? "#e3f2fd",
                     TipoNotaId = nota.TipoNotaId,
-                    Tareas = nota.Tareas
+                    Tareas = nota.Tareas,
+                    EstadoId = nota.EstadoId,
                 };
+
+                if(viewModel.EstadoId == (int)EstadosNotaEnum.NotaFinalizado)
+                    viewModel.NotaFinalizada = true;
+                else
+                    viewModel.NotaFinalizada = false;
 
                 return PartialView("_ModalNota", viewModel);
             }
