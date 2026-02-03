@@ -152,14 +152,12 @@ CREATE TABLE [dbo].[Personas] (
     [correo] nvarchar(50),
     [celular] nvarchar(50),
     [domicilio] nvarchar(100),
-    [fechaIngresoo] datetime,
-    [fechaRetiro] datetime,
     [domicilioEnTirolesa] bit,
     [fallecioEnTirolesa] bit,
     [nroActa] int,
     [nroFolio] int,
     [nroTomo] int,
-    [nroSerie] nvarchar,
+    [nroSerie] nvarchar(5),
     [nroAge] int,
     [estadoDifuntoId] int,
     [categoriaPersonaId] int,
@@ -167,6 +165,7 @@ CREATE TABLE [dbo].[Personas] (
     CONSTRAINT [Personas_categoriaPersonaId_fk] FOREIGN KEY([categoriaPersonaId]) REFERENCES [dbo].[CategoriasPersonas]([id]),
     CONSTRAINT [Personas_estadoDifuntoId_fk] FOREIGN KEY([estadoDifuntoId]) REFERENCES [dbo].[EstadosDifunto]([id])
 );
+
 
 CREATE TABLE [dbo].[EstadosTramites] (
     [id] int NOT NULL IDENTITY(1,1),
@@ -332,9 +331,10 @@ CREATE TABLE [dbo].[Introducciones] (
     [empresaFunebreId] int,
     [parcelaId] int NOT NULL,
     [difuntoId] int NOT NULL,
-    [estadoDifunto] nvarchar(30),
+    [estadoDifuntoId] int not null,
     [informacionAdicional] nvarchar(max),
     PRIMARY KEY ([tramiteId]),
+	foreign key (estadoDifuntoId) references EstadosDifunto(id),
     CONSTRAINT [Introducciones_difuntoId_fk] FOREIGN KEY([difuntoId]) REFERENCES [dbo].[Personas]([id]),
     CONSTRAINT [Introducciones_empresaFunebreId_fk] FOREIGN KEY([empresaFunebreId]) REFERENCES [dbo].[EmpresasFunebres]([id]),
     CONSTRAINT [Introducciones_parcelaId_fk] FOREIGN KEY([parcelaId]) REFERENCES [dbo].[Parcelas]([id]),

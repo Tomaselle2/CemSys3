@@ -84,9 +84,31 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Recordatorio")]
         Recordatorio = 2,
-
-        
     }
+
+    //Categoria Persona
+    public enum CategoriaPersonaEnum
+    {
+        [Display(Name = "Titular")]
+        Titular = 1,
+
+        [Display(Name = "Fallecido")]
+        Fallecido = 2,
+    }
+
+    public enum EstadoDifuntoEnum
+    {
+        [Display(Name = "Cuerpo completo")]
+        CuerpoCompleto = 1,
+
+        [Display(Name = "Reducido")]
+        Reducido = 2,
+
+        [Display(Name = "Cremado")]
+        Cremado = 3,
+    }
+
+
     //para filtro de parcelas ocupadas o desocupadas
     public enum OcupacionParcelaEnum
     {

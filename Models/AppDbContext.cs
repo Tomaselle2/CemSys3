@@ -512,7 +512,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.NroAge).HasColumnName("nroAge");
             entity.Property(e => e.NroFolio).HasColumnName("nroFolio");
             entity.Property(e => e.NroSerie)
-                .HasMaxLength(1)
+                .HasMaxLength(5)
                 .HasColumnName("nroSerie");
             entity.Property(e => e.NroTomo).HasColumnName("nroTomo");
             entity.Property(e => e.Sexo)
