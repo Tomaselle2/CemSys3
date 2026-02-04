@@ -12,5 +12,7 @@
         public string NombreUsuario { get; set; } = null!;
 
         public int IdRol { get; set; }
+
+        public string NombreCompleto => $"{NombreEmpleado} {ApellidoEmpleado}";
     }
 }

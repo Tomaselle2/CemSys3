@@ -1,9 +1,16 @@
-﻿namespace CemSys3.ViewModels.Ingreso
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CemSys3.ViewModels.Ingreso
 {
     public class SelectorUbicacionVM
     {
+        [Required(ErrorMessage = "El tipo de parcela es obligatorio")]
         public int? TipoParcelaID { get; set; }
+
+        [Required(ErrorMessage = "La sección es obligatoria")]
         public int? SeccionID { get; set; }
+
+        [Required(ErrorMessage = "La parcela es obligatoria")]
         public int? ParcelaID { get; set; }
 
         // nombres reales del VM padre

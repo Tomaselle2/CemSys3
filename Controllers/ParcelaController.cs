@@ -57,5 +57,29 @@ namespace CemSys3.Controllers
 
             return View(viewModel);
         }
+
+        //para cargar las parcelas en el select de la pantalla ingreso
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> ObtenerParcelasPorSeccion(int seccionId, int estadoDifuntoId)
+        {
+            try
+            {
+                var parcelas = await _parcelaService.GetAllBySeccionId(seccionId, estadoDifuntoId);
+                return Json(parcelas);
+            }
+            catch (Exception ex)
+            {
+                return Content($$"""
+                <script>
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: '{{ex.Message.Replace("'", "\\'")}}'
+                    });
+                </script>
+            """);
+            }
+        }
     }
 }

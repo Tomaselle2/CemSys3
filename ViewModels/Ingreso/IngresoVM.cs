@@ -1,5 +1,7 @@
-﻿using CemSys3.DTOs.Nota;
+﻿using CemSys3.DTOs.EmpresaSepelio;
+using CemSys3.DTOs.Nota;
 using CemSys3.DTOs.SweetAlert;
+using CemSys3.DTOs.Usuario;
 using CemSys3.Models;
 using System.ComponentModel.DataAnnotations;
 
@@ -42,7 +44,6 @@ namespace CemSys3.ViewModels.Ingreso
         [Required(ErrorMessage = "El empleado es obligatorio")]
         public int? EmpleadoID { get; set; }
 
-        [Required(ErrorMessage = "La empresa de sepelio es obligatoria")]
         public int? EmpresaFunebreID { get; set; }
 
         [Required(ErrorMessage = "La fecha y hora de ingreso es obligatoria")]
@@ -64,9 +65,8 @@ namespace CemSys3.ViewModels.Ingreso
 
         public int? NroAge { get; set; }
 
-
-        //public List<EmpresaFunebre> ListaEmpresasSepelio { get; set; } = new();
-        //public List<DTO_UsuarioIntroduccion> ListaEmpleados { get; set; } = new();
+        public IEnumerable<UsuarioRequestDTO> ListaEmpleados { get; set; } = new List<UsuarioRequestDTO>();
+        public IEnumerable<EmpresaSepelioRequestDTO> ListaEmpresasSepelio { get; set; } = new List<EmpresaSepelioRequestDTO>();
 
         //manero de errores
         public SweetAlertDTO? SweetAlert { get; set; }

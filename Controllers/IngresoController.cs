@@ -2,9 +2,11 @@
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Roles_Autenticacion;
+using CemSys3.Interfaces.EmpresaSepelio;
 using CemSys3.Interfaces.Notas;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Seccion;
+using CemSys3.Interfaces.Usuario;
 using CemSys3.ViewModels.Ingreso;
 using CemSys3.ViewModels.Nota;
 using Microsoft.AspNetCore.Mvc;
@@ -15,14 +17,14 @@ namespace CemSys3.Controllers
     public class IngresoController : Controller
     {
         public readonly INotas _notaService;
-        public readonly ISeccion _seccionService;
-        public readonly IParcela _parcelaService;
+        public readonly IEmpresaSepelio _empresaService;
+        public readonly IUsuario _ususarioService;
 
-        public IngresoController(INotas notasService, ISeccion seccionService, IParcela parcelaService)
+        public IngresoController(INotas notasService, IEmpresaSepelio empresaSepelio, IUsuario usuarioService)
         {
             _notaService = notasService;
-            _seccionService = seccionService;
-            _parcelaService = parcelaService;
+            _empresaService = empresaSepelio;
+            _ususarioService = usuarioService;
         }
 
         [HttpGet]
@@ -33,6 +35,8 @@ namespace CemSys3.Controllers
             try
             {
                 viewModel.NotaIngreso = await _notaService.Get(notaId);
+                viewModel.ListaEmpresasSepelio = await _empresaService.GetAll();
+                viewModel.ListaEmpleados = await _ususarioService.GetAll();
             }
             catch (Exception ex)
             {
@@ -45,52 +49,6 @@ namespace CemSys3.Controllers
             }
 
             return View(viewModel);
-        }
-
-        [HttpGet]
-        [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> ObtenerSeccionesPorTipo(int tipoParcelaId)
-        {
-            try
-            {
-                var secciones = await _seccionService.GetAllByTipo(tipoParcelaId);
-                return Json(secciones);
-            }
-            catch (Exception ex)
-            {
-                return Content($$"""
-                <script>
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: '{{ex.Message.Replace("'", "\\'")}}'
-                    });
-                </script>
-            """);
-            }
-        }
-
-        [HttpGet]
-        [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> ObtenerParcelasPorSeccion(int seccionId, int estadoDifuntoId)
-        {
-            try
-            {
-                var parcelas = await _parcelaService.GetAllBySeccionId(seccionId, estadoDifuntoId);
-                return Json(parcelas);
-            }
-            catch (Exception ex)
-            {
-                return Content($$"""
-                <script>
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: '{{ex.Message.Replace("'", "\\'")}}'
-                    });
-                </script>
-            """);
-            }
         }
     }
 }

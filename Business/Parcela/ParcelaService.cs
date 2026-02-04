@@ -3,10 +3,12 @@ using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Parcela;
 using CemSys3.DTOs.Seccion;
 using CemSys3.Enumerables;
+using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Seccion;
 using CemSys3.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -261,5 +263,6 @@ namespace CemSys3.Business.Parcela
                 TipoParcelaId = e.TipoParcelaId,
             }).ToListAsync();
         }
+
     }
 }

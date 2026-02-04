@@ -61,7 +61,7 @@ namespace CemSys3.Controllers
             EmpresaSepelioRequestDTO empresa = new EmpresaSepelioRequestDTO
             {
                 Id = viewModel.Id ?? 0,
-                Nombre = viewModel.Nombre
+                Nombre = viewModel.Nombre.Trim()
             };
 
             try
@@ -183,6 +183,27 @@ namespace CemSys3.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> AgregarEmpresa(string nombreEmpresa)
+        {
+            EmpresaSepelioRequestDTO empresa = new EmpresaSepelioRequestDTO
+            {
+                Id = 0,
+                Nombre = nombreEmpresa.Trim()
+            };
+
+            try
+            {
+                int idEmpresa = await _empresaService.Add(empresa);
+                return Json(new { success = true, idEmpresa = idEmpresa, message = "Empresa agregada exitosamente." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error al agregar empresa: " + ex.Message });
+            }
         }
     }
 }

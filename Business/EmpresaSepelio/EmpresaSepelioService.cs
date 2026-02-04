@@ -14,15 +14,17 @@ namespace CemSys3.Business.EmpresaSepelio
         {
             _context = context;
         }
-        public async Task Add(EmpresaSepelioRequestDTO empresa)
+        public async Task<int> Add(EmpresaSepelioRequestDTO empresa)
         {
-            _context.EmpresasFunebres.Add(new Models.EmpresasFunebre
-            {
-                Nombre = empresa.Nombre,
-                Visibilidad = true
-            });
+            Models.EmpresasFunebre empresaNueva = new Models.EmpresasFunebre();
+            empresaNueva.Nombre = empresa.Nombre.Trim();
+            empresaNueva.Visibilidad = true;
+
+            _context.EmpresasFunebres.Add(empresaNueva);
 
             await _context.SaveChangesAsync();
+
+            return empresaNueva.Id;
         }
 
         public async Task Delete(int id)
@@ -30,6 +32,19 @@ namespace CemSys3.Business.EmpresaSepelio
             EmpresasFunebre empresa = await _context.EmpresasFunebres.FindAsync(id) ?? throw new KeyNotFoundException("Empresa no encontrada");
             empresa.Visibilidad = false;
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<EmpresaSepelioRequestDTO>> GetAll()
+        {
+            return await _context.EmpresasFunebres
+                .Where(e => e.Visibilidad)
+                .OrderBy(e => e.Nombre)
+                .Select(e => new EmpresaSepelioRequestDTO
+                {
+                    Id = e.Id,
+                    Nombre = e.Nombre
+                })
+                .ToListAsync();
         }
 
         public async Task<PaginadoResponse<EmpresaSepelioRequestDTO>> GetAllPaginado(string? filtro = null, int pagina = 1, int porPagina = 10)

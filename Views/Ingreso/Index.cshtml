@@ -7,7 +7,7 @@
     ViewData["Title"] = "Ingreso";
     string fecha = DateOnly.FromDateTime(DateTime.Now).ToString("yyyy-MM-dd"); //para input fecha
     DateOnly fechaActual = DateOnly.FromDateTime(DateTime.Now); //año maximo de acta
-    var fechaMax = DateTime.Now.ToString("yyyy-MM-ddTHH:mm"); //para input datetime-local
+    string fechaMax = DateTime.Now.ToString("yyyy-MM-ddTHH:mm"); //para input datetime-local
 }
 
 <div class="page-header-container">
@@ -49,7 +49,7 @@
 
 <div id="modal-container"></div>
 
-<form asp-action="/" class="form-box" method="post">
+<form asp-action="/" asp-controller="Ingreso" class="form-box" method="post" id="formularioRegistrar">
 
 
     <!-- Formulario datos del difunto-->
@@ -180,8 +180,8 @@
                             SeccionName = "SeccionID",
                             ParcelaName = "ParcelaID",
 
-                            UrlSecciones = Url.Action("ObtenerSeccionesPorTipo") ?? "",
-                            UrlParcelas = Url.Action("ObtenerParcelasPorSeccion") ?? "",
+                            UrlSecciones = Url.Action("ObtenerSeccionesPorTipo", "Seccion") ?? "",
+                            UrlParcelas = Url.Action("ObtenerParcelasPorSeccion", "Parcela") ?? "",
                         })
                     </div>
                 </div>
@@ -191,8 +191,102 @@
     </div>
 
 
+    <!-- Formulario Detalle del ingreso-->
+    <div class="accordion" id="accordionIngreso">
+        @* ID único para el acordeón principal *@
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="panelsIngreso-headingOne">
+                <button class="accordion-button nueva-seccion" type="button" data-bs-toggle="collapse" data-bs-target="#panelsIngreso-collapseOne" aria-expanded="false" aria-controls="panelsIngreso-collapseOne">
+                    Detalle del ingreso
+                </button>
+            </h2>
+            <div id="panelsIngreso-collapseOne" class="accordion-collapse collapse" aria-labelledby="panelsIngreso-headingOne" data-bs-parent="#accordionIngreso">
+                <div class="accordion-body">
+                    <div class="form-box">
+                        <div class="form-columns-container3">
+                            <div>
+                                <label>Empleado responsable<span class="obligatorio"> * </span></label>
+                                <select id="" class="form-select" asp-for="EmpleadoID" asp-items="@(new SelectList(Model.ListaEmpleados, "Id", "NombreCompleto"))" required>
+                                    <option value="">--Elija una opción--</option>
+                                </select>
+                                <span asp-validation-for="EmpleadoID" class="text-danger"></span>
 
+                            </div>
+
+                            <div>
+                                <label>Empresa de sepelio responsable</label>
+                                <select id="empresaSepelio" class="form-select" asp-for="EmpresaFunebreID" asp-items="@(new SelectList(Model.ListaEmpresasSepelio, "Id", "Nombre"))">
+                                    <option value="">--Elija una opción--</option>
+                                </select>
+                                <span asp-validation-for="EmpresaFunebreID" class="text-danger"></span>
+                            </div>
+
+                            <div class="d-flex align-items-end">
+                                <button id="agregarEmpresaButton" data-bs-toggle="modal" data-bs-target="#EmpresaModal" class="btn btn-outline-primary">Agregar empresa</button>
+                            </div>
+
+                            <div>
+                                <label>Fecha y hora<span class="obligatorio"> * </span></label>
+                                <input type="datetime-local" asp-for="FechaHoraIngreso" class="form-control" required max="@fechaMax" />
+                                <span asp-validation-for="FechaHoraIngreso" class="text-danger"></span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: center;">
+        <input type="button" class="btn btn-success" onclick="confirmarEnvio()" value="Ingresar difunto" />
+    </div>
 </form>
+
+<!-- Modal de confirmacion de difunto -->
+<div class="modal fade" tabindex="-1" id="modalConfirmacion">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Desea ingresar el difunto <strong id="apellidoModal"></strong> <strong id="nombreModal"></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cerrarModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="enviarFormulario()">Ingresar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de agregar empresa -->
+<div class="modal fade" id="EmpresaModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Nueva empresa de sepelio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEmpresa" class="needs-validation" novalidate>
+                    <label for="nombreEmpresa">Nombre<span class="obligatorio"> * </span></label>
+                    <input id="nombreEmpresa" class="form-control" type="text" required />
+                    <div class="invalid-feedback">
+                        El nombre es obligatorio.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="registrarEmpresaBtn">Registrar</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 @* Renderizamos el manejador pasándole el DTO del modelo *@
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
@@ -201,6 +295,100 @@
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"></script>
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/ubicacion-selector.js"></script>
+
+    <script>
+        //logica de agregar empresa
+        const agregarEmpresaButton = document.getElementById('agregarEmpresaButton');
+        const formEmpresa = document.getElementById('formEmpresa');
+        const nombreEmpresaInput = document.getElementById('nombreEmpresa');
+        const empresaSepelioSelect = document.getElementById('empresaSepelio');
+
+        // Abre el modal y limpia el formulario
+        agregarEmpresaButton.addEventListener('click', function (event) {
+            event.preventDefault();
+            formEmpresa.reset();
+            formEmpresa.classList.remove('was-validated');
+            $('#EmpresaModal').modal('show');
+        });
+
+        // Validación y envío con fetch
+        formEmpresa.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (!formEmpresa.checkValidity()) {
+                formEmpresa.classList.add('was-validated');
+                return;
+            }
+
+            const nombre = nombreEmpresaInput.value.trim();
+
+            function mostrarAlertaExito(mensaje) {
+                AlertService.show('Éxito', mensaje, 'success');
+            }
+
+            try {
+                const response = await fetch(`/EmpresaSepelio/AgregarEmpresa?nombreEmpresa=${encodeURIComponent(nombre)}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    mostrarAlertaExito(result.message);
+                    $('#EmpresaModal').modal('hide');
+
+                    if (empresaSepelioSelect) {
+                        const option = document.createElement('option');
+                        option.value = result.idEmpresa;
+                        option.text = nombre;
+                        option.selected = true;
+                        empresaSepelioSelect.appendChild(option);
+                    }
+                } else {
+                    AlertService.show('Error', result.message, 'error');
+
+                }
+            } catch (error) {
+                AlertService.show('Error', "Error al enviar la solicitud", 'error');
+            }
+        });
+
+
+        //logica de modal de confirmacion
+        function confirmarEnvio() {
+               const form = document.getElementById("formularioRegistrar");
+
+               if (form.checkValidity()) {
+                   const modal = new bootstrap.Modal(document.getElementById("modalConfirmacion"));
+
+                   const nombre = document.getElementById("nombreInput").value;
+                   const apellido = document.getElementById("apellidoInput").value;
+
+                   //se inserta en el modal
+                   document.getElementById("nombreModal").textContent = nombre;
+                   document.getElementById("apellidoModal").textContent = apellido;
+
+                   modal.show();
+               } else {
+                   form.reportValidity();
+               }
+           }
+
+           function cerrarModal() {
+               document.getElementById("modalConfirmacion").style.display = "none";
+           }
+
+           function enviarFormulario() {
+               const form = document.getElementById("formularioRegistrar");
+
+               if (form.checkValidity()) {
+                   form.submit(); // Sólo se envía si el formulario es válido
+               } else {
+                   form.reportValidity(); // Muestra los mensajes de error del navegador
+                   cerrarModal(); // Opcional: cerrá el modal si querés forzar al usuario a revisar
+               }
+           }
+
+
+    </script>
 }
 
 

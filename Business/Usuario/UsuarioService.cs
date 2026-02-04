@@ -1,5 +1,6 @@
 ﻿using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Usuario;
+using CemSys3.Enumerables;
 using CemSys3.Interfaces.Usuario;
 using CemSys3.Models;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
@@ -28,6 +29,19 @@ namespace CemSys3.Business.Usuario
                 _contex.Usuarios.Update(usuario);
                 await _contex.SaveChangesAsync();
             }
+        }
+
+        public async Task<IEnumerable<UsuarioRequestDTO>> GetAll()
+        {
+            return await _contex.Usuarios.Where(u=>u.Visibilidad && u.RolId == (int)RolUsuario.Empleado).Select(u => new UsuarioRequestDTO
+            {
+                Id = u.Id,
+                NombreEmpleado = u.Nombre,
+                ApellidoEmpleado = u.Apellido,
+                Correo = u.Correo,
+                NombreUsuario = u.Usuario1,
+                IdRol = u.RolId
+            }).ToListAsync();
         }
 
         public async Task<UsuarioRequestDTO> GetUserById(int Id)

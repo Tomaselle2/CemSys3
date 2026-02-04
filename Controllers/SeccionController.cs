@@ -312,6 +312,31 @@ namespace CemSys3.Controllers
             viewModel.Paginacion.Parametros.Add("porPagina", porPagina.ToString());
         }
 
+        //para obtener las secciones por tipo de parcela (ajax) (se usa en ingreso)
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> ObtenerSeccionesPorTipo(int tipoParcelaId)
+        {
+            try
+            {
+                var secciones = await _seccionService.GetAllByTipo(tipoParcelaId);
+                return Json(secciones);
+            }
+            catch (Exception ex)
+            {
+                return Content($$"""
+                <script>
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: '{{ex.Message.Replace("'", "\\'")}}'
+                    });
+                </script>
+            """);
+            }
+        }
+
+
         private string ObtenerVistaRedirigir(int tipoParcelaId)
         {
             return tipoParcelaId switch
