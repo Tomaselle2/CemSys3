@@ -21,6 +21,9 @@ namespace CemSys3.ViewModels.Nota
         public int UsuarioId { get; set; }
         public int EstadoId { get; set; }
 
+        public int tramiteVinculadoId { get; set; }
+        public string controlador { get; set; } = string.Empty;
+
         public List<TareaDTO> Tareas { get; set; } = new();
     }
 }

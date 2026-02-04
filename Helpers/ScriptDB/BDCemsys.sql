@@ -218,12 +218,14 @@ CREATE TABLE [dbo].[Notas] (
     [descripcion] nvarchar(max),
     [color] nvarchar(16),
 	visibilidad bit NOT NULL DEFAULT 1,
+	tramiteIngresoId int null,
 	foreign key (tramiteId) references Tramites(id),
+	foreign key (tramiteIngresoId) references Tramites(id),
     CONSTRAINT [Notas_tipoNotaId_fk] FOREIGN KEY([tipoNotaId]) REFERENCES [dbo].[TipoNota]([id])
 );
 
 -- 1. Alter the 'nombre' column
---ALTER TABLE Notas add tramiteId int NULL foreign key (tramiteId) references Tramites(id);
+--aLTER TABLE Notas add tramiteIngresoId int NULL foreign key (tramiteIngresoId) references Tramites(id);
 
 -- 2. Alter the 'descripcion' column
 --ALTER TABLE Notas add fechaCreacion datetime2 not null;

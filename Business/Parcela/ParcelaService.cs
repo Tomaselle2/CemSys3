@@ -231,5 +231,35 @@ namespace CemSys3.Business.Parcela
 
             return resultado;
         }
+
+        public async Task<IEnumerable<ParcelaIndexRequestDTO>> GetAllBySeccionId(int seccionId, int estadoDifunto)
+        {
+            int tipoParcelaId = _context.Secciones
+                .Where(s => s.Id == seccionId)
+                .Select(s => s.TipoParcelaId)
+                .FirstOrDefault();
+
+            var query = _context.Parcelas
+               .Where(s => s.SeccionId == seccionId);
+
+            if(estadoDifunto == (int)EstadoDifuntoEnum.CuerpoCompleto && tipoParcelaId == (int)TipoParcelaEnum.Nicho)
+            {
+                query = query.Where(p => p.CantidadDifuntos == 0 && p.TipoNichoId != (int)TipoNichoEnum.Urnario);
+            }
+
+            return await query.Select(e => new ParcelaIndexRequestDTO
+            {
+                Id = e.Id,
+                Visibilidad = e.Visibilidad,
+                NroParcela = e.NroParcela,
+                NroFila = e.NroFila,
+                CantidadDifuntos = e.CantidadDifuntos,
+                NombrePanteon = e.NombrePanteon,
+                SeccionId = e.SeccionId,
+                TipoNichoId = e.TipoNichoId,
+                TipoPanteonId = e.TipoPanteonId,
+                TipoParcelaId = e.TipoParcelaId,
+            }).ToListAsync();
+        }
     }
 }

@@ -96,7 +96,7 @@
                 <div class="col">
                     <div class="card h-100 cursor-pointer"
                          style="background-color: @nota.Color;"
-                         hx-get="@Url.Action(action: "Visualizar", controller: "Nota", values: new { id = nota.Id })"
+                         hx-get="@Url.Action(action: "Visualizar", controller: "Nota", values: new { id = nota.Id})"
                          hx-target="#modal-container"
                          hx-swap="innerHTML"
                          role="button"

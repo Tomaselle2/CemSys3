@@ -21,10 +21,24 @@ namespace CemSys3.Business.Persona
                 Visibilidad = true,
                 FechaNacimiento = dto.FechaNacimiento,
                 FechaDefuncion = dto.FechaDefuncion,
+                Sexo = dto.Sexo,
+                Correo = dto.Correo,
+                Celular = dto.Celular,
+                Domicilio = dto.Domicilio,
+                DomicilioEnTirolesa = dto.DomicilioEnTirolesa,
+                FallecioEnTirolesa = dto.FallecioEnTirolesa,
+                NroActa = dto.NroActa,
+                NroFolio = dto.NroFolio,
+                NroSerie = dto.NroSerie,
+                NroAge = dto.NroAge,
+                NroTomo = dto.NroTomo,
+                EstadoDifuntoId = dto.EstadoDifuntoId,
+                CategoriaPersonaId = dto.CategoriaPersonaId
             };
-            //int result = await _context.
 
-            throw new NotImplementedException();
+            await _context.Personas.AddAsync(persona);
+            await _context.SaveChangesAsync();
+            return persona.Id;
         }
     }
 }

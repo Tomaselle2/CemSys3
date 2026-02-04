@@ -17,5 +17,7 @@ namespace CemSys3.Interfaces.Parcela
             int filtro = 0,
             int pagina = 1,
             int porPagina = 10);
+
+        Task<IEnumerable<ParcelaIndexRequestDTO>> GetAllBySeccionId(int seccionId, int estadoDifunto);
     }
 }

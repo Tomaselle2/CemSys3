@@ -1,0 +1,59 @@
+﻿@using CemSys3.ViewModels.Ingreso
+@using CemSys3.Helpers.Enumerable
+@using CemSys3.Enumerables
+@model SelectorUbicacionVM
+
+<div class="ubicacion-selector form-columns-container3"
+     data-url-secciones="@Model.UrlSecciones"
+     data-url-parcelas="@Model.UrlParcelas">
+
+    <div class="mb-3">
+        <label for="tipoParcelaSelect">Tipo de parcela<span class="obligatorio"> * </span></label>
+        <select class="form-select js-tipo-parcela"
+                id="tipoParcelaSelect"
+                name="@Model.TipoParcelaName"
+                data-selected="@Model.TipoParcelaID"
+                required>
+            <option value="">--Elija una opción--</option>
+            @foreach (var item in EnumHelper.GetSelectListItems<TipoParcelaEnum>())
+            {
+                if (item.Value == Model.TipoParcelaID?.ToString())
+                {
+                    <option value="@item.Value" selected>@item.Text</option>
+                }
+                else
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            }
+        </select>
+        <span class="text-danger field-validation-valid" data-valmsg-for="@Model.TipoParcelaName" data-valmsg-replace="true"></span>
+    </div>
+
+    <div class="mb-3">
+        <label for="seccionSelect">Sección<span class="obligatorio"> * </span></label>
+        <select class="form-select js-seccion"
+                id="seccionSelect"
+                name="@Model.SeccionName"
+                data-selected="@Model.SeccionID"
+                disabled
+                required>
+            <option value="">--Elija una opción--</option>
+        </select>
+        <span class="text-danger field-validation-valid" data-valmsg-for="@Model.SeccionName" data-valmsg-replace="true"></span>
+    </div>
+
+    <div class="mb-3">
+        <label for="parcelaSelect">Parcela<span class="obligatorio"> * </span></label>
+        <select class="form-select js-parcela"
+                id="parcelaSelect"
+                name="@Model.ParcelaName"
+                data-selected="@Model.ParcelaID"
+                disabled
+                required>
+            <option value="">--Elija una opción--</option>
+        </select>
+        <span class="text-danger field-validation-valid" data-valmsg-for="@Model.ParcelaName" data-valmsg-replace="true"></span>
+    </div>
+
+</div>

@@ -331,9 +331,7 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("tramiteId");
             entity.Property(e => e.DifuntoId).HasColumnName("difuntoId");
             entity.Property(e => e.EmpresaFunebreId).HasColumnName("empresaFunebreId");
-            entity.Property(e => e.EstadoDifunto)
-                .HasMaxLength(30)
-                .HasColumnName("estadoDifunto");
+            entity.Property(e => e.EstadoDifuntoId).HasColumnName("estadoDifuntoId");
             entity.Property(e => e.FechaIngreso)
                 .HasColumnType("datetime")
                 .HasColumnName("fechaIngreso");
@@ -352,6 +350,11 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.EmpresaFunebre).WithMany(p => p.Introducciones)
                 .HasForeignKey(d => d.EmpresaFunebreId)
                 .HasConstraintName("Introducciones_empresaFunebreId_fk");
+
+            entity.HasOne(d => d.EstadoDifunto).WithMany(p => p.Introducciones)
+                .HasForeignKey(d => d.EstadoDifuntoId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Introducc__estad__3A4CA8FD");
 
             entity.HasOne(d => d.Parcela).WithMany(p => p.Introducciones)
                 .HasForeignKey(d => d.ParcelaId)
@@ -384,6 +387,7 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(100)
                 .HasColumnName("nombre");
             entity.Property(e => e.TipoNotaId).HasColumnName("tipoNotaId");
+            entity.Property(e => e.TramiteIngresoId).HasColumnName("tramiteIngresoId");
             entity.Property(e => e.Visibilidad)
                 .HasDefaultValue(true)
                 .HasColumnName("visibilidad");
@@ -393,10 +397,14 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("Notas_tipoNotaId_fk");
 
-            entity.HasOne(d => d.Tramite).WithOne(p => p.Nota)
+            entity.HasOne(d => d.Tramite).WithOne(p => p.NotaTramite)
                 .HasForeignKey<Nota>(d => d.TramiteId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Notas__tramiteId__71D1E811");
+
+            entity.HasOne(d => d.TramiteIngreso).WithMany(p => p.NotaTramiteIngresos)
+                .HasForeignKey(d => d.TramiteIngresoId)
+                .HasConstraintName("FK__Notas__tramiteIn__4D5F7D71");
         });
 
         modelBuilder.Entity<Parcela>(entity =>
@@ -497,13 +505,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.EstadoDifuntoId).HasColumnName("estadoDifuntoId");
             entity.Property(e => e.FallecioEnTirolesa).HasColumnName("fallecioEnTirolesa");
             entity.Property(e => e.FechaDefuncion).HasColumnName("fechaDefuncion");
-            entity.Property(e => e.FechaIngresoo)
-                .HasColumnType("datetime")
-                .HasColumnName("fechaIngresoo");
             entity.Property(e => e.FechaNacimiento).HasColumnName("fechaNacimiento");
-            entity.Property(e => e.FechaRetiro)
-                .HasColumnType("datetime")
-                .HasColumnName("fechaRetiro");
             entity.Property(e => e.InformacionAdicional).HasColumnName("informacionAdicional");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(50)

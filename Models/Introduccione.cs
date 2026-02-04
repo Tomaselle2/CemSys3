@@ -19,13 +19,15 @@ public partial class Introduccione
 
     public int DifuntoId { get; set; }
 
-    public string? EstadoDifunto { get; set; }
-
     public string? InformacionAdicional { get; set; }
+
+    public int EstadoDifuntoId { get; set; }
 
     public virtual Persona Difunto { get; set; } = null!;
 
     public virtual EmpresasFunebre? EmpresaFunebre { get; set; }
+
+    public virtual EstadosDifunto EstadoDifunto { get; set; } = null!;
 
     public virtual Parcela Parcela { get; set; } = null!;
 

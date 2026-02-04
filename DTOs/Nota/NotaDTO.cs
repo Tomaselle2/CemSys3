@@ -18,7 +18,7 @@ namespace CemSys3.DTOs.Nota
 
         public int EstadoId { get; set; }
 
-        public int? TramiteId { get; set; }
+        public int? TramiteIngresoId { get; set; }
 
         public DateTime FechaCreacion { get; set; }
 

@@ -116,7 +116,7 @@ namespace CemSys3.Business.Notas
             notaDTO.Visibilidad = nota.Visibilidad;
             notaDTO.EstadoId = nota.Tramite.EstadoActualId;
             notaDTO.FechaCreacion = nota.Tramite.FechaCreacion;
-            notaDTO.TramiteId = nota.TramiteId; //si esta asociada a un tramite
+            notaDTO.TramiteIngresoId = nota.TramiteIngresoId; //si esta asociada a un tramite
             notaDTO.Tareas = tareas.ToList();
 
             return notaDTO;

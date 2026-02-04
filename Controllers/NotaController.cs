@@ -143,7 +143,7 @@ namespace CemSys3.Controllers
 
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> Visualizar(int id)
+        public async Task<IActionResult> Visualizar(int id, string? controlador)
         {
             try
             {
@@ -168,6 +168,8 @@ namespace CemSys3.Controllers
                     TipoNotaId = nota.TipoNotaId,
                     Tareas = nota.Tareas,
                     EstadoId = nota.EstadoId,
+                    tramiteVinculadoId = nota.TramiteIngresoId ?? 0,
+                    controlador = controlador ?? string.Empty
                 };
 
                 if(viewModel.EstadoId == (int)EstadosNotaEnum.NotaFinalizado)
@@ -191,6 +193,20 @@ namespace CemSys3.Controllers
                 """);
             }
             
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public IActionResult RealizarIngreso(int tramiteId, int notaId)
+        {
+            if(tramiteId <= 0) //ingreso nuevo
+            {
+                return RedirectToAction("Index", "Ingreso", new { notaId = notaId });
+            }
+            else //ya existe el trámite de ingreso
+            {
+                return RedirectToAction("IrATramite", "Tramite",  new { tramiteId = tramiteId});
+            }
         }
     }
 }

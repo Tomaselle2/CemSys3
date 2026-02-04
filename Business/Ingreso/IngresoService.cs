@@ -75,7 +75,6 @@ namespace CemSys3.Business.Ingreso
                     CategoriaPersonaId = (int)CategoriaPersonaEnum.Fallecido
                 };
                 int difuntoId = await _personaService.Add(difunto);
-                await _context.SaveChangesAsync(); //guardar cambios antes de continuar
 
                 //4- se registra la relacion (difunto con el tramite)
                 TramitePersona tramitePersona = new TramitePersona
@@ -115,7 +114,7 @@ namespace CemSys3.Business.Ingreso
                     EmpresaFunebreId = dto.EmpresaFunebreId,
                     ParcelaId = dto.ParcelaId,
                     DifuntoId = difuntoId,
-                    EstadoDifunto = "",
+                    EstadoDifuntoId = dto.EstadoDifuntoId,
                     InformacionAdicional = dto.InformacionAdicional
                 };
                 _context.Introducciones.Add(ingreso);

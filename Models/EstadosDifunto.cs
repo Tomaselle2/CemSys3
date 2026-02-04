@@ -9,5 +9,7 @@ public partial class EstadosDifunto
 
     public string Estado { get; set; } = null!;
 
+    public virtual ICollection<Introduccione> Introducciones { get; set; } = new List<Introduccione>();
+
     public virtual ICollection<Persona> Personas { get; set; } = new List<Persona>();
 }

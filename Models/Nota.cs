@@ -17,9 +17,13 @@ public partial class Nota
 
     public bool Visibilidad { get; set; }
 
+    public int? TramiteIngresoId { get; set; }
+
     public virtual ICollection<Tarea> Tareas { get; set; } = new List<Tarea>();
 
     public virtual TipoNotum TipoNota { get; set; } = null!;
 
     public virtual Tramite Tramite { get; set; } = null!;
+
+    public virtual Tramite? TramiteIngreso { get; set; }
 }

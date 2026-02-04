@@ -12,5 +12,6 @@ namespace CemSys3.Interfaces.Seccion
         Task Delete(int id);
         Task<SeccionRequestDTO> Get(int id);
         Task<PaginadoResponse<SeccionRequestDTO>> GetAllByTipoPaginado(int tipoId, string? filtro = null, int pagina = 1, int porPagina = 10);
+        Task<IEnumerable<SeccionSelectDTO>> GetAllByTipo(int tipoParcelaId);
     }
 }

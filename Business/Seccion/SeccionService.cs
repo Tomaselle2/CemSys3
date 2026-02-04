@@ -224,6 +224,18 @@ namespace CemSys3.Business.Seccion
             return resultado;
         }
 
+        public async Task<IEnumerable<SeccionSelectDTO>> GetAllByTipo(int tipoParcelaId)
+        {
+            return await _context.Secciones
+                .Where(s => s.TipoParcelaId == tipoParcelaId && s.Visibilidad == true)
+                .OrderBy(s => s.Nombre)
+                .Select(s => new SeccionSelectDTO
+                {
+                    Id = s.Id,
+                    Nombre = s.Nombre,
+                })
+                .ToListAsync();
+        }
         public async Task Update(SeccionRequestDTO dto) //solo se puede modificar el nombre de la seccion
         {
             Seccione seccion = await _context.Secciones.FindAsync(dto.Id) ?? throw new KeyNotFoundException("Sección no encontrada");
