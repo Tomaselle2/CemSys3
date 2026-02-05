@@ -9,7 +9,8 @@ namespace CemSys3.DTOs.Ingreso
 
         public DateTime? FechaIngreso { get; set; }
 
-        public int UsuarioId { get; set; }
+        public int UsuarioLogueadoId { get; set; }
+        public int EmpleadoIngresoId { get; set; }
 
         public int? EmpresaFunebreId { get; set; }
 

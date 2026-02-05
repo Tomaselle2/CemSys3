@@ -1,6 +1,7 @@
 ﻿using CemSys3.DTOs.Persona;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CemSys3.Business.Persona
 {
@@ -39,6 +40,12 @@ namespace CemSys3.Business.Persona
             await _context.Personas.AddAsync(persona);
             await _context.SaveChangesAsync();
             return persona.Id;
+        }
+
+        public async Task<bool> PersonaExiste(int dni, string sexo)
+        {
+            string dniString = dni.ToString("D8");
+            return  await _context.Personas.AnyAsync(p =>  p.Dni == dniString && p.Visibilidad && p.Sexo == sexo);
         }
     }
 }

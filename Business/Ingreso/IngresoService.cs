@@ -40,7 +40,7 @@ namespace CemSys3.Business.Ingreso
                     Visibilidad = true,
                     FechaCreacion = DateTime.Now,
                     TipoTramiteId = (int)TipoTramiteEnum.Ingreso,
-                    UsuarioId = dto.UsuarioId,
+                    UsuarioId = dto.UsuarioLogueadoId,
                     EstadoActualId = (int)EstadosIngresoEnum.IngresoRegistrado //registrado
                 };
                 int tramiteId = await _tramiteService.Add(tramite);
@@ -110,7 +110,7 @@ namespace CemSys3.Business.Ingreso
                     TramiteId = tramiteId,
                     Visibilidad = true,
                     FechaIngreso = dto.FechaIngreso,
-                    UsuarioId = dto.UsuarioId,
+                    UsuarioId = dto.EmpleadoIngresoId,
                     EmpresaFunebreId = dto.EmpresaFunebreId,
                     ParcelaId = dto.ParcelaId,
                     DifuntoId = difuntoId,

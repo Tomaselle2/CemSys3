@@ -49,8 +49,8 @@
 
 <div id="modal-container"></div>
 
-<form asp-action="/" asp-controller="Ingreso" class="form-box" method="post" id="formularioRegistrar">
-
+<form asp-action="Ingreso" asp-controller="Ingreso" class="form-box" method="post" id="formularioRegistrar">
+    <input type="hidden" asp-for="NotaIngreso.Id" />
 
     <!-- Formulario datos del difunto-->
     <div class="accordion" id="accordionDatosDifunto">
