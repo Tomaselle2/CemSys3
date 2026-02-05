@@ -21,7 +21,7 @@ namespace CemSys3.Controllers
                 switch (tramite.TipoTramiteId)
                 {
                     case (int)TipoTramiteEnum.Ingreso:
-                        return RedirectToAction("ResumenIngreso", "Ingreso", new { tramiteId = tramite.Id });
+                        return RedirectToAction("ResumenIngreso", "Ingreso", new { ingresoId = tramiteId }); //tramite ya registrado como ingreso
 
                     //case (int)TipoTramiteEnum.ContratoConcesion:
                     //    var contrato = await _concesionesBusiness.ConsultarContratoConcesion(tramiteId);

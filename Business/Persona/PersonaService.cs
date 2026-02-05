@@ -45,7 +45,22 @@ namespace CemSys3.Business.Persona
         public async Task<bool> PersonaExiste(int dni, string sexo)
         {
             string dniString = dni.ToString("D8");
-            return  await _context.Personas.AnyAsync(p =>  p.Dni == dniString && p.Visibilidad && p.Sexo == sexo);
+
+            // DNI antiguo (7 dígitos) → empieza con 0 → se compara sexo
+            if (dniString.StartsWith("0"))
+            {
+                return await _context.Personas.AnyAsync(p =>
+                    p.Dni == dniString &&
+                    p.Sexo == sexo &&
+                    p.Visibilidad
+                );
+            }
+
+            // DNI moderno (8 dígitos) → NO se compara sexo
+            return await _context.Personas.AnyAsync(p =>
+                p.Dni == dniString &&
+                p.Visibilidad
+            );
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using CemSys3.DTOs.Generics;
+﻿using AspNetCoreGeneratedDocument;
+using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.HistorialEstado;
 using CemSys3.DTOs.Ingreso;
 using CemSys3.DTOs.Persona;
@@ -7,9 +8,12 @@ using CemSys3.Enumerables;
 using CemSys3.Helpers.Enumerable;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Ingreso;
+using CemSys3.Interfaces.Notas;
+using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CemSys3.Business.Ingreso
 {
@@ -19,13 +23,19 @@ namespace CemSys3.Business.Ingreso
         private readonly ITramite _tramiteService;
         private readonly IHistorialEstados _historialEstadosService;
         private readonly IPersona _personaService;
-        public IngresoService(AppDbContext context, ITramite tramiteService, IHistorialEstados historialEstados,
-            IPersona personaService)
+        private readonly IParcela _parcelaService;
+        private readonly INotas _notaService;
+
+        public IngresoService(AppDbContext context, ITramite tramiteService, 
+            IHistorialEstados historialEstados, IParcela parcelaService,
+            IPersona personaService, INotas notasService)
         {
             _context = context;
             _tramiteService = tramiteService;
             _historialEstadosService = historialEstados;
+            _parcelaService = parcelaService;
             _personaService = personaService;
+            _notaService = notasService;
         }
 
         public async Task<GenericResultDTO> Add(IngresoDTO dto)
@@ -119,6 +129,12 @@ namespace CemSys3.Business.Ingreso
                 };
                 _context.Introducciones.Add(ingreso);
 
+                //8- se debe sumar en 1 la cantidad de difuntos en la parcela
+                await _parcelaService.AumentarDifunto(ingreso.ParcelaId);
+
+                //9- Vincular la nota con el ingreso
+                await _notaService.VincularNotaConIngreso(dto.NotaId, tramiteId);
+
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
@@ -135,5 +151,51 @@ namespace CemSys3.Business.Ingreso
                 throw;
             }
         }
+
+        public async Task<ResumenIngresoDTO> Get(int ingresoId)
+        {
+            ResumenIngresoDTO ingreso = await _context.Introducciones.Where(i => i.TramiteId == ingresoId).Select(s => new ResumenIngresoDTO
+            {
+                TramiteId = s.TramiteId,
+                Visibilidad = s.Visibilidad,
+                FechaIngreso = s.FechaIngreso,
+                UsuarioLogueadoId = s.UsuarioId,
+                UsuarioLogueadoNombre = s.Usuario.Nombre + " " + s.Usuario.Apellido,
+                EmpleadoIngresoId = s.UsuarioId,
+                EmpleadoIngresoNombre = s.Usuario.Nombre + " " + s.Usuario.Apellido,
+                EmpresaFunebreId = s.EmpresaFunebreId,
+                EmpresaFunebreNombre = s.EmpresaFunebre != null ? s.EmpresaFunebre.Nombre : null,
+                ParcelaId = s.ParcelaId,
+                NroParcela = s.Parcela.NroParcela,
+                SeccionNombre = s.Parcela.Seccion.Nombre,
+                NroFila = s.Parcela.NroFila,
+                DifuntoId = s.DifuntoId,
+                EstadoDifuntoId = s.EstadoDifuntoId,
+                EstadoDifuntoNombre = s.EstadoDifunto.Estado,
+                InformacionAdicional = s.InformacionAdicional,
+                Difunto = new PersonaDTO
+                {
+                    Nombre = s.Difunto.Nombre,
+                    Apellido = s.Difunto.Apellido,
+                    Dni = s.Difunto.Dni,
+                    FechaNacimiento = s.Difunto.FechaNacimiento,
+                    FechaDefuncion = s.Difunto.FechaDefuncion,
+                    InformacionAdicional = s.Difunto.InformacionAdicional,
+                    Sexo = s.Difunto.Sexo,
+                    NroActa = s.Difunto.NroActa,
+                    NroFolio = s.Difunto.NroFolio,
+                    NroTomo = s.Difunto.NroTomo,
+                    NroSerie = s.Difunto.NroSerie,
+                    NroAge = s.Difunto.NroAge,
+                    EstadoDifuntoId = s.Difunto.EstadoDifuntoId
+                }
+            }).FirstOrDefaultAsync() ?? throw new Exception("No se encontro el ingreso");
+
+            //obtener la nota asociada
+            ingreso.Nota = await _notaService.GetNotaIngreso(ingresoId);
+
+            return ingreso;
+        }
+
     }
 }

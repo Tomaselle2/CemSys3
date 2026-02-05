@@ -1,0 +1,56 @@
+﻿@using CemSys3.ViewModels.Ingreso
+@using CemSys3.Helpers.Enumerable
+@using CemSys3.Enumerables
+@model ResumenIngresoVM
+
+@{
+    ViewData["Title"] = "Resumen de ingreso";
+}
+
+<div class="page-header-container">
+    <h1 class="title-page">Resumen de ingreso</h1>
+</div>
+
+<h2>Nombre difunto: @Model.Resumen.Difunto.Nombre?.ToUpper() @Model.Resumen.Difunto.Apellido?.ToUpper()</h2>
+
+<!-- Nota de ingreso -->
+<div class="container-fluid">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-2">
+        <div class="col">
+            <div class="card h-100 cursor-pointer"
+                 style="background-color:@Model.Resumen.Nota.Color;"
+                 hx-get="@Url.Action(action: "visualizar", controller: "Nota", values: new { id = @Model.Resumen.Nota.Id, controlador = "Ingreso" })"
+                 hx-target="#modal-container"
+                 hx-swap="innerHTML"
+                 role="button"
+                 tabindex="0">
+
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="badge bg-primary">
+                        @(EnumHelper.GetDisplayNameByValue<TipoNotaEnum>(@Model.Resumen.Nota.TipoNotaId))
+                    </span>
+                    <span class="badge bg-black">
+                        @(EnumHelper.GetDisplayNameByValue<EstadosNotaEnum>(@Model.Resumen.Nota.EstadoId))
+                    </span>
+                </div>
+
+                <div class="card-body">
+                    <h5 class="card-title">@Model.Resumen.Nota.Nombre</h5>
+                    <p class="card-text" style="white-space:pre-wrap;">
+                        <!-- Aquí debería ir la descripción o contenido -->
+@Model.Resumen.Nota.Descripcion
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-container"></div>
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
+@section Scripts{
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+}

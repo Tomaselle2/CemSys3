@@ -264,5 +264,10 @@ namespace CemSys3.Business.Parcela
             }).ToListAsync();
         }
 
+        public async Task AumentarDifunto(int parcelaId)
+        {
+            Models.Parcela parcela = await _context.Parcelas.FindAsync(parcelaId) ?? throw new Exception("La parcela no existe");
+            parcela.CantidadDifuntos += 1;
+        }
     }
 }

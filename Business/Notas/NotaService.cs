@@ -122,6 +122,31 @@ namespace CemSys3.Business.Notas
             return notaDTO;
         }
 
+        public async Task<NotaDTO> GetNotaIngreso(int tramiteIngresoId)
+        {
+            NotaDTO notaDTO = new NotaDTO();
+
+            //obtener la nota por tramite de ingreso
+            Nota nota = await _context.Notas.Include(t => t.Tramite).Where(n => n.TramiteIngresoId == tramiteIngresoId).FirstOrDefaultAsync() ?? throw new Exception("Nota no encontrada");
+
+            //obtener todas las tareas asociadas a la nota
+            IEnumerable<TareaDTO> tareas = await _tareaService.GetAllByNota(nota.TramiteId);
+
+            //mapear la nota a NotaDTO
+            notaDTO.Id = nota.TramiteId;
+            notaDTO.Nombre = nota.Nombre;
+            notaDTO.TipoNotaId = nota.TipoNotaId;
+            notaDTO.Descripcion = nota.Descripcion;
+            notaDTO.Color = nota.Color;
+            notaDTO.Visibilidad = nota.Visibilidad;
+            notaDTO.EstadoId = nota.Tramite.EstadoActualId;
+            notaDTO.FechaCreacion = nota.Tramite.FechaCreacion;
+            notaDTO.TramiteIngresoId = nota.TramiteIngresoId; //si esta asociada a un tramite
+            notaDTO.Tareas = tareas.ToList();
+
+            return notaDTO;
+        }
+
         public async Task<PaginadoResponse<NotaDTO>> GetPaginadoByTipo(int estadoId, int filtroTipoNota = 0, int pagina = 1, int porPagina = 10)
         {
             PaginadoResponse<NotaDTO> resultado = new PaginadoResponse<NotaDTO>();
@@ -263,6 +288,14 @@ namespace CemSys3.Business.Notas
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+
+        public async Task VincularNotaConIngreso(int notaId, int ingresoId)
+        {
+            //obtener la nota por id
+            Nota nota = await _context.Notas.Where(n => n.TramiteId == notaId).FirstOrDefaultAsync() ?? throw new Exception("Nota no encontrada");
+
+            nota.TramiteIngresoId = ingresoId;
         }
     }
 }

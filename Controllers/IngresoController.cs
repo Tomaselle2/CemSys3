@@ -64,6 +64,30 @@ namespace CemSys3.Controllers
             return View(viewModel);
         }
 
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> ResumenIngreso(int ingresoId)
+        {
+            ResumenIngresoVM viewModel = new ResumenIngresoVM();
+
+            try
+            {
+                viewModel.Resumen = await _ingresoService.Get(ingresoId);
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = ex.Message,
+                    Tipo = "error"
+                };
+            }
+
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+            return View(viewModel);
+        }
+
         private async Task CargarListasIngreso(IngresoVM viewModel, int notaId)
         {
             //Cargar listas desplegables si es necesario
@@ -89,8 +113,51 @@ namespace CemSys3.Controllers
                 };
 
                 await CargarListasIngreso(viewModel, viewModel.NotaIngreso.Id);
-
                 return View("Index", viewModel);
+            }
+
+            //la fecha de defuncion no puede ser mayor a la fecha del ingreso
+            if (viewModel.FechaDefuncion.HasValue && viewModel.FechaHoraIngreso.HasValue)
+            {
+                DateOnly fechaIngreso = DateOnly.FromDateTime(viewModel.FechaHoraIngreso.Value);
+                if (viewModel.FechaDefuncion.Value > fechaIngreso)
+                {
+                    ModelState.AddModelError(
+                        nameof(viewModel.FechaDefuncion),
+                        "La fecha de defunción no puede ser posterior a la fecha de ingreso."
+                    );
+
+                    viewModel.SweetAlert = new SweetAlertDTO
+                    {
+                        Titulo = "Verificar",
+                        Mensaje = "La fecha de defunción no puede ser posterior a la fecha de ingreso.",
+                        Tipo = "warning"
+                    };
+
+                    await CargarListasIngreso(viewModel, viewModel.NotaIngreso.Id);
+                    return View("Index", viewModel);
+                }
+            }
+
+            //la fecha de defuncion no puede ser menor a la fecha de nacimiento
+            if (viewModel.FechaDefuncion.HasValue && viewModel.FechaNacimiento.HasValue)
+            {
+                if (viewModel.FechaDefuncion.Value < viewModel.FechaNacimiento.Value)
+                {
+                    ModelState.AddModelError(
+                        nameof(viewModel.FechaDefuncion),
+                        "La fecha de defunción no puede ser anterior a la fecha de nacimiento."
+                    );
+
+                    viewModel.SweetAlert = new SweetAlertDTO
+                    {
+                        Titulo = "Verificar",
+                        Mensaje = "La fecha de defunción no puede ser anterior a la fecha de nacimiento.",
+                        Tipo = "warning"
+                    };
+                    await CargarListasIngreso(viewModel, viewModel.NotaIngreso.Id);
+                    return View("Index", viewModel);
+                }
             }
 
             try
@@ -120,7 +187,7 @@ namespace CemSys3.Controllers
                 {
                     Nombre = viewModel.Nombre?.Trim(),
                     Apellido = viewModel.Apellido?.Trim(),
-                    Dni = viewModel.Dni?.ToString(),
+                    Dni = viewModel.Dni?.ToString("D8"),
                     FechaDefuncion = viewModel.FechaDefuncion,
                     Sexo = viewModel.Sexo,
                     EstadoDifuntoId = viewModel.EstadoDifuntoId,
@@ -144,7 +211,8 @@ namespace CemSys3.Controllers
                     InformacionAdicional = viewModel.InformacionAdicional,
                     Difunto = difunto,
                     EmpleadoIngresoId = viewModel.EmpleadoID ?? 0,
-                    Visibilidad = true
+                    Visibilidad = true,
+                    NotaId = viewModel.NotaIngreso.Id
                 };
 
                 GenericResultDTO resultado = await _ingresoService.Add(ingreso);
@@ -159,7 +227,7 @@ namespace CemSys3.Controllers
                     });
                 }
 
-                return RedirectToAction("Index", new { notaId = viewModel.NotaIngreso.Id });
+                return RedirectToAction("ResumenIngreso", new { ingresoId = resultado.Id});
             }
             catch (Exception ex)
             {
