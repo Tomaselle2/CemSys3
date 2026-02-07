@@ -1,4 +1,5 @@
-﻿using CemSys3.DTOs.Generics;
+﻿using CemSys3.Business.Tramite;
+using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Ingreso;
 using CemSys3.DTOs.Nota;
 using CemSys3.DTOs.Persona;
@@ -73,6 +74,8 @@ namespace CemSys3.Controllers
             try
             {
                 viewModel.Resumen = await _ingresoService.Get(ingresoId);
+                viewModel.IngresoId = ingresoId;
+                viewModel.InformacionAdicionalIngreso = viewModel.Resumen.InformacionAdicional;
             }
             catch (Exception ex)
             {
@@ -195,7 +198,7 @@ namespace CemSys3.Controllers
                     NroActa = viewModel.NroActa,
                     NroFolio =  viewModel.NroFolio,
                     NroTomo = viewModel.NroTomo,
-                    NroSerie = viewModel.NroSerie,
+                    NroSerie = viewModel.NroSerie?.Trim(),
                     NroAge = viewModel.NroAge,
                     Visibilidad = true,
                     InformacionAdicional = viewModel.InformacionAdicional
@@ -241,5 +244,6 @@ namespace CemSys3.Controllers
                 return View("Index", viewModel);
             }
         }
+
     }
 }

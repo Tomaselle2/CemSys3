@@ -110,7 +110,7 @@ body {
 
 /* ------------------------ CONTENEDORES GENERICOS ---------------------------------------------- */
 .container3 { /* Es para los botones de configuracion y reportes */
-    /*max-width: 1300px;*/
+    max-width: 1300px;
     margin-left: auto;
     margin-right: auto;
     display: flex;
@@ -126,6 +126,23 @@ body {
         max-width: calc(33.333% - 20px);
         box-sizing: border-box;
     }
+
+.contenedor-resumen {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 2px solid #338b85; /* borde verde */
+}
+
+.separador {
+    height: 1px;
+    background: #ddd;
+    margin: 20px 0;
+    border-radius: 1px;
+}
 
 
 

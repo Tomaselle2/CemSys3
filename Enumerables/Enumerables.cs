@@ -72,6 +72,9 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Panteón")]
         Panteon = 3,
+
+        [Display(Name = "Sin especificar")]
+        SinEspecificar = 0,
     }
 
     public enum TipoNotaEnum

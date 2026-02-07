@@ -5,13 +5,30 @@
 
 @{
     ViewData["Title"] = "Resumen de ingreso";
+
+    string ubicacion = string.Empty;
+
+    if (Model.Resumen.TipoParcelaId == (int)TipoParcelaEnum.Nicho)
+    {
+        ubicacion = $"Nicho {Model.Resumen.NroParcela} Fila {Model.Resumen.NroFila}";
+    }
+    else if (Model.Resumen.TipoParcelaId == (int)TipoParcelaEnum.Fosa)
+    {
+        ubicacion = $"Fosa {Model.Resumen.NroParcela}";
+    }
+    else if (Model.Resumen.TipoParcelaId == (int)TipoParcelaEnum.Panteon)
+    {
+        ubicacion = $"Lote {Model.Resumen.NroParcela}";
+    }
+    else
+    {
+        ubicacion = "Sin asignar";
+    }
 }
 
 <div class="page-header-container">
     <h1 class="title-page">Resumen de ingreso</h1>
 </div>
-
-<h2>Nombre difunto: @Model.Resumen.Difunto.Nombre?.ToUpper() @Model.Resumen.Difunto.Apellido?.ToUpper()</h2>
 
 <!-- Nota de ingreso -->
 <div class="container-fluid">
@@ -47,10 +64,94 @@
 </div>
 
 <div id="modal-container"></div>
+
+<div class="contenedor-resumen mt-3">
+
+    <div class="d-flex align-items-center justify-content-between">
+        <h2 class="nroTramite">Trámite @Model.Resumen.TramiteId</h2>
+        <h3><strong>Estado: <span class="estadoTramite">@(EnumHelper.GetDisplayNameByValue<EstadosIngresoEnum>(Model.Resumen.EstadoActualId))</span></strong></h3>
+    </div>
+
+    <p><strong>Ingreso:</strong> @Model.Resumen.FechaIngreso?.ToString("dd/MM/yyyy HH:mm")</p>
+    <p><strong>Empresa:</strong> @Model.Resumen.EmpresaFunebreNombre?.ToUpper()</p>
+
+    <div class="separador"></div>
+
+    <p><strong>DNI:</strong> @(Model.Resumen.Difunto.Dni != null ? Model.Resumen.Difunto.Dni : "-----")</p>
+    <p><strong>Apellido y Nombre:</strong> @($"{Model.Resumen.Difunto.Apellido?.ToUpper()}, {Model.Resumen.Difunto.Nombre?.ToUpper()}")</p>
+    <p><strong>Fecha nacimiento:</strong> @(Model.Resumen.Difunto.FechaNacimiento != null ? Model.Resumen.Difunto.FechaNacimiento?.ToString("dd/MM/yyy") : "-----")</p>
+    <p><strong>Fecha defunción:</strong> @(Model.Resumen.Difunto.FechaDefuncion != null ? Model.Resumen.Difunto.FechaDefuncion?.ToString("dd/MM/yyy") : "-----")</p>
+    <p><strong>Estado del difunto:</strong> @Model.Resumen.EstadoDifuntoNombre.ToUpper()</p>
+    <p><strong>Datos adicionales:</strong> @(Model.Resumen.Difunto.InformacionAdicional != null ? Model.Resumen.Difunto.InformacionAdicional : "")</p>
+
+    <div class="separador"></div>
+
+    <div class="form-columns-container5">
+        <div>
+            <p><strong>Acta:</strong> @(Model.Resumen.Difunto.NroActa != null ? Model.Resumen.Difunto.NroActa : "")</p>
+        </div>
+        <div>
+            <p><strong>Tomo:</strong> @(Model.Resumen.Difunto.NroTomo != null ? Model.Resumen.Difunto.NroTomo : "")</p>
+        </div>
+        <div>
+            <p><strong>Folio:</strong> @(Model.Resumen.Difunto.NroFolio != null ? Model.Resumen.Difunto.NroFolio : "")</p>
+        </div>
+        <div>
+            <p><strong>Serie:</strong> @(Model.Resumen.Difunto.NroSerie != null ? Model.Resumen.Difunto.NroSerie : "")</p>
+        </div>
+        <div>
+            <p><strong>Año:</strong> @(Model.Resumen.Difunto.NroAge != null ? Model.Resumen.Difunto.NroAge : "")</p>
+        </div>
+    </div>
+
+    <div class="separador"></div>
+
+    <p><strong>Empleado responsable:</strong> @Model.Resumen.EmpleadoIngresoNombre.ToUpper()</p>
+    <p><strong>Sección:</strong> @Model.Resumen.SeccionNombre.ToUpper()</p>
+    <p><strong>Parcela:</strong> @ubicacion</p>
+</div>
+
+<div id="htmx-alert-container" style="display:none;"></div>
+
+<!--Info adicional-->
+<div class="contenedor-resumen my-2">
+        <div>
+            <label><b>Información adicional del trámite</b></label>
+            <textarea id="textareaInfoAdicional"
+                  class="form-control auto-resize"
+                      name="informacionAdicionaTramite"                      
+                      oninput="document.getElementById('btnActualizar').disabled = false; autoResize(this)"
+                      asp-for="InformacionAdicionalIngreso">
+            </textarea>
+        </div>
+        @if (Model.Resumen.EstadoActualId != (int)EstadosIngresoEnum.IngresoFinalizado)
+        {
+            <div class="my-1">
+                <input type="hidden" name="tramiteId" value="@Model.IngresoId" id="tramiteIdHidden" />
+                <input 
+                   type="submit" id="btnActualizar" class="btn btn-success" value="Actualizar" disabled
+                   hx-post="/Tramite/ActualizarInfoAdicionalTramite"
+                   hx-include="#textareaInfoAdicional, #tramiteIdHidden"
+                   hx-target="#htmx-alert-container"
+                   hx-swap="innerHTML" />
+            </div>
+        }
+
+</div>
 @* Renderizamos el manejador pasándole el DTO del modelo *@
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
 
 @section Scripts{
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"></script>
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.auto-resize').forEach(t => autoResize(t));
+        });
+    </script>
 }

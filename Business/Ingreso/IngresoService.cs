@@ -173,6 +173,8 @@ namespace CemSys3.Business.Ingreso
                 EstadoDifuntoId = s.EstadoDifuntoId,
                 EstadoDifuntoNombre = s.EstadoDifunto.Estado,
                 InformacionAdicional = s.InformacionAdicional,
+                TipoParcelaId = s.Parcela.TipoParcelaId ?? 0,
+                EstadoActualId = s.Tramite.EstadoActualId,
                 Difunto = new PersonaDTO
                 {
                     Nombre = s.Difunto.Nombre,

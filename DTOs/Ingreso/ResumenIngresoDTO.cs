@@ -30,6 +30,8 @@ namespace CemSys3.DTOs.Ingreso
         public string EstadoDifuntoNombre { get; set; } = string.Empty;
 
         public string? InformacionAdicional { get; set; }
+        public int TipoParcelaId { get; set; }
+        public int EstadoActualId { get; set; }
 
         public NotaDTO Nota { get; set; } = new NotaDTO();
         public PersonaDTO Difunto { get; set; } = new PersonaDTO();
