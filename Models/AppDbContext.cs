@@ -51,6 +51,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<PreciosTarifaria> PreciosTarifarias { get; set; }
 
+    public virtual DbSet<ReglasIngreso> ReglasIngresos { get; set; }
+
     public virtual DbSet<RolesUsuario> RolesUsuarios { get; set; }
 
     public virtual DbSet<Seccione> Secciones { get; set; }
@@ -557,6 +559,102 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.Seccion).WithMany(p => p.PreciosTarifaria)
                 .HasForeignKey(d => d.SeccionId)
                 .HasConstraintName("PreciosTarifarias_seccionId_fk");
+        });
+
+        modelBuilder.Entity<ReglasIngreso>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__ReglasIn__3213E83F6361DF47");
+
+            entity.ToTable("ReglasIngreso");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CierreFosa).HasColumnName("cierreFosa");
+            entity.Property(e => e.CierreNicho).HasColumnName("cierreNicho");
+            entity.Property(e => e.ConceptoDefuncionId).HasColumnName("conceptoDefuncionId");
+            entity.Property(e => e.ConceptoInhumacionId).HasColumnName("conceptoInhumacionId");
+            entity.Property(e => e.ConceptoIntroduccionId).HasColumnName("conceptoIntroduccionId");
+            entity.Property(e => e.ConceptoTranscripcionId).HasColumnName("conceptoTranscripcionId");
+            entity.Property(e => e.EstadoDifuntoId).HasColumnName("estadoDifuntoId");
+            entity.Property(e => e.MontoMinimoFondoId).HasColumnName("montoMinimoFondoId");
+            entity.Property(e => e.NombreRegla)
+                .HasMaxLength(100)
+                .HasColumnName("nombreRegla");
+            entity.Property(e => e.PorcentajeAumentoDerechoOficinaId).HasColumnName("porcentajeAumentoDerechoOficinaId");
+            entity.Property(e => e.PorcentajeAumentoOtraLocalidadId).HasColumnName("porcentajeAumentoOtraLocalidadId");
+            entity.Property(e => e.PorcentajeFondoSaludId).HasColumnName("porcentajeFondoSaludId");
+            entity.Property(e => e.PorcentajeIntroduccionUrnaDerechoOficna).HasColumnName("porcentajeIntroduccionUrnaDerechoOficna");
+            entity.Property(e => e.TipoNichoId).HasColumnName("tipoNichoId");
+            entity.Property(e => e.TipoPanteonId).HasColumnName("tipoPanteonId");
+            entity.Property(e => e.TipoParcelaId).HasColumnName("tipoParcelaId");
+            entity.Property(e => e.Visibilidad)
+                .HasDefaultValue(true)
+                .HasColumnName("visibilidad");
+
+            entity.HasOne(d => d.CierreFosaNavigation).WithMany(p => p.ReglasIngresoCierreFosaNavigations)
+                .HasForeignKey(d => d.CierreFosa)
+                .HasConstraintName("FK_RI_CierreFosa");
+
+            entity.HasOne(d => d.CierreNichoNavigation).WithMany(p => p.ReglasIngresoCierreNichoNavigations)
+                .HasForeignKey(d => d.CierreNicho)
+                .HasConstraintName("FK_RI_CierreNicho");
+
+            entity.HasOne(d => d.ConceptoDefuncion).WithMany(p => p.ReglasIngresoConceptoDefuncions)
+                .HasForeignKey(d => d.ConceptoDefuncionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_RI_Defuncion");
+
+            entity.HasOne(d => d.ConceptoInhumacion).WithMany(p => p.ReglasIngresoConceptoInhumacions)
+                .HasForeignKey(d => d.ConceptoInhumacionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_RI_Inhumacion");
+
+            entity.HasOne(d => d.ConceptoIntroduccion).WithMany(p => p.ReglasIngresoConceptoIntroduccions)
+                .HasForeignKey(d => d.ConceptoIntroduccionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_RI_Introduccion");
+
+            entity.HasOne(d => d.ConceptoTranscripcion).WithMany(p => p.ReglasIngresoConceptoTranscripcions)
+                .HasForeignKey(d => d.ConceptoTranscripcionId)
+                .HasConstraintName("FK_RI_Transcripcion");
+
+            entity.HasOne(d => d.EstadoDifunto).WithMany(p => p.ReglasIngresos)
+                .HasForeignKey(d => d.EstadoDifuntoId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_RI_EstadoDifunto");
+
+            entity.HasOne(d => d.MontoMinimoFondo).WithMany(p => p.ReglasIngresoMontoMinimoFondos)
+                .HasForeignKey(d => d.MontoMinimoFondoId)
+                .HasConstraintName("FK_RI_MinFondo");
+
+            entity.HasOne(d => d.PorcentajeAumentoDerechoOficina).WithMany(p => p.ReglasIngresoPorcentajeAumentoDerechoOficinas)
+                .HasForeignKey(d => d.PorcentajeAumentoDerechoOficinaId)
+                .HasConstraintName("FK_RI_AumentoDO");
+
+            entity.HasOne(d => d.PorcentajeAumentoOtraLocalidad).WithMany(p => p.ReglasIngresoPorcentajeAumentoOtraLocalidads)
+                .HasForeignKey(d => d.PorcentajeAumentoOtraLocalidadId)
+                .HasConstraintName("FK_RI_AumentoLocalidad");
+
+            entity.HasOne(d => d.PorcentajeFondoSalud).WithMany(p => p.ReglasIngresoPorcentajeFondoSaluds)
+                .HasForeignKey(d => d.PorcentajeFondoSaludId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_RI_Fondo");
+
+            entity.HasOne(d => d.PorcentajeIntroduccionUrnaDerechoOficnaNavigation).WithMany(p => p.ReglasIngresoPorcentajeIntroduccionUrnaDerechoOficnaNavigations)
+                .HasForeignKey(d => d.PorcentajeIntroduccionUrnaDerechoOficna)
+                .HasConstraintName("FK_RI_PrecioUrnario");
+
+            entity.HasOne(d => d.TipoNicho).WithMany(p => p.ReglasIngresos)
+                .HasForeignKey(d => d.TipoNichoId)
+                .HasConstraintName("FK_RI_TipoNicho");
+
+            entity.HasOne(d => d.TipoPanteon).WithMany(p => p.ReglasIngresos)
+                .HasForeignKey(d => d.TipoPanteonId)
+                .HasConstraintName("FK_RI_TipoPanteon");
+
+            entity.HasOne(d => d.TipoParcela).WithMany(p => p.ReglasIngresos)
+                .HasForeignKey(d => d.TipoParcelaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_RI_TipoParcela");
         });
 
         modelBuilder.Entity<RolesUsuario>(entity =>

@@ -11,5 +11,7 @@ public partial class TipoParcela
 
     public virtual ICollection<Parcela> Parcelas { get; set; } = new List<Parcela>();
 
+    public virtual ICollection<ReglasIngreso> ReglasIngresos { get; set; } = new List<ReglasIngreso>();
+
     public virtual ICollection<Seccione> Secciones { get; set; } = new List<Seccione>();
 }

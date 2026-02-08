@@ -10,4 +10,6 @@ public partial class TipoPanteon
     public string Tipo { get; set; } = null!;
 
     public virtual ICollection<Parcela> Parcelas { get; set; } = new List<Parcela>();
+
+    public virtual ICollection<ReglasIngreso> ReglasIngresos { get; set; } = new List<ReglasIngreso>();
 }

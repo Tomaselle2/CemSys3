@@ -187,6 +187,18 @@ namespace CemSys3.Enumerables
         NotaFinalizado = 4,
     }
 
+    //concepto de la tarifaria 
+    public enum ConceptosTarifariaEnum
+    {
+        PorcentajeFondoAyudaCentroSalud = 18,
+        MontoMinimoFondo = 19,
+        PorcentajeAumentoInhumacionOtrasLocalidades = 20,
+        PorcentajeAumentoConcesionesOtrasLocalidades = 21,
+        PorcentajeAumentoIntroduccionDerechoOficinaOtrasLocalidades = 22,
+        PorcentajePreciosNichosUrnariosConcesionSecc16_18 = 23,
+        PorcentajeIntroduccionUrnaDerechoOficina = 24
+    }
+
     public class Enumerables
     {
     }

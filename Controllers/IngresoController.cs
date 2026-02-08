@@ -13,6 +13,7 @@ using CemSys3.Interfaces.Notas;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.Seccion;
+using CemSys3.Interfaces.Tarifaria;
 using CemSys3.Interfaces.Usuario;
 using CemSys3.Models;
 using CemSys3.ViewModels.Ingreso;
@@ -29,16 +30,18 @@ namespace CemSys3.Controllers
         public readonly IUsuario _ususarioService;
         public readonly IPersona _personaService;
         public readonly IIngreso _ingresoService;
+        public readonly ITarifaria _tarifariaService;
 
         public IngresoController(INotas notasService, IEmpresaSepelio empresaSepelio, 
             IUsuario usuarioService, IPersona personaService,
-            IIngreso ingresoService )
+            IIngreso ingresoService, ITarifaria tarifariaService)
         {
             _notaService = notasService;
             _empresaService = empresaSepelio;
             _ususarioService = usuarioService;
             _personaService = personaService;
             _ingresoService = ingresoService;
+            _tarifariaService = tarifariaService;
         }
 
         [HttpGet]
@@ -76,6 +79,7 @@ namespace CemSys3.Controllers
                 viewModel.Resumen = await _ingresoService.Get(ingresoId);
                 viewModel.IngresoId = ingresoId;
                 viewModel.InformacionAdicionalIngreso = viewModel.Resumen.InformacionAdicional;
+                viewModel.PreciosIngresos = await _tarifariaService.GetPreciosIngresos();
             }
             catch (Exception ex)
             {

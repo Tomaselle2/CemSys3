@@ -142,6 +142,14 @@ namespace CemSys3.Controllers
             }
 
         }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> GetAllPreciosIngreso()
+        {
+            IEnumerable<PrecioIngresoDTO> Listado = await _tarifariaService.GetPreciosIngresos();
+            return View(Listado);
+        }
     }
 }
 

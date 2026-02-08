@@ -12,4 +12,6 @@ public partial class EstadosDifunto
     public virtual ICollection<Introduccione> Introducciones { get; set; } = new List<Introduccione>();
 
     public virtual ICollection<Persona> Personas { get; set; } = new List<Persona>();
+
+    public virtual ICollection<ReglasIngreso> ReglasIngresos { get; set; } = new List<ReglasIngreso>();
 }
