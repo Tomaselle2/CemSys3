@@ -57,6 +57,7 @@ builder.Services.AddScoped<ISeccionNichoTarifaria, SeccionService>();
 builder.Services.AddScoped<IParcela, ParcelaService>();
 builder.Services.AddScoped<IConceptoTarifaria, ConceptoTarifariaService>();
 builder.Services.AddScoped<ITarifaria, TarifariaService>();
+builder.Services.AddScoped<IPrecioIngresoService, PrecioIngresoService>();
 builder.Services.AddScoped<INotas, NotaService>();
 builder.Services.AddScoped<ITarea, TareaService>();
 builder.Services.AddScoped<IHistorialEstados, HistorialEstadoService>();

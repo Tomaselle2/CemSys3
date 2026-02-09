@@ -79,7 +79,7 @@ namespace CemSys3.Controllers
                 viewModel.Resumen = await _ingresoService.Get(ingresoId);
                 viewModel.IngresoId = ingresoId;
                 viewModel.InformacionAdicionalIngreso = viewModel.Resumen.InformacionAdicional;
-                viewModel.PreciosIngresos = await _tarifariaService.GetPreciosIngresos();
+                //viewModel.PreciosIngresos = await _tarifariaService.GetPreciosIngresos();
             }
             catch (Exception ex)
             {

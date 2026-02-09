@@ -256,7 +256,7 @@ porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierre
 NULL, --tipoPanteonId
 10, --conceptoInhumacionId
 13,--conceptoDefuncionId
-14,--conceptoTranscripcionId --si aplica
+null,--conceptoTranscripcionId --no aplica
 15, --conceptoIntroduccionId
 18, --porcentajeFondoSaludId
 20, --porcentajeAumentoInhumacionOtraLocalidadId --si aplica

@@ -13,12 +13,14 @@ namespace CemSys3.Controllers
     public class TarifariaController : Controller
     {
         private readonly ITarifaria _tarifariaService;
+        private readonly IPrecioIngresoService _iprecioIngresoService;
         private readonly ISeccionNichoTarifaria _seccionTarifariaService;
 
-        public TarifariaController(ITarifaria tarifaria, ISeccionNichoTarifaria seccionTarifariaNicho)
+        public TarifariaController(ITarifaria tarifaria, ISeccionNichoTarifaria seccionTarifariaNicho, IPrecioIngresoService iprecioIngresoService)
         {
             _tarifariaService = tarifaria;
             _seccionTarifariaService = seccionTarifariaNicho;
+            _iprecioIngresoService = iprecioIngresoService;
         }
 
         [HttpGet]
@@ -147,7 +149,7 @@ namespace CemSys3.Controllers
         [AuthorizeRole(RolUsuario.Administrador)]
         public async Task<IActionResult> GetAllPreciosIngreso()
         {
-            IEnumerable<PrecioIngresoDTO> Listado = await _tarifariaService.GetPreciosIngresos();
+            IEnumerable<PrecioIngresoDTO> Listado = await _iprecioIngresoService.ObtenerTodasLasReglasAsync();
             return View(Listado);
         }
     }
