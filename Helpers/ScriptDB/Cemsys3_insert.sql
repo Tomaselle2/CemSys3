@@ -157,6 +157,7 @@ insert into Personas
 
 INSERT INTO Usuarios (nombre, apellido, correo, usuario, clave, rolId) values ('Tomas', 'Carreras', 'tomaselle2@gmail.com', 'Tomaselle2', 'P7eSe/VyhW8UaKMx5qghSw==.JYrOO0ZJQLp0A82FUreiYz7mWl+BpZykU1AfM1ZOpZU=', 2);
 
+--precios de nichos
 INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
 conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
 porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
@@ -266,6 +267,340 @@ null,--conceptoTranscripcionId --no aplica
 4, --cierre nicho --si aplica
 null, --cierre fosa
 1);-- visibilidad
+
+--precios de fosas
+INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
+conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
+porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
+porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
+('Fosa - Fallecidos de otra localidad con domicilio en otra localidad',
+2, --tipoParcelaId--fosa
+1, --estadoDifuntoId --cuerpo completo o reduccion
+null, --tipoNichoId --feretro o especial
+NULL, --tipoPanteonId
+11, --conceptoInhumacionId
+13,--conceptoDefuncionId
+14,--conceptoTranscripcionId --si aplica
+15, --conceptoIntroduccionId
+18, --porcentajeFondoSaludId
+20, --porcentajeAumentoInhumacionOtraLocalidadId --si aplica
+22, --porcentajeAumentoDerechoOficinaId --si aplica
+null, --porcentajeIntroduccion-Urna-DerechoOficna --no aplica
+19,--montoMinimoFondoId
+null, --cierre nicho --no aplica
+5, --cierre fosa --si aplica
+1);-- visibilidad
+
+INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
+conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
+porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
+porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
+('Fosa - Fallecidos de otra localidad con domicilio en Tirolesa',
+2, --tipoParcelaId--nicho
+1, --estadoDifuntoId --cuerpo completo o reduccion
+null, --tipoNichoId --feretro o especial
+NULL, --tipoPanteonId
+11, --conceptoInhumacionId
+13,--conceptoDefuncionId
+14,--conceptoTranscripcionId --si aplica
+15, --conceptoIntroduccionId
+18, --porcentajeFondoSaludId
+null, --porcentajeAumentoInhumacionOtraLocalidadId --no aplica
+null, --porcentajeAumentoDerechoOficinaId --no aplica
+null, --porcentajeIntroduccion-Urna-DerechoOficna --no aplica
+19,--montoMinimoFondoId
+null, --cierre nicho --no aplica
+5, --cierre fosa --si aplica
+1);-- visibilidad
+
+INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
+conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
+porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
+porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
+('Fosa - Fallecidos en Colonia Tirolesa',
+2, --tipoParcelaId--nicho
+1, --estadoDifuntoId --cuerpo completo o reduccion
+null, --tipoNichoId --feretro o especial
+NULL, --tipoPanteonId
+11, --conceptoInhumacionId
+13,--conceptoDefuncionId
+null,--conceptoTranscripcionId --no aplica
+15, --conceptoIntroduccionId
+18, --porcentajeFondoSaludId
+null, --porcentajeAumentoInhumacionOtraLocalidadId --no aplica
+null, --porcentajeAumentoDerechoOficinaId --no aplica
+null, --porcentajeIntroduccion-Urna-DerechoOficna --no aplica
+19,--montoMinimoFondoId
+null, --cierre nicho --no aplica
+5, --cierre fosa
+1);-- visibilidad
+
+INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
+conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
+porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
+porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
+('Fosa - Cenizas en urnas con domicilio en Tirolesa',
+2, --tipoParcelaId--nicho
+3, --estadoDifuntoId --cremado
+null, --tipoNichoId --feretro o especial
+NULL, --tipoPanteonId
+11, --conceptoInhumacionId
+13,--conceptoDefuncionId
+null,--conceptoTranscripcionId --no aplica
+15, --conceptoIntroduccionId
+18, --porcentajeFondoSaludId
+null, --porcentajeAumentoInhumacionOtraLocalidadId --no aplica
+null, --porcentajeAumentoDerechoOficinaId --no aplica
+24, --porcentajeIntroduccion-Urna-DerechoOficna --si aplica
+19,--montoMinimoFondoId
+null, --cierre nicho --no aplica
+null, --cierre fosa
+1);-- visibilidad
+
+INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
+conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
+porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
+porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
+('Fosa - Cenizas en urnas con domicilio en otra localidad',
+2, --tipoParcelaId--nicho
+3, --estadoDifuntoId --cremado
+null, --tipoNichoId --feretro o especial
+NULL, --tipoPanteonId
+11, --conceptoInhumacionId
+13,--conceptoDefuncionId
+null,--conceptoTranscripcionId --no aplica
+15, --conceptoIntroduccionId
+18, --porcentajeFondoSaludId
+20, --porcentajeAumentoInhumacionOtraLocalidadId --si aplica
+22, --porcentajeAumentoDerechoOficinaId --si aplica
+24, --porcentajeIntroduccion-Urna-DerechoOficna --si aplica
+19,--montoMinimoFondoId
+null, --cierre nicho --no aplica
+null, --cierre fosa
+1);-- visibilidad
+
+--precios panteon con nichos
+INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
+conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
+porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
+porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
+('Panteón con nichos - Fallecidos de otra localidad con domicilio en otra localidad',
+3, --tipoParcelaId--nicho
+1, --estadoDifuntoId --cuerpo completo o reduccion
+null, --tipoNichoId --feretro o especial
+1, --tipoPanteonId --con nicho
+12, --conceptoInhumacionId
+13,--conceptoDefuncionId
+14,--conceptoTranscripcionId --si aplica
+15, --conceptoIntroduccionId
+18, --porcentajeFondoSaludId
+20, --porcentajeAumentoInhumacionOtraLocalidadId --si aplica
+22, --porcentajeAumentoDerechoOficinaId --si aplica
+null, --porcentajeIntroduccion-Urna-DerechoOficna --no aplica
+19,--montoMinimoFondoId
+4, --cierre nicho --si aplica
+null, --cierre fosa
+1);-- visibilidad
+
+INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
+conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
+porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
+porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
+('Panteón con nichos - Fallecidos de otra localidad con domicilio en Tirolesa',
+3, --tipoParcelaId--nicho
+1, --estadoDifuntoId --cuerpo completo o reduccion
+null, --tipoNichoId --feretro o especial
+1, --tipoPanteonId --con nicho
+12, --conceptoInhumacionId
+13,--conceptoDefuncionId
+14,--conceptoTranscripcionId --si aplica
+15, --conceptoIntroduccionId
+18, --porcentajeFondoSaludId
+null, --porcentajeAumentoInhumacionOtraLocalidadId --no aplica
+null, --porcentajeAumentoDerechoOficinaId --no aplica
+null, --porcentajeIntroduccion-Urna-DerechoOficna --no aplica
+19,--montoMinimoFondoId
+4, --cierre nicho --si aplica
+null, --cierre fosa
+1);-- visibilidad
+
+INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
+conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
+porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
+porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
+('Panteón con nichos - Fallecidos en Colonia Tirolesa',
+3, --tipoParcelaId--nicho
+1, --estadoDifuntoId --cuerpo completo o reduccion
+null, --tipoNichoId --feretro o especial
+1, --tipoPanteonId
+12, --conceptoInhumacionId
+13,--conceptoDefuncionId
+null,--conceptoTranscripcionId --no aplica
+15, --conceptoIntroduccionId
+18, --porcentajeFondoSaludId
+null, --porcentajeAumentoInhumacionOtraLocalidadId --no aplica
+null, --porcentajeAumentoDerechoOficinaId --no aplica
+null, --porcentajeIntroduccion-Urna-DerechoOficna --no aplica
+19,--montoMinimoFondoId
+4, --cierre nicho --si aplica
+null, --cierre fosa
+1);-- visibilidad
+
+INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
+conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
+porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
+porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
+('Panteón con nichos - Cenizas en urnas con domicilio en Tirolesa',
+3, --tipoParcelaId--nicho
+3, --estadoDifuntoId --cremado
+null, --tipoNichoId --feretro o especial
+1, --tipoPanteonId
+12, --conceptoInhumacionId
+13,--conceptoDefuncionId
+null,--conceptoTranscripcionId --no aplica
+15, --conceptoIntroduccionId
+18, --porcentajeFondoSaludId
+null, --porcentajeAumentoInhumacionOtraLocalidadId --no aplica
+null, --porcentajeAumentoDerechoOficinaId --no aplica
+24, --porcentajeIntroduccion-Urna-DerechoOficna --si aplica
+19,--montoMinimoFondoId
+4, --cierre nicho --si aplica
+null, --cierre fosa
+1);-- visibilidad
+
+INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
+conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
+porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
+porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
+('Panteón con nichos - Cenizas en urnas con domicilio en otra localidad',
+3, --tipoParcelaId--nicho
+3, --estadoDifuntoId --cremado
+null, --tipoNichoId --feretro o especial
+1, --tipoPanteonId
+12, --conceptoInhumacionId
+13,--conceptoDefuncionId
+null,--conceptoTranscripcionId --no aplica
+15, --conceptoIntroduccionId
+18, --porcentajeFondoSaludId
+20, --porcentajeAumentoInhumacionOtraLocalidadId --si aplica
+22, --porcentajeAumentoDerechoOficinaId --si aplica
+24, --porcentajeIntroduccion-Urna-DerechoOficna --si aplica
+19,--montoMinimoFondoId
+4, --cierre nicho --si aplica
+null, --cierre fosa
+1);-- visibilidad
+
+--precios panteon sin nichos
+INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
+conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
+porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
+porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
+('Panteón sin nichos - Fallecidos de otra localidad con domicilio en otra localidad',
+3, --tipoParcelaId--nicho
+1, --estadoDifuntoId --cuerpo completo o reduccion
+null, --tipoNichoId --feretro o especial
+2, --tipoPanteonId --sin nicho
+12, --conceptoInhumacionId
+13,--conceptoDefuncionId
+14,--conceptoTranscripcionId --si aplica
+15, --conceptoIntroduccionId
+18, --porcentajeFondoSaludId
+20, --porcentajeAumentoInhumacionOtraLocalidadId --si aplica
+22, --porcentajeAumentoDerechoOficinaId --si aplica
+null, --porcentajeIntroduccion-Urna-DerechoOficna --no aplica
+19,--montoMinimoFondoId
+null, --cierre nicho --no aplica
+null, --cierre fosa
+1);-- visibilidad
+
+INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
+conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
+porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
+porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
+('Panteón sin nichos - Fallecidos de otra localidad con domicilio en Tirolesa',
+3, --tipoParcelaId--nicho
+1, --estadoDifuntoId --cuerpo completo o reduccion
+null, --tipoNichoId --feretro o especial
+2, --tipoPanteonId --sin nicho
+12, --conceptoInhumacionId
+13,--conceptoDefuncionId
+14,--conceptoTranscripcionId --si aplica
+15, --conceptoIntroduccionId
+18, --porcentajeFondoSaludId
+null, --porcentajeAumentoInhumacionOtraLocalidadId --no aplica
+null, --porcentajeAumentoDerechoOficinaId --no aplica
+null, --porcentajeIntroduccion-Urna-DerechoOficna --no aplica
+19,--montoMinimoFondoId
+null, --cierre nicho --no aplica
+null, --cierre fosa
+1);-- visibilidad
+
+INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
+conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
+porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
+porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
+('Panteón sin nichos - Fallecidos en Colonia Tirolesa',
+3, --tipoParcelaId--nicho
+1, --estadoDifuntoId --cuerpo completo o reduccion
+null, --tipoNichoId --feretro o especial
+2, --tipoPanteonId
+12, --conceptoInhumacionId
+13,--conceptoDefuncionId
+null,--conceptoTranscripcionId --no aplica
+15, --conceptoIntroduccionId
+18, --porcentajeFondoSaludId
+null, --porcentajeAumentoInhumacionOtraLocalidadId --no aplica
+null, --porcentajeAumentoDerechoOficinaId --no aplica
+null, --porcentajeIntroduccion-Urna-DerechoOficna --no aplica
+19,--montoMinimoFondoId
+null, --cierre nicho --no aplica
+null, --cierre fosa
+1);-- visibilidad
+
+INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
+conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
+porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
+porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
+('Panteón sin nichos - Cenizas en urnas con domicilio en Tirolesa',
+3, --tipoParcelaId--nicho
+3, --estadoDifuntoId --cremado
+null, --tipoNichoId --feretro o especial
+2, --tipoPanteonId
+12, --conceptoInhumacionId
+13,--conceptoDefuncionId
+null,--conceptoTranscripcionId --no aplica
+15, --conceptoIntroduccionId
+18, --porcentajeFondoSaludId
+null, --porcentajeAumentoInhumacionOtraLocalidadId --no aplica
+null, --porcentajeAumentoDerechoOficinaId --no aplica
+24, --porcentajeIntroduccion-Urna-DerechoOficna --si aplica
+19,--montoMinimoFondoId
+null, --cierre nicho --no aplica
+null, --cierre fosa
+1);-- visibilidad
+
+INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNichoId, tipoPanteonId, 
+conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
+porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
+porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
+('Panteón sin nichos - Cenizas en urnas con domicilio en otra localidad',
+3, --tipoParcelaId--nicho
+3, --estadoDifuntoId --cremado
+null, --tipoNichoId --feretro o especial
+2, --tipoPanteonId
+12, --conceptoInhumacionId
+13,--conceptoDefuncionId
+null,--conceptoTranscripcionId --no aplica
+15, --conceptoIntroduccionId
+18, --porcentajeFondoSaludId
+20, --porcentajeAumentoInhumacionOtraLocalidadId --si aplica
+22, --porcentajeAumentoDerechoOficinaId --si aplica
+24, --porcentajeIntroduccion-Urna-DerechoOficna --si aplica
+19,--montoMinimoFondoId
+null, --cierre nicho --no aplica
+null, --cierre fosa
+1);-- visibilidad
+
 
 select * from ReglasIngreso
 

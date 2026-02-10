@@ -57,10 +57,10 @@ namespace CemSys3.Business.Tarifaria
         }
 
         private void CalcularInhumacion(
-    PrecioIngresoDTO dto,
-    ReglasIngreso regla,
-    ILookup<int, PreciosTarifaria> precios,
-    Dictionary<int, ConceptosTarifarium> conceptos)
+            PrecioIngresoDTO dto,
+            ReglasIngreso regla,
+            ILookup<int, PreciosTarifaria> precios,
+            Dictionary<int, ConceptosTarifarium> conceptos)
         {
             var tema = new TemaIngresoDTO
             {
@@ -94,6 +94,7 @@ namespace CemSys3.Business.Tarifaria
             {
                 (int)TipoParcelaEnum.Nicho => regla.CierreNicho,
                 (int)TipoParcelaEnum.Fosa => regla.CierreFosa,
+                (int)TipoParcelaEnum.Panteon => regla.CierreNicho,
                 _ => null
             };
 
