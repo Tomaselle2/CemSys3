@@ -152,6 +152,38 @@ namespace CemSys3.Business.Ingreso
             }
         }
 
+        public async Task FinalizarIngreso(int ingresoId, string cobroIngreso)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                //se registrar el historial
+                HistorialEstadosDTO historial = new HistorialEstadosDTO
+                {
+                    Fecha = DateTime.Now,
+                    TramiteId = ingresoId,
+                    EstadoTramiteId = (int)EstadosIngresoEnum.IngresoFinalizado
+                };
+                await _historialEstadosService.Add(historial);
+
+                //se modifica el estadoActual en la tabla tramite
+                Models.Tramite tramite = await _context.Tramites.FindAsync(ingresoId) ?? throw new Exception("Trámite no encontrado");
+                tramite.EstadoActualId = (int)EstadosIngresoEnum.IngresoFinalizado;
+
+                //Se suma el cobroIngreso en el infoAdicional del tramite Introduccion
+                Models.Introduccione ingreso = await _context.Introducciones.FindAsync(ingresoId) ?? throw new Exception("Ingreso no encontrado");
+                ingreso.InformacionAdicional += $"\nDetalle el cobro: {cobroIngreso}";
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
         public async Task<ResumenIngresoDTO> Get(int ingresoId)
         {
             ResumenIngresoDTO ingreso = await _context.Introducciones.Where(i => i.TramiteId == ingresoId).Select(s => new ResumenIngresoDTO

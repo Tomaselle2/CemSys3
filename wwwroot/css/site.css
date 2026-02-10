@@ -506,6 +506,10 @@ body {
 
 
 /* ------------------------ para notas ---------------------------------------------- */
+.notaModal{
+    box-shadow: 1px 1px 10px 1px #514d4d;
+}
+
 .card.cursor-pointer:hover {
     transform: scale(1.01);
     box-shadow: 0 0 10px rgba(0,0,0,.2);

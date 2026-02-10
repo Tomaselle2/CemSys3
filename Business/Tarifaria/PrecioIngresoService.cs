@@ -56,6 +56,47 @@ namespace CemSys3.Business.Tarifaria
             return resultado;
         }
 
+        public async Task<IEnumerable<PrecioIngresoDTO>> GetPreciosIngresoBy(int tipoParcelaId, int estadoDifuntoId)
+        {
+            var reglas = await _context.ReglasIngresos
+            .Where(r => r.Visibilidad &&
+            r.TipoParcelaId == tipoParcelaId &&
+            r.EstadoDifuntoId == estadoDifuntoId)
+            .Include(r => r.TipoParcela)
+            .ToListAsync();
+
+            var preciosLookup = (await _context.PreciosTarifarias
+                .Where(p => p.Visibilidad == true)
+                .ToListAsync())
+                .ToLookup(p => p.ConceptoTarifariaId);
+
+            var conceptos = await _context.ConceptosTarifaria
+                .Include(c => c.Tema)
+                .ToListAsync();
+
+            var conceptosDict = conceptos.ToDictionary(c => c.Id);
+
+            var resultado = new List<PrecioIngresoDTO>();
+
+            foreach (var regla in reglas)
+            {
+                var dto = new PrecioIngresoDTO
+                {
+                    NombreRegla = regla.NombreRegla,
+                    TipoParcelaId = regla.TipoParcelaId
+                };
+
+                CalcularInhumacion(dto, regla, preciosLookup, conceptosDict);
+                CalcularRegistroCivil(dto, regla, preciosLookup, conceptosDict);
+                CalcularDerechoOficina(dto, regla, preciosLookup, conceptosDict);
+                AplicarFondoPorTema(dto, regla, preciosLookup, conceptosDict);
+
+                resultado.Add(dto);
+            }
+
+            return resultado;
+        }
+
         private void CalcularInhumacion(
             PrecioIngresoDTO dto,
             ReglasIngreso regla,
@@ -112,10 +153,10 @@ namespace CemSys3.Business.Tarifaria
         }
 
         private void CalcularRegistroCivil(
-    PrecioIngresoDTO dto,
-    ReglasIngreso regla,
-    ILookup<int, PreciosTarifaria> precios,
-    Dictionary<int, ConceptosTarifarium> conceptos)
+            PrecioIngresoDTO dto,
+            ReglasIngreso regla,
+            ILookup<int, PreciosTarifaria> precios,
+            Dictionary<int, ConceptosTarifarium> conceptos)
         {
             var tema = new TemaIngresoDTO
             {
@@ -256,8 +297,6 @@ namespace CemSys3.Business.Tarifaria
             }
         }
 
-
-
-
+       
     }
 }

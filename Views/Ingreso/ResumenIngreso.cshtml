@@ -26,6 +26,208 @@
     }
 }
 
+<!--Estilos de tabla de ingreso-->
+<style>
+    .contenedor-principal {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .grupo-tabla {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        margin-bottom: 30px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 3px solid transparent;
+        border-radius: 8px;
+        padding: 10px;
+    }
+
+        .grupo-tabla:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .grupo-tabla.seleccionada {
+            border-color: #0d6efd;
+            background-color: #f8f9ff;
+            box-shadow: 0 6px 12px rgba(13,110,253,0.2);
+        }
+
+        .grupo-tabla.no-seleccionada {
+            opacity: 0.5;
+        }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        font-family: Arial, sans-serif;
+        font-size: 15px;
+        margin-bottom: 0;
+    }
+
+    th, td {
+        border: 1px solid #000;
+        padding: 5px 8px;
+        vertical-align: top;
+    }
+
+    th {
+        text-align: center;
+        font-weight: bold;
+        background-color: #f2f2f2;
+        font-size: 14px;
+    }
+
+    .right {
+        text-align: right;
+    }
+
+    .bold {
+        font-weight: bold;
+    }
+
+    /* Primera columna sin líneas internas */
+    .grupo {
+        border-bottom: none;
+        width: 35%;
+    }
+
+    .grupo-cont {
+        border-top: none;
+        border-bottom: none;
+    }
+
+    .grupo-fin {
+        border-top: none;
+    }
+
+    /* Renglón separador */
+    .espacio td {
+        height: 12px;
+        border: none;
+    }
+
+    .titulo-regla {
+        font-size: 14px;
+        font-weight: bold;
+        margin: 0;
+        background-color: #f9f9f9;
+    }
+
+    .total-ingreso {
+        background-color: #e8e8e8;
+        font-size: 14px;
+    }
+
+    /* Para separar las tablas dentro de un grupo */
+    .separador-tabla {
+        height: 20px;
+    }
+
+    .td-contenido {
+        width: 45%;
+    }
+
+    .td-importe {
+        width: 30%;
+    }
+
+    /* Estilos para el control de cobro */
+    .control-cobro {
+        background-color: #f8f9fa;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+
+    .switch-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+    input:checked + .slider {
+        background-color: #198754;
+    }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+    .selector-tabla-container {
+        display: none;
+        margin-top: 15px;
+        padding: 15px;
+        background-color: #fff;
+        border-radius: 6px;
+        border: 1px solid #dee2e6;
+    }
+
+        .selector-tabla-container.active {
+            display: block;
+        }
+
+    .badge-seleccion {
+        position: absolute;
+        top: -15px;
+        right: 5px;
+        background-color: #0d6efd;
+        color: white;
+        padding: 5px 25px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .grupo-tabla {
+        position: relative;
+    }
+</style>
+
+
 <div class="page-header-container">
     <h1 class="title-page">Resumen de ingreso</h1>
 </div>
@@ -54,7 +256,6 @@
                 <div class="card-body">
                     <h5 class="card-title">@Model.Resumen.Nota.Nombre</h5>
                     <p class="card-text" style="white-space:pre-wrap;">
-                        <!-- Aquí debería ir la descripción o contenido -->
 @Model.Resumen.Nota.Descripcion
                     </p>
                 </div>
@@ -115,33 +316,179 @@
 
 <!--Info adicional-->
 <div class="contenedor-resumen my-2">
-        <div>
-            <label><b>Información adicional del trámite</b></label>
-            <textarea id="textareaInfoAdicional"
+    <div>
+        <label><b>Información adicional del trámite</b></label>
+        <textarea id="textareaInfoAdicional"
                   class="form-control auto-resize"
-                      name="informacionAdicionaTramite"                      
-                      oninput="document.getElementById('btnActualizar').disabled = false; autoResize(this)"
-                      asp-for="InformacionAdicionalIngreso">
+                  name="informacionAdicionaTramite"
+                  oninput="document.getElementById('btnActualizar').disabled = false; autoResize(this)"
+                  asp-for="InformacionAdicionalIngreso">
             </textarea>
-        </div>
-        @if (Model.Resumen.EstadoActualId != (int)EstadosIngresoEnum.IngresoFinalizado)
-        {
-            <div class="my-1">
-                <input type="hidden" name="tramiteId" value="@Model.IngresoId" id="tramiteIdHidden" />
-                <input 
-                   type="submit" id="btnActualizar" class="btn btn-success" value="Actualizar" disabled
-                   hx-post="/Tramite/ActualizarInfoAdicionalTramite"
-                   hx-include="#textareaInfoAdicional, #tramiteIdHidden"
-                   hx-target="#htmx-alert-container"
-                   hx-swap="innerHTML" />
-            </div>
-        }
-
+    </div>
+    
+    <div class="my-1">
+        <input type="hidden" name="tramiteId" value="@Model.IngresoId" id="tramiteIdHidden" />
+        <input type="submit" id="btnActualizar" class="btn btn-success" value="Actualizar" disabled
+                hx-post="/Tramite/ActualizarInfoAdicionalTramite"
+                hx-include="#textareaInfoAdicional, #tramiteIdHidden"
+                hx-target="#htmx-alert-container"
+                hx-swap="innerHTML" />
+    </div>
 </div>
+
+
+<!--Control de cobro de ingreso-->
+@if (Model.Resumen.EstadoActualId == (int)EstadosIngresoEnum.IngresoRegistrado)
+{
+    <div class="control-cobro">
+        <div class="switch-container">
+            <label class="switch">
+                <input type="checkbox" id="switchCobro" checked>
+                <span class="slider"></span>
+            </label>
+            <label for="switchCobro" style="font-weight: bold; font-size: 16px; margin: 0;">
+                <span id="labelCobro">Cobrar ingreso</span>
+            </label>
+        </div>
+
+        <div id="selectorTablaContainer" class="selector-tabla-container active">
+            <label style="font-weight: bold; margin-bottom: 10px; display: block;">
+                Seleccione la tabla de precios a aplicar:
+            </label>
+            <select id="selectTabla" class="form-select" style="max-width: 600px;">
+                <option value="">-- Seleccione una opción --</option>
+                @{
+                    int indexRegla = 0;
+                    foreach (var regla in Model.PreciosIngresos)
+                    {
+                        var totalRegla = regla.Temas.Sum(t => t.Conceptos.Sum(c => c.PrecioBase));
+                        var tipoParcelaNombre = EnumHelper.GetDisplayNameByValue<TipoParcelaEnum>(regla.TipoParcelaId);
+                        <option value="@indexRegla" class="form-control form-select">
+                            @regla.NombreRegla (@totalRegla.ToString("C"))
+                        </option>
+                        indexRegla++;
+                    }
+                }
+            </select>
+            <input type="hidden" id="tablaSeleccionadaId" name="tablaSeleccionadaId" value="" />
+        </div>
+    </div>
+
+    <!--Tablas de precios de ingreso-->
+    <div class="contenedor-principal" id="contenedorTablas" style="display: grid;">
+        @{
+            int contador = 0;
+            foreach (var regla in Model.PreciosIngresos)
+            {
+                <div class="grupo-tabla" data-index="@contador" style="display: none;">
+                    <table>
+                        <!-- Encabezado principal -->
+                        <tr>
+                            <th colspan="2" style="font-size: 16px; padding: 8px;">
+                                @(EnumHelper.GetDisplayNameByValue<TipoParcelaEnum>(regla.TipoParcelaId).ToUpper())
+                            </th>
+                            <th style="font-size: 16px; padding: 8px;">
+                                @DateTime.Now.Year.ToString()
+                            </th>
+                        </tr>
+
+                        <!-- Título de la regla -->
+                        <tr class="titulo-regla">
+                            <td colspan="3" class="bold" style="padding: 8px;">
+                                @regla.NombreRegla
+                            </td>
+                        </tr>
+
+                        @foreach (var tema in regla.Temas)
+                        {
+                            var totalTema = tema.Conceptos.Sum(c => c.PrecioBase);
+
+                            <!-- Encabezado del tema -->
+                            <tr>
+                                <th colspan="2">Tema</th>
+                                <th>Importe</th>
+                            </tr>
+
+                            <!-- Conceptos del tema -->
+                            @for (int i = 0; i < tema.Conceptos.Count; i++)
+                            {
+                                var concepto = tema.Conceptos[i];
+
+                                <tr>
+                                    @if (i == 0)
+                                    {
+                                        <td class="bold grupo">@tema.Tema</td>
+                                    }
+                                    else if (i == tema.Conceptos.Count - 1)
+                                    {
+                                        <td class="grupo-fin"></td>
+                                    }
+                                    else
+                                    {
+                                        <td class="grupo-cont"></td>
+                                    }
+
+                                    <td class="td-contenido">@concepto.Nombre</td>
+                                    <td class="right td-importe">
+                                        @concepto.PrecioBase.ToString("C")
+                                    </td>
+                                </tr>
+                            }
+
+                            <!-- TOTAL POR TEMA -->
+                            <tr>
+                                <td></td>
+                                <td class="bold">Total</td>
+                                <td class="right bold">
+                                    @totalTema.ToString("C")
+                                </td>
+                            </tr>
+
+                            <!-- Espacio entre temas -->
+                            <tr class="espacio">
+                                <td colspan="3"></td>
+                            </tr>
+                        }
+
+                        <!-- TOTAL POR REGLA -->
+                        <tr class="total-ingreso">
+                            <td colspan="2" class="bold">TOTAL INGRESO</td>
+                            <td class="right bold">
+                                @regla.Temas.Sum(t => t.Conceptos.Sum(c => c.PrecioBase)).ToString("C")
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                contador++;
+            }
+        }
+    </div>
+}
+
+
+ <!--btn de finzalizar ingreso-->
+@if (Model.Resumen.EstadoActualId != (int)EstadosIngresoEnum.IngresoFinalizado)
+{
+    <form asp-action="Finalizar" asp-controller="Ingreso" method="post"
+          data-confirm-title="Confirmar"
+          data-confirm-message="¿Está seguro de finalizar el trámite de ingreso?"
+          data-confirm-icon="question" class="js-confirm">
+
+        <input type="hidden" name="cobroIngreso" id="cobroIngreso" />
+        <input type="hidden" name="ingresoId" value="@Model.IngresoId" />
+
+        <input type="submit" value="Finalizar" class="btn btn-success text-center" />
+    </form>
+}
+
+
 @* Renderizamos el manejador pasándole el DTO del modelo *@
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
 
-@section Scripts{
+
+
+@section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"></script>
     <partial name="_ValidationScriptsPartial" />
     <script>
@@ -152,6 +499,125 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.auto-resize').forEach(t => autoResize(t));
+
+            // Control del switch de cobro
+            const switchCobro = document.getElementById('switchCobro');
+            const labelCobro = document.getElementById('labelCobro');
+            const selectorContainer = document.getElementById('selectorTablaContainer');
+            const contenedorTablas = document.getElementById('contenedorTablas');
+            const selectTabla = document.getElementById('selectTabla');
+            const tablaSeleccionadaInput = document.getElementById('tablaSeleccionadaId');
+            const cobroIngresoInput = document.getElementById('cobroIngreso');
+
+
+            // Función para actualizar el valor del input hidden de cobro
+            function actualizarCobroIngreso() {
+                if(switchCobro){
+                    if (!switchCobro.checked) {
+                    // Si el switch está desactivado
+                    cobroIngresoInput.value = 'No se cobra ingreso';
+                    } else {
+                        // Si el switch está activado, tomar el texto del select
+                        const selectedOption = selectTabla.options[selectTabla.selectedIndex];
+                        if (selectedOption && selectedOption.value !== '') {
+                            cobroIngresoInput.value = selectedOption.text;
+                        } else {
+                            cobroIngresoInput.value = '-- Seleccione una opción --';
+                        }
+                    }
+                }
+            }
+
+            // Inicializar el valor al cargar la página
+            actualizarCobroIngreso();
+
+            if (switchCobro) {
+                switchCobro.addEventListener('change', function() {
+                    if (this.checked) {
+                        labelCobro.textContent = 'Cobrar ingreso';
+                        selectorContainer.classList.add('active');
+                        // Mostrar la tabla seleccionada si existe
+                        if (selectTabla.value !== '') {
+                            mostrarTablaSeleccionada(selectTabla.value);
+                        }
+                    } else {
+                        labelCobro.textContent = 'No cobrar ingreso';
+                        selectorContainer.classList.remove('active');
+                        contenedorTablas.style.display = 'none';
+                        selectTabla.value = '';
+                        tablaSeleccionadaInput.value = '';
+                        ocultarTodasLasTablas();
+                    }
+
+                    // Actualizar el valor del input hidden
+                    actualizarCobroIngreso();
+                });
+            }
+
+            // Control del selector de tabla
+            if (selectTabla) {
+                selectTabla.addEventListener('change', function() {
+                    const indexSeleccionado = this.value;
+                    tablaSeleccionadaInput.value = indexSeleccionado;
+
+                    if (indexSeleccionado !== '') {
+                        mostrarTablaSeleccionada(indexSeleccionado);
+                    } else {
+                        ocultarTodasLasTablas();
+                        contenedorTablas.style.display = 'none';
+                    }
+
+                    // Actualizar el valor del input hidden
+                    actualizarCobroIngreso();
+                });
+            }
+
+            function mostrarTablaSeleccionada(index) {
+                const todasLasTablas = document.querySelectorAll('.grupo-tabla');
+
+                todasLasTablas.forEach((tabla, i) => {
+                    if (i.toString() === index) {
+                        tabla.style.display = 'block';
+                        tabla.classList.add('seleccionada');
+                        tabla.classList.remove('no-seleccionada');
+
+                        // Agregar badge si no existe
+                        if (!tabla.querySelector('.badge-seleccion')) {
+                            const badge = document.createElement('div');
+                            badge.className = 'badge-seleccion';
+                            badge.innerHTML = '✓ SELECCIONADO';
+                            tabla.appendChild(badge);
+                        }
+                    } else {
+                        tabla.style.display = 'none';
+                        tabla.classList.remove('seleccionada');
+
+                        // Remover badge
+                        const badge = tabla.querySelector('.badge-seleccion');
+                        if (badge) {
+                            badge.remove();
+                        }
+                    }
+                });
+
+                contenedorTablas.style.display = 'grid';
+            }
+
+            function ocultarTodasLasTablas() {
+                const todasLasTablas = document.querySelectorAll('.grupo-tabla');
+                todasLasTablas.forEach(tabla => {
+                    tabla.style.display = 'none';
+                    tabla.classList.remove('seleccionada', 'no-seleccionada');
+
+                    const badge = tabla.querySelector('.badge-seleccion');
+                    if (badge) {
+                        badge.remove();
+                    }
+                });
+            }
+
+            // Inicializar: ocultar todas las tablas al cargar
+            ocultarTodasLasTablas();
         });
     </script>
 }

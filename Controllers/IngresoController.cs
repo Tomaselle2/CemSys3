@@ -1,7 +1,5 @@
-﻿using CemSys3.Business.Tramite;
-using CemSys3.DTOs.Generics;
+﻿using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Ingreso;
-using CemSys3.DTOs.Nota;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
@@ -10,14 +8,10 @@ using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.EmpresaSepelio;
 using CemSys3.Interfaces.Ingreso;
 using CemSys3.Interfaces.Notas;
-using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Persona;
-using CemSys3.Interfaces.Seccion;
 using CemSys3.Interfaces.Tarifaria;
 using CemSys3.Interfaces.Usuario;
-using CemSys3.Models;
 using CemSys3.ViewModels.Ingreso;
-using CemSys3.ViewModels.Nota;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -30,18 +24,18 @@ namespace CemSys3.Controllers
         public readonly IUsuario _ususarioService;
         public readonly IPersona _personaService;
         public readonly IIngreso _ingresoService;
-        public readonly ITarifaria _tarifariaService;
+        public readonly IPrecioIngresoService _preciosIngresos;
 
         public IngresoController(INotas notasService, IEmpresaSepelio empresaSepelio, 
             IUsuario usuarioService, IPersona personaService,
-            IIngreso ingresoService, ITarifaria tarifariaService)
+            IIngreso ingresoService, IPrecioIngresoService preciosIngresos)
         {
             _notaService = notasService;
             _empresaService = empresaSepelio;
             _ususarioService = usuarioService;
             _personaService = personaService;
             _ingresoService = ingresoService;
-            _tarifariaService = tarifariaService;
+            _preciosIngresos = preciosIngresos;
         }
 
         [HttpGet]
@@ -68,41 +62,7 @@ namespace CemSys3.Controllers
             return View(viewModel);
         }
 
-        [HttpGet]
-        [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> ResumenIngreso(int ingresoId)
-        {
-            ResumenIngresoVM viewModel = new ResumenIngresoVM();
-
-            try
-            {
-                viewModel.Resumen = await _ingresoService.Get(ingresoId);
-                viewModel.IngresoId = ingresoId;
-                viewModel.InformacionAdicionalIngreso = viewModel.Resumen.InformacionAdicional;
-                //viewModel.PreciosIngresos = await _tarifariaService.GetPreciosIngresos();
-            }
-            catch (Exception ex)
-            {
-                viewModel.SweetAlert = new SweetAlertDTO
-                {
-                    Titulo = "Error",
-                    Mensaje = ex.Message,
-                    Tipo = "error"
-                };
-            }
-
-            viewModel.SweetAlert = TempData.GetSweetAlert();
-            return View(viewModel);
-        }
-
-        private async Task CargarListasIngreso(IngresoVM viewModel, int notaId)
-        {
-            //Cargar listas desplegables si es necesario
-            viewModel.NotaIngreso = await _notaService.Get(notaId);
-            viewModel.ListaEmpresasSepelio = await _empresaService.GetAll();
-            viewModel.ListaEmpleados = await _ususarioService.GetAll();
-        }
-
+        //envia los datos del ingreso al servidro
         [HttpPost]
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> Ingreso(IngresoVM viewModel)
@@ -247,6 +207,72 @@ namespace CemSys3.Controllers
                 await CargarListasIngreso(viewModel, viewModel.NotaIngreso.Id);
                 return View("Index", viewModel);
             }
+        }
+
+        //pantalla despues de ingreso exitoso
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> ResumenIngreso(int ingresoId)
+        {
+            ResumenIngresoVM viewModel = new ResumenIngresoVM();
+
+            try
+            {
+                viewModel.Resumen = await _ingresoService.Get(ingresoId);
+                viewModel.IngresoId = ingresoId;
+                viewModel.InformacionAdicionalIngreso = viewModel.Resumen.InformacionAdicional;
+                viewModel.PreciosIngresos = await _preciosIngresos.GetPreciosIngresoBy(viewModel.Resumen.TipoParcelaId, viewModel.Resumen.EstadoDifuntoId);
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = ex.Message,
+                    Tipo = "error"
+                };
+            }
+
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+            return View(viewModel);
+        }
+
+        //finaliza el tramite de ingreso
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> Finalizar(int ingresoId, string cobroIngreso)
+        {
+
+            try
+            {
+               await _ingresoService.FinalizarIngreso(ingresoId, cobroIngreso);
+               TempData.SetSweetAlert(
+                    new SweetAlertDTO
+                    {
+                        Titulo = "Éxito",
+                        Mensaje = "Ingreso finalizado correctamente",
+                        Tipo = "success"
+                    });
+                return RedirectToAction("ResumenIngreso", new { ingresoId = ingresoId });
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(
+                    new SweetAlertDTO
+                    {
+                        Titulo = "Error",
+                        Mensaje = ex.Message,
+                        Tipo = "error"
+                    });
+                return RedirectToAction("ResumenIngreso", new { ingresoId = ingresoId });
+            }
+        }
+        private async Task CargarListasIngreso(IngresoVM viewModel, int notaId)
+        {
+            //Cargar listas desplegables si es necesario
+            viewModel.NotaIngreso = await _notaService.Get(notaId);
+            viewModel.ListaEmpresasSepelio = await _empresaService.GetAll();
+            viewModel.ListaEmpleados = await _ususarioService.GetAll();
         }
 
     }

@@ -5,5 +5,6 @@ namespace CemSys3.Interfaces.Tarifaria
     public interface IPrecioIngresoService
     {
         Task<IEnumerable<PrecioIngresoDTO>> ObtenerTodasLasReglasAsync();
+        Task<IEnumerable<PrecioIngresoDTO>> GetPreciosIngresoBy(int tipoParcelaId, int estadoDifuntoId);
     }
 }

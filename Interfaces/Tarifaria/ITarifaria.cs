@@ -7,7 +7,5 @@ namespace CemSys3.Interfaces.Tarifaria
     {
         Task<IEnumerable<TarifariaRequestDTO>> GetPrecios(); //trae los precios sin paginar de todo
         Task ActualizarPreciosTarifaria(List<PrecioActualizarDTO> preciosActualizar); //para actualizar todos los precios
-
-        //Task<IEnumerable<PrecioIngresoDTO>> GetPreciosIngresos(); //trae los precios de los ingresos
     }
 }
