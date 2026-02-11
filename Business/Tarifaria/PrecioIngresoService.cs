@@ -16,7 +16,32 @@ namespace CemSys3.Business.Tarifaria
         {
             _context = context;
         }
+        public async Task<IEnumerable<ConceptoIngresoDTO>> GetPreciosAperturas(int tipoParcelaId)
+        {
+            var query = _context.PreciosTarifarias.AsQueryable();
 
+            // Si es fosa, solo traer apertura de fosa
+            if (tipoParcelaId == (int)TipoParcelaEnum.Fosa)
+            {
+                query = query.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.AperturaFosa ||
+                p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.PorcentajeFondoAyudaCentroSalud);
+            }
+            else // Si no es fosa, traer apertura de nicho (con o sin placa)
+            {
+                query = query.Where(p =>
+                    p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.AperturaNichoConPlaca ||
+                    p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.AperturaNichoSinPlaca ||
+                    p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.PorcentajeFondoAyudaCentroSalud
+                );
+            }
+
+            return await query.Select(s => new ConceptoIngresoDTO
+            {
+                ConceptoId = s.ConceptoTarifariaId,
+                Nombre = s.ConceptoTarifaria.Nombre,
+                PrecioBase = s.Precio
+            }).ToListAsync();
+        }
         public async Task<IEnumerable<PrecioIngresoDTO>> ObtenerTodasLasReglasAsync()
         {
             var reglas = await _context.ReglasIngresos
@@ -297,6 +322,6 @@ namespace CemSys3.Business.Tarifaria
             }
         }
 
-       
+    
     }
 }

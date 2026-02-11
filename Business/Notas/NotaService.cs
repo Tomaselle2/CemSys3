@@ -67,14 +67,17 @@ namespace CemSys3.Business.Notas
                 {
                     foreach (var tareaDto in dto.Tareas)
                     {
-                        TareaDTO nuevaTarea = new TareaDTO
+                        if (!tareaDto.Eliminada)
                         {
-                            NotaId = nuevaNota.TramiteId,
-                            Estado = tareaDto.Estado,
-                            Descripcion = tareaDto.Descripcion,
-                            Visibilidad = true
-                        };
-                        await _tareaService.Add(nuevaTarea);
+                            TareaDTO nuevaTarea = new TareaDTO
+                            {
+                                NotaId = nuevaNota.TramiteId,
+                                Estado = tareaDto.Estado,
+                                Descripcion = tareaDto.Descripcion,
+                                Visibilidad = true
+                            };
+                            await _tareaService.Add(nuevaTarea);
+                        }
                     }
                 }
 

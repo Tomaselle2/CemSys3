@@ -357,6 +357,62 @@ new HistorialOffcanvasVM
     </div>
 </div>
 
+<!-- Control de cobro de apertura -->
+@if (Model.Resumen.EstadoActualId == (int)EstadosIngresoEnum.IngresoRegistrado)
+{
+    <div class="control-cobro mt-4">
+
+        <div class="switch-container">
+            <label class="switch">
+                <input type="checkbox" id="switchApertura">
+                <span class="slider"></span>
+            </label>
+            <label for="switchApertura" style="font-weight: bold; font-size: 16px; margin: 0;">
+                <span id="labelApertura">No se cobra apertura</span>
+            </label>
+        </div>
+
+        <div id="selectorAperturaContainer" class="selector-tabla-container">
+            <label style="font-weight: bold; margin-bottom: 10px; display: block;">
+                Seleccione la apertura:
+            </label>
+
+            <select id="selectApertura" class="form-select" style="max-width: 600px;">
+                <option value="">-- Seleccione una opción --</option>
+
+                @{
+                    var porcentaje = Model.PreciosAperturas
+                    .FirstOrDefault(x => x.ConceptoId == (int)ConceptosTarifariaEnum.PorcentajeFondoAyudaCentroSalud);
+
+                    var aperturas = Model.PreciosAperturas
+                    .Where(x => x.ConceptoId != (int)ConceptosTarifariaEnum.PorcentajeFondoAyudaCentroSalud);
+
+                    foreach (var apertura in aperturas)
+                    {
+                        decimal montoFondo = porcentaje != null
+                        ? apertura.PrecioBase * (porcentaje.PrecioBase)
+                        : 0;
+
+                        decimal total = apertura.PrecioBase + montoFondo;
+
+                        <option value="@apertura.ConceptoId"
+                                data-base="@apertura.PrecioBase"
+                                data-porcentaje="@(porcentaje?.PrecioBase ?? 0)">
+                            @apertura.Nombre (@total.ToString("C"))
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div id="contenedorTablaApertura" style="display:none; margin-top:20px;"></div>
+
+    </div>
+
+}
+
+
+
 
 <!--Control de cobro de ingreso-->
 @if (Model.Resumen.EstadoActualId == (int)EstadosIngresoEnum.IngresoRegistrado)
@@ -498,6 +554,7 @@ new HistorialOffcanvasVM
 
         <input type="hidden" name="cobroIngreso" id="cobroIngreso" />
         <input type="hidden" name="ingresoId" value="@Model.IngresoId" />
+        <input type="hidden" name="cobroApertura" id="cobroApertura" />
 
         <input type="submit" value="Finalizar" class="btn btn-success text-center" />
     </form>
@@ -531,7 +588,7 @@ new HistorialOffcanvasVM
             const cobroIngresoInput = document.getElementById('cobroIngreso');
 
 
-            // Función para actualizar el valor del input hidden de cobro
+            // Función para actualizar el valor del input hidden de cobro de ingreso
             function actualizarCobroIngreso() {
                 if(switchCobro){
                     if (!switchCobro.checked) {
@@ -636,6 +693,102 @@ new HistorialOffcanvasVM
                     }
                 });
             }
+
+
+
+            // ===== CONTROL APERTURA =====
+
+            const switchApertura = document.getElementById('switchApertura');
+            const labelApertura = document.getElementById('labelApertura');
+            const selectorAperturaContainer = document.getElementById('selectorAperturaContainer');
+            const selectApertura = document.getElementById('selectApertura');
+            const contenedorTablaApertura = document.getElementById('contenedorTablaApertura');
+            const cobroAperturaInput = document.getElementById('cobroApertura');
+
+            // Inicializar
+            if(cobroAperturaInput){
+                cobroAperturaInput.value = "No se cobra apertura";
+            }
+
+            if (switchApertura) {
+                switchApertura.addEventListener('change', function () {
+
+                    if (this.checked) {
+                        labelApertura.textContent = "Se cobra apertura";
+                        selectorAperturaContainer.classList.add('active');
+                    }
+                    else {
+                        labelApertura.textContent = "No se cobra apertura";
+                        selectorAperturaContainer.classList.remove('active');
+                        contenedorTablaApertura.style.display = 'none';
+                        selectApertura.value = '';
+                        cobroAperturaInput.value = "No se cobra apertura";
+                    }
+                });
+            }
+
+            if (selectApertura) {
+                selectApertura.addEventListener('change', function () {
+
+                    const option = this.options[this.selectedIndex];
+
+                    if (!option.value) {
+                        contenedorTablaApertura.style.display = 'none';
+                        return;
+                    }
+
+                    const nombre = option.text.split(' (')[0];
+                    const precioBase = parseFloat(option.dataset.base);
+                    const porcentaje = parseFloat(option.dataset.porcentaje);
+
+                    const montoFondo = precioBase * (porcentaje);
+                    const total = precioBase + montoFondo;
+
+                    contenedorTablaApertura.innerHTML = `
+                        <table>
+                            <tr>
+                                <th colspan="2" style="font-size:16px;">APERTURA</th>
+                                <th>${new Date().getFullYear()}</th>
+                            </tr>
+
+                            <tr>
+                                <th>Concepto</th>
+                                <th></th>
+                                <th>Importe</th>
+                            </tr>
+
+                            <tr>
+                                <td class="bold">${nombre}</td>
+                                <td></td>
+                                <td class="right">${precioBase.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}</td>
+                            </tr>
+
+                            <tr>
+                                <td>% Fondo ayuda centro salud (${porcentaje}%)</td>
+                                <td></td>
+                                <td class="right">${montoFondo.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}</td>
+                            </tr>
+
+                            <tr class="total-ingreso">
+                                <td colspan="2" class="bold">TOTAL APERTURA</td>
+                                <td class="right bold">
+                                    ${total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}
+                                </td>
+                            </tr>
+                        </table>
+                    `;
+
+                    contenedorTablaApertura.style.display = 'block';
+
+                    // Guardar valor para enviar al controller
+                    cobroAperturaInput.value = `${nombre} (${total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })})`;
+                });
+}
+
+
+
+
+
 
             // Inicializar: ocultar todas las tablas al cargar
             ocultarTodasLasTablas();

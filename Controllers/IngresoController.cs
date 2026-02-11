@@ -228,6 +228,7 @@ namespace CemSys3.Controllers
                 viewModel.InformacionAdicionalIngreso = viewModel.Resumen.InformacionAdicional;
                 viewModel.PreciosIngresos = await _preciosIngresos.GetPreciosIngresoBy(viewModel.Resumen.TipoParcelaId, viewModel.Resumen.EstadoDifuntoId);
                 viewModel.HistorialEstados = await _historialEstados.GetAllById(ingresoId);
+                viewModel.PreciosAperturas = await _preciosIngresos.GetPreciosAperturas(viewModel.Resumen.TipoParcelaId);
             }
             catch (Exception ex)
             {
@@ -246,12 +247,12 @@ namespace CemSys3.Controllers
         //finaliza el tramite de ingreso
         [HttpPost]
         [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> Finalizar(int ingresoId, string cobroIngreso)
+        public async Task<IActionResult> Finalizar(int ingresoId, string cobroIngreso, string cobroApertura)
         {
 
             try
             {
-               await _ingresoService.FinalizarIngreso(ingresoId, cobroIngreso);
+               await _ingresoService.FinalizarIngreso(ingresoId, cobroIngreso, cobroApertura);
                TempData.SetSweetAlert(
                     new SweetAlertDTO
                     {

@@ -190,6 +190,9 @@ namespace CemSys3.Enumerables
     //concepto de la tarifaria 
     public enum ConceptosTarifariaEnum
     {
+        AperturaNichoConPlaca = 1,
+        AperturaNichoSinPlaca = 2,
+        AperturaFosa = 3,
         PorcentajeFondoAyudaCentroSalud = 18,
         MontoMinimoFondo = 19,
         PorcentajeAumentoInhumacionOtrasLocalidades = 20,

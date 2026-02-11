@@ -7,6 +7,6 @@ namespace CemSys3.Interfaces.Ingreso
     {
         Task<GenericResultDTO> Add(IngresoDTO dto);
         Task<ResumenIngresoDTO> Get(int ingresoId);
-        Task FinalizarIngreso (int ingresoId, string cobroIngreso);
+        Task FinalizarIngreso (int ingresoId, string cobroIngreso, string cobroApertura);
     }
 }

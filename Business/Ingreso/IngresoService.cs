@@ -151,7 +151,7 @@ namespace CemSys3.Business.Ingreso
             }
         }
 
-        public async Task FinalizarIngreso(int ingresoId, string cobroIngreso)
+        public async Task FinalizarIngreso(int ingresoId, string cobroIngreso, string cobroApertura)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
@@ -172,6 +172,7 @@ namespace CemSys3.Business.Ingreso
                 //Se suma el cobroIngreso en el infoAdicional del tramite Introduccion
                 Models.Introduccione ingreso = await _context.Introducciones.FindAsync(ingresoId) ?? throw new Exception("Ingreso no encontrado");
                 ingreso.InformacionAdicional += $"\nDetalle el cobro: {cobroIngreso}";
+                ingreso.InformacionAdicional += $"\nDetalle de la apertura: {cobroApertura}";
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();

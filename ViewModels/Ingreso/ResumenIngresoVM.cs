@@ -13,6 +13,7 @@ namespace CemSys3.ViewModels.Ingreso
         public ResumenIngresoDTO Resumen { get; set; } = new ResumenIngresoDTO();
 
         public IEnumerable<PrecioIngresoDTO> PreciosIngresos { get; set; } = new List<PrecioIngresoDTO>();
+        public IEnumerable<ConceptoIngresoDTO> PreciosAperturas { get; set; } = new List<ConceptoIngresoDTO>();
         public IEnumerable<HistorialEstadosDTO> HistorialEstados { get; set; } = new List<HistorialEstadosDTO>();
 
         //manero de errores
