@@ -5,7 +5,6 @@ using CemSys3.DTOs.Ingreso;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
-using CemSys3.Helpers.Enumerable;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Ingreso;
 using CemSys3.Interfaces.Notas;

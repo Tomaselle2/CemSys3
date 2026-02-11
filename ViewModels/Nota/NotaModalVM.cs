@@ -1,4 +1,5 @@
-﻿using CemSys3.DTOs.Tarea;
+﻿using CemSys3.DTOs.HistorialEstado;
+using CemSys3.DTOs.Tarea;
 using System.ComponentModel.DataAnnotations;
 
 namespace CemSys3.ViewModels.Nota
@@ -25,5 +26,7 @@ namespace CemSys3.ViewModels.Nota
         public string controlador { get; set; } = string.Empty;
 
         public List<TareaDTO> Tareas { get; set; } = new();
+        public IEnumerable<HistorialEstadosDTO> HistorialEstados { get; set; } = new List<HistorialEstadosDTO>();
+
     }
 }

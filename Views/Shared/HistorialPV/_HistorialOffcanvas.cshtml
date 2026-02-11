@@ -1,0 +1,38 @@
+﻿@using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.Historial
+@model HistorialOffcanvasVM
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="@Model.OffcanvasId">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">@Model.Titulo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+
+    <div class="offcanvas-body">
+        <div class="timeline">
+            @if (Model.Historial != null && Model.EnumType != null)
+            {
+                @foreach (var opc in Model.Historial)
+                {
+                    string estado = EnumHelper.GetDisplayNameByValue(
+                    Model.EnumType,
+                    opc.EstadoTramiteId
+                    );
+
+                    <div class="timeline-item">
+                        <div class="icon bg-success text-white">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                        <div class="content">
+                            <p class="mb-0 fw-bold">@estado</p>
+                            <small class="text-muted">
+                                <i class="bi bi-clock"></i>
+                                @opc.Fecha.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

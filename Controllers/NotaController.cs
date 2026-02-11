@@ -4,6 +4,7 @@ using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.Tarea;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Roles_Autenticacion;
+using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Notas;
 using CemSys3.ViewModels.Nota;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +15,12 @@ namespace CemSys3.Controllers
     public class NotaController : Controller
     {
         private readonly INotas _notaService;
+        private readonly IHistorialEstados _historialEstados;
 
-        public NotaController(INotas notasService)
+        public NotaController(INotas notasService, IHistorialEstados historialEstados)
         {
             _notaService = notasService;
+            _historialEstados = historialEstados;
         }
 
         [HttpGet]
@@ -169,7 +172,8 @@ namespace CemSys3.Controllers
                     Tareas = nota.Tareas,
                     EstadoId = nota.EstadoId,
                     tramiteVinculadoId = nota.TramiteIngresoId ?? 0,
-                    controlador = controlador ?? string.Empty
+                    controlador = controlador ?? string.Empty,
+                    HistorialEstados = await _historialEstados.GetAllById(nota.Id)
                 };
 
                 if(viewModel.EstadoId == (int)EstadosNotaEnum.NotaFinalizado)

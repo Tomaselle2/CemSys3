@@ -1,5 +1,6 @@
 ﻿@using CemSys3.Enumerables
 @using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.Historial
 @using CemSys3.ViewModels.Nota
 @model NotaModalVM
 
@@ -43,7 +44,24 @@
                     <span class="badge bg-black">
                         @(Model.EstadoId != 0 ? EnumHelper.GetDisplayNameByValue<EstadosNotaEnum>(Model.EstadoId) : "Sin guardar")
                     </span>
+                    <!--Btn historial-->
+                    <div>
+                        <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasHistorial_@Model.Id">
+                            <i class="bi bi-clock-history"></i> Historial
+                        </button>
+                    </div>
                 </div>
+
+                <!-- Panel lateral derecho del historial -->
+                @await Html.PartialAsync("HistorialPV/_HistorialOffcanvas",
+                new HistorialOffcanvasVM
+                {
+                    Historial = Model.HistorialEstados,
+                    EnumType = typeof(EstadosNotaEnum),
+                    OffcanvasId = $"offcanvasHistorial_{Model.Id}",
+                    Titulo = "Historial de la nota"
+                })
+                
 
                 <div class="modal-body">
 
@@ -154,6 +172,8 @@
         </div>
     </div>
 </div>
+
+
 
 <script>
     // evaluar estado inicial al abrir el modal

@@ -525,3 +525,56 @@ body {
     background-color: #eee;
 }
 
+
+
+
+
+/*Estilo Personalizado de historial de tramite*/
+.timeline {
+    position: relative;
+    margin-left: 30px;
+}
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 12px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #ccc;
+    }
+
+.timeline-item:last-child::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: white; /* mismo color que el fondo del panel */
+}
+
+.timeline-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+    .timeline-item .icon {
+        z-index: 1;
+        width: 28px;
+        height: 27px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1rem;
+        margin-right: 10px;
+    }
+
+    .timeline-item .content {
+        flex-grow: 1;
+    }
+

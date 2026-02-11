@@ -58,5 +58,20 @@ namespace CemSys3.Helpers.Enumerable
 
             return displayAttribute != null ? displayAttribute.Name : name;
         }
+
+        //para los historiales, el panel lateral
+        public static string GetDisplayNameByValue(Type enumType, int value)
+        {
+            if (!enumType.IsEnum)
+                throw new ArgumentException("El tipo debe ser un enum");
+
+            var name = Enum.GetName(enumType, value);
+            if (name == null) return value.ToString();
+
+            var field = enumType.GetField(name);
+            var attr = field?.GetCustomAttribute<DisplayAttribute>();
+
+            return attr?.Name ?? name;
+        }
     }
 }

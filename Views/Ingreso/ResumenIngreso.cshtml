@@ -1,4 +1,5 @@
-﻿@using CemSys3.ViewModels.Ingreso
+﻿@using CemSys3.ViewModels.Historial
+@using CemSys3.ViewModels.Ingreso
 @using CemSys3.Helpers.Enumerable
 @using CemSys3.Enumerables
 @model ResumenIngresoVM
@@ -230,7 +231,24 @@
 
 <div class="page-header-container">
     <h1 class="title-page">Resumen de ingreso</h1>
+
+    <!--Btn historial-->
+    <div>
+        <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasHistorial_@Model.IngresoId">
+            <i class="bi bi-clock-history"></i> Historial
+        </button>
+    </div>
 </div>
+
+<!-- Panel lateral derecho del historial -->
+@await Html.PartialAsync("HistorialPV/_HistorialOffcanvas",
+new HistorialOffcanvasVM
+{
+    Historial = Model.HistorialEstados,
+    EnumType = typeof(EstadosIngresoEnum),
+    OffcanvasId = $"offcanvasHistorial_{Model.IngresoId}",
+    Titulo = "Historial del ingreso"
+})
 
 <!-- Nota de ingreso -->
 <div class="container-fluid">
@@ -264,8 +282,10 @@
     </div>
 </div>
 
+<!-- Modal del ingreso -->
 <div id="modal-container"></div>
 
+<!-- Contenedor del resumen del ingreso -->
 <div class="contenedor-resumen mt-3">
 
     <div class="d-flex align-items-center justify-content-between">
@@ -312,9 +332,10 @@
     <p><strong>Parcela:</strong> @ubicacion</p>
 </div>
 
+<!-- Contenedor para alerta de htmx de informacion adicional -->
 <div id="htmx-alert-container" style="display:none;"></div>
 
-<!--Info adicional-->
+<!-- Bloque de Info adicional-->
 <div class="contenedor-resumen my-2">
     <div>
         <label><b>Información adicional del trámite</b></label>

@@ -6,6 +6,7 @@ using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.EmpresaSepelio;
+using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Ingreso;
 using CemSys3.Interfaces.Notas;
 using CemSys3.Interfaces.Persona;
@@ -25,10 +26,13 @@ namespace CemSys3.Controllers
         public readonly IPersona _personaService;
         public readonly IIngreso _ingresoService;
         public readonly IPrecioIngresoService _preciosIngresos;
+        public readonly IHistorialEstados _historialEstados;
+
 
         public IngresoController(INotas notasService, IEmpresaSepelio empresaSepelio, 
             IUsuario usuarioService, IPersona personaService,
-            IIngreso ingresoService, IPrecioIngresoService preciosIngresos)
+            IIngreso ingresoService, IPrecioIngresoService preciosIngresos,
+            IHistorialEstados historialEstados)
         {
             _notaService = notasService;
             _empresaService = empresaSepelio;
@@ -36,6 +40,7 @@ namespace CemSys3.Controllers
             _personaService = personaService;
             _ingresoService = ingresoService;
             _preciosIngresos = preciosIngresos;
+            _historialEstados = historialEstados;
         }
 
         [HttpGet]
@@ -222,6 +227,7 @@ namespace CemSys3.Controllers
                 viewModel.IngresoId = ingresoId;
                 viewModel.InformacionAdicionalIngreso = viewModel.Resumen.InformacionAdicional;
                 viewModel.PreciosIngresos = await _preciosIngresos.GetPreciosIngresoBy(viewModel.Resumen.TipoParcelaId, viewModel.Resumen.EstadoDifuntoId);
+                viewModel.HistorialEstados = await _historialEstados.GetAllById(ingresoId);
             }
             catch (Exception ex)
             {
@@ -267,6 +273,8 @@ namespace CemSys3.Controllers
                 return RedirectToAction("ResumenIngreso", new { ingresoId = ingresoId });
             }
         }
+
+        //carga los select, solo para formulario de carga de difunto
         private async Task CargarListasIngreso(IngresoVM viewModel, int notaId)
         {
             //Cargar listas desplegables si es necesario
