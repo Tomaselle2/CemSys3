@@ -51,9 +51,10 @@
                                         <td>@opc.FechaCreacion?.ToString("dd/MM/yyyy HH:mm")</td>
                                         <td>@(EnumHelper.GetDisplayNameByValue<CategoriaArchivosEnum>(categoria))</td>
                                         <td>
-                                            <button class="btn btn-primary btn-sm btnEditarArchivoCons btn-lista"
+                                            <button class="btn btn-warning btn-sm btnEditarArchivoCons btn-lista"
                                                     type="button"
                                                     data-id="@opc.Id"
+                                                    title="Editar"
                                                     data-concepto="@opc.Descripcion"
                                                     data-archivo="@opc.NombreArchivo"
                                                     data-categoria="@opc.CategoriaArchivo">
@@ -62,10 +63,29 @@
 
                                             <button type="button"
                                                     class="btn btn-secondary btn-sm btn-lista"
-                                                    title="Ver"
-                                                    onclick="verRecibo('@opc.Id')">
+                                                    title="Ver archivo"
+                                                    onclick="verRecibo('@opc.Id', '@Model.TramiteId')">
                                                 <i class="bi bi-eye"></i>
                                             </button>
+
+                                            <form asp-action="Eliminar"
+                                                  asp-controller="Archivo"
+                                                  method="get"
+                                                  style="display: inline-block;"
+                                                  class="js-confirm"
+                                                  data-confirm-title="Confirmar eliminación"
+                                                  data-confirm-message="¿Está seguro de eliminar el archivo @opc.Descripcion?.ToUpper()?"
+                                                  data-confirm-icon="warning">
+
+                                                <input type="hidden" name="archivoId" value="@opc.Id" />
+                                                <input type="hidden" name="tramiteId" value="@Model.TramiteId"/>
+
+                                                <button type="submit"
+                                                        class="btn btn-danger btn-sm btn-lista"
+                                                        title="Eliminar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 }
@@ -210,7 +230,8 @@
         </div>
     </div>
 </div>
-    <script>
+
+<script>
     // Lógica para editar un recibo o archivo
     document.addEventListener("DOMContentLoaded", function () {
         //para abrir el modal agregar archivo
@@ -256,6 +277,18 @@
         });
 
     });
+
+    function verRecibo(archivoId, tramiteId) {
+        const iframe = document.getElementById("reciboViewer");
+        const img = document.getElementById("reciboImage");
+
+        // Ocultar ambos al principio
+        iframe.style.display = "block";
+        img.style.display = "none";
+
+        iframe.src = `/Archivo/VerArchivo?archivoId=${archivoId}&tramiteId=${tramiteId}`;
+        new bootstrap.Modal(document.getElementById("modalVerRecibo")).show();
+    }
 </script>
 
 

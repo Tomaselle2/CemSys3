@@ -202,7 +202,7 @@ namespace CemSys3.Enumerables
         PorcentajeIntroduccionUrnaDerechoOficina = 24
     }
 
-    public enum CategoriaArchivosEnum
+    public enum CategoriaArchivosEnum //cada categoria que se agrega debe ser al final siempre
     {
         [Display(Name = "Contrato de Concesión")]
         Contrato_Concesion,
@@ -221,6 +221,12 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Decreto Municipal")]
         Decreto,
+
+        [Display(Name = "Tarifaria")]
+        Tarifaria,
+
+        [Display(Name = "Documentación CemSys")]
+        Documentacion,
 
         [Display(Name = "Otro tipo de archivo")]
         Otro

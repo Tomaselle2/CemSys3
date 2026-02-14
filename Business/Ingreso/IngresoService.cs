@@ -171,7 +171,7 @@ namespace CemSys3.Business.Ingreso
 
                 //Se suma el cobroIngreso en el infoAdicional del tramite Introduccion
                 Models.Introduccione ingreso = await _context.Introducciones.FindAsync(ingresoId) ?? throw new Exception("Ingreso no encontrado");
-                ingreso.InformacionAdicional += $"\nDetalle el cobro: {cobroIngreso}";
+                ingreso.InformacionAdicional += $"\nDetalle del cobro: {cobroIngreso}";
                 ingreso.InformacionAdicional += $"\nDetalle de la apertura: {cobroApertura}";
 
                 await _context.SaveChangesAsync();

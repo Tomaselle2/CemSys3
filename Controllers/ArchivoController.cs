@@ -2,6 +2,7 @@
 using CemSys3.DTOs.Generics;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
+using CemSys3.Helpers.PDF;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Archivo;
 using CemSys3.Models;
@@ -168,6 +169,68 @@ namespace CemSys3.Controllers
 
                 return RedirectToAction("IrATramite", "Tramite", new { tramiteId = viewModel.TramiteId });
             }
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado, RolUsuario.Administrador)]
+        public async Task<IActionResult> Eliminar(int tramiteId, Guid archivoId)
+        {
+            try
+            {
+                await _archivoService.Delete(archivoId);
+
+                TempData.SetSweetAlert(new DTOs.SweetAlert.SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "Archivo eliminado correctamente",
+                    Tipo = "success"
+                });
+                return RedirectToAction("IrATramite", "Tramite", new { tramiteId = tramiteId });
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new DTOs.SweetAlert.SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "Error al eliminar el archivo: " + ex.Message,
+                    Tipo = "error"
+                });
+
+                return RedirectToAction("IrATramite", "Tramite", new { tramiteId = tramiteId });
+            }
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado, RolUsuario.Administrador)]
+        public async Task<IActionResult> VerArchivo(Guid archivoId, int tramiteId)
+        {
+            var archivo = await _archivoService.Get(archivoId);
+
+            if (archivo == null || archivo.Contenido == null)
+            {
+                TempData.SetSweetAlert(new DTOs.SweetAlert.SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "Error al buscar el archivo",
+                    Tipo = "error"
+                });
+
+                return RedirectToAction("IrATramite", "Tramite", new { tramiteId = tramiteId });
+            }
+            string tipo = archivo.TipoArchivo.ToLower();
+
+            if (tipo.StartsWith("image/"))
+            {
+                // Convertir la imagen a PDF
+                archivo.Contenido = PdfHelper.ImagenComoPdf(archivo.Contenido);
+                tipo = "application/pdf";
+                archivo.NombreArchivo = Path.ChangeExtension(archivo.NombreArchivo, ".pdf");
+            }
+
+            // Forzar a que el navegador intente mostrarlo
+            Response.Headers["Content-Disposition"] = $"inline; filename=\"{archivo.NombreArchivo}\"";
+
+            return File(archivo.Contenido, tipo);
         }
     }
 }

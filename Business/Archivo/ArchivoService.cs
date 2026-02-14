@@ -48,6 +48,30 @@ namespace CemSys3.Business.Archivo
             await _context.SaveChangesAsync();
         }
 
+        public async Task Delete(Guid archivoId)
+        {
+            Models.Archivo archivo = await _context.Archivos.FindAsync(archivoId) ?? throw new Exception("No se encontro el archivo");
+
+            _context.Archivos.Remove(archivo);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<ArchivoDTO> Get(Guid archivoId)
+        {
+            Models.Archivo archivo = await _context.Archivos.FindAsync(archivoId) ?? throw new Exception("No se encontro el archivo");
+
+            return new ArchivoDTO
+            {
+                Id = archivo.Id,
+                NombreArchivo = archivo.NombreArchivo,
+                TipoArchivo = archivo.TipoArchivo,
+                Descripcion = archivo.Descripcion,
+                Visibilidad = archivo.Visibilidad,
+                Contenido = archivo.Contenido
+            };
+        }
+
         public async Task<IEnumerable<ArchivoDTO>> GetAllByTramiteId(int tramiteId)
         {
             return await _context.Archivos.Where(a => a.TramiteId == tramiteId).OrderByDescending(f=>f.FechaCreacion).Select(a => new ArchivoDTO {

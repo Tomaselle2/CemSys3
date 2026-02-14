@@ -18,7 +18,11 @@
 
         public bool Visibilidad { get; set; }
 
+
+
         public IFormFile? Archivo { get; set; }
         public string? MimeType { get; set; }
+        public byte[]? Contenido { get; set; }
+
     }
 }
