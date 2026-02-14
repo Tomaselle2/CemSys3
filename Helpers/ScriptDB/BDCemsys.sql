@@ -283,18 +283,19 @@ CREATE TABLE [dbo].[Tareas] (
 
 -- Tablas con dependencias de tercer nivel
 CREATE TABLE [dbo].[Archivos] (
-    [id] UNIQUEIDENTIFIER ROWGUIDCOL NOT NULL DEFAULT NEWID(),
+    [id] UNIQUEIDENTIFIER ROWGUIDCOL NOT NULL UNIQUE DEFAULT NEWID(),
     [categoriaArchivo] nvarchar(50),
     [tramiteId] int,
     [nombreArchivo] nvarchar(255) NOT NULL,
     [tipoArchivo] nvarchar(50) NOT NULL,
     [tamanoBytes] bigint NOT NULL,
-    [contenido] varbinary NOT NULL,
+    [contenido] VARBINARY(MAX) FILESTREAM NOT NULL,
     [descripcion] nvarchar(255),
     [fechaCreacion] DATETIME2 DEFAULT SYSDATETIME(),
     [visibilidad] bit NOT NULL DEFAULT 1,
     PRIMARY KEY ([id]),
-    CONSTRAINT [Archivos_tramiteId_fk] FOREIGN KEY([tramiteId]) REFERENCES [dbo].[Tramites]([id])
+    CONSTRAINT [Archivos_tramiteId_fk] FOREIGN KEY([tramiteId])
+        REFERENCES [dbo].[Tramites]([id])
 );
 
 CREATE TABLE [dbo].[HistorialEstadoTramite] (

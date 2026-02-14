@@ -5,6 +5,7 @@ using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
+using CemSys3.Interfaces.Archivo;
 using CemSys3.Interfaces.EmpresaSepelio;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Ingreso;
@@ -20,19 +21,19 @@ namespace CemSys3.Controllers
 {
     public class IngresoController : Controller
     {
-        public readonly INotas _notaService;
-        public readonly IEmpresaSepelio _empresaService;
-        public readonly IUsuario _ususarioService;
-        public readonly IPersona _personaService;
-        public readonly IIngreso _ingresoService;
-        public readonly IPrecioIngresoService _preciosIngresos;
-        public readonly IHistorialEstados _historialEstados;
-
+        private readonly INotas _notaService;
+        private readonly IEmpresaSepelio _empresaService;
+        private readonly IUsuario _ususarioService;
+        private readonly IPersona _personaService;
+        private readonly IIngreso _ingresoService;
+        private readonly IPrecioIngresoService _preciosIngresos;
+        private readonly IHistorialEstados _historialEstados;
+        private readonly IArchivo _archivoService;
 
         public IngresoController(INotas notasService, IEmpresaSepelio empresaSepelio, 
             IUsuario usuarioService, IPersona personaService,
             IIngreso ingresoService, IPrecioIngresoService preciosIngresos,
-            IHistorialEstados historialEstados)
+            IHistorialEstados historialEstados, IArchivo archivoService)
         {
             _notaService = notasService;
             _empresaService = empresaSepelio;
@@ -41,6 +42,7 @@ namespace CemSys3.Controllers
             _ingresoService = ingresoService;
             _preciosIngresos = preciosIngresos;
             _historialEstados = historialEstados;
+            _archivoService = archivoService;
         }
 
         [HttpGet]
@@ -141,15 +143,43 @@ namespace CemSys3.Controllers
                     personaExiste = await _personaService.PersonaExiste(viewModel.Dni.Value, viewModel.Sexo ?? "");
                 }
 
-                if (personaExiste) //difunto ya existe
+                if (personaExiste) //persona ya registrada con (DNI + SEXO)
                 {
-                    viewModel.SweetAlert = new SweetAlertDTO
-                    {
-                        Titulo = "Verificar",
-                        Mensaje = "El difunto que intenta ingresar ya existe",
-                        Tipo = "warning"
-                    };
+                    PersonaDTO persona = new PersonaDTO();
 
+                    //consultar el tipo de persona
+                    if (viewModel.Dni.HasValue && viewModel.Sexo != null)
+                    {
+                        persona = await _personaService.GetByDNISexo(viewModel.Dni.Value, viewModel.Sexo);
+                    }
+
+                    if (persona.CategoriaPersonaId == (int)CategoriaPersonaEnum.Titular) 
+                    {
+                        viewModel.SweetAlert = new SweetAlertDTO
+                        {
+                            Titulo = "Verificar",
+                            Mensaje = "El difunto que intenta registrar es titular en concesiones. ¿Desea ingresarlo como fallecido?",
+                            Tipo = "warning"
+                        };
+
+                        //marcar IngresoTitularFallecido en true
+                        viewModel.IngresoTitularFallecido = true;
+                    }
+                    else //si es difunto enviar error difunto existente
+                    {
+                        viewModel.SweetAlert = new SweetAlertDTO
+                        {
+                            Titulo = "Verificar",
+                            Mensaje = "El difunto que intenta ingresar ya existe",
+                            Tipo = "warning"
+                        };
+                    }
+
+                    //falta terminar metodo. Se envia mensaje de El difunto que intenta registrar es titular en concesiones.
+                    //Debe aparecer dos botones, para continuar o cancelar
+
+
+                    //si es persona titular enviar los datos a la vista con mensaje de si desea ingresar la persona como fallecida
                     await CargarListasIngreso(viewModel, viewModel.NotaIngreso.Id);
 
                     return View("Index", viewModel);
@@ -229,6 +259,7 @@ namespace CemSys3.Controllers
                 viewModel.PreciosIngresos = await _preciosIngresos.GetPreciosIngresoBy(viewModel.Resumen.TipoParcelaId, viewModel.Resumen.EstadoDifuntoId);
                 viewModel.HistorialEstados = await _historialEstados.GetAllById(ingresoId);
                 viewModel.PreciosAperturas = await _preciosIngresos.GetPreciosAperturas(viewModel.Resumen.TipoParcelaId);
+                viewModel.Archivos = await _archivoService.GetAllByTramiteId(ingresoId);
             }
             catch (Exception ex)
             {

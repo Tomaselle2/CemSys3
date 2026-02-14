@@ -1,0 +1,261 @@
+﻿@using CemSys3.ViewModels.Archivo
+@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@model ArchivoVM
+
+<style>
+    th{
+        font-size: 1.1rem;
+    }
+    td{
+        font-size: 1.1rem;
+    }
+    .accordion{
+        border: 0px;
+    }
+
+</style>
+<!--Tabla Archivos -->
+<div class="accordion" id="accordionPanelsStayOpenExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button nueva-seccion acordeon-fijo border-0 shadow-none" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                Archivos
+            </button>
+        </h2>
+        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            @* cuerpo del acordion *@
+            @if (Model.Archivos.Any())
+            {
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-0">
+                        <table class="table table-bordered mb-0 table-hover">
+                            <!-- SIN table-borderless -->
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Descripción</th>
+                                    <th>Fecha de carga</th>
+                                    <th>Categoría</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var opc in Model.Archivos)
+                                {
+                                    int categoria;
+                                    int.TryParse(opc.CategoriaArchivo, out categoria);
+
+                                    <tr>
+                                        <!-- Bootstrap añadirá automáticamente border-bottom a cada fila -->
+                                        <td>@opc.Descripcion</td>
+                                        <td>@opc.FechaCreacion?.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>@(EnumHelper.GetDisplayNameByValue<CategoriaArchivosEnum>(categoria))</td>
+                                        <td>
+                                            <button class="btn btn-primary btn-sm btnEditarArchivoCons btn-lista"
+                                                    type="button"
+                                                    data-id="@opc.Id"
+                                                    data-concepto="@opc.Descripcion"
+                                                    data-archivo="@opc.NombreArchivo"
+                                                    data-categoria="@opc.CategoriaArchivo">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+
+                                            <button type="button"
+                                                    class="btn btn-secondary btn-sm btn-lista"
+                                                    title="Ver"
+                                                    onclick="verRecibo('@opc.Id')">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mt-3" role="alert">
+                    <i class="bi bi-info-circle me-2"></i> No hay archivos registrados.
+                </div>
+            }
+            @* Fin cuerpo del acordeon *@
+        </div>
+
+        <button class="btn btn-success m-3"
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#SubirArchivoContrato">
+            <i class="bi bi-file-earmark-arrow-up" style="font-size: 20px;"></i>
+            Subir archivo
+        </button>
+    </div>
+</div>
+
+<!--Modal Editar Archivo-->
+<div class="modal fade" id="EditarArchivoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Editar archivo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="Editar" asp-controller="Archivo" method="post" id="formEditarArchivo" class="form-box" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="descripcionArchivoEdicion">Descripción<span class="obligatorio"> * </span></label>
+                        <input asp-for="Descripcion" id="descripcionArchivoEdicion" class="form-control" type="text" maxlength="255" required />
+                        <span asp-validation-for="Descripcion" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="control-label">Categoría del archivo<span class="obligatorio"> * </span></label>
+                        <select asp-for="CategoriaArchivo" id="categoriaArchivoEdicion"
+                                asp-items="EnumHelper.GetSelectListItems<CategoriaArchivosEnum>()"
+                                class="form-control"
+                                required>
+                            <option value="">-- Seleccione una categoría --</option>
+                        </select>
+                        <span asp-validation-for="CategoriaArchivo" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label>Archivo actual</label>
+                        <input type="text" id="archivoActualArchivo" class="form-control" readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label for="archivoReciboEdicion">Nuevo archivo (opcional) <span class="obligatorio"> (.png .jpg .pdf)</span></label>
+                        <input asp-for="Archivo" id="archivoReciboEdicion" class="form-control" type="file" accept=".png,.jpg,.jpeg,.pdf" />
+                        <span asp-validation-for="Archivo" class="text-danger"></span>
+                    </div>
+                    <input type="hidden" asp-for="IdArchivo" id="idArchivoHidden" />
+                    <input type="hidden" asp-for="TramiteId" value="@Model.TramiteId" />
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+                        <div class="my-3">
+                            <button type="submit" id="btnEditarArchivo" class="my-3 btn btn-success">
+                                <span class="btn-text">Editar</span>
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                <span class="loading-text d-none">Cargando...</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Modal del visor de archivo -->
+<div class="modal fade" id="modalVerRecibo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <!-- Extra grande -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Archivo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center" style="height: 85vh;">
+                <iframe id="reciboViewer" style="width: 100%; height: 80vh; border: none; display: none;"></iframe>
+                <img id="reciboImage" style="max-width: 100%; height: auto; display: none;" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Modal subir archivo contrato-->
+<div class="modal fade" id="SubirArchivoContrato" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Subir archivo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="Subir" asp-controller="Archivo" method="post" id="subirArchivoContratoForm" class="form-box" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="descripcionArchivo">Descripción<span class="obligatorio"> * </span></label>
+                        <input asp-for="Descripcion" id="descripcionArchivo" class="form-control" type="text" maxlength="255" required />
+                        <span asp-validation-for="Descripcion" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="control-label">Categoría del archivo<span class="obligatorio"> * </span></label>
+                        <select asp-for="CategoriaArchivo"
+                                asp-items="EnumHelper.GetSelectListItems<CategoriaArchivosEnum>()"
+                                class="form-control"
+                                required>
+                            <option value="">-- Seleccione una categoría --</option>
+                        </select>
+                        <span asp-validation-for="CategoriaArchivo" class="text-danger"></span>
+                    </div>
+                    <div>
+                        <label for="archivoRecibo">Seleccione el archivo<span class="obligatorio"> * (.png .jpg .pdf)</span></label>
+                        <input asp-for="Archivo" id="archivoContrato" class="form-control" type="file" accept=".png,.jpg,.jpeg,.pdf" required />
+                        <span asp-validation-for="Archivo" class="text-danger"></span>
+                    </div>
+                    <input type="hidden" asp-for="TramiteId" value="@Model.TramiteId" />
+        
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+                        <div class="my-3">
+                            <button type="submit" id="btnCargarArchivo" class="my-3 btn btn-success">
+                                <span class="btn-text">Subir</span>
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                <span class="loading-text d-none">Cargando...</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+    <script>
+    // Lógica para editar un recibo o archivo
+    document.addEventListener("DOMContentLoaded", function () {
+        //para abrir el modal agregar archivo
+            document.querySelectorAll('.btnAgregarArchivo').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const id = this.dataset.id;
+                const concepto = this.dataset.concepto;
+                const archivo = this.dataset.archivo;
+
+                document.getElementById('idArchivoHidden').value = id;
+                document.getElementById('descripcionArchivo').value = concepto;
+                document.getElementById('descripcionArchivo').value = "";
+
+
+                $('#SubirArchivoContrato').modal('show');
+            });
+        });
+
+        // Lógica para editar un archivo (modal EditarArchivoModal)
+        // Para editar archivo
+        document.querySelectorAll('.btnEditarArchivoCons').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const id = this.dataset.id;
+                const concepto = this.dataset.concepto;
+                const archivo = this.dataset.archivo;
+                const categoria = this.dataset.categoria;
+
+                // Llenar el formulario de edición de archivo
+                document.getElementById('idArchivoHidden').value = id;
+                document.getElementById('descripcionArchivoEdicion').value = concepto;
+                document.getElementById('archivoActualArchivo').value = archivo || "Sin archivo";
+
+                // Establecer la categoría seleccionada
+                const selectCategoria = document.getElementById('categoriaArchivoEdicion');
+                if (selectCategoria) {
+                    selectCategoria.value = categoria;
+                }
+
+                // Mostrar el modal correcto
+                const modal = new bootstrap.Modal(document.getElementById('EditarArchivoModal'));
+                modal.show();
+            });
+        });
+
+    });
+</script>
+
+

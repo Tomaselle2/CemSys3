@@ -92,6 +92,10 @@ namespace CemSys3.Controllers
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> Guardar(NotaModalVM vm)
         {
+            foreach (var item in vm.Tareas) {
+                if (item.Descripcion == null)
+                    item.Descripcion = "---";
+            }
             if (!ModelState.IsValid)
             {
                 return PartialView("_ModalNota", vm); // NO CIERRA MODAL

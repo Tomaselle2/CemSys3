@@ -2,6 +2,7 @@
 @using CemSys3.ViewModels.Ingreso
 @using CemSys3.Helpers.Enumerable
 @using CemSys3.Enumerables
+@using CemSys3.ViewModels.Archivo
 @model ResumenIngresoVM
 
 @{
@@ -412,8 +413,6 @@ new HistorialOffcanvasVM
 }
 
 
-
-
 <!--Control de cobro de ingreso-->
 @if (Model.Resumen.EstadoActualId == (int)EstadosIngresoEnum.IngresoRegistrado)
 {
@@ -544,6 +543,13 @@ new HistorialOffcanvasVM
 }
 
 
+<!-- Archivos-->
+@await Html.PartialAsync("ArchivoPV/_ArchivoPV",
+new ArchivoVM
+{
+    Archivos = Model.Archivos,
+    TramiteId = Model.IngresoId
+})
  <!--btn de finzalizar ingreso-->
 @if (Model.Resumen.EstadoActualId != (int)EstadosIngresoEnum.IngresoFinalizado)
 {

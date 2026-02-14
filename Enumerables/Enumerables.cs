@@ -202,6 +202,30 @@ namespace CemSys3.Enumerables
         PorcentajeIntroduccionUrnaDerechoOficina = 24
     }
 
+    public enum CategoriaArchivosEnum
+    {
+        [Display(Name = "Contrato de Concesión")]
+        Contrato_Concesion,
+
+        [Display(Name = "Recibo")]
+        Recibo,
+
+        [Display(Name = "Documento de Identidad")]
+        DNI,
+
+        [Display(Name = "Acta")]
+        Acta,
+
+        [Display(Name = "Libreta de Familia")]
+        Libreta_Familia,
+
+        [Display(Name = "Decreto Municipal")]
+        Decreto,
+
+        [Display(Name = "Otro tipo de archivo")]
+        Otro
+    }
+
     public class Enumerables
     {
     }

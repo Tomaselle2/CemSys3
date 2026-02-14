@@ -49,6 +49,8 @@ namespace CemSys3.ViewModels.Ingreso
         [Required(ErrorMessage = "La fecha y hora de ingreso es obligatoria")]
         public DateTime? FechaHoraIngreso { get; set; }
 
+        public bool IngresoTitularFallecido { get; set; }
+
         public string? InformacionAdicional { get; set; }
 
         public DateOnly? FechaNacimiento { get; set; }

@@ -95,7 +95,9 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Archivo>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Archivos__3213E83F51AC4CFC");
+            entity.HasKey(e => e.Id).HasName("PK__Archivos__3213E83FE52232AA");
+
+            entity.HasIndex(e => e.Id, "UQ__Archivos__3213E83EF00E858A").IsUnique();
 
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("(newid())")
@@ -103,9 +105,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CategoriaArchivo)
                 .HasMaxLength(50)
                 .HasColumnName("categoriaArchivo");
-            entity.Property(e => e.Contenido)
-                .HasMaxLength(1)
-                .HasColumnName("contenido");
+            entity.Property(e => e.Contenido).HasColumnName("contenido");
             entity.Property(e => e.Descripcion)
                 .HasMaxLength(255)
                 .HasColumnName("descripcion");

@@ -42,6 +42,22 @@ namespace CemSys3.Business.Persona
             return persona.Id;
         }
 
+        public async Task<PersonaDTO> GetByDNISexo(int dni, string sexo)
+        {
+            string dniString = dni.ToString("D8");
+            return await _context.Personas.Where(p=> p.Dni == dniString && p.Sexo == sexo).Select(s => new PersonaDTO
+            {
+                Id = s.Id,
+                Nombre = s.Nombre,
+                Apellido = s.Apellido,
+                Dni = s.Dni,
+                Sexo = s.Sexo,
+                Visibilidad = s.Visibilidad,
+                CategoriaPersonaId = s.CategoriaPersonaId
+
+            }).FirstOrDefaultAsync();
+        }
+
         public async Task<bool> PersonaExiste(int dni, string sexo)
         {
             string dniString = dni.ToString("D8");
