@@ -2,6 +2,8 @@
 using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.HistorialEstado;
 using CemSys3.DTOs.Ingreso;
+using CemSys3.DTOs.Paginacion;
+using CemSys3.DTOs.Parcela;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
@@ -231,5 +233,75 @@ namespace CemSys3.Business.Ingreso
             return ingreso;
         }
 
+        public async Task<PaginadoResponse<ListadoIngresosDTO>> GetAllPaginadoIngresos(DateOnly? fechaDesde, DateOnly? fechaHasta, int pagina = 1, int porPagina = 10, int filtro = 0)
+        {
+            PaginadoResponse<ListadoIngresosDTO> resultado = new PaginadoResponse<ListadoIngresosDTO>();
+
+            var query = _context.Introducciones.Include(d=> d.Difunto).Include(t=> t.Tramite).Include(p => p.Parcela).AsQueryable();
+
+            // Filtro por estado de estado
+            switch (filtro)
+            {
+                case 1: //registrados
+                    query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosIngresoEnum.IngresoRegistrado);
+                    break;
+                case 2: //finalizados
+                    query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosIngresoEnum.IngresoFinalizado);
+                    break;
+                case 0: //todos
+                default:
+                    // No aplicar filtro
+                    break;
+            }
+
+
+
+            // Aplicar filtros de fecha si existen
+            if (fechaDesde.HasValue)
+            {
+                DateTime _fechaDesde = fechaDesde.Value.ToDateTime(TimeOnly.MinValue);
+               
+                query = query.Where(x => x.FechaIngreso >= _fechaDesde);
+            }
+
+            if (fechaHasta.HasValue)
+            {
+                DateTime _fechaHasta = fechaHasta.Value.ToDateTime(TimeOnly.MinValue);
+
+                // Añadir un día para incluir todo el día hasta
+                query = query.Where(x => x.FechaIngreso < _fechaHasta.AddDays(1));
+            }
+
+            // Total de registros
+            var total = await query.CountAsync();
+
+            // Paginación
+            resultado.Paginacion.TotalPaginas = (int)Math.Ceiling(total / (double)porPagina);
+            resultado.Paginacion.PaginaActual = Math.Max(1, Math.Min(pagina, resultado.Paginacion.TotalPaginas));
+            resultado.Paginacion.RegistrosPorPagina = porPagina;
+            resultado.Paginacion.Accion = "ListadoIngresos";
+            resultado.Paginacion.Controlador = "Ingreso";
+            resultado.Paginacion.TotalRegistros = total;
+
+            // Obtener datos paginados
+            resultado.Items = await query
+                .OrderByDescending(e => e.FechaIngreso)
+                .Skip((resultado.Paginacion.PaginaActual - 1) * porPagina)
+                .Take(porPagina)
+                .Select(e => new ListadoIngresosDTO
+                {
+                    TramiteId = e.TramiteId,
+                    EstadoTramiteId = e.Tramite.EstadoActualId,
+                    NroParcela = e.Parcela.NroParcela,
+                    NroFila = e.Parcela.NroFila,
+                    TipoParcelaId = e.Parcela.TipoParcelaId ?? 0,
+                    NombreSeccion = e.Parcela.Seccion.Nombre.ToUpper(),
+                    NombreDifunto = e.Difunto.Nombre ?? "----",
+                    ApellidoDifunto = e.Difunto.Apellido ?? "----",
+                    FechaIngreso = e.FechaIngreso
+                }).ToListAsync();
+
+            return resultado;
+        }
     }
 }

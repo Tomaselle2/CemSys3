@@ -231,6 +231,7 @@
 
 
 <div class="page-header-container">
+    <a asp-action="ListadoIngresos" asp-controller="Ingreso" class="btn btn-secondary m-3" title="Configuración"><i class="bi bi-arrow-left"></i></a>
     <h1 class="title-page">Resumen de ingreso</h1>
 
     <!--Btn historial-->
@@ -770,7 +771,7 @@ new ArchivoVM
                             </tr>
 
                             <tr>
-                                <td>% Fondo ayuda centro salud (${porcentaje}%)</td>
+                                <td>% Fondo ayuda centro salud (${(porcentaje*100)}%)</td>
                                 <td></td>
                                 <td class="right">${montoFondo.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}</td>
                             </tr>

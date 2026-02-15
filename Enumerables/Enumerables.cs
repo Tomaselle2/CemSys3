@@ -125,6 +125,19 @@ namespace CemSys3.Enumerables
         Desocupado = 2,
     }
 
+    //para filtro de estados de ingresos
+    public enum FiltroEstadosIngresosEnum
+    {
+        [Display(Name = "Todos")]
+        Todas = 0,
+
+        [Display(Name = "Registrados")]
+        Registrados = 1,
+
+        [Display(Name = "Finalizados")]
+        Finalizados = 2,
+    }
+
     public enum TemaTarifariaEnum
     {
         [Display(Name = "General")]

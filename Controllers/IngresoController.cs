@@ -1,5 +1,6 @@
 ﻿using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Ingreso;
+using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
@@ -45,6 +46,56 @@ namespace CemSys3.Controllers
             _archivoService = archivoService;
         }
 
+        //vista muestra el listado de ingresos
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> ListadoIngresos(DateOnly? fechaDesde, DateOnly? fechaHasta, int filtro = 0, int pagina = 1, int porPagina = 10)
+        {
+            ListadoIngresosVM viewModel = new ListadoIngresosVM();
+
+            if(fechaDesde.HasValue && fechaHasta.HasValue)
+            {
+                if(fechaHasta < fechaDesde)
+                {
+                    viewModel.SweetAlert = new SweetAlertDTO
+                    {
+                        Titulo = "Validación",
+                        Mensaje = $"La fecha hasta: {fechaHasta?.ToString("dd/MM/yyyy")} es menor a fecha desde: {fechaDesde?.ToString("dd/MM/yyyy")}",
+                        Tipo = "warning"
+                    };
+
+                    return View(viewModel);
+                }
+            }
+
+            try
+            {
+                PaginadoResponse<ListadoIngresosDTO> resultado = await _ingresoService.GetAllPaginadoIngresos(fechaDesde, fechaHasta, pagina, porPagina, filtro);
+                viewModel.Ingresos = resultado.Items;
+                viewModel.Paginacion = resultado.Paginacion;
+
+                viewModel.Paginacion.Parametros = new Dictionary<string, string>();
+
+                viewModel.Paginacion.Parametros.Add("fechaDesde", fechaDesde?.ToString("yyyy-MM-dd") ?? "");
+                viewModel.Paginacion.Parametros.Add("fechaHasta", fechaHasta?.ToString("yyyy-MM-dd") ?? "");
+                viewModel.Paginacion.Parametros.Add("porPagina", porPagina.ToString());
+                viewModel.Paginacion.Parametros.Add("filtro", filtro.ToString());
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al cargar los ingresos: {ex.Message}",
+                    Tipo = "error"
+                };
+            }
+
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+            return View(viewModel);
+        }
+
+        //vista para realizar el ingreso
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> Index(int notaId)

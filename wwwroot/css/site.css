@@ -144,6 +144,20 @@ body {
     border-radius: 1px;
 }
 
+.nroTramite {
+    margin-bottom: 15px;
+    font-weight: 600;
+    color: #338b85;
+    font-size: 1.7rem;
+}
+
+.estadoTramite {
+    margin-bottom: 15px;
+    font-weight: 600;
+    color: #8b26b4;
+    font-size: 1.7rem;
+}
+
 
 
 

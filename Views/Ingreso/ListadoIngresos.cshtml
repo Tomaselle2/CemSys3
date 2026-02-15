@@ -1,0 +1,181 @@
+﻿@using CemSys3.DTOs.Paginacion
+@using CemSys3.ViewModels.Ingreso
+@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@model ListadoIngresosVM
+@{
+    ViewData["Title"] = "Ingresos";
+}
+
+<div class="page-header-container">
+    <h1 class="title-page">Ingresos</h1>
+</div>
+
+<!-- formulario buscador -->
+<div class="accordion" id="accordionPanelsStayOpenExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                Buscador
+            </button>
+        </h2>
+        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            @* cuerpo del acordion *@
+            <div class="accordion-body">
+                <form asp-action="ListadoIngresos" method="get">
+
+                    @* Mantener contexto *@
+                    <input type="hidden" name="pagina" value="1" />
+                    <input type="hidden" name="porPagina" value="@Model.Paginacion.RegistrosPorPagina" />
+
+                    <div class="d-flex justify-content-center align-items-end gap-4 p-3 flex-wrap">
+
+                        <div>
+                            <label class="form-label fw-semibold">Desde</label>
+                            <input type="date"
+                                   class="form-control shadow-sm"
+                                   name="fechaDesde"
+                                   style="width: 200px;"
+                                   value="@(Model.Paginacion.Parametros.TryGetValue("fechaDesde", out var fd) ? fd : "")" />
+                        </div>
+
+                        <div>
+                            <label class="form-label fw-semibold">Hasta</label>
+                            <input type="date"
+                                   class="form-control shadow-sm"
+                                   name="fechaHasta"
+                                   style="width: 200px;"
+                                   value="@(Model.Paginacion.Parametros.TryGetValue("fechaHasta", out var fh) ? fh : "")" />
+                        </div>
+
+                    </div>
+
+                    @{
+                        int filtroSeleccionado = 0;
+                        if (Model.Paginacion.Parametros != null && Model.Paginacion.Parametros.ContainsKey("filtro"))
+                        {
+                            int.TryParse(Model.Paginacion.Parametros["filtro"], out filtroSeleccionado);
+                        }
+                    }
+                    <div class="d-flex justify-content-center align-items-center gap-2 p-3">
+                        <label class="mb-0 fw-semibold">Estado</label>
+
+                        <select name="filtro"
+                                class="form-control shadow-sm form-select"
+                                style="width: 160px"
+                                asp-items="EnumHelper.GetSelectListItems<FiltroEstadosIngresosEnum>(filtroSeleccionado)">
+                        </select>
+                    </div>
+                    
+
+                    <div class="text-center mt-3">
+                        <button type="submit" class="btn btn-success me-2" id="btnBuscar">Buscar</button>
+                        <a asp-action="ListadoIngresos" asp-controller="Ingreso" class="btn btn-primary">Limpiar filtros</a>
+                    </div>
+                </form>
+            </div>
+            @* Fin cuerpo del acordeon *@
+        </div>
+    </div>
+</div>
+
+<!-- Tabla -->
+<div class="accordion" id="accordionPanelsStayOpenExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                Ingresos
+            </button>
+        </h2>
+        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            @* cuerpo del acordion *@
+            @if (Model.Ingresos.Any())
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Trámite</th>
+                                    <th>Fecha del ingreso</th>
+                                    <th>Difunto</th>
+                                    <th>Sección</th>
+                                    <th>Parcela</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var opc in Model.Ingresos)
+                                {
+                                    string parcela = "";
+                                    if (opc.TipoParcelaId == (int)TipoParcelaEnum.Nicho) //nicho
+                                    {
+                                        parcela = $"Nicho {opc.NroParcela.ToString()} Fila {opc.NroFila.ToString()}";
+                                    }
+                                    else if (opc.TipoParcelaId == (int)TipoParcelaEnum.Fosa)//fosa
+                                    {
+                                        parcela = $"Fosa {opc.NroParcela.ToString()}";
+                                    }
+                                    else if (opc.TipoParcelaId == (int)TipoParcelaEnum.Panteon) //panteon
+                                    {
+                                        parcela = $"Lote {opc.NroParcela.ToString()}";
+                                    }
+
+                                    <tr>
+                                        <td>@opc.TramiteId</td>
+                                        <td>@opc.FechaIngreso?.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>@opc.ApellidoDifunto.ToUpper(), @opc.NombreDifunto.ToUpper()</td>
+                                        <td>@opc.NombreSeccion.ToUpper()</td>
+                                        <td>@parcela</td>
+                                        <td>@(EnumHelper.GetDisplayNameByValue<EstadosIngresoEnum>(opc.EstadoTramiteId))</td>
+                                        <td>
+                                            <a asp-action="IrATramite"
+                                               asp-controller="Tramite"
+                                               asp-route-tramiteId="@opc.TramiteId"
+                                               class="btn btn-secondary btn-sm btn-lista"
+                                               title="Ir a trámite">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mt-3" role="alert">
+                    <i class="bi bi-info-circle me-2"></i> No se encontraron registros de ingresos.
+                </div>
+            }
+            @* Fin cuerpo del acordeon *@
+
+            @* Paginador *@
+            @if (Model.Paginacion.TotalPaginas > 0)
+            {
+                @await Html.PartialAsync("_Paginador", new PaginacionDTO
+                {
+                    PaginaActual = Model.Paginacion.PaginaActual,
+                        TotalPaginas = Model.Paginacion.TotalPaginas,
+                        TotalRegistros = Model.Paginacion.TotalRegistros,
+                        RegistrosPorPagina = Model.Paginacion.RegistrosPorPagina,
+                        Accion = "ListadoIngresos",
+                        Controlador = "Ingreso",
+                        Parametros = Model.Paginacion.Parametros
+                })
+            }
+        </div>
+    </div>
+</div>
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

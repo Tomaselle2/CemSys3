@@ -40,7 +40,7 @@
            <input type="hidden" name="pagina" value="1" />
            <input type="hidden" name="porPagina" value="@Model.Paginacion.RegistrosPorPagina" />
 
-        <label class="small text-muted">Mostrar:</label>
+        <label class="small text-muted fw-semibold">Mostrar:</label>
 
         @{
             int filtroSeleccionado = 0;
@@ -60,7 +60,7 @@
         }
         <!-- Select de TipoNota -->
         <select name="filtro"
-                class="form-select form-select-sm"
+                class="form-control shadow-sm form-select"
                 style="width: 160px"
                 onchange="this.form.submit()">
             @foreach (var item in EnumHelper.GetSelectListItems<TipoNotaEnum>())
@@ -73,7 +73,7 @@
 
         <!-- Select de EstadosNota -->
         <select name="estadoId"
-                class="form-select form-select-sm"
+                class="form-control shadow-sm form-select"
                 style="width: 160px"
                 onchange="this.form.submit()">
             @foreach (var item in EnumHelper.GetSelectListItems<EstadosNotaEnum>())
