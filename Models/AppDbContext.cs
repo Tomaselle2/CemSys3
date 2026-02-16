@@ -187,16 +187,9 @@ public partial class AppDbContext : DbContext
                 .ValueGeneratedNever()
                 .HasColumnName("tramiteId");
             entity.Property(e => e.CantidadAniosId).HasColumnName("cantidadAniosId");
-            entity.Property(e => e.Concesion)
-                .HasMaxLength(10)
-                .HasColumnName("concesion");
+            entity.Property(e => e.Concesion).HasColumnName("concesion");
             entity.Property(e => e.CuotaId).HasColumnName("cuotaId");
-            entity.Property(e => e.FechaGeneracion)
-                .HasColumnType("datetime")
-                .HasColumnName("fechaGeneracion");
-            entity.Property(e => e.PagoDescripcion)
-                .HasMaxLength(200)
-                .HasColumnName("pagoDescripcion");
+            entity.Property(e => e.InformacionAdicional).HasColumnName("informacionAdicional");
             entity.Property(e => e.ParcelaId).HasColumnName("parcelaId");
             entity.Property(e => e.Precio)
                 .HasColumnType("decimal(15, 2)")

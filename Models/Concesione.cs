@@ -7,11 +7,7 @@ public partial class Concesione
 {
     public int TramiteId { get; set; }
 
-    public string? Concesion { get; set; }
-
-    public string? PagoDescripcion { get; set; }
-
-    public DateTime? FechaGeneracion { get; set; }
+    public int? Concesion { get; set; }
 
     public decimal? Precio { get; set; }
 
@@ -28,6 +24,8 @@ public partial class Concesione
     public int? CuotaId { get; set; }
 
     public int? UsuarioId { get; set; }
+
+    public string? InformacionAdicional { get; set; }
 
     public virtual AnioConcesion? CantidadAnios { get; set; }
 

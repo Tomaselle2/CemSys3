@@ -362,11 +362,10 @@ CREATE TABLE [dbo].[ParcelaDifuntos] (
 
 CREATE TABLE [dbo].[Concesiones] (
     [tramiteId] int NOT NULL,
-    [concesion] nvarchar(10),
-    [pagoDescripcion] nvarchar(200),
-    [fechaGeneracion] datetime,
+    [concesion] int,
     [precio] decimal(15, 2),
     [visibilidad] bit DEFAULT 1,
+	[informacionAdicional] nvarchar(max),
     [tipoParcela] nvarchar(20),
     [vencimiento] date,
     [parcelaId] int NOT NULL,
