@@ -40,7 +40,6 @@
            <input type="hidden" name="pagina" value="1" />
            <input type="hidden" name="porPagina" value="@Model.Paginacion.RegistrosPorPagina" />
 
-        <label class="small text-muted fw-semibold">Mostrar:</label>
 
         @{
             int filtroSeleccionado = 0;
@@ -58,31 +57,58 @@
                 }
             }
         }
-        <!-- Select de TipoNota -->
-        <select name="filtro"
-                class="form-control shadow-sm form-select"
-                style="width: 160px"
-                onchange="this.form.submit()">
-            @foreach (var item in EnumHelper.GetSelectListItems<TipoNotaEnum>())
-            {
-                <option value="@item.Value" selected="@(item.Value == filtroSeleccionado.ToString())">
-                    @item.Text
-                </option>
-            }
-        </select>
+        
 
-        <!-- Select de EstadosNota -->
-        <select name="estadoId"
-                class="form-control shadow-sm form-select"
-                style="width: 160px"
-                onchange="this.form.submit()">
-            @foreach (var item in EnumHelper.GetSelectListItems<EstadosNotaEnum>())
-            {
-                <option value="@item.Value" selected="@(item.Value == estadoSeleccionado.ToString())">
-                    @item.Text
-                </option>
-            }
-        </select>
+        <div class="d-flex justify-content-center align-items-end gap-4 p-3 flex-wrap">
+            <label class="small text-muted fw-semibold">Mostrar:</label>
+
+            <!-- Select de TipoNota -->
+            <select name="filtro"
+                    class="form-control shadow-sm form-select"
+                    style="width: 160px"
+                    onchange="this.form.submit()">
+                @foreach (var item in EnumHelper.GetSelectListItems<TipoNotaEnum>())
+                {
+                    <option value="@item.Value" selected="@(item.Value == filtroSeleccionado.ToString())">
+                        @item.Text
+                    </option>
+                }
+            </select>
+
+            <!-- Select de EstadosNota -->
+            <select name="estadoId"
+                    class="form-control shadow-sm form-select"
+                    style="width: 160px"
+                    onchange="this.form.submit()">
+                @foreach (var item in EnumHelper.GetSelectListItems<EstadosNotaEnum>())
+                {
+                    <option value="@item.Value" selected="@(item.Value == estadoSeleccionado.ToString())">
+                        @item.Text
+                    </option>
+                }
+            </select>
+
+            <div>
+                <label class="form-label fw-semibold">Desde</label>
+                <input type="date"
+                       class="form-control shadow-sm"
+                       name="fechaDesde"
+                       style="width: 200px;"
+                       value="@(Model.Paginacion.Parametros.TryGetValue("fechaDesde", out var fd) ? fd : "")" />
+            </div>
+            <div>
+                <label class="form-label fw-semibold">Hasta</label>
+                <input type="date"
+                       class="form-control shadow-sm"
+                       name="fechaHasta"
+                       style="width: 200px;"
+                       value="@(Model.Paginacion.Parametros.TryGetValue("fechaHasta", out var fh) ? fh : "")" />
+            </div>
+            <div class="text-center mt-3">
+                <button type="submit" class="btn btn-success me-2" id="btnBuscar">Filtrar</button>
+                <a asp-action="Index" asp-controller="Nota" class="btn btn-primary">Limpiar fechas</a>
+            </div>
+        </div>
     </form>
 </div>
 

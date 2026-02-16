@@ -150,7 +150,7 @@ namespace CemSys3.Business.Notas
             return notaDTO;
         }
 
-        public async Task<PaginadoResponse<NotaDTO>> GetPaginadoByTipo(int estadoId, int filtroTipoNota = 0, int pagina = 1, int porPagina = 10)
+        public async Task<PaginadoResponse<NotaDTO>> GetPaginadoByTipo(DateOnly? fechaDesde, DateOnly? fechaHasta, int estadoId, int filtroTipoNota = 0, int pagina = 1, int porPagina = 10)
         {
             PaginadoResponse<NotaDTO> resultado = new PaginadoResponse<NotaDTO>();
 
@@ -175,7 +175,23 @@ namespace CemSys3.Business.Notas
                         break;
                 }
             }
-            
+
+            // Aplicar filtros de fecha si existen
+            if (fechaDesde.HasValue)
+            {
+                DateTime _fechaDesde = fechaDesde.Value.ToDateTime(TimeOnly.MinValue);
+
+                query = query.Where(x => x.Tramite.FechaCreacion >= _fechaDesde);
+            }
+
+            if (fechaHasta.HasValue)
+            {
+                DateTime _fechaHasta = fechaHasta.Value.ToDateTime(TimeOnly.MinValue);
+
+                // Añadir un día para incluir todo el día hasta
+                query = query.Where(x => x.Tramite.FechaCreacion < _fechaHasta.AddDays(1));
+            }
+
             // Total de registros
             var total = query != null ? await query.CountAsync() : 0;
 

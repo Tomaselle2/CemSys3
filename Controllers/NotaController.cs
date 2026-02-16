@@ -25,16 +25,31 @@ namespace CemSys3.Controllers
 
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> Index(int estadoId = (int)EstadosNotaEnum.NotaPendiente, int filtro = 0, int pagina = 1, int porPagina = 10)
+        public async Task<IActionResult> Index(DateOnly? fechaDesde, DateOnly? fechaHasta, int estadoId = (int)EstadosNotaEnum.NotaPendiente, int filtro = 0, int pagina = 1, int porPagina = 10)
         {
             NotaVM viewModel = new NotaVM();
+
+            if (fechaDesde.HasValue && fechaHasta.HasValue)
+            {
+                if (fechaHasta < fechaDesde)
+                {
+                    viewModel.SweetAlert = new SweetAlertDTO
+                    {
+                        Titulo = "Validación",
+                        Mensaje = $"La fecha hasta: {fechaHasta?.ToString("dd/MM/yyyy")} es menor a fecha desde: {fechaDesde?.ToString("dd/MM/yyyy")}",
+                        Tipo = "warning"
+                    };
+
+                    return View(viewModel);
+                }
+            }
 
             if (porPagina <= 0)
                 porPagina = 10;
 
             try
             {
-                PaginadoResponse<NotaDTO> paginadoNotas = await _notaService.GetPaginadoByTipo(estadoId, filtro, pagina, porPagina);
+                PaginadoResponse<NotaDTO> paginadoNotas = await _notaService.GetPaginadoByTipo(fechaDesde, fechaHasta, estadoId, filtro, pagina, porPagina);
                 viewModel.ListaNotas = paginadoNotas.Items;
                 viewModel.Paginacion = paginadoNotas.Paginacion;
 
@@ -45,6 +60,8 @@ namespace CemSys3.Controllers
                 viewModel.Paginacion.Parametros["filtro"] = filtro.ToString();
                 viewModel.Paginacion.Parametros["estadoId"] = estadoId.ToString();
                 viewModel.Paginacion.Parametros["porPagina"] = porPagina.ToString();
+                viewModel.Paginacion.Parametros.Add("fechaDesde", fechaDesde?.ToString("yyyy-MM-dd") ?? "");
+                viewModel.Paginacion.Parametros.Add("fechaHasta", fechaHasta?.ToString("yyyy-MM-dd") ?? "");
 
                 // Mantener otros parámetros si los hubiera
                 viewModel.Paginacion.Parametros["pagina"] = pagina.ToString();
@@ -177,7 +194,8 @@ namespace CemSys3.Controllers
                     EstadoId = nota.EstadoId,
                     tramiteVinculadoId = nota.TramiteIngresoId ?? 0,
                     controlador = controlador ?? string.Empty,
-                    HistorialEstados = await _historialEstados.GetAllById(nota.Id)
+                    HistorialEstados = await _historialEstados.GetAllById(nota.Id),
+                    FechaCreacion = nota.FechaCreacion
                 };
 
                 if(viewModel.EstadoId == (int)EstadosNotaEnum.NotaFinalizado)

@@ -158,7 +158,9 @@
                     </button>
                 </div>
             </form>
-
+            <div class="text-start">
+                <p class="p-2">@(Model.FechaCreacion != null ? $"Nota creada: {Model.FechaCreacion?.ToString("dd/MM/yyyy HH:mm")}" : "")</p>
+            </div>
             @if (Model.EstadoId == (int)EstadosNotaEnum.NotaPendiente && !Model.controlador.Equals("Ingreso"))
             {
                 <div class="modal-footer">
