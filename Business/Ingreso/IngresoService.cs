@@ -1,4 +1,5 @@
 ﻿using AspNetCoreGeneratedDocument;
+using CemSys3.DTOs.Concesion;
 using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.HistorialEstado;
 using CemSys3.DTOs.Ingreso;
@@ -7,6 +8,8 @@ using CemSys3.DTOs.Parcela;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
+using CemSys3.Helpers.Enumerable;
+using CemSys3.Interfaces.Concesion;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Ingreso;
 using CemSys3.Interfaces.Notas;
@@ -26,10 +29,11 @@ namespace CemSys3.Business.Ingreso
         private readonly IPersona _personaService;
         private readonly IParcela _parcelaService;
         private readonly INotas _notaService;
+        private readonly IConcesion _concesionService;
 
         public IngresoService(AppDbContext context, ITramite tramiteService, 
             IHistorialEstados historialEstados, IParcela parcelaService,
-            IPersona personaService, INotas notasService)
+            IPersona personaService, INotas notasService, IConcesion concesionService)
         {
             _context = context;
             _tramiteService = tramiteService;
@@ -37,6 +41,7 @@ namespace CemSys3.Business.Ingreso
             _parcelaService = parcelaService;
             _personaService = personaService;
             _notaService = notasService;
+            _concesionService = concesionService;
         }
 
         public async Task<GenericResultDTO> Add(IngresoDTO dto)
@@ -135,6 +140,20 @@ namespace CemSys3.Business.Ingreso
 
                 //9- Vincular la nota con el ingreso
                 await _notaService.VincularNotaConIngreso(dto.NotaId, tramiteId);
+
+                //10- se inicia el contrato de concesion en estado "Sin Contrato" solo si es nicho o fosa
+                if(ingreso.Parcela.TipoParcelaId == (int)TipoParcelaEnum.Nicho ||
+                    ingreso.Parcela.TipoParcelaId == (int)TipoParcelaEnum.Fosa)
+                {
+                    ConcesionDTO concesion = new ConcesionDTO();
+                    concesion.ParcelaId = ingreso.ParcelaId;
+                    concesion.TipoParcela = EnumHelper.GetDisplayNameByValue<TipoParcelaEnum>(ingreso.Parcela.TipoParcelaId ?? 0);
+                    concesion.UsuarioId = ingreso.UsuarioId;
+                    concesion.EstadoTramiteId = (int)EstadosConcesionEnum.SinContrato;
+                    GenericResultDTO resultadoConcesion = await _concesionService.Add(concesion);
+                }
+                
+
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -239,7 +258,7 @@ namespace CemSys3.Business.Ingreso
 
             var query = _context.Introducciones.Include(d=> d.Difunto).Include(t=> t.Tramite).Include(p => p.Parcela).AsQueryable();
 
-            // Filtro por estado de estado
+            // Filtro por estado del tramite
             switch (filtro)
             {
                 case 1: //registrados

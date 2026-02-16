@@ -140,17 +140,14 @@ INSERT INTO PreciosTarifarias (precio, conceptoTarifariaId, visibilidad, nroFila
 
 INSERT INTO EstadosTramites (estado, tipoTramiteId)
 VALUES 
-('Registrado', 1), --ingreso
-('Finalizado', 1), --ingreso
-('Pendiente', 7), --nota
-('Finalizado', 7); --nota
---(4, 'Iniciado'), --contrato de conescion
---(4, 'Pendiente de documentación'),
---(4, 'Activa'),
---(4, 'Vencida'),
---(4, 'Inactiva'),
---(4, 'Renovación');
-
+('Registrado', 1), --ingreso 1
+('Finalizado', 1), --ingreso 2
+('Pendiente', 7), --nota 3
+('Finalizado', 7), --nota 4
+('SinContrato', 4), --contrato de concesion 5
+('Vigente', 4), --contrato de concesion 6
+('Vencido', 4), --contrato de concesion 7
+('Caducado', 4); --contrato de concesion 8
 
 insert into Personas 
 (nombre, visibilidad, sexo) values ('Municipalidad Colonia Tirolesa', 1, 'otro');
@@ -602,6 +599,4 @@ null, --cierre fosa
 1);-- visibilidad
 
 
-select * from ReglasIngreso
-
-select * from ReglasIngreso where tipoParcelaId = 1 and estadoDifuntoId = 3 and tipoNichoId = 1 
+select * from EstadosTramites

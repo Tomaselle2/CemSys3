@@ -180,7 +180,7 @@ namespace CemSys3.Enumerables
         anio25 = 5
     }
 
-    //Estados de los tramites
+    //Estados de los tramites de ingreso
     public enum EstadosIngresoEnum
     {
         [Display(Name = "Registrado")]
@@ -198,6 +198,22 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Finalizado")]
         NotaFinalizado = 4,
+    }
+
+    //estados de tramites de concesion
+    public enum EstadosConcesionEnum
+    {
+        [Display(Name = "Sin contrato")]
+        SinContrato = 5,
+
+        [Display(Name = "Vigente")]
+        Vigente = 6,
+
+        [Display(Name = "Vencido")]
+        Vencido = 7,
+
+        [Display(Name = "Caducado")]
+        Caducado = 8,
     }
 
     //concepto de la tarifaria 

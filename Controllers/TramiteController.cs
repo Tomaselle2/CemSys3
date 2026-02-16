@@ -2,7 +2,6 @@
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Tramite;
-using CemSys3.ViewModels.Ingreso;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CemSys3.Controllers

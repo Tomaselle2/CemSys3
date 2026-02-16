@@ -223,19 +223,7 @@ CREATE TABLE [dbo].[Notas] (
 	foreign key (tramiteIngresoId) references Tramites(id),
     CONSTRAINT [Notas_tipoNotaId_fk] FOREIGN KEY([tipoNotaId]) REFERENCES [dbo].[TipoNota]([id])
 );
-
--- 1. Alter the 'nombre' column
---aLTER TABLE Notas add tramiteIngresoId int NULL foreign key (tramiteIngresoId) references Tramites(id);
-
--- 2. Alter the 'descripcion' column
---ALTER TABLE Notas add fechaCreacion datetime2 not null;
-
--- 3. Add the 'visibilidad' column with a default value
---ALTER TABLE Notas ADD visibilidad BIT NOT NULL CONSTRAINT DF_Notas_visibilidad DEFAULT 1;
-
 -- Tablas con dependencias de segundo nivel
-
-
 CREATE TABLE [dbo].[Parcelas] (
     [id] int NOT NULL IDENTITY(1,1),
     [visibilidad] bit NOT NULL DEFAULT 1,

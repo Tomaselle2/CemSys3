@@ -2,6 +2,7 @@
 using CemSys3.Interfaces.Persona;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 
 namespace CemSys3.Business.Persona
 {
@@ -18,7 +19,7 @@ namespace CemSys3.Business.Persona
             {
                 Nombre = dto.Nombre,
                 Apellido = dto.Apellido,
-                Dni = dto.Dni,
+                Dni = dto.Dni?.PadLeft(8, '0'),
                 Visibilidad = true,
                 FechaNacimiento = dto.FechaNacimiento,
                 FechaDefuncion = dto.FechaDefuncion,
@@ -77,6 +78,33 @@ namespace CemSys3.Business.Persona
                 p.Dni == dniString &&
                 p.Visibilidad
             );
+        }
+
+        public async Task<int> Update(PersonaDTO dto)
+        {
+            Models.Persona persona = await _context.Personas.FindAsync(dto.Id) ?? throw new Exception("Persona no encontrada");
+
+            persona.Nombre = dto.Nombre?.Trim();
+            persona.Apellido = dto.Apellido?.Trim();
+            persona.Dni = dto.Dni?.ToString();
+            persona.FechaNacimiento = dto.FechaNacimiento.Value;
+            persona.FechaDefuncion = dto.FechaDefuncion.Value;
+            persona.InformacionAdicional = dto.InformacionAdicional;
+            persona.Sexo = dto.Sexo;
+            persona.Correo = dto.Correo;
+            persona.Celular = dto.Celular;
+            persona.Domicilio = dto.Domicilio;
+            persona.NroActa = dto.NroActa;
+            persona.NroFolio = dto.NroFolio;
+            persona.NroTomo = dto.NroTomo;
+            persona.NroSerie = dto.NroSerie;
+            persona.NroAge = dto.NroAge;
+            persona.EstadoDifuntoId = dto.EstadoDifuntoId;
+            persona.CategoriaPersonaId = dto.CategoriaPersonaId;
+
+            await _context.SaveChangesAsync();
+
+            return persona.Id;
         }
     }
 }
