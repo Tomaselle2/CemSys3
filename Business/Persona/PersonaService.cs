@@ -35,7 +35,9 @@ namespace CemSys3.Business.Persona
                 NroAge = dto.NroAge,
                 NroTomo = dto.NroTomo,
                 EstadoDifuntoId = dto.EstadoDifuntoId,
-                CategoriaPersonaId = dto.CategoriaPersonaId
+                CategoriaPersonaId = dto.CategoriaPersonaId,
+                InformacionAdicional = dto.InformacionAdicional
+                
             };
 
             await _context.Personas.AddAsync(persona);

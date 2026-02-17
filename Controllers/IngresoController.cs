@@ -261,7 +261,6 @@ namespace CemSys3.Controllers
                     EmpresaFunebreId = viewModel.EmpresaFunebreID,
                     ParcelaId = viewModel.ParcelaID ?? 0,
                     EstadoDifuntoId = viewModel.EstadoDifuntoId ?? 0,
-                    InformacionAdicional = viewModel.InformacionAdicional,
                     Difunto = difunto,
                     EmpleadoIngresoId = viewModel.EmpleadoID ?? 0,
                     Visibilidad = true,
@@ -307,7 +306,13 @@ namespace CemSys3.Controllers
                 viewModel.Resumen = await _ingresoService.Get(ingresoId);
                 viewModel.IngresoId = ingresoId;
                 viewModel.InformacionAdicionalIngreso = viewModel.Resumen.InformacionAdicional;
-                viewModel.PreciosIngresos = await _preciosIngresos.GetPreciosIngresoBy(viewModel.Resumen.TipoParcelaId, viewModel.Resumen.EstadoDifuntoId);
+
+                int estadoDifuntoId = viewModel.Resumen.EstadoDifuntoId;
+                if (viewModel.Resumen.EstadoDifuntoId == (int)EstadoDifuntoEnum.Reducido)
+                {
+                    estadoDifuntoId = (int)EstadoDifuntoEnum.CuerpoCompleto;
+                }
+                viewModel.PreciosIngresos = await _preciosIngresos.GetPreciosIngresoBy(viewModel.Resumen.TipoParcelaId, estadoDifuntoId);
                 viewModel.HistorialEstados = await _historialEstados.GetAllById(ingresoId);
                 viewModel.PreciosAperturas = await _preciosIngresos.GetPreciosAperturas(viewModel.Resumen.TipoParcelaId);
                 viewModel.Archivos = await _archivoService.GetAllByTramiteId(ingresoId);

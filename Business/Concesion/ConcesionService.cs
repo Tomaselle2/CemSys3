@@ -5,6 +5,7 @@ using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
+using CemSys3.Helpers.Enumerable;
 using CemSys3.Interfaces.Concesion;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Persona;
@@ -69,7 +70,7 @@ namespace CemSys3.Business.Concesion
                 concesion.CantidadAniosId = dto.CantidadAniosId;
                 concesion.CuotaId = dto.CuotaId;
                 concesion.UsuarioId = dto.UsuarioId;
-                concesion.InformacionAdicional = dto.InformacionAdicional;
+                concesion.InformacionAdicional += dto.InformacionAdicional;
                 await _context.Concesiones.AddAsync(concesion);
 
                 //4 - relacion de tramite con parcela
@@ -138,6 +139,12 @@ namespace CemSys3.Business.Concesion
                         }
                     }
                 }
+
+                //7- en parcela se modifica el info adicional
+                Models.Parcela parcela = await _context.Parcelas.FindAsync(dto.ParcelaId) ?? throw new Exception("Parcela no encontrada.");
+                parcela.InformacionAdicional += dto.MensajeParcela;
+
+                //8- en concesion se modifica el info adicional
 
                 await _context.SaveChangesAsync();
                 return new GenericResultDTO

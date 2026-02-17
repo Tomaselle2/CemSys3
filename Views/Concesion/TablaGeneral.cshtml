@@ -1,0 +1,119 @@
+﻿@using CemSys3.DTOs.Paginacion
+@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.Concesion
+@model TablaGeneralVM
+
+@{
+    ViewData["Title"] = "Ingresos";
+}
+
+<div class="page-header-container">
+    <h1 class="title-page">Concesiones</h1>
+</div>
+
+<!-- Tabla General de concesiones -->
+<div class="accordion" id="accordionConcesiones">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingConcesiones">
+            <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-target="#panelsStayOpen-collapseConcesiones" aria-expanded="true" aria-controls="panelsStayOpen-collapseConcesiones">
+                Tabla General
+            </button>
+        </h2>
+        <div id="panelsStayOpen-collapseConcesiones" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingConcesiones">
+            @if (Model.Listado != null && Model.Listado.Count() > 0)
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body p-0 table-responsive">
+                        <table class="table table-hover mb-0 table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Concesión</th>
+                                    <th>Difunto/s</th>
+                                    <th>Sección</th>
+                                    <th>Parcela</th>
+                                    <th>Titular</th>
+                                    <th>Vencimiento</th>
+                                    <th>Estado</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var opc in Model.Listado)
+                                {
+                                    string parcela = "";
+                                    string estadoTramiteDisplay = EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(opc.EstadoTramiteId);
+
+                                    if (opc.TipoParcelaId == 1) //nicho
+                                    {
+                                        parcela = $"Nicho {opc.NroParcela.ToString()} Fila {opc.NroFila.ToString()}";
+                                    }
+                                    else if (opc.TipoParcelaId == 2)//fosa
+                                    {
+                                        parcela = $"Fosa {opc.NroParcela.ToString()}";
+                                    }
+                                    else if (opc.TipoParcelaId == 3) //panteon
+                                    {
+                                        parcela = $"Lote {opc.NroParcela.ToString()}";
+                                    }
+
+                                    <tr>
+                                        <td>@(opc.Concesion != null ? opc.Concesion : "---")</td>
+                                        <td>
+                                            @(opc.Difuntos != null && opc.Difuntos.Any()
+                                                                                ? Html.Raw(string.Join("<br>",
+                                                                                opc.Difuntos.Select(d => $"{d.Apellido.ToUpper()}, {d.Nombre.ToUpper()}")))
+                                                                                : "---")
+                                        </td>
+                                        <td>@opc.NombreSeccion.ToUpper()</td>
+                                        <td>@parcela</td>
+                                        <td>
+                                            @(opc.Titulares != null && opc.Titulares.Any()
+                                                                                ? Html.Raw(string.Join("<br>",
+                                                                                opc.Titulares.Select(t => $"{t.Apellido.ToUpper()}, {t.Nombre.ToUpper()}")))
+                                                                                : "---")
+                                        </td>
+                                        <td>@opc.Vencimiento?.ToString("dd/MM/yyyy")</td>
+                                        <td>@estadoTramiteDisplay</td>
+                                        <td>
+                                            @* <form asp-action="ContratoIniciado" asp-controller="ContratoConcesion" target="_blank" method="get" style="display: inline-block;">
+                                                <input type="hidden" name="parcelaId" value="@opc.parcelaId" />
+                                                <input type="hidden" name="nroConcesion" value="@opc.NroConcesion" />
+                                                <button type="submit" class="btn btn-info" title="Ir a concesión">
+                                                    <i class="bi bi-box-arrow-in-up-right"></i>
+                                                </button>
+                                            </form> *@
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                //paginador
+                @* Paginador *@
+                @if (Model.Paginacion.TotalPaginas > 0)
+                {
+                    @await Html.PartialAsync("_Paginador", new PaginacionDTO
+                    {
+                        PaginaActual = Model.Paginacion.PaginaActual,
+                        TotalPaginas = Model.Paginacion.TotalPaginas,
+                        TotalRegistros = Model.Paginacion.TotalRegistros,
+                        RegistrosPorPagina = Model.Paginacion.RegistrosPorPagina,
+                        Accion = "TablaGeneral",
+                        Controlador = "Concesion",
+                        Parametros = Model.Paginacion.Parametros
+                    })
+                }
+            }
+            else
+            {
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    No hay concesiones
+                </div>
+            }
+        </div>
+    </div>
+</div>
