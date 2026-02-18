@@ -23,13 +23,13 @@
                     {
                         <tr>
                             <td>Nicho @opc.NroParcela Fila @opc.NroFila</td>
-                            <td>@(opc.TipoNichoId.HasValue ? EnumHelper.GetDisplayNameByValue<TipoNichoEnum>(opc.TipoNichoId.Value) : "Sin tipo")</td>
+                            <td>@(opc.TipoNichoId.HasValue ? EnumHelper.GetDisplayNameByValue<TipoNichoEnum>(opc.TipoNichoId.Value) : "Sin asignar")</td>
                             <td>@(opc.CantidadDifuntos == 0 ? "Desocupado" : $"Ocupado {opc.CantidadDifuntos} difunto/s")</td>
                             <td>@(opc.Visibilidad == true ? "Activo" : "Inactivo")</td>
                             <td>
                                 
-                                <form asp-action="HistorialParela" asp-controller="Parcela" method="get" style="display: inline-block;">
-                                    <input type="hidden" value="@opc.SeccionId" name="seccionId" /> <!--Manda la seccionId-->
+                                <form asp-action="HistorialParcela" asp-controller="Parcela" method="get" style="display: inline-block;" target="_blank" data-skip-loader="true">
+                                    <input type="hidden" value="@opc.Id" name="parcelaId" />
 
                                     <button type="submit" class="btn btn-secondary btn-sm btn-lista" title="Historial">
                                         <i class="bi bi-clock-history"></i>

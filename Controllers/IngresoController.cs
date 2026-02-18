@@ -52,8 +52,9 @@ namespace CemSys3.Controllers
         public async Task<IActionResult> ListadoIngresos(DateOnly? fechaDesde, DateOnly? fechaHasta, int filtro = 0, int pagina = 1, int porPagina = 10)
         {
             ListadoIngresosVM viewModel = new ListadoIngresosVM();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
 
-            if(fechaDesde.HasValue && fechaHasta.HasValue)
+            if (fechaDesde.HasValue && fechaHasta.HasValue)
             {
                 if(fechaHasta < fechaDesde)
                 {
@@ -91,7 +92,6 @@ namespace CemSys3.Controllers
                 };
             }
 
-            viewModel.SweetAlert = TempData.GetSweetAlert();
             return View(viewModel);
         }
 
@@ -300,6 +300,7 @@ namespace CemSys3.Controllers
         public async Task<IActionResult> ResumenIngreso(int ingresoId)
         {
             ResumenIngresoVM viewModel = new ResumenIngresoVM();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
 
             try
             {
@@ -327,7 +328,6 @@ namespace CemSys3.Controllers
                 };
             }
 
-            viewModel.SweetAlert = TempData.GetSweetAlert();
             return View(viewModel);
         }
 

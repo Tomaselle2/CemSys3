@@ -1,6 +1,7 @@
 ﻿using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.Tarifaria;
 using CemSys3.Enumerables;
+using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Seccion;
 using CemSys3.Interfaces.Tarifaria;
@@ -28,7 +29,7 @@ namespace CemSys3.Controllers
         public async Task<IActionResult> Index()
         {
             TarifariaVM viewModel = new TarifariaVM();
-
+            viewModel.SweetAlert = TempData.GetSweetAlert();
             try
             {
                 viewModel.ListadoPrecios = await _tarifariaService.GetPrecios();

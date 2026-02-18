@@ -44,15 +44,15 @@
                                     string parcela = "";
                                     string estadoTramiteDisplay = EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(opc.EstadoTramiteId);
 
-                                    if (opc.TipoParcelaId == 1) //nicho
+                                    if (opc.TipoParcelaId == (int)TipoParcelaEnum.Nicho) //nicho
                                     {
                                         parcela = $"Nicho {opc.NroParcela.ToString()} Fila {opc.NroFila.ToString()}";
                                     }
-                                    else if (opc.TipoParcelaId == 2)//fosa
+                                    else if (opc.TipoParcelaId == (int)TipoParcelaEnum.Fosa)//fosa
                                     {
                                         parcela = $"Fosa {opc.NroParcela.ToString()}";
                                     }
-                                    else if (opc.TipoParcelaId == 3) //panteon
+                                    else if (opc.TipoParcelaId == (int)TipoParcelaEnum.Panteon) //panteon
                                     {
                                         parcela = $"Lote {opc.NroParcela.ToString()}";
                                     }
@@ -117,3 +117,7 @@
         </div>
     </div>
 </div>
+
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />

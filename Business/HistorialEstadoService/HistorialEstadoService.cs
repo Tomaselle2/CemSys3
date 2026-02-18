@@ -35,5 +35,40 @@ namespace CemSys3.Business.HistorialEstadoService
                 EstadoTramiteId= s.EstadoTramiteId
             }).ToListAsync();
         }
+
+        public async Task VincularTramiteAPersona(int tramiteId, int personaId)
+        {
+            bool existe = await _context.TramitePersonas
+                .AnyAsync(tp => tp.TramiteId == tramiteId
+                            && tp.PersonaId == personaId);
+
+            if (!existe)
+            {
+                TramitePersona tramitePersona = new TramitePersona
+                {
+                    TramiteId = tramiteId,
+                    PersonaId = personaId,
+                    FechaRegistro = DateTime.Now
+                };
+
+                _context.TramitePersonas.Add(tramitePersona);
+            }
+        }
+
+        public async Task VincularTramiteAParcela(int tramiteId, int parcelaId)
+        {
+            bool existe = await _context.TramitesParcelas
+                .AnyAsync(x => x.TramiteId == tramiteId && x.ParcelaId == parcelaId);
+
+            if (!existe)
+            {
+                _context.TramitesParcelas.Add(new TramitesParcela
+                {
+                    TramiteId = tramiteId,
+                    ParcelaId = parcelaId,
+                    FechaRegistro = DateTime.Now
+                });
+            }
+        }
     }
 }

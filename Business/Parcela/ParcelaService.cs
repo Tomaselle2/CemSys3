@@ -1,17 +1,14 @@
 ﻿using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Parcela;
+using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Seccion;
+using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
-using CemSys3.Helpers.Roles_Autenticacion;
-using CemSys3.Interfaces;
 using CemSys3.Interfaces.Parcela;
-using CemSys3.Interfaces.Seccion;
 using CemSys3.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+
 
 namespace CemSys3.Business.Parcela
 {
@@ -234,6 +231,7 @@ namespace CemSys3.Business.Parcela
             return resultado;
         }
 
+        //para vista parcial de ingreso
         public async Task<IEnumerable<ParcelaIndexRequestDTO>> GetAllBySeccionId(int seccionId, int estadoDifunto)
         {
             int tipoParcelaId = _context.Secciones
@@ -268,6 +266,58 @@ namespace CemSys3.Business.Parcela
         {
             Models.Parcela parcela = await _context.Parcelas.FindAsync(parcelaId) ?? throw new Exception("La parcela no existe");
             parcela.CantidadDifuntos += 1;
+        }
+
+        public async Task<ParcelaHistorialDTO> HistorialParcela(int parcelaId)
+        {
+            Models.Parcela parcela = await _context.Parcelas.Where(pa => pa.Id == parcelaId).Include(p => p.Seccion).FirstOrDefaultAsync() ?? throw new Exception("No se encontro la parcela.");
+            ParcelaHistorialDTO historial = new ParcelaHistorialDTO();
+            historial.Id = parcela.Id;
+            historial.NroParcela = parcela.NroParcela;
+            historial.NroFila = parcela.NroFila;
+            historial.NombreSeccion = parcela.Seccion.Nombre;
+            historial.TipoParcelaId = parcela.TipoParcelaId ?? 0;
+            historial.TipoNichoId = parcela.TipoNichoId ?? 0;
+            historial.TipoPanteonId = parcela.TipoPanteonId ?? 0;
+            historial.NombrePanteon = parcela.NombrePanteon;
+            historial.infoAdicional = parcela.InformacionAdicional;
+            historial.CantidadDifuntosActuales = parcela.CantidadDifuntos;
+
+            //historial de tramites parcelas
+            historial.Tramites = await _context.TramitesParcelas.Where(p => p.ParcelaId == parcelaId).Select(s => new TramiteDTO
+            {
+                Id = s.TramiteId,
+                Visibilidad = s.Tramite.Visibilidad,
+                FechaCreacion = s.Tramite.FechaCreacion,
+                TipoTramiteId = s.Tramite.TipoTramiteId,
+                EstadoActualId = s.Tramite.EstadoActualId
+            }).ToListAsync();
+
+            //historial de difuntos actuales
+            historial.DifuntosActuales = await _context.ParcelaDifuntos.Where(p => p.ParcelaId == parcelaId && p.TramiteRetiroId == null).Select(f => new DifuntoHistorialParcelaDTO
+            {
+                Id = f.Id,
+                FechaIngreso = f.FechaIngreso,
+                FechaRetiro = f.FechaRetiro,
+                Dni = f.Difunto.Dni,
+                Nombre = f.Difunto.Nombre,
+                Apellido = f.Difunto.Apellido,
+                EstadoDifunto = f.Difunto.EstadoDifuntoId
+            }).ToListAsync();
+
+            //historial de difuntos historicos
+            historial.DifuntosHistoricos = await _context.ParcelaDifuntos.Where(p => p.ParcelaId == parcelaId).Select(f => new DifuntoHistorialParcelaDTO
+            {
+                Id = f.Id,
+                FechaIngreso = f.FechaIngreso,
+                FechaRetiro = f.FechaRetiro,
+                Dni = f.Difunto.Dni,
+                Nombre = f.Difunto.Nombre,
+                Apellido = f.Difunto.Apellido,
+                EstadoDifunto = f.Difunto.EstadoDifuntoId
+            }).ToListAsync();
+
+            return historial;
         }
     }
 }

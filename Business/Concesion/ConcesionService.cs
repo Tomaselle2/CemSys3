@@ -5,7 +5,6 @@ using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
-using CemSys3.Helpers.Enumerable;
 using CemSys3.Interfaces.Concesion;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Persona;
@@ -74,13 +73,7 @@ namespace CemSys3.Business.Concesion
                 await _context.Concesiones.AddAsync(concesion);
 
                 //4 - relacion de tramite con parcela
-                TramitesParcela tramiteParcela = new TramitesParcela
-                {
-                    TramiteId = tramiteId,
-                    ParcelaId = dto.ParcelaId,
-                    FechaRegistro = DateTime.Now
-                };
-                _context.TramitesParcelas.Add(tramiteParcela);
+                await _historialEstadosService.VincularTramiteAParcela(tramiteId, dto.ParcelaId);
 
                 //5 - relacion de titulares con concesiones(si existe)
                 if (dto.Titulares != null && dto.Titulares.Count > 0)
@@ -107,13 +100,7 @@ namespace CemSys3.Business.Concesion
                             int personaCargada = await _personaService.Update(personaExistente);
 
                             //6 - relacion de titulares con tramite
-                            TramitePersona tramitePersona = new TramitePersona
-                            {
-                                PersonaId = personaCargada,
-                                TramiteId = tramiteId,
-                                FechaRegistro = DateTime.Now
-                            };
-                            _context.TramitePersonas.Add(tramitePersona);
+                            await _historialEstadosService.VincularTramiteAPersona(tramiteId, personaCargada);
                         }
                         else //si no existe creo una nueva persona
                         {
@@ -129,13 +116,7 @@ namespace CemSys3.Business.Concesion
                             int personaCargada = await _personaService.Add(personaNueva);
 
                             //6 - relacion de titulares con tramite
-                            TramitePersona tramitePersona = new TramitePersona
-                            {
-                                PersonaId = personaCargada,
-                                TramiteId = tramiteId,
-                                FechaRegistro = DateTime.Now
-                            };
-                            _context.TramitePersonas.Add(tramitePersona);
+                            await _historialEstadosService.VincularTramiteAPersona(tramiteId, personaCargada);
                         }
                     }
                 }

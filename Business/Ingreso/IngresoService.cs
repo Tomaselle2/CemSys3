@@ -92,15 +92,9 @@ namespace CemSys3.Business.Ingreso
                 };
                 int difuntoId = await _personaService.Add(difunto);
 
-                //4- se registra la relacion (difunto con el tramite)
-                TramitePersona tramitePersona = new TramitePersona
-                {
-                    PersonaId = difuntoId,
-                    TramiteId = tramiteId,
-                    FechaRegistro = DateTime.Now
-                };
-                _context.TramitePersonas.Add(tramitePersona);
-
+                //4- se registra la relacion (difunto con el tramite)\
+                await _historialEstadosService.VincularTramiteAPersona(tramiteId, difuntoId);
+                
                 //5- se registra la relacion (parcela con difunto)
                 ParcelaDifunto parcelaDifunto = new ParcelaDifunto
                 {
@@ -112,13 +106,7 @@ namespace CemSys3.Business.Ingreso
                 _context.ParcelaDifuntos.Add(parcelaDifunto);
 
                 //6- se registra la relacion (trámite con parcela)
-                TramitesParcela tramiteParcela = new TramitesParcela
-                {
-                    TramiteId = tramiteId,
-                    ParcelaId = dto.ParcelaId,
-                    FechaRegistro = DateTime.Now
-                };
-                _context.TramitesParcelas.Add(tramiteParcela);
+                await _historialEstadosService.VincularTramiteAParcela(tramiteId, dto.ParcelaId);
 
                 //7- se registra el ingreso
                 Introduccione ingreso = new Introduccione

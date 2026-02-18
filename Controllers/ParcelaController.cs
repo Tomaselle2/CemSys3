@@ -3,6 +3,7 @@ using CemSys3.DTOs.Parcela;
 using CemSys3.DTOs.Seccion;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
+using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Seccion;
@@ -23,6 +24,7 @@ namespace CemSys3.Controllers
             _seccionService = seccionService;
         }
 
+        //listado de parcelas de una seccion
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> Index(int seccionId, int filtro = 0, int pagina = 1, int porPagina = 10)
@@ -45,7 +47,8 @@ namespace CemSys3.Controllers
                 viewModel.Paginacion.Parametros.Add("seccionId", seccionId.ToString());
                 viewModel.Paginacion.Parametros.Add("porPagina", porPagina.ToString());
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 viewModel.SweetAlert = new SweetAlertDTO
                 {
                     Titulo = "Error",
@@ -53,12 +56,12 @@ namespace CemSys3.Controllers
                     Tipo = "error"
                 };
             }
-            
+
 
             return View(viewModel);
         }
 
-        //para cargar las parcelas en el select de la pantalla ingreso
+        //para cargar las parcelas en el select de la pantalla ingreso, se usan en vista parcial
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> ObtenerParcelasPorSeccion(int seccionId, int estadoDifuntoId)
@@ -80,6 +83,31 @@ namespace CemSys3.Controllers
                 </script>
             """);
             }
+        }
+
+
+        //Vista de historial de parcela
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> HistorialParcela(int parcelaId)
+        {
+            ParcelaHistorialVM viewModel = new ParcelaHistorialVM();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+
+            try
+            {
+                viewModel.Historial = await _parcelaService.HistorialParcela(parcelaId);
+            }
+            catch (Exception ex) {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "Ocurrió un error al cargar el historial: " + ex.Message,
+                    Tipo = "error"
+                };
+            }
+
+            return View(viewModel);
         }
     }
 }

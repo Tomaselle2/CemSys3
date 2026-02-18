@@ -6,5 +6,8 @@ namespace CemSys3.Interfaces.HistorialEstados
     {
         Task Add(HistorialEstadosDTO dto);
         Task<IEnumerable<HistorialEstadosDTO>> GetAllById(int tramiteId);
+
+        Task VincularTramiteAPersona(int tramiteId, int personaId);
+        Task VincularTramiteAParcela(int tramiteId, int parcelaId);
     }
 }

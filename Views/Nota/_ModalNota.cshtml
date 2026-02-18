@@ -171,6 +171,16 @@
                     </form>
                 </div>
             }
+            else
+            {
+                <div class="modal-footer">
+                    <form asp-action="RealizarIngreso" asp-controller="Nota" method="get" class="ms-auto">
+                        <input type="hidden" name="notaId" asp-for="Id" />
+                        <input type="hidden" name="tramiteId" asp-for="tramiteVinculadoId" />
+                        <button type="submit" class="btn btn-primary">@(Model.tramiteVinculadoId > 0 ? "Ir al ingreso" : "Completar ingreso")</button>
+                    </form>
+                </div>
+            }
         </div>
     </div>
 </div>

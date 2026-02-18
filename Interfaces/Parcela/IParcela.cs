@@ -21,5 +21,6 @@ namespace CemSys3.Interfaces.Parcela
         Task<IEnumerable<ParcelaIndexRequestDTO>> GetAllBySeccionId(int seccionId, int estadoDifunto);
 
         Task AumentarDifunto(int parcelaId);
+        Task<ParcelaHistorialDTO> HistorialParcela(int parcelaId);
     }
 }
