@@ -1,7 +1,14 @@
-﻿@{
+﻿@using CemSys3.DTOs.Nota
+@using CemSys3.ViewModels.Home
+@model NotificacionHomeVM
+@{
     ViewData["Title"] = "Home";
 }
 
 <div class="text-center">
     <img src="~/img/LogoCemSys.png" alt="Logo" class="img-fluid mb-4" style="width: 45%; height: auto;" />
 </div>
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
