@@ -219,6 +219,7 @@ CREATE TABLE [dbo].[Notas] (
     [color] nvarchar(16),
 	visibilidad bit NOT NULL DEFAULT 1,
 	tramiteIngresoId int null,
+	FechaFinRecordatorio datetime2 null,
 	foreign key (tramiteId) references Tramites(id),
 	foreign key (tramiteIngresoId) references Tramites(id),
     CONSTRAINT [Notas_tipoNotaId_fk] FOREIGN KEY([tipoNotaId]) REFERENCES [dbo].[TipoNota]([id])
@@ -400,19 +401,49 @@ CREATE TABLE ReglasIngreso (
     visibilidad BIT NOT NULL DEFAULT 1,
 	cierreNicho int null,
 	cierreFosa int null
-    CONSTRAINT FK_RI_TipoParcela FOREIGN KEY (tipoParcelaId) REFERENCES TipoParcela(id),
-    CONSTRAINT FK_RI_EstadoDifunto FOREIGN KEY (estadoDifuntoId) REFERENCES EstadosDifunto(id),
-    CONSTRAINT FK_RI_TipoNicho FOREIGN KEY (tipoNichoId) REFERENCES TipoNichos(id),
-    CONSTRAINT FK_RI_TipoPanteon FOREIGN KEY (tipoPanteonId) REFERENCES TipoPanteon(id),
-    CONSTRAINT FK_RI_Fondo FOREIGN KEY (conceptoInhumacionId) REFERENCES ConceptosTarifaria(id),
-    CONSTRAINT FK_RI_AumentoLocalidad FOREIGN KEY (conceptoDefuncionId) REFERENCES ConceptosTarifaria(id),
-    CONSTRAINT FK_RI_AumentoDO FOREIGN KEY (conceptoTranscripcionId) REFERENCES ConceptosTarifaria(id),
-    CONSTRAINT FK_RI_PrecioUrnario FOREIGN KEY (conceptoIntroduccionId) REFERENCES ConceptosTarifaria(id),
-    CONSTRAINT FK_RI_Fondo FOREIGN KEY (porcentajeFondoSaludId) REFERENCES ConceptosTarifaria(id),
-    CONSTRAINT FK_RI_AumentoLocalidad FOREIGN KEY (porcentajeAumentoOtraLocalidadId) REFERENCES ConceptosTarifaria(id),
-    CONSTRAINT FK_RI_AumentoDO FOREIGN KEY (porcentajeAumentoDerechoOficinaId) REFERENCES ConceptosTarifaria(id),
-    CONSTRAINT FK_RI_PrecioUrnario FOREIGN KEY (porcentajeIntroduccionUrnaDerechoOficna) REFERENCES ConceptosTarifaria(id),
-    CONSTRAINT FK_RI_MinFondo FOREIGN KEY (montoMinimoFondoId) REFERENCES ConceptosTarifaria(id),
-	CONSTRAINT FK_RI_CierreNicho FOREIGN KEY (cierreNicho) REFERENCES ConceptosTarifaria(id),
-	CONSTRAINT FK_RI_CierreFosa FOREIGN KEY (cierreFosa) REFERENCES ConceptosTarifaria(id)
+     -- FOREIGN KEYS (TODAS CON NOMBRES ÚNICOS)
+    CONSTRAINT FK_RI_TipoParcela 
+        FOREIGN KEY (tipoParcelaId) REFERENCES TipoParcela(id),
+
+    CONSTRAINT FK_RI_EstadoDifunto 
+        FOREIGN KEY (estadoDifuntoId) REFERENCES EstadosDifunto(id),
+
+    CONSTRAINT FK_RI_TipoNicho 
+        FOREIGN KEY (tipoNichoId) REFERENCES TipoNichos(id),
+
+    CONSTRAINT FK_RI_TipoPanteon 
+        FOREIGN KEY (tipoPanteonId) REFERENCES TipoPanteon(id),
+
+    CONSTRAINT FK_RI_ConceptoInhumacion 
+        FOREIGN KEY (conceptoInhumacionId) REFERENCES ConceptosTarifaria(id),
+
+    CONSTRAINT FK_RI_ConceptoDefuncion 
+        FOREIGN KEY (conceptoDefuncionId) REFERENCES ConceptosTarifaria(id),
+
+    CONSTRAINT FK_RI_ConceptoTranscripcion 
+        FOREIGN KEY (conceptoTranscripcionId) REFERENCES ConceptosTarifaria(id),
+
+    CONSTRAINT FK_RI_ConceptoIntroduccion 
+        FOREIGN KEY (conceptoIntroduccionId) REFERENCES ConceptosTarifaria(id),
+
+    CONSTRAINT FK_RI_PorcFondoSalud 
+        FOREIGN KEY (porcentajeFondoSaludId) REFERENCES ConceptosTarifaria(id),
+
+    CONSTRAINT FK_RI_PorcAumentoOtraLocalidad 
+        FOREIGN KEY (porcentajeAumentoOtraLocalidadId) REFERENCES ConceptosTarifaria(id),
+
+    CONSTRAINT FK_RI_PorcAumentoDerechoOficina 
+        FOREIGN KEY (porcentajeAumentoDerechoOficinaId) REFERENCES ConceptosTarifaria(id),
+
+    CONSTRAINT FK_RI_PorcIntroduccionUrnaDO 
+        FOREIGN KEY (porcentajeIntroduccionUrnaDerechoOficna) REFERENCES ConceptosTarifaria(id),
+
+    CONSTRAINT FK_RI_MontoMinimoFondo 
+        FOREIGN KEY (montoMinimoFondoId) REFERENCES ConceptosTarifaria(id),
+
+    CONSTRAINT FK_RI_CierreNicho 
+        FOREIGN KEY (cierreNicho) REFERENCES ConceptosTarifaria(id),
+
+    CONSTRAINT FK_RI_CierreFosa 
+        FOREIGN KEY (cierreFosa) REFERENCES ConceptosTarifaria(id)
 );

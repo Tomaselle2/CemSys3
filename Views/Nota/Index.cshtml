@@ -25,7 +25,14 @@
                 Ingreso
             </a>
         </li>
-        <li><a class="dropdown-item" href="#">Recordatorio</a></li>
+        <li>
+            <a class="dropdown-item" style="cursor: pointer"
+               hx-get="@Url.Action("ModalRecordatorio", "Nota")"
+               hx-target="#modal-container"
+               hx-swap="innerHTML">
+                Recordatorio
+            </a>
+        </li>
     </ul>
 </div>
 
@@ -143,6 +150,12 @@
 @(nota.Descripcion ?? "Sin descripción")
                             </p>
                         </div>
+                        @if(nota.TipoNotaId == (int)TipoNotaEnum.Recordatorio)
+                        {
+                            <div>
+                                <p class="text-center">Fecha límite: @nota.FechaFinRecordatorio?.ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                        }
                     </div>
                 </div>
             }

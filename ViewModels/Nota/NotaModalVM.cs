@@ -25,6 +25,7 @@ namespace CemSys3.ViewModels.Nota
         public int tramiteVinculadoId { get; set; }
         public string controlador { get; set; } = string.Empty;
         public DateTime? FechaCreacion { get; set; }
+        public DateTime? FechaFinRecordatorio { get; set; }
 
         public List<TareaDTO> Tareas { get; set; } = new();
         public IEnumerable<HistorialEstadosDTO> HistorialEstados { get; set; } = new List<HistorialEstadosDTO>();

@@ -23,6 +23,7 @@ namespace CemSys3.DTOs.Nota
         public DateTime FechaCreacion { get; set; }
 
         public int UsurioId { get; set; }
+        public DateTime? FechaFinRecordatorio { get; set; }
 
         public List<TareaDTO> Tareas { get; set; } = new();
     }

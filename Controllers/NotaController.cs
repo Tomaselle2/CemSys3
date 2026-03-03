@@ -98,7 +98,28 @@ namespace CemSys3.Controllers
                     new() { Descripcion = "Realizar contrato de concesión", Estado = false },
                     new() { Descripcion = "Cobrar ingreso", Estado = false },
                     new() { Descripcion = "Realizar ingreso en CemSys", Estado = false },
-                    new() { Descripcion = "Marcar en el plano", Estado = false }
+                    new() { Descripcion = "Marcar en el plano", Estado = false },
+                    new() { Descripcion = "Completar el libro", Estado = false }
+
+                }
+            };
+
+            return PartialView("_ModalNota", vm);
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public IActionResult ModalRecordatorio()
+        {
+            var vm = new NotaModalVM
+            {
+                TipoNotaId = (int)TipoNotaEnum.Recordatorio,
+                Color = "#F5DADE",
+                Descripcion =
+@"• Escriba una breve descripción: ",
+                Tareas = new List<TareaDTO>
+                {
+                    new() { Descripcion = "Completar tarea", Estado = false }
                 }
             };
 
@@ -109,10 +130,6 @@ namespace CemSys3.Controllers
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> Guardar(NotaModalVM vm)
         {
-            foreach (var item in vm.Tareas) {
-                if (item.Descripcion == null)
-                    item.Descripcion = "---";
-            }
             if (!ModelState.IsValid)
             {
                 return PartialView("_ModalNota", vm); // NO CIERRA MODAL
@@ -129,7 +146,8 @@ namespace CemSys3.Controllers
                     TipoNotaId = vm.TipoNotaId,
                     UsurioId = vm.UsuarioId,
                     Tareas = vm.Tareas,
-                    EstadoId = vm.EstadoId
+                    EstadoId = vm.EstadoId,
+                    FechaFinRecordatorio = vm.FechaFinRecordatorio
                 };
 
 
@@ -195,7 +213,8 @@ namespace CemSys3.Controllers
                     tramiteVinculadoId = nota.TramiteIngresoId ?? 0,
                     controlador = controlador ?? string.Empty,
                     HistorialEstados = await _historialEstados.GetAllById(nota.Id),
-                    FechaCreacion = nota.FechaCreacion
+                    FechaCreacion = nota.FechaCreacion,
+                    FechaFinRecordatorio = nota.FechaFinRecordatorio
                 };
 
                 if(viewModel.EstadoId == (int)EstadosNotaEnum.NotaFinalizado)

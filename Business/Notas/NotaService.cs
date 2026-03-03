@@ -56,6 +56,7 @@ namespace CemSys3.Business.Notas
                     Descripcion = dto.Descripcion,
                     Color = dto.Color,
                     Visibilidad = true,
+                    FechaFinRecordatorio = dto.FechaFinRecordatorio
                 };
 
                 await _context.Notas.AddAsync(nuevaNota);
@@ -121,6 +122,7 @@ namespace CemSys3.Business.Notas
             notaDTO.FechaCreacion = nota.Tramite.FechaCreacion;
             notaDTO.TramiteIngresoId = nota.TramiteIngresoId; //si esta asociada a un tramite
             notaDTO.Tareas = tareas.ToList();
+            notaDTO.FechaFinRecordatorio = nota.FechaFinRecordatorio;
 
             return notaDTO;
         }
@@ -205,24 +207,32 @@ namespace CemSys3.Business.Notas
                 resultado.Paginacion.Controlador = "Nota";
                 resultado.Paginacion.TotalRegistros = total;
 
+                DateTime hoy = DateTime.Today;
+
                 // Obtener datos paginados - ORDENAR ANTES de la proyección
                 resultado.Items = await query
-                    .OrderByDescending(e => e.Tramite.FechaCreacion) // Ordenar por fecha antes de paginar
-                    .Skip((resultado.Paginacion.PaginaActual - 1) * porPagina)
-                    .Take(porPagina)
-                    .Select(s => new NotaDTO
-                    {
-                        Id = s.TramiteId,
-                        Nombre = s.Nombre,
-                        TipoNotaId = s.TipoNotaId,
-                        Descripcion = s.Descripcion,
-                        Color = s.Color,
-                        Visibilidad = s.Visibilidad,
-                        EstadoId = s.Tramite.EstadoActualId,
-                        FechaCreacion = s.Tramite.FechaCreacion // Incluir la fecha
-                    })
-                    .ToListAsync();
-            }else
+                .OrderBy(r =>
+                    r.FechaFinRecordatorio == null ? 2 :
+                    r.FechaFinRecordatorio < hoy ? 0 : 1) // Grupo: vencido=0, próximo=1, null=2
+                .ThenBy(r => r.FechaFinRecordatorio) // Orden interno por fecha
+                .ThenByDescending(r => r.Tramite.FechaCreacion) // Desempate final
+                .Skip((resultado.Paginacion.PaginaActual - 1) * porPagina)
+                .Take(porPagina)
+                .Select(s => new NotaDTO
+                {
+                    Id = s.TramiteId,
+                    Nombre = s.Nombre,
+                    TipoNotaId = s.TipoNotaId,
+                    Descripcion = s.Descripcion,
+                    Color = s.Color,
+                    Visibilidad = s.Visibilidad,
+                    EstadoId = s.Tramite.EstadoActualId,
+                    FechaCreacion = s.Tramite.FechaCreacion,
+                    FechaFinRecordatorio = s.FechaFinRecordatorio
+                })
+                .ToListAsync();
+            }
+            else
             {
                 resultado.Items = new List<NotaDTO>();
             }
@@ -245,6 +255,7 @@ namespace CemSys3.Business.Notas
                 nota.Descripcion = dto.Descripcion;
                 nota.Color = dto.Color;
                 nota.Tramite.EstadoActualId = dto.EstadoId;
+                nota.FechaFinRecordatorio = dto.FechaFinRecordatorio;
 
                 //se registra el historial de estados
                 if (nota.Tramite.EstadoActualId == (int)EstadosNotaEnum.NotaFinalizado)

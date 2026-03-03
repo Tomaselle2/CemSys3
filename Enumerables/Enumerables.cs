@@ -213,6 +213,27 @@ namespace CemSys3.Enumerables
         Caducado = 8,
     }
 
+    public enum EstadosTramiteEnum
+    {
+        [Display(Name = "Registrado")]
+        IngresoRegistrado = 1,
+
+        [Display(Name = "Finalizado")]
+        IngresoFinalizado = 2,
+
+        [Display(Name = "Sin contrato")]
+        SinContrato = 5,
+
+        [Display(Name = "Vigente")]
+        Vigente = 6,
+
+        [Display(Name = "Vencido")]
+        Vencido = 7,
+
+        [Display(Name = "Caducado")]
+        Caducado = 8,
+    }
+
     //concepto de la tarifaria 
     public enum ConceptosTarifariaEnum
     {

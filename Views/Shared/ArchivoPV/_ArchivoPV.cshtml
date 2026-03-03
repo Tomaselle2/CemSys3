@@ -132,7 +132,7 @@
                         <label class="control-label">Categoría del archivo<span class="obligatorio"> * </span></label>
                         <select asp-for="CategoriaArchivo" id="categoriaArchivoEdicion"
                                 asp-items="EnumHelper.GetSelectListItems<CategoriaArchivosEnum>()"
-                                class="form-control"
+                                class="form-control form-select"
                                 required>
                             <option value="">-- Seleccione una categoría --</option>
                         </select>
@@ -140,7 +140,7 @@
                     </div>
                     <div class="mb-3">
                         <label>Archivo actual</label>
-                        <input type="text" id="archivoActualArchivo" class="form-control" readonly />
+                        <input type="text" id="archivoActualArchivo" class="form-control" disabled />
                     </div>
                     <div class="mb-3">
                         <label for="archivoReciboEdicion">Nuevo archivo (opcional) <span class="obligatorio"> (.png .jpg .pdf)</span></label>

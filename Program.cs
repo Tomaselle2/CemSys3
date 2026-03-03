@@ -7,6 +7,7 @@ using CemSys3.Business.HistorialEstadoService;
 using CemSys3.Business.Ingreso;
 using CemSys3.Business.Login;
 using CemSys3.Business.Notas;
+using CemSys3.Business.Notificacion;
 using CemSys3.Business.Parcela;
 using CemSys3.Business.Persona;
 using CemSys3.Business.Seccion;
@@ -23,6 +24,7 @@ using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Ingreso;
 using CemSys3.Interfaces.Login;
 using CemSys3.Interfaces.Notas;
+using CemSys3.Interfaces.Notificaciones;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.Seccion;
@@ -70,7 +72,7 @@ builder.Services.AddScoped<IIngreso, IngresoService>();
 builder.Services.AddScoped<IPersona, PersonaService>();
 builder.Services.AddScoped<IArchivo, ArchivoService>();
 builder.Services.AddScoped<IConcesion, ConcesionService>();
-
+builder.Services.AddScoped<INotificaciones, NotificacionService>();
 
 
 

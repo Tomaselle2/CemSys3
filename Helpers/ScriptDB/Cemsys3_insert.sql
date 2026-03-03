@@ -47,7 +47,8 @@ INSERT INTO CategoriasPersonas (categoria) VALUES
 ('Fallecido');
 
 INSERT INTO TipoNota (Descripcion, visibilidad) VALUES 
-('Ingreso', 1);
+('Ingreso', 1),
+('Recordatorio', 1);
 
 -- INSERT para EstadoDifunto
 INSERT INTO EstadosDifunto (estado) VALUES 
@@ -148,9 +149,6 @@ VALUES
 ('Vigente', 4), --contrato de concesion 6
 ('Vencido', 4), --contrato de concesion 7
 ('Caducado', 4); --contrato de concesion 8
-
-insert into Personas 
-(nombre, visibilidad, sexo) values ('Municipalidad Colonia Tirolesa', 1, 'otro');
 
 INSERT INTO Usuarios (nombre, apellido, correo, usuario, clave, rolId) values ('Tomas', 'Carreras', 'tomaselle2@gmail.com', 'Tomaselle2', 'P7eSe/VyhW8UaKMx5qghSw==.JYrOO0ZJQLp0A82FUreiYz7mWl+BpZykU1AfM1ZOpZU=', 2);
 

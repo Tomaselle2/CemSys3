@@ -40,7 +40,7 @@
                 <input type="hidden" asp-for="EstadoId"/>
 
                 <div class="modal-header d-flex justify-content-between align-items-center">
-                    <h5 class="modal-title">Nota Ingreso</h5>
+                    <h5 class="modal-title">Nota @(EnumHelper.GetDisplayNameByValue<TipoNotaEnum>(Model.TipoNotaId))</h5>
                     <span class="badge bg-black">
                         @(Model.EstadoId != 0 ? EnumHelper.GetDisplayNameByValue<EstadosNotaEnum>(Model.EstadoId) : "Sin guardar")
                     </span>
@@ -90,7 +90,16 @@
                                   oninput="autoResize(this)"></textarea>
                         <span asp-validation-for="Descripcion" class="text-danger"></span>
                     </div>
-                    
+
+                    <!--Fecha de recordatorio de la nota-->
+                    @if (Model.TipoNotaId == (int)TipoNotaEnum.Recordatorio)
+                    {
+                        <div>
+                            <label class="form-label">Fecha límite:</label>
+                            <input type="datetime-local" id="FechaRecordatorio" class="form-control shadow-sm" asp-for="FechaFinRecordatorio" />
+                        </div>
+                    }
+                        
                     <!-- Tareas de la nota-->
                     <hr />
                     <h6>Tareas</h6>
@@ -161,7 +170,7 @@
             <div class="text-start">
                 <p class="p-2">@(Model.FechaCreacion != null ? $"Nota creada: {Model.FechaCreacion?.ToString("dd/MM/yyyy HH:mm")}" : "")</p>
             </div>
-            @if (Model.EstadoId == (int)EstadosNotaEnum.NotaPendiente && !Model.controlador.Equals("Ingreso"))
+            @if (Model.EstadoId == (int)EstadosNotaEnum.NotaPendiente && !Model.controlador.Equals("Ingreso") && Model.TipoNotaId == (int)TipoNotaEnum.Ingreso)
             {
                 <div class="modal-footer">
                     <form asp-action="RealizarIngreso" asp-controller="Nota" method="get" class="ms-auto">
@@ -171,7 +180,7 @@
                     </form>
                 </div>
             }
-            else
+            else if (Model.EstadoId != 0 && Model.TipoNotaId == (int)TipoNotaEnum.Ingreso)
             {
                 <div class="modal-footer">
                     <form asp-action="RealizarIngreso" asp-controller="Nota" method="get" class="ms-auto">
@@ -204,6 +213,12 @@
 
             //desactivar el titulo del modal
             document.querySelector('#NombreNota').disabled = true;
+
+            //desactivar el datetime-local si existe
+            const fechaRecordatorio = document.getElementById('FechaRecordatorio');
+            if(fechaRecordatorio){
+                fechaRecordatorio.disabled = true;
+            }
 
             //desactivar el check de las tareas
             document.querySelectorAll('#tareas input[type="checkbox"]').forEach(cb => cb.disabled = true);
