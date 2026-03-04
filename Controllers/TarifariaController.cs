@@ -1,8 +1,11 @@
-﻿using CemSys3.DTOs.SweetAlert;
+﻿using CemSys3.DTOs.PDF;
+using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.Tarifaria;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
+using CemSys3.Helpers.PDF;
 using CemSys3.Helpers.Roles_Autenticacion;
+using CemSys3.Interfaces.PDF;
 using CemSys3.Interfaces.Seccion;
 using CemSys3.Interfaces.Tarifaria;
 using CemSys3.ViewModels.Tarifaria;
@@ -16,12 +19,14 @@ namespace CemSys3.Controllers
         private readonly ITarifaria _tarifariaService;
         private readonly IPrecioIngresoService _iprecioIngresoService;
         private readonly ISeccionNichoTarifaria _seccionTarifariaService;
+        private readonly IViewRenderService _viewRenderService;
 
-        public TarifariaController(ITarifaria tarifaria, ISeccionNichoTarifaria seccionTarifariaNicho, IPrecioIngresoService iprecioIngresoService)
+        public TarifariaController(ITarifaria tarifaria, ISeccionNichoTarifaria seccionTarifariaNicho, IPrecioIngresoService iprecioIngresoService, IViewRenderService render)
         {
             _tarifariaService = tarifaria;
             _seccionTarifariaService = seccionTarifariaNicho;
             _iprecioIngresoService = iprecioIngresoService;
+            _viewRenderService = render;
         }
 
         [HttpGet]
@@ -151,7 +156,20 @@ namespace CemSys3.Controllers
         public async Task<IActionResult> GetAllPreciosIngreso()
         {
             IEnumerable<PrecioIngresoDTO> Listado = await _iprecioIngresoService.ObtenerTodasLasReglasAsync();
-            return View(Listado);
+
+            string html = await _viewRenderService.RenderToStringAsync("Tarifaria/GetAllPreciosIngreso", Listado);
+
+            var pdfGenerator = new PlaywrightPdfGenerator();
+            var pdfBytes = await pdfGenerator.GenerateFromHtmlAsync(
+                    html,
+                    new PdfOptionsDto
+                    {
+                        Landscape = true,
+                        MarginTop = "60px",
+                        MarginLeft = "30px",
+                    });
+            //var pdfBytes = await _pdfGenerator.GenerateFromHtmlAsync(html); // por defecto en vertical
+            return File(pdfBytes, "application/pdf", $"Precios_Ingresos_{DateTime.Now.Year}.pdf");
         }
     }
 }

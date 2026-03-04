@@ -1,9 +1,7 @@
-﻿using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Jpeg;
+﻿using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
 using iText.Kernel.Pdf;
 using iText.Layout;
-using iText.Layout.Element;
 using iText.IO.Image;
 
 namespace CemSys3.Helpers.PDF
