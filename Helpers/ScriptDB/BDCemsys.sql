@@ -152,8 +152,6 @@ CREATE TABLE [dbo].[Personas] (
     [correo] nvarchar(50),
     [celular] nvarchar(50),
     [domicilio] nvarchar(100),
-    [domicilioEnTirolesa] bit,
-    [fallecioEnTirolesa] bit,
     [nroActa] int,
     [nroFolio] int,
     [nroTomo] int,
@@ -165,6 +163,9 @@ CREATE TABLE [dbo].[Personas] (
     CONSTRAINT [Personas_categoriaPersonaId_fk] FOREIGN KEY([categoriaPersonaId]) REFERENCES [dbo].[CategoriasPersonas]([id]),
     CONSTRAINT [Personas_estadoDifuntoId_fk] FOREIGN KEY([estadoDifuntoId]) REFERENCES [dbo].[EstadosDifunto]([id])
 );
+
+alter table Personas drop column domicilioEnTirolesa
+alter table Personas drop column fallecioEnTirolesa
 
 
 CREATE TABLE [dbo].[EstadosTramites] (

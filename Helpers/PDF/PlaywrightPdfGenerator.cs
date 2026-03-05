@@ -5,37 +5,41 @@ namespace CemSys3.Helpers.PDF
 {
     public class PlaywrightPdfGenerator
     {
-        public async Task<byte[]> GenerateFromHtmlAsync(
-            string html,
-            PdfOptionsDto? options = null)
+        private readonly IBrowser _browser;
+
+        public PlaywrightPdfGenerator(IBrowser browser)
+        {
+            _browser = browser;
+        }
+
+        public async Task<byte[]> GenerateFromHtmlAsync(string html, PdfOptionsDto? options = null)
         {
             options ??= new PdfOptionsDto();
 
-            using var playwright = await Playwright.CreateAsync();
-
-            await using var browser = await playwright.Chromium.LaunchAsync(
-                new BrowserTypeLaunchOptions { Headless = true });
-
-            var page = await browser.NewPageAsync();
+            var page = await _browser.NewPageAsync();
 
             await page.SetContentAsync(html, new PageSetContentOptions
             {
                 WaitUntil = WaitUntilState.NetworkIdle
             });
 
-            return await page.PdfAsync(new PagePdfOptions
+            var pdf = await page.PdfAsync(new PagePdfOptions
             {
                 Format = options.Format,
                 Landscape = options.Landscape,
-                Margin = new PagePdfMargin
+                PrintBackground = true,
+                Margin = new Margin
                 {
                     Top = options.MarginTop,
                     Bottom = options.MarginBottom,
                     Left = options.MarginLeft,
                     Right = options.MarginRight
-                },
-                PrintBackground = true
+                }
             });
+
+            await page.CloseAsync();
+
+            return pdf;
         }
     }
 

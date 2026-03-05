@@ -20,13 +20,15 @@ namespace CemSys3.Controllers
         private readonly IPrecioIngresoService _iprecioIngresoService;
         private readonly ISeccionNichoTarifaria _seccionTarifariaService;
         private readonly IViewRenderService _viewRenderService;
+        private readonly PlaywrightPdfGenerator _pdfGenerator;
 
-        public TarifariaController(ITarifaria tarifaria, ISeccionNichoTarifaria seccionTarifariaNicho, IPrecioIngresoService iprecioIngresoService, IViewRenderService render)
+        public TarifariaController(ITarifaria tarifaria, ISeccionNichoTarifaria seccionTarifariaNicho, IPrecioIngresoService iprecioIngresoService, IViewRenderService render, PlaywrightPdfGenerator pdfGenerator)
         {
             _tarifariaService = tarifaria;
             _seccionTarifariaService = seccionTarifariaNicho;
             _iprecioIngresoService = iprecioIngresoService;
             _viewRenderService = render;
+            _pdfGenerator = pdfGenerator;
         }
 
         [HttpGet]
@@ -159,15 +161,14 @@ namespace CemSys3.Controllers
 
             string html = await _viewRenderService.RenderToStringAsync("Tarifaria/GetAllPreciosIngreso", Listado);
 
-            var pdfGenerator = new PlaywrightPdfGenerator();
-            var pdfBytes = await pdfGenerator.GenerateFromHtmlAsync(
-                    html,
-                    new PdfOptionsDto
-                    {
-                        Landscape = true,
-                        MarginTop = "60px",
-                        MarginLeft = "30px",
-                    });
+            var pdfBytes = await _pdfGenerator.GenerateFromHtmlAsync(
+                   html,
+                   new PdfOptionsDto
+                   {
+                       Landscape = true,
+                       MarginTop = "60px",
+                       MarginLeft = "30px"
+                   });
             //var pdfBytes = await _pdfGenerator.GenerateFromHtmlAsync(html); // por defecto en vertical
             return File(pdfBytes, "application/pdf", $"Precios_Ingresos_{DateTime.Now.Year}.pdf");
         }

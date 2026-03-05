@@ -16,6 +16,7 @@ using CemSys3.Business.Tarea;
 using CemSys3.Business.Tarifaria;
 using CemSys3.Business.Tramite;
 using CemSys3.Business.Usuario;
+using CemSys3.Helpers.PDF;
 using CemSys3.Interfaces.Archivo;
 using CemSys3.Interfaces.Cementerio;
 using CemSys3.Interfaces.ConceptoTarifaria;
@@ -36,6 +37,7 @@ using CemSys3.Interfaces.Tramite;
 using CemSys3.Interfaces.Usuario;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Playwright;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -77,7 +79,20 @@ builder.Services.AddScoped<IConcesion, ConcesionService>();
 builder.Services.AddScoped<INotificaciones, NotificacionService>();
 builder.Services.AddScoped<IViewRenderService, ViewRenderService>();
 
+builder.Services.AddSingleton<IBrowser>(sp =>
+{
+    var playwright = Playwright.CreateAsync().GetAwaiter().GetResult();
 
+    return playwright.Chromium
+        .LaunchAsync(new BrowserTypeLaunchOptions
+        {
+            Headless = true
+        })
+        .GetAwaiter()
+        .GetResult();
+});
+
+builder.Services.AddScoped<PlaywrightPdfGenerator>();
 
 var app = builder.Build();
 app.UseSession();
