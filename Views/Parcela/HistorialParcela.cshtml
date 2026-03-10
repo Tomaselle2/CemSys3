@@ -21,7 +21,7 @@
         parcela = $"Lote {Model.Historial.NroParcela.ToString()}";
     }
 
-    string ocupacionParcela = (Model.Historial.CantidadDifuntosActuales > 0) ? "ocupado" : "desocupado";
+    string ocupacionParcela = (Model.Historial.CantidadDifuntosActuales > 0) ? "ocupado" : "disponible";
 
 }
 
@@ -30,41 +30,41 @@
 </div>
 
 <div class="contenedor-resumen">
-    <p>Estado: <span>@ocupacionParcela</span></p>
+    <p>Estado: <span class="@ocupacionParcela">@ocupacionParcela</span></p>
 
-    @if(Model.Historial.TipoParcelaId == (int)TipoParcelaEnum.Nicho)
-    {
-        <div class="mb-2">
-            <label class="form-label">Tipo de nicho</label>
-            <select class="form-control shadow-sm form-select" asp-for="Historial.TipoNichoId" asp-items="@(EnumHelper.GetSelectListItems<TipoNichoEnum>())"></select>
+    <form asp-action="Guardar" method="post">
+        @if (Model.Historial.TipoParcelaId == (int)TipoParcelaEnum.Nicho)
+        {
+            <div class="mb-2">
+                <label class="form-label">Tipo de nicho</label>
+                <select class="form-control shadow-sm form-select" asp-for="Historial.TipoNichoId" asp-items="@(EnumHelper.GetSelectListItems<TipoNichoEnum>())"></select>
+            </div>
+        }
+
+        @if (Model.Historial.TipoParcelaId == (int)TipoParcelaEnum.Panteon)
+        {
+            <div class="mb-2">
+                <label class="form-label">Tipo de panteón</label>
+                <select class="form-control shadow-sm form-select" asp-for="Historial.TipoPanteonId" asp-items="@(EnumHelper.GetSelectListItems<TipoPanteonEnum>())">
+                </select>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label">Nombre del panteón</label>
+                <input class="form-control" type="text" asp-for="Historial.NombrePanteon" />
+            </div>
+        }
+
+        <div>
+            <label class="form-label">Información adicional</label>
+            <textarea id="textareaInfoAdicional" style="overflow:hidden;" oninput="ajustarAltura(this)" class="form-control" asp-for="Historial.infoAdicional"></textarea>
         </div>
-    }
 
-    @if (Model.Historial.TipoParcelaId == (int)TipoParcelaEnum.Panteon)
-    {
-        <div class="mb-2">
-            <label class="form-label">Tipo de panteón</label>
-            <select class="form-control shadow-sm form-select" asp-for="Historial.TipoPanteonId" asp-items="@(EnumHelper.GetSelectListItems<TipoPanteonEnum>())">
-            </select>
+        <div class="mt-3">
+            <input type="hidden" asp-for="Historial.Id" />
+            <input type="submit" class="btn btn-success" value="Actualizar" />
         </div>
-
-        <div class="mb-2">
-            <label class="form-label">Nombre del panteón</label>
-            <input class="form-control" type="text" asp-for="Historial.NombrePanteon" />
-        </div>
-    }
-
-    <div>
-        <label class="form-label">Información adicional</label>
-        <textarea id="textareaInfoAdicional" style="overflow:hidden;" oninput="ajustarAltura(this)" class="form-control" asp-for="Historial.infoAdicional"></textarea>
-    </div>
-
-    <div class="mt-3">
-        <input type="hidden" asp-for="Historial.Id" />
-        <input type="hidden" asp-for="Historial.TipoParcelaId" />
-
-        <input type="submit" class="btn btn-success" value="Actualizar" />
-    </div>
+    </form>
 </div>
 
 <!-- Tabla de historial de difuntos actuales -->
@@ -100,12 +100,12 @@
                                         <td>@($"{opc.Apellido?.ToUpper()}, {opc.Nombre?.ToUpper()}")</td>
                                         <td>@(opc.EstadoDifunto != null ? EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(opc.EstadoDifunto ?? 0) : "Sin asignar")</td>
                                         <td>
-                                            @* <form asp-action="HistorialPersona" asp-controller="Personas" target="_blank" method="get" style="display: inline-block;">
-                                                <input type="hidden" name="personaId" value="@opc.DifuntoId" />
-                                                <button type="submit" class="btn-modificar btn-sm" title="ver">
-                                                    <i class="bi bi-eye"></i>
+                                            <form asp-action="HistorialPersona" asp-controller="Persona" target="_blank" method="get" style="display: inline-block;" data-skip-loader="true">
+                                                <input type="hidden" name="id" value="@opc.Id" />
+                                                <button type="submit" class="btn btn-secondary btn-sm" title="Ir al historial">
+                                                    <i class="bi bi-clock"></i>
                                                 </button>
-                                            </form> *@
+                                            </form>
                                         </td>
                                     </tr>
 
@@ -253,3 +253,17 @@
 
 @* Renderizamos el manejador pasándole el DTO del modelo *@
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
+@section Scripts {
+    <script>
+        function ajustarAltura(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const textarea = document.getElementById('textareaInfoAdicional');
+            ajustarAltura(textarea);
+        });
+    </script>
+}

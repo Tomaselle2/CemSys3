@@ -81,7 +81,6 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AnioConcesion>(entity =>
@@ -497,9 +496,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Domicilio)
                 .HasMaxLength(100)
                 .HasColumnName("domicilio");
-            entity.Property(e => e.DomicilioEnTirolesa).HasColumnName("domicilioEnTirolesa");
             entity.Property(e => e.EstadoDifuntoId).HasColumnName("estadoDifuntoId");
-            entity.Property(e => e.FallecioEnTirolesa).HasColumnName("fallecioEnTirolesa");
             entity.Property(e => e.FechaDefuncion).HasColumnName("fechaDefuncion");
             entity.Property(e => e.FechaNacimiento).HasColumnName("fechaNacimiento");
             entity.Property(e => e.InformacionAdicional).HasColumnName("informacionAdicional");

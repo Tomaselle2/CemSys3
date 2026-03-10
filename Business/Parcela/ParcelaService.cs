@@ -296,7 +296,7 @@ namespace CemSys3.Business.Parcela
             //historial de difuntos actuales
             historial.DifuntosActuales = await _context.ParcelaDifuntos.Where(p => p.ParcelaId == parcelaId && p.TramiteRetiroId == null).Select(f => new DifuntoHistorialParcelaDTO
             {
-                Id = f.Id,
+                Id = f.Difunto.Id,
                 FechaIngreso = f.FechaIngreso,
                 FechaRetiro = f.FechaRetiro,
                 Dni = f.Difunto.Dni,
@@ -308,7 +308,7 @@ namespace CemSys3.Business.Parcela
             //historial de difuntos historicos
             historial.DifuntosHistoricos = await _context.ParcelaDifuntos.Where(p => p.ParcelaId == parcelaId).Select(f => new DifuntoHistorialParcelaDTO
             {
-                Id = f.Id,
+                Id = f.Difunto.Id,
                 FechaIngreso = f.FechaIngreso,
                 FechaRetiro = f.FechaRetiro,
                 Dni = f.Difunto.Dni,
@@ -318,6 +318,18 @@ namespace CemSys3.Business.Parcela
             }).ToListAsync();
 
             return historial;
+        }
+
+        public async Task UpdateParcela(ModificarParcelaDTO dto)
+        {
+            Models.Parcela parcela = await _context.Parcelas.FindAsync(dto.Id) ?? throw new Exception("La parcela no existe");
+
+            parcela.NombrePanteon = dto.NombrePanteon ?? parcela.NombrePanteon;
+            parcela.InformacionAdicional = dto.infoAdicional ?? parcela.InformacionAdicional;
+            parcela.TipoNichoId = dto.TipoNichoId ?? parcela.TipoNichoId;
+            parcela.TipoPanteonId = dto.TipoPanteonId ?? parcela.TipoPanteonId;
+            
+            await _context.SaveChangesAsync();
         }
     }
 }

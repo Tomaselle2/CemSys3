@@ -7,6 +7,7 @@ using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Seccion;
+using CemSys3.Models;
 using CemSys3.ViewModels.Parcela;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -108,6 +109,43 @@ namespace CemSys3.Controllers
             }
 
             return View(viewModel);
+        }
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> Guardar(ParcelaHistorialVM viewModel)
+        {
+
+            ModificarParcelaDTO dto = new ModificarParcelaDTO();
+            dto.Id = viewModel.Historial.Id;
+            dto.TipoPanteonId = viewModel.Historial.TipoPanteonId;
+            dto.TipoNichoId = viewModel.Historial.TipoNichoId;
+            dto.NombrePanteon = viewModel.Historial.NombrePanteon;
+            dto.infoAdicional = viewModel.Historial.infoAdicional;
+
+            try
+            {
+                await _parcelaService.UpdateParcela(dto);
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "Parcela guardada exitosamente.",
+                    Tipo = "success"
+                });
+
+               return RedirectToAction("HistorialParcela", new { parcelaId = viewModel.Historial.Id });
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al guardar los datos de la parcela: {ex.Message}",
+                    Tipo = "error"
+                });
+
+                return View(viewModel);
+            }
         }
     }
 }

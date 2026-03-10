@@ -118,7 +118,7 @@ namespace CemSys3.Enumerables
         [Display(Name = "Ocupados")]
         Ocupado = 1,
 
-        [Display(Name = "Desocupdos")]
+        [Display(Name = "Disponibles")]
         Desocupado = 2,
     }
 

@@ -29,10 +29,6 @@ public partial class Persona
 
     public string? Domicilio { get; set; }
 
-    public bool? DomicilioEnTirolesa { get; set; }
-
-    public bool? FallecioEnTirolesa { get; set; }
-
     public int? NroActa { get; set; }
 
     public int? NroFolio { get; set; }

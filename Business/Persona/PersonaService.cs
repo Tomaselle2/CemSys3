@@ -27,8 +27,6 @@ namespace CemSys3.Business.Persona
                 Correo = dto.Correo,
                 Celular = dto.Celular,
                 Domicilio = dto.Domicilio,
-                DomicilioEnTirolesa = dto.DomicilioEnTirolesa,
-                FallecioEnTirolesa = dto.FallecioEnTirolesa,
                 NroActa = dto.NroActa,
                 NroFolio = dto.NroFolio,
                 NroSerie = dto.NroSerie,
@@ -43,6 +41,34 @@ namespace CemSys3.Business.Persona
             await _context.Personas.AddAsync(persona);
             await _context.SaveChangesAsync();
             return persona.Id;
+        }
+
+        public async Task<PersonaDTO> Get(int id)
+        {
+            Models.Persona persona = await _context.Personas.FindAsync(id) ?? throw new Exception("Persona no encontrada");
+            
+            return new PersonaDTO
+            {
+                Id = persona.Id,
+                Nombre = persona.Nombre,
+                Apellido = persona.Apellido,
+                Dni = persona.Dni,
+                Visibilidad = persona.Visibilidad,
+                FechaNacimiento = persona.FechaNacimiento,
+                FechaDefuncion = persona.FechaDefuncion,
+                InformacionAdicional = persona.InformacionAdicional,
+                Sexo = persona.Sexo,
+                Correo = persona.Correo,
+                Celular = persona.Celular,
+                Domicilio = persona.Domicilio,
+                NroActa = persona.NroActa,
+                NroFolio = persona.NroFolio,
+                NroSerie = persona.NroSerie,
+                NroAge = persona.NroAge,
+                NroTomo = persona.NroTomo,
+                EstadoDifuntoId = persona.EstadoDifuntoId,
+                CategoriaPersonaId = persona.CategoriaPersonaId
+            };
         }
 
         public async Task<PersonaDTO> GetByDNISexo(int dni, string sexo)

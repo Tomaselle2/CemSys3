@@ -65,6 +65,19 @@ body {
     padding: 10px;
 }
 
+/*Se usan en historial de parcelas*/
+.ocupado {
+    color: #e53935;
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.disponible {
+    color: #1f946e;
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
 /*NUEVA SECCIÓN*/
 .nueva-seccion {
     background-color: var(--color-nueva-seccion);

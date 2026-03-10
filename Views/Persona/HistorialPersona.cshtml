@@ -1,0 +1,90 @@
+﻿@using CemSys3.ViewModels.Persona
+@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@model HistorialPersonaVM
+@{
+    ViewData["Title"] = $"Historial {Model.persona.Apellido?.ToLower()} {Model.persona.Nombre?.ToLower()}";
+}
+
+<!-- Datos del titular -->
+<div class="accordion" id="accordionDatosDifunto">
+    @* ID único para el acordeón principal *@
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsDatosDifunto-headingOne">
+            <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsDatosDifunto-collapseOne" aria-expanded="false" aria-controls="panelsDatosDifunto-collapseOne">
+                Datos personales
+            </button>
+        </h2>
+        <div id="panelsDatosDifunto-collapseOne" class="accordion-collapse  show" aria-labelledby="panelsDatosDifunto-headingOne" data-bs-parent="#accordionDatosDifunto">
+            <div class="accordion-body">
+                <div class="form-box">
+                    <form asp-action="ModificarPersonaContribuyenteTitular" asp-controller="Personas" method="post">
+
+                        <div class="form-columns-container3">
+                            <div>
+                                <label for="dni">DNI</label>
+                                <input class="form-control" id="dni" type="text" asp-for="persona.Dni" pattern="[0-9]+" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                            </div>
+
+                            <div>
+                                <label for="nombre">Nombre</label>
+                                <input class="form-control" id="nombre" type="text" asp-for="persona.Nombre" required maxlength="50" minlength="2" />
+                            </div>
+
+                            <div>
+                                <label for="apellido">Apellido</label>
+                                <input class="form-control" type="text" id="apellido" asp-for="persona.Apellido" required maxlength="50" minlength="2" />
+                            </div>
+
+
+                            <div>
+                                <label for="fechaNacimiento">Nacimiento</label>
+                                <input id="fechaNacimiento" class="form-control" type="date" asp-for="persona.FechaNacimiento" />
+                            </div>
+
+                            <div>
+                                <label for="sexo">Sexo<span class="obligatorio"> * </span></label>
+                                <select id="sexo" class="form-select" asp-for="persona.Sexo" required>
+                                    <option value="">--Elija una opción--</option>
+                                    <option value="masculino">Masculino</option>
+                                    <option value="femenino">Femenino</option>
+                                    <option value="otro">Otro</option>
+                                </select>
+                            </div>
+
+                        </div>
+                        <div class="form-columns-container3">
+                            <div>
+                                <label for="email">Correo</label>
+                                <input class="form-control" id="email" type="email" asp-for="persona.Correo" maxlength="50" />
+                            </div>
+                            <div>
+                                <label for="telefono">Teléfono</label>
+                                <input class="form-control" id="telefono" type="text" asp-for="persona.Celular" pattern="[0-9]+" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="25" />
+                            </div>
+                        </div>
+                        <div>
+                            <label for="domicilio">Domicilio</label>
+                            <input class="form-control" type="text" id="domicilio" asp-for="persona.Domicilio" maxlength="100" />
+                        </div>
+                        <!-- Datos adicionales -->
+                        <div class="full-width my-2">
+                            <label for="datosAdicionales">Datos adicionales</label>
+                            <textarea class="form-control" id="datosAdicionales" asp-for="persona.InformacionAdicional"></textarea>
+                        </div>
+
+                        <div style="display: flex; justify-content: center;">
+                            <input type="hidden" asp-for="persona.Id" />
+                            <input type="submit" class="btn btn-success" value="Guardar" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
+

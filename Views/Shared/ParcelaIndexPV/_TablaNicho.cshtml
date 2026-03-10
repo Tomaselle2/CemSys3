@@ -24,7 +24,7 @@
                         <tr>
                             <td>Nicho @opc.NroParcela Fila @opc.NroFila</td>
                             <td>@(opc.TipoNichoId.HasValue ? EnumHelper.GetDisplayNameByValue<TipoNichoEnum>(opc.TipoNichoId.Value) : "Sin asignar")</td>
-                            <td>@(opc.CantidadDifuntos == 0 ? "Desocupado" : $"Ocupado {opc.CantidadDifuntos} difunto/s")</td>
+                            <td>@(opc.CantidadDifuntos == 0 ? "Disponible" : $"Ocupado {opc.CantidadDifuntos} difunto/s")</td>
                             <td>@(opc.Visibilidad == true ? "Activo" : "Inactivo")</td>
                             <td>
                                 
