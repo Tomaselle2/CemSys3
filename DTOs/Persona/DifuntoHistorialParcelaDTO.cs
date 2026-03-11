@@ -9,5 +9,11 @@
         public string? Nombre { get; set; }
         public string? Apellido { get; set; }
         public int? EstadoDifunto { get; set; }
+
+        public int? IdParcela { get; set; }
+        public int? NroParcela { get; set; }
+        public int? NroFila { get; set; }
+        public string? NombreSeccion { get; set; }
+        public int? TipoParcelaId { get; set; }
     }
 }

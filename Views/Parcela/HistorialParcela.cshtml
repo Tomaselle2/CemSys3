@@ -159,14 +159,14 @@
                                         <td>@(opc.FechaRetiro != null ? opc.FechaRetiro?.ToString("dd/MM/yyyy HH:mm") : "")</td>
                                         <td>@(opc.Dni != null ? opc.Dni : "")</td>
                                         <td>@($"{opc.Apellido?.ToUpper()}, {opc.Nombre?.ToUpper()}")</td>
-                                        @* <td>
-                                            <form asp-action="HistorialPersona" asp-controller="Personas" target="_blank" method="get" style="display: inline-block;">
-                                                <input type="hidden" name="personaId" value="@opc.DifuntoId" />
-                                                <button type="submit" class="btn-modificar btn-sm" title="ver">
-                                                    <i class="bi bi-eye"></i>
+                                        <td>
+                                            <form asp-action="HistorialPersona" asp-controller="Persona" target="_blank" method="get" style="display: inline-block;" data-skip-loader="true">
+                                                <input type="hidden" name="id" value="@opc.Id" />
+                                                <button type="submit" class="btn btn-secondary btn-sm" title="Ir al historial">
+                                                    <i class="bi bi-clock"></i>
                                                 </button>
                                             </form>
-                                        </td> *@
+                                        </td>
                                     </tr>
                                 }
                             </tbody>

@@ -1,4 +1,5 @@
 ﻿using CemSys3.DTOs.Persona;
+using CemSys3.DTOs.Tramite;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
@@ -87,6 +88,41 @@ namespace CemSys3.Business.Persona
             }).FirstOrDefaultAsync();
         }
 
+        public async Task<HistorialPersonaDTO> HistorialPersona(int id)
+        {
+            HistorialPersonaDTO historial = new HistorialPersonaDTO();
+            historial.Persona = await Get(id);
+
+            //historial de tramites persona
+            historial.Tramites = await _context.TramitePersonas.Where(p => p.PersonaId == id).OrderByDescending(t => t.FechaRegistro).Select(s => new TramiteDTO
+            {
+                Id = s.TramiteId,
+                Visibilidad = s.Tramite.Visibilidad,
+                FechaCreacion = s.Tramite.FechaCreacion,
+                TipoTramiteId = s.Tramite.TipoTramiteId,
+                EstadoActualId = s.Tramite.EstadoActualId
+            }).ToListAsync();
+
+            //historial de las parcelas donde estuvo el difunto
+            historial.Parcelas = await _context.ParcelaDifuntos.Where(p => p.DifuntoId == id).Include(p=> p.Parcela).OrderByDescending(t => t.FechaIngreso).Select(f => new DifuntoHistorialParcelaDTO
+            {
+                Id = f.Difunto.Id,
+                FechaIngreso = f.FechaIngreso,
+                FechaRetiro = f.FechaRetiro,
+                Dni = f.Difunto.Dni,
+                Nombre = f.Difunto.Nombre,
+                Apellido = f.Difunto.Apellido,
+                EstadoDifunto = f.Difunto.EstadoDifuntoId,
+                IdParcela = f.ParcelaId,
+                NroParcela = f.Parcela.NroParcela,
+                NroFila = f.Parcela.NroFila,
+                NombreSeccion = f.Parcela.Seccion.Nombre,
+                TipoParcelaId = f.Parcela.TipoParcelaId
+            }).ToListAsync();
+
+            return historial;
+        }
+
         public async Task<bool> PersonaExiste(int dni, string sexo)
         {
             string dniString = dni.ToString("D8");
@@ -115,8 +151,24 @@ namespace CemSys3.Business.Persona
             persona.Nombre = dto.Nombre?.Trim();
             persona.Apellido = dto.Apellido?.Trim();
             persona.Dni = dto.Dni?.ToString();
-            persona.FechaNacimiento = dto.FechaNacimiento.Value;
-            persona.FechaDefuncion = dto.FechaDefuncion.Value;
+            if (dto.FechaNacimiento.HasValue)
+            {
+                persona.FechaNacimiento = dto.FechaNacimiento.Value;
+            }
+            else
+            {
+                persona.FechaNacimiento = null;
+            }
+
+            if (dto.FechaDefuncion.HasValue)
+            {
+                persona.FechaDefuncion = dto.FechaDefuncion.Value;
+            }
+            else
+            {
+                persona.FechaDefuncion = null;
+            }
+
             persona.InformacionAdicional = dto.InformacionAdicional;
             persona.Sexo = dto.Sexo;
             persona.Correo = dto.Correo;

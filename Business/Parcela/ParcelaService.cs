@@ -284,7 +284,7 @@ namespace CemSys3.Business.Parcela
             historial.CantidadDifuntosActuales = parcela.CantidadDifuntos;
 
             //historial de tramites parcelas
-            historial.Tramites = await _context.TramitesParcelas.Where(p => p.ParcelaId == parcelaId).Select(s => new TramiteDTO
+            historial.Tramites = await _context.TramitesParcelas.Where(p => p.ParcelaId == parcelaId).OrderByDescending(t=>t.FechaRegistro).Select(s => new TramiteDTO
             {
                 Id = s.TramiteId,
                 Visibilidad = s.Tramite.Visibilidad,
@@ -294,7 +294,7 @@ namespace CemSys3.Business.Parcela
             }).ToListAsync();
 
             //historial de difuntos actuales
-            historial.DifuntosActuales = await _context.ParcelaDifuntos.Where(p => p.ParcelaId == parcelaId && p.TramiteRetiroId == null).Select(f => new DifuntoHistorialParcelaDTO
+            historial.DifuntosActuales = await _context.ParcelaDifuntos.Where(p => p.ParcelaId == parcelaId && p.TramiteRetiroId == null).OrderByDescending(t => t.FechaIngreso).Select(f => new DifuntoHistorialParcelaDTO
             {
                 Id = f.Difunto.Id,
                 FechaIngreso = f.FechaIngreso,
@@ -306,7 +306,7 @@ namespace CemSys3.Business.Parcela
             }).ToListAsync();
 
             //historial de difuntos historicos
-            historial.DifuntosHistoricos = await _context.ParcelaDifuntos.Where(p => p.ParcelaId == parcelaId).Select(f => new DifuntoHistorialParcelaDTO
+            historial.DifuntosHistoricos = await _context.ParcelaDifuntos.Where(p => p.ParcelaId == parcelaId).OrderByDescending(t => t.FechaIngreso).Select(f => new DifuntoHistorialParcelaDTO
             {
                 Id = f.Difunto.Id,
                 FechaIngreso = f.FechaIngreso,

@@ -9,5 +9,6 @@ namespace CemSys3.Interfaces.Persona
         Task<PersonaDTO> GetByDNISexo(int dni, string sexo);
         Task<PersonaDTO> Get(int id);
         Task<int> Update(PersonaDTO dto);
+        Task<HistorialPersonaDTO> HistorialPersona (int id);
     }
 }

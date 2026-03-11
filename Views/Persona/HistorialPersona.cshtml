@@ -3,10 +3,10 @@
 @using CemSys3.Helpers.Enumerable
 @model HistorialPersonaVM
 @{
-    ViewData["Title"] = $"Historial {Model.persona.Apellido?.ToLower()} {Model.persona.Nombre?.ToLower()}";
+    ViewData["Title"] = $"Historial {Model.persona.Persona.Apellido?.ToLower()} {Model.persona.Persona.Nombre?.ToLower()}";
 }
 
-<!-- Datos del titular -->
+<!-- Datos de la persona -->
 <div class="accordion" id="accordionDatosDifunto">
     @* ID único para el acordeón principal *@
     <div class="accordion-item">
@@ -18,63 +18,106 @@
         <div id="panelsDatosDifunto-collapseOne" class="accordion-collapse  show" aria-labelledby="panelsDatosDifunto-headingOne" data-bs-parent="#accordionDatosDifunto">
             <div class="accordion-body">
                 <div class="form-box">
-                    <form asp-action="ModificarPersonaContribuyenteTitular" asp-controller="Personas" method="post">
-
+                    <form asp-action="Guardar" asp-controller="Persona" method="post">
+                        <input type="hidden" asp-for="persona.Persona.CategoriaPersonaId" />
                         <div class="form-columns-container3">
                             <div>
                                 <label for="dni">DNI</label>
-                                <input class="form-control" id="dni" type="text" asp-for="persona.Dni" pattern="[0-9]+" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                <input class="form-control" id="dni" type="text" asp-for="persona.Persona.Dni" pattern="[0-9]+" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                             </div>
 
                             <div>
-                                <label for="nombre">Nombre</label>
-                                <input class="form-control" id="nombre" type="text" asp-for="persona.Nombre" required maxlength="50" minlength="2" />
+                                <label for="nombre">Nombre<span class="obligatorio"> * </span></label>
+                                <input class="form-control" id="nombre" type="text" asp-for="persona.Persona.Nombre" autocomplete="off" required maxlength="50" minlength="2" />
                             </div>
 
                             <div>
-                                <label for="apellido">Apellido</label>
-                                <input class="form-control" type="text" id="apellido" asp-for="persona.Apellido" required maxlength="50" minlength="2" />
+                                <label for="apellido">Apellido<span class="obligatorio"> * </span></label>
+                                <input class="form-control" type="text" id="apellido" asp-for="persona.Persona.Apellido" autocomplete="off" required maxlength="50" minlength="2" />
                             </div>
 
 
                             <div>
                                 <label for="fechaNacimiento">Nacimiento</label>
-                                <input id="fechaNacimiento" class="form-control" type="date" asp-for="persona.FechaNacimiento" />
+                                <input id="fechaNacimiento" class="form-control" type="date" asp-for="persona.Persona.FechaNacimiento" />
                             </div>
 
                             <div>
                                 <label for="sexo">Sexo<span class="obligatorio"> * </span></label>
-                                <select id="sexo" class="form-select" asp-for="persona.Sexo" required>
+                                <select id="sexo" class="form-select" asp-for="persona.Persona.Sexo" required>
                                     <option value="">--Elija una opción--</option>
                                     <option value="masculino">Masculino</option>
                                     <option value="femenino">Femenino</option>
                                     <option value="otro">Otro</option>
                                 </select>
                             </div>
-
                         </div>
+
                         <div class="form-columns-container3">
                             <div>
                                 <label for="email">Correo</label>
-                                <input class="form-control" id="email" type="email" asp-for="persona.Correo" maxlength="50" />
+                                <input class="form-control" id="email" type="email" asp-for="persona.Persona.Correo" maxlength="50" />
                             </div>
                             <div>
                                 <label for="telefono">Teléfono</label>
-                                <input class="form-control" id="telefono" type="text" asp-for="persona.Celular" pattern="[0-9]+" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="25" />
+                                <input class="form-control" id="telefono" type="text" asp-for="persona.Persona.Celular" pattern="[0-9]+" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="25" />
                             </div>
                         </div>
                         <div>
                             <label for="domicilio">Domicilio</label>
-                            <input class="form-control" type="text" id="domicilio" asp-for="persona.Domicilio" maxlength="100" />
-                        </div>
-                        <!-- Datos adicionales -->
-                        <div class="full-width my-2">
-                            <label for="datosAdicionales">Datos adicionales</label>
-                            <textarea class="form-control" id="datosAdicionales" asp-for="persona.InformacionAdicional"></textarea>
+                            <input class="form-control" type="text" id="domicilio" asp-for="persona.Persona.Domicilio" maxlength="100" />
                         </div>
 
-                        <div style="display: flex; justify-content: center;">
-                            <input type="hidden" asp-for="persona.Id" />
+                        <div class="form-columns-container3">
+                            @if (Model.persona.Persona.CategoriaPersonaId == (int)CategoriaPersonaEnum.Fallecido)
+                            {
+                                <div class="mt-3">
+                                    <label for="fechaDefuncion">Defunción</label>
+                                    <input class="form-control" id="fechaDefuncion" type="date" asp-for="persona.Persona.FechaDefuncion" />
+                                </div>
+
+                                <div class="mt-3">
+                                    <label>Estado del difunto</label>
+                                    <select class="form-control form-select" asp-items="@(EnumHelper.GetSelectListItems<EstadoDifuntoEnum>())" asp-for="persona.Persona.EstadoDifuntoId">
+                                    </select>
+                                </div>
+                            }
+                        </div>
+                        @if (Model.persona.Persona.CategoriaPersonaId == (int)CategoriaPersonaEnum.Fallecido)
+                            {
+                                <h5>Datos acta de defunción</h5>
+                                <div class="form-columns-container5">
+                                    <div>
+                                        <label for="acta">Acta</label>
+                                    <input type="number" class="form-control" autocomplete="off" asp-for="persona.Persona.NroActa" min="1" />
+                                    </div>
+                                    <div>
+                                        <label>Tomo</label>
+                                    <input type="number" class="form-control" autocomplete="off" asp-for="persona.Persona.NroTomo" min="1" />
+                                    </div>
+                                    <div>
+                                        <label>Folio</label>
+                                    <input type="number" class="form-control" autocomplete="off" asp-for="persona.Persona.NroFolio" min="1" />
+                                    </div>
+                                    <div>
+                                        <label>Serie</label>
+                                    <input type="text" class="form-control" autocomplete="off" asp-for="persona.Persona.NroSerie" />
+                                    </div>
+                                    <div>
+                                        <label>Año</label>
+                                    <input type="number" class="form-control" autocomplete="off" asp-for="persona.Persona.NroAge" />
+                                    </div>
+                                </div>
+                            }
+                            
+                        <!-- Datos adicionales -->
+                        <div>
+                            <label class="form-label my-2" for="textareaInfoAdicional">Información adicional</label>
+                            <textarea id="textareaInfoAdicional" style="overflow:hidden;" oninput="ajustarAltura(this)" class="form-control" asp-for="persona.Persona.InformacionAdicional"></textarea>
+                        </div>
+
+                        <div style="display: flex; justify-content: center;" class="my-3">
+                            <input type="hidden" asp-for="persona.Persona.Id" />
                             <input type="submit" class="btn btn-success" value="Guardar" />
                         </div>
                     </form>
@@ -84,7 +127,165 @@
     </div>
 </div>
 
+@if (Model.persona.Persona.CategoriaPersonaId == (int)CategoriaPersonaEnum.Fallecido)
+{
+    <!-- Tabla de historial de parcelas -->
+    <div class="accordion" id="accordionPanelsStayOpenExample">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+                <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                    Historial de parcelas
+                </button>
+            </h2>
+            <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+                @* cuerpo del acordion *@
+                @if (Model.persona.Parcelas.Any())
+                {
+                    <div class="card shadow-sm">
+                        <div class="card-body p-0">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Ingreso</th>
+                                        <th>Retiro</th>
+                                        <th>Sección</th>
+                                        <th>Parcela</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var opc in Model.persona.Parcelas)
+                                    {
+                                        string parcela = "";
+
+                                        if (opc.TipoParcelaId == (int)TipoParcelaEnum.Nicho) //nicho
+                                        {
+                                            parcela = $"Nicho {opc.NroParcela.ToString()} Fila {opc.NroFila.ToString()}";
+                                        }
+                                        else if (opc.TipoParcelaId == (int)TipoParcelaEnum.Fosa)//fosa
+                                        {
+                                            parcela = $"Fosa {opc.NroParcela.ToString()}";
+                                        }
+                                        else if (opc.TipoParcelaId == (int)TipoParcelaEnum.Panteon) //panteon
+                                        {
+                                            parcela = $"Lote {opc.NroParcela.ToString()}";
+                                        }
+
+                                        string fechaIngreso = opc.FechaIngreso.HasValue ? @opc.FechaIngreso.Value.ToString("dd/MM/yyyy HH:mm") : "-----";
+                                        string fechaRetiro = opc.FechaRetiro.HasValue ? @opc.FechaRetiro.Value.ToString("dd/MM/yyyy HH:mm") : "-----";
+
+                                        <tr>
+                                            <td>@fechaIngreso</td>
+                                            <td>@fechaRetiro</td>
+                                            <td>@opc.NombreSeccion?.ToUpper()</td>
+                                            <td>@parcela</td>
+                                            <td>
+                                                <form asp-action="HistorialParcela" asp-controller="Parcela" method="get" target="_blank" style="display: inline-block;" data-skip-loader="true">
+                                                    <input type="hidden" name="parcelaId" value="@opc.IdParcela" />
+                                                    <button type="submit" class="btn btn-secondary btn-sm" title="Ir a parcela">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle"></i>
+                        No hay parcelas registradas.
+                    </div>
+                }
+                @* Fin cuerpo del acordeon *@
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Tabla de historial de tramites -->
+<div class="accordion" id="accordionPanelsStayOpenExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                Historial de trámites (@Model.persona.Tramites.Count())
+            </button>
+        </h2>
+        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            @* cuerpo del acordion *@
+            @if (Model.persona.Tramites.Any())
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Trámite</th>
+                                    <th>Fecha inicio</th>
+                                    <th>Tipo trámite</th>
+                                    <th>Estado</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var opc in Model.persona.Tramites)
+                                {
+                                    string tipoTramiteDisplay = EnumHelper.GetDisplayNameByValue<TipoTramiteEnum>(opc.TipoTramiteId);
+                                    string estadoTramiteDisplay = EnumHelper.GetDisplayNameByValue<EstadosTramiteEnum>(opc.EstadoActualId);
+
+                                    <tr>
+                                        <td>@opc.Id</td>
+                                        <td>@(opc.FechaCreacion.ToString("dd/MM/yyyy HH:mm"))</td>
+                                        <td>@tipoTramiteDisplay</td>
+                                        <td>@estadoTramiteDisplay</td>
+                                        <td>
+                                            <form asp-action="IrATramite" asp-controller="Tramite" target="_blank" method="get" style="display: inline-block;" data-skip-loader="true">
+                                                <input type="hidden" name="tramiteId" value="@opc.Id" />
+                                                <button type="submit" class="btn btn-secondary btn-sm" title="Ir al trámite">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    No hay historial de tramites.
+                </div>
+            }
+            @* Fin cuerpo del acordeon *@
+        </div>
+    </div>
+</div>
+
+
 @* Renderizamos el manejador pasándole el DTO del modelo *@
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
 
 
+@section Scripts {
+    <script>
+        function ajustarAltura(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const textarea = document.getElementById('textareaInfoAdicional');
+            ajustarAltura(textarea);
+        });
+    </script>
+}
