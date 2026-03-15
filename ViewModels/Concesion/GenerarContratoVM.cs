@@ -29,7 +29,7 @@ namespace CemSys3.ViewModels.Concesion
         public SweetAlertDTO? SweetAlert { get; set; }
 
 
-        // 👇 Método para calcular el precio de 1 año
+        //Método para calcular el precio de 1 año
         public void CalcularPrecioNichoUnAnio()
         {
             if (contrato.TipoParcela != "Nicho")

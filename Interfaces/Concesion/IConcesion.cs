@@ -7,6 +7,8 @@ namespace CemSys3.Interfaces.Concesion
     public interface IConcesion
     {
         Task<GenericResultDTO> Add(ConcesionDTO dto);
+        Task<GenericResultDTO> Update(ConcesionDTO dto);
+
         Task<PaginadoResponse<TablaConcesionDTO>> GellAllPaginado(
             int filtroEstado = 0,
             int pagina = 1,

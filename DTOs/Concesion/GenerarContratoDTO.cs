@@ -19,5 +19,16 @@ namespace CemSys3.DTOs.Concesion
         public List<PrecioTarifariaDTO> PreciosNichos { get; set; } = new List<PrecioTarifariaDTO>();
         public List<PrecioTarifariaDTO> PreciosFosas { get; set; } = new List<PrecioTarifariaDTO>();
 
+
+        public string baseUrl = string.Empty;
+        public string PrecioEnLetras = string.Empty;
+        public string formaPago { get; set; } = string.Empty;
+        public int? CuotaId { get; set; }
+        public decimal Precio { get; set; }
+        public string? OtraFormaPago { get; set; }
+        public int CantidadAniosId { get; set; }
+        public DateOnly Vencimiento { get; set; }
+        public DateTime fechaGeneracion { get; set; }
+
     }
 }

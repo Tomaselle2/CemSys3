@@ -24,7 +24,11 @@
 
 
 
-<form asp-action="GenerarContratoConcesionPDF" method="post" id="formPrincipal" target="_blank">
+<form asp-action="GenerarContrato" method="post" id="formPrincipal" target="_blank">
+
+    <input type="hidden" asp-for="contrato.TramiteId" />
+    <input type="hidden" asp-for="contrato.EstadoTramiteId" />
+
     <!-- Sección de titulares -->
     <div class="accordion" id="accordionTitulares">
         <div class="accordion-item">
@@ -98,6 +102,15 @@
                 }
             </div>
         </div>
+
+        @for (int i = 0; i < Model.contrato.Difuntos.Count; i++)
+        {
+            <input type="hidden" asp-for="contrato.Difuntos[i].DNI" />
+            <input type="hidden" asp-for="contrato.Difuntos[i].Nombre" />
+            <input type="hidden" asp-for="contrato.Difuntos[i].Apellido" />
+            <input type="hidden" asp-for="contrato.Difuntos[i].FechaIngreso" />
+            <input type="hidden" asp-for="contrato.Difuntos[i].EstadoDifuntoId" />
+        }
     </div>
 
     
@@ -186,7 +199,7 @@
                     </div>
                     <div>
                         <label>N° Concesión<span class="obligatorio"> * si no tiene numero colocar 5 (-) </span></label>
-                        <input class="form-control" type="text" required
+                        <input class="form-control" type="text" required autocomplete="off"
                                id="nroConcesion" asp-for="contrato.NroConcesion" maxlength="5" />
                         <span asp-validation-for="contrato.NroConcesion" class="text-danger"></span>
                     </div>
@@ -196,7 +209,7 @@
                     <label>Forma de pago<span class="obligatorio"> * </span></label>
                     <div class="form-columns-container3 mb-3">
                         <div>
-                            <select id="formaDePago" class="form-control" asp-for="FormaDePago" disabled>
+                            <select id="formaDePago" class="form-control form-select" asp-for="FormaDePago" disabled>
                                 <option value="">--Seleccione una forma de pago--</option>
                                 <option value="cuota">Cuotas</option>
                                 <option value="otra">Otra</option>

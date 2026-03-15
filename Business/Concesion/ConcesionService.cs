@@ -142,7 +142,86 @@ namespace CemSys3.Business.Concesion
             }
             
         }
+        public async Task<GenericResultDTO> Update(ConcesionDTO dto)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
+            try
+            {
+                //buscar la concesion por el tramiteId
+                Models.Concesione concesion = await _context.Concesiones.FirstOrDefaultAsync(c => c.TramiteId == dto.TramiteId) ?? throw new Exception("Concesión no encontrada.");
+
+                //reemplazar los datos de la concesion con el dto.
+                concesion.Concesion = dto.Concesion;
+                concesion.Precio = dto.Precio;
+                concesion.Vencimiento = dto.Vencimiento;
+                concesion.CantidadAniosId = dto.CantidadAniosId;
+                concesion.CuotaId = dto.CuotaId;
+                concesion.UsuarioId = dto.UsuarioId;
+                //(tudo) revisar como hacer con la info adicional. 
+
+                //relacion de titulares con concesiones(si existe)
+                if (dto.Titulares != null && dto.Titulares.Count > 0)
+                {
+                    //se busca la persona si existe en la bd
+                    foreach (var persona in dto.Titulares)
+                    {
+                        int dni;
+                        int.TryParse(persona.Dni, out dni);
+
+                        bool existe = await _personaService.PersonaExiste(dni, persona.Sexo ?? "");
+
+                        //si existe actualizo
+                        if (existe)
+                        {
+                            PersonaDTO personaExistente = new PersonaDTO();
+                            personaExistente.Dni = persona.Dni?.PadLeft(8, '0');
+                            personaExistente.Nombre = persona.Nombre;
+                            personaExistente.Apellido = persona.Apellido;
+                            personaExistente.Sexo = persona.Sexo;
+                            personaExistente.Celular = persona.Celular;
+                            personaExistente.Correo = persona.Correo;
+                            personaExistente.Domicilio = persona.Domicilio;
+
+                            int personaCargada = await _personaService.Update(personaExistente);
+
+                            //relacion de titulares con tramite
+                            await _historialEstadosService.VincularTramiteAPersona(dto.TramiteId, personaCargada);
+                        }
+                        else //si no existe creo una nueva persona
+                        {
+                            PersonaDTO personaNueva = new PersonaDTO();
+                            personaNueva.Dni = persona.Dni?.PadLeft(8, '0');
+                            personaNueva.Nombre = persona.Nombre;
+                            personaNueva.Apellido = persona.Apellido;
+                            personaNueva.Sexo = persona.Sexo;
+                            personaNueva.Celular = persona.Celular;
+                            personaNueva.Correo = persona.Correo;
+                            personaNueva.Domicilio = persona.Domicilio;
+
+                            int personaCargada = await _personaService.Add(personaNueva);
+
+                            //relacion de titulares con tramite
+                            await _historialEstadosService.VincularTramiteAPersona(dto.TramiteId, personaCargada);
+                        }
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new GenericResultDTO
+                {
+                    Success = true,
+                    Message = "Concesión actualizada con éxito.",
+                    Id = dto.TramiteId
+                };
+            }
+            catch (Exception) {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
         public async Task<PaginadoResponse<TablaConcesionDTO>> GellAllPaginado(int filtroEstado = 0, int pagina = 1, int porPagina = 10)
         {
             PaginadoResponse<TablaConcesionDTO> resultado = new PaginadoResponse<TablaConcesionDTO>();
@@ -345,5 +424,7 @@ namespace CemSys3.Business.Concesion
 
             return dto;
         }
+
+        
     }
 }
