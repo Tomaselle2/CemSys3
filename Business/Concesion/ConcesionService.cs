@@ -3,6 +3,7 @@ using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.HistorialEstado;
 using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Persona;
+using CemSys3.DTOs.Tarifaria;
 using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
 using CemSys3.Interfaces.Concesion;
@@ -258,6 +259,91 @@ namespace CemSys3.Business.Concesion
             }).ToList();
 
             return resultado;
+        }
+
+        public async Task<GenerarContratoDTO> SolicitarDatosParaGenerarContrato(int idTramite)
+        {
+            GenerarContratoDTO dto = new GenerarContratoDTO();
+
+            Models.Concesione concesion = _context.Concesiones
+                .Include(c => c.Tramite)
+                .Include(c => c.Parcela)
+                    .ThenInclude(p => p.Seccion)
+                .FirstOrDefault(c => c.TramiteId == idTramite) ?? throw new Exception("Concesión no encontrada.");
+
+            dto.TramiteId = concesion.TramiteId;
+            dto.EstadoTramiteId = concesion.Tramite.EstadoActualId;
+            dto.ParcelaId = concesion.ParcelaId;
+            dto.TipoParcela = concesion.TipoParcela;
+            dto.SeccionId = concesion.Parcela.SeccionId;
+            dto.NombreSeccion = concesion.Parcela.Seccion.Nombre;
+            dto.NroParcela = concesion.Parcela.NroParcela;
+            dto.NroFila = concesion.Parcela.NroFila;
+            dto.NroConcesion = concesion.Concesion;
+
+            //consultar los difuntos relacionados a la parcela
+            dto.Difuntos = await _context.ParcelaDifuntos
+                .Where(p => p.ParcelaId == dto.ParcelaId && p.FechaRetiro == null)
+                .Select(p => new DifuntoContratoDTO
+                {
+                    Id = p.Id,
+                    DNI = p.Difunto.Dni,
+                    Nombre = p.Difunto.Nombre,
+                    Apellido = p.Difunto.Apellido,
+                    FechaIngreso = p.FechaIngreso,
+                    EstadoDifuntoId = p.Difunto.EstadoDifuntoId
+                }).ToListAsync();
+
+            //Traer Titulares en una sola consulta
+            dto.Titulares = await _context.HistorialTitularesConcesiones
+                .Where(h => h.ConcesionId == idTramite && h.FechaFin == null)
+                .Select(h => new TitularesContratoDTO
+                {
+                    Id = h.Persona.Id,
+                    Dni = h.Persona.Dni,
+                    Nombre = h.Persona.Nombre,
+                    Apellido = h.Persona.Apellido,
+                    Sexo = h.Persona.Sexo,
+                    Celular = h.Persona.Celular,
+                    CorreoElectronico = h.Persona.Correo,
+                    Domicilio = h.Persona.Domicilio
+                }).ToListAsync();
+
+            //consultar los precios relacionados a la parcela dependiendo del tipo de parcela
+            if (dto.TipoParcela == "Nicho")
+            {
+                dto.PreciosNichos = await _context.PreciosTarifarias
+                    .Where(t => t.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.ConcesionNicho && t.SeccionId == dto.SeccionId && t.NroFila == dto.NroFila)
+                    .Select(t => new PrecioTarifariaDTO
+                    {
+                        Id = t.Id,
+                        Precio = t.Precio,
+                        NroFila = t.NroFila,
+                        ConceptoTarifariaId = t.ConceptoTarifariaId,
+                        AniosConcesionId = t.AniosConcesionId,
+                        SeccionId = t.SeccionId,
+                        Visibilidad = t.Visibilidad,
+                    }).ToListAsync();
+            }
+
+            //consultar los precios relacionados a la parcela dependiendo del tipo de parcela
+            if (dto.TipoParcela == "Fosa")
+            {
+                dto.PreciosNichos = await _context.PreciosTarifarias
+                    .Where(t => t.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.ConcesionFosa)
+                    .Select(t => new PrecioTarifariaDTO
+                    {
+                        Id = t.Id,
+                        Precio = t.Precio,
+                        NroFila = t.NroFila,
+                        ConceptoTarifariaId = t.ConceptoTarifariaId,
+                        AniosConcesionId = t.AniosConcesionId,
+                        SeccionId = t.SeccionId,
+                        Visibilidad = t.Visibilidad,
+                    }).ToListAsync();
+            }
+
+            return dto;
         }
     }
 }

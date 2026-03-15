@@ -1,0 +1,1181 @@
+﻿@using CemSys3.ViewModels.Concesion
+@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@model GenerarContratoVM
+@{
+    ViewData["Title"] = "Generar Contrato Concesión";
+}
+
+<div class="page-header-container">
+    <h1 class="title-page">Generar contrato concesión</h1>
+</div>
+
+
+<div style="max-width: 1400px; margin: 0 auto; padding: 0 10px;">
+    <div class="d-flex align-items-center justify-content-between">
+        <div>
+            <h3><b>Concesión:</b> <span class="nroTramite">@(Model.contrato.NroConcesion == null ? "-----" : Model.contrato.NroConcesion.Value.ToString("D8"))</span></h3>
+        </div>
+        <div>
+            <h3><strong>Estado: <span class="estadoTramite">@(EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(Model.contrato.EstadoTramiteId))</span></strong></h3>
+        </div>
+    </div>
+</div>
+
+
+
+<form asp-action="GenerarContratoConcesionPDF" method="post" id="formPrincipal" target="_blank">
+    <!-- Sección de titulares -->
+    <div class="accordion" id="accordionTitulares">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="panelsStayOpen-headingTitulares">
+                <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-target="#panelsStayOpen-collapseTitulares" aria-expanded="true" aria-controls="panelsStayOpen-collapseTitulares">
+                    Titulares (<span id="contadorTitulares">0</span>)
+                </button>
+            </h2>
+            <p class="obligatorio m-2">Si cambia el titular, quitar el actual y agregar el nuevo. No reemplazar los datos.</p>
+
+            <div id="panelsStayOpen-collapseTitulares" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingTitulares">
+                <div class="mb-3 p-3">
+                    <!-- Contenedor para titulares (aquí se renderizarán los inputs) -->
+                    <div id="contenedorTitulares"></div>
+
+                    <!-- Botón para agregar titular -->
+                    <div class="text-center mt-3">
+                        <button class="btn btn-success" id="agregarContribuyenteButton" type="button">
+                            <i class="bi bi-person-plus" id="contribuyenteIcon"></i> Agregar Titular
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    
+    <!-- Tabla de historial de difuntos actuales -->
+    <div class="accordion" id="accordionDifuntos">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="panelsStayOpen-headingDifuntos">
+                <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-target="#panelsStayOpen-collapseDifuntos" aria-expanded="true" aria-controls="panelsStayOpen-collapseDifuntos">
+                    Difunto/s (@Model.contrato.Difuntos.Count())
+                </button>
+            </h2>
+            <div id="panelsStayOpen-collapseDifuntos" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingDifuntos">
+                @if (Model.contrato.Difuntos.Any())
+                {
+                    <div class="contenedor-2-elementos">
+                        @foreach (var opc in Model.contrato.Difuntos)
+                        {
+                            string dni = opc.DNI == null ? "--------" : opc.DNI;
+                            string nombre = opc.Nombre == null ? "--------" : opc.Nombre;
+                            string apellido = opc.Apellido == null ? "--------" : opc.Apellido;
+                            string fechaIngreso = opc.FechaIngreso == null ? "-------" : opc.FechaIngreso.Value.ToString("dd/MM/yyyy HH:mm");
+                            string estado = opc.EstadoDifuntoId == null ? "--------" : EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(opc.EstadoDifuntoId.Value);
+                            <div class="card-presentacion-datos">
+                                <div>
+                                    <p><b>DNI: </b><span class="datoEncabezadoHistorialParcela dni-formateado">@dni</span></p>
+                                </div>
+                                <div>
+                                    <p><b>Nombre: </b><span class="datoEncabezadoHistorialParcela">@apellido.ToUpper(), @nombre.ToUpper()</span></p>
+                                </div>
+                                <div>
+                                    <p><b>Ingreso: </b><span class="datoEncabezadoHistorialParcela">@fechaIngreso</span></p>
+                                </div>
+                                <div>
+                                    <p><b>Estado: </b><span class="datoEncabezadoHistorialParcela">@estado</span></p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle"></i>
+                        No hay difuntos actuales en esta parcela.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    
+
+
+    <!-- Tabla de datos de la concesion -->
+    <div class="accordion" id="accordionDatosConcesion">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="panelsStayOpen-headingDatosConcesion">
+                <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-target="#panelsStayOpen-collapseDatosConcesion" aria-expanded="true" aria-controls="panelsStayOpen-collapseDatosConcesion">
+                    Concesión
+                </button>
+            </h2>
+            <div id="panelsStayOpen-collapseDatosConcesion" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingDatosConcesion">
+                <!--Cuerpo-->
+                @{
+                    string parcela = "";
+                    if (Model.contrato.TipoParcela == "Nicho") //nicho
+                    {
+                        parcela = $"Nicho {Model.contrato.NroParcela.ToString()} Fila {Model.contrato.NroFila.ToString()}";
+                    }
+
+                    if (Model.contrato.TipoParcela == "Fosa")//fosa
+                    {
+                        parcela = $"Fosa {Model.contrato.NroParcela.ToString()}";
+                    }
+                }
+
+                <!--datos de la parcela-->
+                <div class="contenedor-2-elementos">
+                    <div class="card-presentacion-datos">
+                        <div>
+                            <p class="titulo-intermedio">Datos de la parcela</p>
+                        </div>
+                        <p class="separador"></p>
+                        <div>
+                            <p><b>Tipo de parcela: </b><span class="datoEncabezadoHistorialParcela">@Model.contrato.TipoParcela</span></p>
+                        </div>
+                        <div>
+                            <p><b>Sección: </b><span class="datoEncabezadoHistorialParcela">@Model.contrato.NombreSeccion.ToUpper()</span></p>
+                        </div>
+                        <div>
+                            <p><b>Parcela: </b><span class="datoEncabezadoHistorialParcela">@parcela</span></p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="p-3">
+                    <label>Precio de la concesión<span class="obligatorio"> * </span></label>
+                    <select asp-for="PrecioSeleccionado" class="form-control form-select" id="selectCantidadPrecio">
+                        <option value="">-- Seleccione la cantidad de años --</option>
+                        @if(Model.contrato.TipoParcela == "Nicho"){
+                            @foreach (var precio in Model.contrato.PreciosNichos)
+                            {
+                                <option value="@precio.Id"
+                                        data-precio="@precio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        data-cantidad-anios-id="@precio.AniosConcesionId"
+                                        data-anios="@EnumHelper.ObtenerAnios((AniosConcesionEnum)precio.AniosConcesionId.Value)"
+                                        selected="@(Model.PrecioSeleccionado == precio.Id ? "selected" : null)">
+                                    @(EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(precio.AniosConcesionId.Value)) - $ @precio.Precio.ToString("N2")
+                                </option>
+                            }
+                        }else{
+                            @foreach (var precio in Model.contrato.PreciosFosas)
+                            {
+                                <option value="@precio.Id"
+                                        data-precio="@precio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        data-cantidad-anios-id="@precio.AniosConcesionId"
+                                        data-anios="@EnumHelper.ObtenerAnios((AniosConcesionEnum)precio.AniosConcesionId.Value)"
+                                        selected="@(Model.PrecioSeleccionado == precio.Id ? "selected" : null)">
+                                    @precio.AniosConcesionId años - $ @precio.Precio.ToString("N2")
+                                </option>
+                            }
+                        }
+                        
+                    </select>
+                    <span asp-validation-for="PrecioSeleccionado" class="text-danger"></span>
+                </div>
+
+                <div class="form-columns-container3 mb-3 p-3">
+                    <div>
+                        <label>Vencimiento<span class="obligatorio"> * </span></label>
+                        <input class="form-control" type="date" required id="vencimientoConcesion" asp-for="Vencimiento" />
+                        <span asp-validation-for="Vencimiento" class="text-danger"></span>
+                    </div>
+                    <div>
+                        <label>N° Concesión<span class="obligatorio"> * si no tiene numero colocar 5 (-) </span></label>
+                        <input class="form-control" type="text" required
+                               id="nroConcesion" asp-for="contrato.NroConcesion" maxlength="5" />
+                        <span asp-validation-for="contrato.NroConcesion" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="p-3">
+                    <label>Forma de pago<span class="obligatorio"> * </span></label>
+                    <div class="form-columns-container3 mb-3">
+                        <div>
+                            <select id="formaDePago" class="form-control" asp-for="FormaDePago" disabled>
+                                <option value="">--Seleccione una forma de pago--</option>
+                                <option value="cuota">Cuotas</option>
+                                <option value="otra">Otra</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select disabled class="form-control form-select" id="CantidadCuotaSeleccionada" asp-for="CantidadCuotaSeleccionada" asp-items="@(EnumHelper.GetSelectListItems<CuotasEnum>())">
+                                <option value="">--Elija una cuota--</option>
+                            </select>
+                            <span id="cuota-error" class="text-danger"></span> <!-- mensaje de validación -->
+                        </div>
+                        <div>
+                            <input class="form-control" type="text" id="valorCuota" readonly />
+                        </div>
+                    </div>
+
+                    <div id="divOtraFormaPago" style="display: none">
+                        <label>Escriba la forma de pago</label>
+                        <input class="form-control" type="text" id="otraForma" asp-for="otraFormaPago" readonly />
+                        <span id="otraForma-error" class="text-danger"></span> <!-- mensaje de validación -->
+                    </div>
+                </div>
+
+
+                <input type="hidden" asp-for="contrato.ParcelaId" value="@Model.contrato.ParcelaId" />
+                <input type="hidden" asp-for="CantidadAniosId" id="cantidadAniosId" />
+                <input type="hidden" asp-for="contrato.TipoParcela" value="@Model.contrato.TipoParcela" />
+                <input type="hidden" asp-for="contrato.NombreSeccion" value="@Model.contrato.NombreSeccion.ToUpper()" />
+                <input type="hidden" asp-for="ParcelaString" value="@parcela" />
+                <input type="hidden" asp-for="PrecioFinal" id="precioFinal" name="PrecioFinal" />
+                <input type="hidden" asp-for="contrato.NroFila" value="@Model.contrato.NroFila" />
+                <input type="hidden" asp-for="contrato.NroParcela" value="@Model.contrato.NroParcela" />
+
+                <div class="text-center p-3">
+                    <input type="submit" value="Generar contrato" class="btn btn-success" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+</form> 
+
+
+
+<!-- Modal contribuyente-->
+<div class="modal fade" id="TitularModal" tabindex="-1" aria-labelledby="titularModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="titularModalLabel">Buscar/Registrar Titular</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formContribuyente" class="needs-validation" novalidate data-no-loader="true">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="dniInput">DNI<span class="obligatorio"> * </span></label>
+                            <input class="form-control" id="dniInput" type="text" pattern="[0-9]+" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required />
+                            <div class="invalid-feedback">El DNI es obligatorio</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sexoInput">Sexo<span class="obligatorio"> * </span></label>
+                            <select class="form-select" id="sexoInput" required>
+                                <option value="">--Elija una opción--</option>
+                                <option value="masculino">Masculino</option>
+                                <option value="femenino">Femenino</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                            <div class="invalid-feedback">El sexo es obligatorio</div>
+                        </div>
+                    </div>
+
+                    <!-- Campos adicionales (inicialmente ocultos) -->
+                    <div id="camposAdicionales" style="display: none;">
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="nombreInput">Nombre<span class="obligatorio"> * </span></label>
+                                <input class="form-control" id="nombreInput" type="text" maxlength="60" minlength="2" />
+                                <div class="invalid-feedback">El nombre es obligatorio</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="apellidoInput">Apellido<span class="obligatorio"> * </span></label>
+                                <input class="form-control" type="text" id="apellidoInput" maxlength="60" minlength="2" />
+                                <div class="invalid-feedback">El apellido es obligatorio</div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="celularInput">Celular</label>
+                                <input class="form-control" type="text" id="celularInput" maxlength="25" pattern="[0-9]+" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                <div class="invalid-feedback">No puede tener más de 25 dígitos</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="correoInput">Correo electrónico</label>
+                                <input class="form-control" type="email" maxlength="100" id="correoInput" />
+                                <div class="invalid-feedback">Debe contener "@@" y "." </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="domicilioInput">Domicilio<span class="obligatorio"> * </span></label>
+                            <input class="form-control" type="text" maxlength="100" minlength="2" id="domicilioInput" />
+                            <div class="invalid-feedback">El domicilio es obligatorio</div>
+                        </div>
+                    </div>
+
+                    <!-- Mensaje de error -->
+                    <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="formContribuyente" class="btn btn-primary" id="btnAccionContribuyente">Buscar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- CSS adicional para múltiples titulares -->
+<style>
+    .titular-item {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+
+    .titular-header {
+        background-color: #e9ecef;
+        padding: 10px 15px;
+        border-radius: 8px 8px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .titular-number {
+        font-weight: bold;
+        color: #495057;
+    }
+
+    .btn-eliminar {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+</style>
+
+
+<!-- Modal Confirmación Quitar contribuyente -->
+<div class="modal fade" id="confirmarEliminarModal" tabindex="-1" aria-labelledby="confirmarEliminarModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title" id="confirmarEliminarModalLabel">Advertencia</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                ¿Está seguro de que desea quitar este titular?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnConfirmarEliminar" class="btn btn-danger">Quitar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--Btn de contrato firmado-->
+<div class="d-flex justify-content-center align-items-center">
+    <button class="btn btn-secondary" id="btnSubirContrato" style="display: none" value="">
+        Contrato firmado
+    </button>
+</div>
+
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
+@{
+    var jsonOptions = new System.Text.Json.JsonSerializerOptions
+    {
+        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
+        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+    };
+
+    var titularesProjection = Model.contrato?.Titulares?
+        .Select(t => new
+        {
+            Id = t.Id,
+            Dni = t.Dni,
+            Nombre = t.Nombre,
+            Apellido = t.Apellido,
+            Sexo = t.Sexo,
+            Celular = t.Celular,
+            CorreoElectronico = t.CorreoElectronico,
+            Domicilio = t.Domicilio
+        })
+        .ToList();
+
+    // Cast a object? para que el ?? compare objetos y devuelva un array vacío si es null
+    var titularesJson = System.Text.Json.JsonSerializer.Serialize((object?)titularesProjection ?? System.Array.Empty<object>(), jsonOptions);
+}
+
+@section Scripts {
+    <script>
+        // Variables globales
+        // Inicializo titulares desde el servidor (Model.contrato.Titulares)
+        const initialTitulares = @Html.Raw(titularesJson);
+        let titulares = [];
+
+        let estadoModal = 'buscar';
+        let titularAEliminar = null;
+        const normalizarDni = (v) => String(v ?? '').trim().replace(/\D/g, '');
+
+        // Elementos del DOM - Titulares
+        const formPrincipal = document.getElementById('formPrincipal');
+        const agregarTitularButton = document.getElementById('agregarContribuyenteButton');
+        const formTitular = document.getElementById('formContribuyente');
+        const contenedorTitulares = document.getElementById('contenedorTitulares');
+        const contadorTitularesSpan = document.getElementById('contadorTitulares');
+        const dniInput = document.getElementById('dniInput');
+        const sexoInput = document.getElementById('sexoInput');
+        const nombreInput = document.getElementById('nombreInput');
+        const apellidoInput = document.getElementById('apellidoInput');
+        const celularInput = document.getElementById('celularInput');
+        const correoInput = document.getElementById('correoInput');
+        const domicilioInput = document.getElementById('domicilioInput');
+        const camposAdicionales = document.getElementById('camposAdicionales');
+        const btnAccionTitular = document.getElementById('btnAccionContribuyente');
+        const errorMessage = document.getElementById('errorMessage');
+
+
+        // Elementos del DOM - Forma de pago
+        const nroConcesionInput = document.getElementById('nroConcesion');
+        const formaDePagoSelect = document.getElementById('formaDePago');
+        const cantidadCuotaSelect = document.getElementById('CantidadCuotaSeleccionada');
+        const divOtraFormaPago = document.getElementById('divOtraFormaPago');
+        const selectCantidadPrecio = document.getElementById('selectCantidadPrecio');
+        const valorCuotaInput = document.getElementById('valorCuota');
+        const otraFormaError = document.getElementById('otraForma-error');
+        const otraFormaInput = document.getElementById('otraForma');
+        const cuotaError = document.getElementById('cuota-error');
+        const precioFinalHidden = document.getElementById('precioFinal');
+        const cantidadAniosIdHidden = document.getElementById('cantidadAniosId');
+        const vencimientoConcesion = document.getElementById('vencimientoConcesion');
+        const btnSubirContrato = document.getElementById('btnSubirContrato');
+
+
+
+        // Inicializar titulares desde el server si vienen
+        (function initTitularesFromServer() {
+            if (!initialTitulares || !Array.isArray(initialTitulares) || initialTitulares.length === 0) return;
+
+            titulares = initialTitulares.map(t => ({
+                id: t.id ?? t.Id ?? Date.now(),
+                dni: normalizarDni(t.dni ?? t.Dni ?? t.DNI),
+                nombre: (t.nombre ?? t.Nombre ?? '') || '',
+                apellido: (t.apellido ?? t.Apellido ?? '') || '',
+                sexo: (t.sexo ?? t.Sexo ?? '').toLowerCase(),
+                celular: t.celular ?? t.Celular ?? '',
+                correo: t.correo ?? t.Correo ?? t.CorreoElectronico ?? '',
+                domicilio: t.domicilio ?? t.Domicilio ?? ''
+            }));
+
+
+            renderizarTitulares();
+            actualizarContador();
+        })();
+
+        // Valida el formulario del modal (usa validación HTML5 y muestra mensajes)
+        function validarFormulario() {
+            // limpiar estado previo
+            formTitular.classList.remove('was-validated');
+            ocultarError();
+
+            // En modo registrar, aseguramos que los campos adicionales estén marcados como required
+            if (estadoModal === 'registrar') {
+                nombreInput.setAttribute('required', '');
+                apellidoInput.setAttribute('required', '');
+                domicilioInput.setAttribute('required', '');
+            }
+
+            // Usar validación nativa
+            if (!formTitular.checkValidity()) {
+                formTitular.classList.add('was-validated');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Event Listeners - Titulares
+        agregarTitularButton.addEventListener('click', function() {
+            resetearModal();
+            $('#TitularModal').modal('show');
+        });
+
+
+
+        formTitular.addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (!validarFormulario()) return;
+
+            if (estadoModal === 'buscar') {
+                buscarTitular();
+            } else if (estadoModal === 'registrar') {
+                registrarTitular();
+            }
+        });
+
+
+
+        // Validar formulario principal antes de enviar
+        formPrincipal.addEventListener('submit', function(event) {
+            // Primero verificamos la validez del formulario
+            if (!this.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+                ocultarBoton();
+                return;
+            }
+
+            // Validación personalizada adicional
+            let valido = true;
+
+            // Validar que haya al menos un titular
+            if (titulares.length === 0) {
+                valido = false;
+                AlertService.show("Verificar", "Debe agregar al menos un titular", "warning");
+
+            }
+
+            // Validación de forma de pago (si aplica)
+            if (typeof formaDePagoSelect !== 'undefined' && formaDePagoSelect.value === 'otra') {
+                const texto = otraFormaInput.value.trim();
+                if (texto.length < 10) {
+                    valido = false;
+                    otraFormaError.textContent = 'Debe ingresar al menos 10 caracteres en "Otra forma de pago".';
+                    otraFormaInput.classList.add("is-invalid");
+                }
+            }
+
+            if (typeof formaDePagoSelect !== 'undefined' && formaDePagoSelect.value === 'cuota') {
+                if (!cantidadCuotaSelect.value) {
+                    valido = false;
+                    cuotaError.textContent = 'Debe seleccionar una cantidad de cuotas.';
+                    cantidadCuotaSelect.classList.add("is-invalid");
+                }
+            }
+
+            if (!valido) {
+                event.preventDefault();
+                event.stopPropagation();
+                this.classList.add('was-validated');
+                ocultarBoton();
+                return;
+            }
+
+            // Si todo es válido, permitimos el submit (los inputs ya están en el form)
+            // no preventDefault aquí para que el form haga POST (abre en nueva pestaña)
+            SubirContrato();
+
+        });
+
+        // Funciones principales - Titulares
+        function validarFormulario() {
+            let esValido = true;
+            formTitular.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+
+            // Validar DNI
+            if (!dniInput.value.trim() || dniInput.value.length < 1) {
+                dniInput.classList.add('is-invalid');
+                esValido = false;
+            }
+
+            // Validar sexo
+            if (!sexoInput.value) {
+                sexoInput.classList.add('is-invalid');
+                esValido = false;
+            }
+
+            // Verificar si el DNI ya existe
+            const dniNorm = normalizarDni(dniInput.value);
+            if (titulares.some(t => normalizarDni(t.dni ?? t.Dni) === dniNorm)) {
+                dniInput.classList.add('is-invalid');
+                mostrarError('Ya existe un titular con este DNI');
+                return false;
+            }
+
+            // Si estamos en modo registrar, validar campos adicionales
+            if (estadoModal === 'registrar') {
+                if (!nombreInput.value.trim() || nombreInput.value.length < 2) {
+                    nombreInput.classList.add('is-invalid');
+                    esValido = false;
+                }
+                if (!apellidoInput.value.trim() || apellidoInput.value.length < 2) {
+                    apellidoInput.classList.add('is-invalid');
+                    esValido = false;
+                }
+                if (!domicilioInput.value.trim() || domicilioInput.value.length < 2) {
+                    domicilioInput.classList.add('is-invalid');
+                    esValido = false;
+                }
+            }
+
+            return esValido;
+        }
+
+
+
+        function buscarTitular() {
+            mostrarCargando(true);
+            ocultarError();
+
+            const datos = {
+                Dni: parseInt(dniInput.value),
+                Sexo: sexoInput.value,
+            };
+
+            fetch('/Persona/BuscarContribuyenteContrato', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: JSON.stringify(datos)
+            })
+            .then(response => response.json())
+            .then(data => {
+                mostrarCargando(false);
+                if (data.success) {
+                    if (data.contribuyente) {
+                        // Asegurar que el titular tenga un ID único
+                        data.contribuyente.id = data.contribuyente.id || Date.now();
+                        agregarTitular(data.contribuyente);
+                        $('#TitularModal').modal('hide');
+                    } else {
+                        cambiarAModoRegistrar();
+                    }
+                } else {
+                    mostrarError(data.message || 'Error al buscar titular');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarCargando(false);
+                mostrarError('Error de conexión');
+            });
+        }
+
+        function registrarTitular() {
+            mostrarCargando(true);
+            ocultarError();
+
+            const datos = {
+                dni: dniInput.value.trim(),
+                sexo: sexoInput.value,
+                nombre: nombreInput.value.trim(),
+                apellido: apellidoInput.value.trim(),
+                celular: celularInput.value.trim(),
+                correo: correoInput.value.trim(),
+                domicilio: domicilioInput.value.trim()
+            };
+
+            fetch('/Persona/RegistrarContribuyenteContrato', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: JSON.stringify(datos)
+            })
+            .then(response => response.json())
+            .then(data => {
+                mostrarCargando(false);
+                if (data.success) {
+                    // Asegurar que el titular tenga un ID único
+                    data.contribuyente.id = data.contribuyente.id || Date.now();
+                    agregarTitular(data.contribuyente);
+                    $('#TitularModal').modal('hide');
+                } else {
+                    mostrarError(data.message || 'Error al registrar titular');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarCargando(false);
+                mostrarError('Error de conexión');
+            });
+        }
+
+
+
+        // Funciones principales - Titulares (se mantienen, solo renderizar cambia nombres)
+        function agregarTitular(titular) {
+            const tNorm = {
+                id: titular.id ?? titular.Id ?? Date.now(),
+                dni: normalizarDni(titular.dni ?? titular.Dni ?? titular.DNI),
+                nombre: titular.nombre ?? titular.Nombre ?? '',
+                apellido: titular.apellido ?? titular.Apellido ?? '',
+                sexo: (titular.sexo ?? titular.Sexo ?? '').toLowerCase(),
+                celular: titular.celular ?? titular.Celular ?? '',
+                correo: titular.correo ?? titular.Correo ?? titular.CorreoElectronico ?? '',
+                domicilio: titular.domicilio ?? titular.Domicilio ?? ''
+            };
+
+            if (titulares.some(t => normalizarDni(t.dni ?? t.Dni) === tNorm.dni)) {
+                mostrarError('Ya existe un titular con este DNI');
+                return;
+            }
+
+            titulares.push(tNorm);
+            renderizarTitulares();
+            actualizarContador();
+        }
+
+
+
+        function eliminarTitular(id) {
+            titularAEliminar = id;
+            $('#confirmarEliminarModal').modal('show');
+        }
+
+
+
+        document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
+            if (titularAEliminar !== null) {
+                titulares = titulares.filter(t => t.id !== titularAEliminar);
+                renderizarTitulares();
+                actualizarContador();
+                titularAEliminar = null;
+                $('#confirmarEliminarModal').modal('hide');
+            }
+        });
+
+
+
+        function renderizarTitulares() {
+            contenedorTitulares.innerHTML = '';
+
+            titulares.forEach((titular, index) => {
+                const titularDiv = document.createElement('div');
+                titularDiv.className = 'titular-item';
+                // Nombres de inputs con prefijo 'contrato.Titulares[...]' para bind a Model.contrato.Titulares
+                titularDiv.innerHTML = `
+                    <div class="titular-header">
+                        <span class="titular-number">Titular ${index + 1}</span>
+                        <button type="button" class="btn btn-danger btn-sm btn-eliminar" onclick="eliminarTitular(${titular.id})">
+                            <i class="bi bi-trash"></i> Quitar
+                        </button>
+                    </div>
+                    <div class="p-3">
+                        <input type="hidden" name="contrato.Titulares[${index}].Id" value="${titular.id}" />
+                        <div class="form-columns-container3 mb-3">
+                            <div>
+                                <label>DNI<span class="obligatorio"> * </span></label>
+                                <input class="form-control" type="text" name="contrato.Titulares[${index}].Dni" value="${titular.dni}" readonly required />
+                                <div class="invalid-feedback">El DNI es obligatorio</div>
+                            </div>
+                            <div>
+                                <label>Nombre<span class="obligatorio"> * </span></label>
+                                <input class="form-control" type="text" name="contrato.Titulares[${index}].Nombre" value="${titular.nombre}" maxlength="60" required />
+                                <div class="invalid-feedback">El nombre es obligatorio</div>
+                            </div>
+                            <div>
+                                <label>Apellido<span class="obligatorio"> * </span></label>
+                                <input class="form-control" type="text" name="contrato.Titulares[${index}].Apellido" value="${titular.apellido}" maxlength="60" required />
+                                <div class="invalid-feedback">El apellido es obligatorio</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Domicilio<span class="obligatorio"> * </span></label>
+                            <input class="form-control" type="text" name="contrato.Titulares[${index}].Domicilio" value="${titular.domicilio}" maxlength="100" required />
+                            <div class="invalid-feedback">El domicilio es obligatorio</div>
+                        </div>
+                        <div class="form-columns-container3">
+                            <div>
+                                <label>Sexo<span class="obligatorio"> * </span></label>
+                                <select class="form-select" name="contrato.Titulares[${index}].Sexo" required>
+                                    <option value="masculino" ${titular.sexo === 'masculino' ? 'selected' : ''}>Masculino</option>
+                                    <option value="femenino" ${titular.sexo === 'femenino' ? 'selected' : ''}>Femenino</option>
+                                    <option value="otro" ${titular.sexo === 'otro' ? 'selected' : ''}>Otro</option>
+                                </select>
+                                <div class="invalid-feedback">El sexo es obligatorio</div>
+                            </div>
+                            <div>
+                                <label>Teléfono</label>
+                                <input class="form-control" type="text" name="contrato.Titulares[${index}].Celular" value="${titular.celular || ''}" maxlength="25" />
+                            </div>
+                            <div>
+                                <label>Correo</label>
+                                <input class="form-control" type="text" name="contrato.Titulares[${index}].CorreoElectronico" value="${titular.correo || ''}" maxlength="100" />
+                            </div>
+                        </div>
+                    </div>
+                `;
+                contenedorTitulares.appendChild(titularDiv);
+            });
+        }
+
+
+
+        function actualizarContador() {
+            contadorTitularesSpan.textContent = titulares.length;
+        }
+
+
+
+        function cambiarAModoRegistrar() {
+            estadoModal = 'registrar';
+            camposAdicionales.style.display = 'block';
+            btnAccionTitular.textContent = 'Registrar';
+            nombreInput.setAttribute('required', '');
+            apellidoInput.setAttribute('required', '');
+            domicilioInput.setAttribute('required', '');
+        }
+
+
+
+        function resetearModal() {
+            estadoModal = 'buscar';
+            formTitular.reset();
+            formTitular.classList.remove('was-validated');
+            camposAdicionales.style.display = 'none';
+            btnAccionTitular.textContent = 'Buscar';
+            ocultarError();
+
+            // Remover required de campos
+            nombreInput.removeAttribute('required');
+            apellidoInput.removeAttribute('required');
+            domicilioInput.removeAttribute('required');
+
+            // Limpiar validaciones
+            formTitular.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        }
+
+
+
+        // Funciones auxiliares
+        function mostrarCargando(mostrar) {
+            if (mostrar) {
+                btnAccionTitular.disabled = true;
+                btnAccionTitular.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Procesando...';
+            } else {
+                btnAccionTitular.disabled = false;
+                btnAccionTitular.textContent = estadoModal === 'buscar' ? 'Buscar' : 'Registrar';
+            }
+        }
+
+
+
+        function mostrarError(mensaje) {
+            errorMessage.textContent = mensaje;
+            errorMessage.style.display = 'block';
+        }
+
+
+
+        function ocultarError() {
+            errorMessage.style.display = 'none';
+        }
+
+
+
+        // Función para formatear el DNI con puntos cada 3 dígitos
+        function formatearDNI(dni) {
+            if (!dni) return "--------";
+            return dni.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function SubirContrato() {
+            btnSubirContrato.style.display = 'block';
+
+            // ⚠️ Solo agregar listener si no existe ya
+            if (!btnSubirContrato.dataset.listenerAdded) {
+                btnSubirContrato.addEventListener('click', () => {
+                    // Obtener valores necesarios
+                    const nroConcesion = nroConcesionInput.value;
+                    const parcelaId = '@Model.contrato?.ParcelaId'; // Usar el valor del modelo
+
+                    const modalHTML = `
+                    <div class="modal fade" id="modalSubirContrato" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Advertencia</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form method="post" action="@Url.Action("PendienteDocumentacion", "ContratoConcesion")">
+                                    @Html.AntiForgeryToken()
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <p>El contrato debe estar firmado y escaneado para continuar</p>
+                                        </div>
+                                        <div id="titularesSubirContrato"></div> <!-- Contenedor para titulares -->
+                                    </div>
+
+                                    <input type="hidden" name="NroConcesion" value="${nroConcesion}" />
+                                    <input type="hidden" name="ParcelaId" value="${parcelaId}" />
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Continuar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+
+                    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+                    // Copiar titulares al formulario del modal
+                    const titularesSubirContrato = document.getElementById('titularesSubirContrato');
+                    titulares.forEach((titular, index) => {
+                        titularesSubirContrato.innerHTML += `
+                            <input type="hidden" name="contrato.Titulares[${index}].Id" value="${titular.id}" />
+                            <input type="hidden" name="contrato.Titulares[${index}].Dni" value="${titular.dni}" />
+                            <input type="hidden" name="contrato.Titulares[${index}].Nombre" value="${titular.nombre}" />
+                            <input type="hidden" name="contrato.Titulares[${index}].Apellido" value="${titular.apellido}" />
+                            <input type="hidden" name="contrato.Titulares[${index}].Domicilio" value="${titular.domicilio}" />
+                            <input type="hidden" name="contrato.Titulares[${index}].Sexo" value="${titular.sexo}" />
+                            <input type="hidden" name="contrato.Titulares[${index}].Celular" value="${titular.celular || ''} " />
+                            <input type="hidden" name="contrato.Titulares[${index}].CorreoElectronico" value="${titular.correo || ''}" />
+                        `;
+                    });
+
+                    const modal = new bootstrap.Modal(document.getElementById('modalSubirContrato'));
+                    modal.show();
+
+                    document.getElementById('modalSubirContrato').addEventListener('hidden.bs.modal', () => {
+                        document.getElementById('modalSubirContrato').remove();
+                    });
+                });
+
+                btnSubirContrato.dataset.listenerAdded = "true";
+            }
+        }
+
+
+
+
+
+
+
+        // --- Función auxiliar para ocultar ---
+        function ocultarBoton() {
+            btnSubirContrato.style.display = 'none';
+        }
+
+        // Lógica de vencimiento
+        // function extraerAnios(textoOpcion) {
+        //     // Usamos una expresión regular para encontrar el número de años
+        //     const match = textoOpcion.match(/^(\d+)\s*años/);
+        //     if (match && match[1]) {
+        //         return parseInt(match[1]);
+        //     }
+        //     return 0;
+        // }
+
+        // Función para calcular la fecha de vencimiento
+        function calcularVencimiento() {
+
+            if (selectCantidadPrecio.value === "") {
+                AlertService.show("Verificar", "Por favor, seleccione la cantidad de años.", "warning");
+                return;
+            }
+
+            const opcionSeleccionada = selectCantidadPrecio.options[selectCantidadPrecio.selectedIndex];
+
+            const anios = parseInt(opcionSeleccionada.dataset.anios);
+
+            if (!anios) {
+                AlertService.show("Error", "No se pudo determinar la cantidad de años.", "error");
+                return;
+            }
+
+            const hoy = new Date();
+
+            const nuevaFecha = new Date(hoy);
+            nuevaFecha.setFullYear(nuevaFecha.getFullYear() + anios);
+
+            const year = nuevaFecha.getFullYear();
+            const month = String(nuevaFecha.getMonth() + 1).padStart(2, '0');
+            const day = String(nuevaFecha.getDate()).padStart(2, '0');
+
+            vencimientoConcesion.value = `${year}-${month}-${day}`;
+        }
+
+        selectCantidadPrecio.addEventListener('change', function() {
+            // Solo calcular si hay una selección válida
+            if (this.value !== "") {
+                calcularVencimiento();
+            } else {
+                vencimientoConcesion.value = "";
+            }
+        });
+
+        // Lógica de forma de pago y cuotas
+        function parsePrecioString(raw) {
+            if (!raw) return NaN;
+            raw = raw.trim();
+            raw = raw.replace(/[^\d.,-]/g, '');
+
+            const lastDot   = raw.lastIndexOf('.');
+            const lastComma = raw.lastIndexOf(',');
+
+            if (lastDot > lastComma) {
+                raw = raw.replace(/,/g, '');                // punto decimal
+            } else if (lastComma > lastDot) {
+                raw = raw.replace(/\./g, '').replace(',', '.'); // coma decimal
+            } else {
+                const dots   = (raw.match(/\./g) || []).length;
+                const commas = (raw.match(/,/g) || []).length;
+                if (dots > 1 && commas === 0) raw = raw.replace(/\./g, '');
+                else if (commas > 1 && dots === 0) raw = raw.replace(/,/g, '');
+                else if (commas === 1 && dots === 0) raw = raw.replace(',', '.');
+            }
+            const n = Number(raw);
+            return Number.isFinite(n) ? n : NaN;
+        }
+
+        function getPrecioSeleccionado() {
+            const opt = selectCantidadPrecio.selectedOptions && selectCantidadPrecio.selectedOptions[0];
+            if (!opt) return NaN;
+            let raw = opt.dataset.precio ?? '';
+            if (!raw) raw = opt.textContent || '';
+            return parsePrecioString(raw);
+        }
+
+        function calcularValorCuota() {
+            const forma = formaDePagoSelect.value;
+            if (forma !== 'cuota') {
+                valorCuotaInput.value = '';
+                return;
+            }
+
+            const precio = getPrecioSeleccionado();
+            const cuotas = parseInt(cantidadCuotaSelect.value, 10);
+
+            if (Number.isFinite(precio) && Number.isInteger(cuotas) && cuotas > 0) {
+                const cuota = precio / cuotas;
+                const montoFormateado = new Intl.NumberFormat('es-AR', {
+                    style: 'currency',
+                    currency: 'ARS'
+                }).format(cuota);
+
+                if (cuotas === 1) {
+                    valorCuotaInput.value = `1 pago de ${montoFormateado}`;
+                } else {
+                    valorCuotaInput.value = `${cuotas} cuotas de ${montoFormateado}`;
+                }
+            } else {
+                valorCuotaInput.value = '';
+            }
+        }
+
+        formaDePagoSelect.addEventListener('change', function() {
+            if (this.value === 'otra') {
+                divOtraFormaPago.style.display = 'block';
+                otraFormaInput.removeAttribute('readonly');
+                cantidadCuotaSelect.setAttribute('disabled', 'disabled');
+                cantidadCuotaSelect.value = '';
+                valorCuotaInput.value = '';
+                otraFormaInput.value = '';
+            } else if (this.value === 'cuota') {
+                divOtraFormaPago.style.display = 'none';
+                otraFormaInput.setAttribute('readonly', 'readonly');
+                cantidadCuotaSelect.removeAttribute('disabled');
+            } else {
+                divOtraFormaPago.style.display = 'none';
+                otraFormaInput.setAttribute('readonly', 'readonly');
+                cantidadCuotaSelect.setAttribute('disabled', 'disabled');
+                cantidadCuotaSelect.value = '';
+                valorCuotaInput.value = '';
+            }
+
+            precioFinalHidden.value = getPrecioSeleccionado() || 0;
+            calcularValorCuota();
+        });
+
+        selectCantidadPrecio.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+
+            if (selectedOption && selectedOption.value !== '') {
+                const cantidadAniosId = selectedOption.getAttribute('data-cantidad-anios-id');
+                console.log(cantidadAniosId);
+                cantidadAniosIdHidden.value = cantidadAniosId;
+                formaDePagoSelect.removeAttribute('disabled');
+            } else {
+                cantidadAniosIdHidden.value = '';
+                formaDePagoSelect.setAttribute('disabled', 'disabled');
+                formaDePagoSelect.value = '';
+                divOtraFormaPago.style.display = 'none';
+                otraFormaInput.setAttribute('readonly', 'readonly');
+                cantidadCuotaSelect.setAttribute('disabled', 'disabled');
+                cantidadCuotaSelect.value = '';
+                valorCuotaInput.value = '';
+            }
+
+            precioFinalHidden.value = getPrecioSeleccionado() || 0;
+            calcularValorCuota();
+        });
+
+        cantidadCuotaSelect.addEventListener('change', calcularValorCuota);
+
+        // Validación en tiempo real para forma de pago
+        otraFormaInput.addEventListener('input', function () {
+            if (this.value.trim().length >= 10) {
+                otraFormaError.textContent = "";
+                this.classList.remove("is-invalid");
+            }
+        });
+
+        cantidadCuotaSelect.addEventListener('change', function () {
+            if (this.value) {
+                cuotaError.textContent = "";
+                this.classList.remove("is-invalid");
+            }
+        });
+
+        // Validación número de concesión
+        if (nroConcesionInput) {
+            nroConcesionInput.addEventListener('blur', function() {
+                formatearNumeroConcesion(this);
+            });
+
+            nroConcesionInput.addEventListener('input', function() {
+                // Permitir solo números y guiones, limitar a 5 caracteres
+                this.value = this.value.replace(/[^0-9\-]/g, '');
+                if (this.value.length > 5) {
+                    this.value = this.value.slice(0, 5);
+                }
+            });
+        }
+
+        function formatearNumeroConcesion(input) {
+            let valor = input.value.trim();
+
+            if (valor === '') {
+                input.setCustomValidity('El número de concesión es requerido');
+                return;
+            }
+
+            // Verificar si son exactamente 5 guiones
+            if (valor === '-----') {
+                input.setCustomValidity(''); // Limpiar cualquier error
+                input.reportValidity(); // Forzar actualización de la validación
+                return; // No formatear, mantener los guiones
+            }
+
+            // Si no son 5 guiones, debe ser un número
+            // Verificar que solo contenga números
+            if (!/^\d+$/.test(valor)) {
+                input.setCustomValidity('El número de concesión debe contener solo números o exactamente 5 guiones (-----)');
+                return;
+            }
+
+            // Asegurar que tenga exactamente 5 dígitos con ceros a la izquierda
+            input.value = valor.padStart(5, '0');
+            input.setCustomValidity('');
+        }
+
+
+
+
+
+
+
+
+
+        // Aplicar el formato a los elementos con la clase 'dni-formateado'
+        document.addEventListener("DOMContentLoaded", function () {
+            const elementosDNI = document.querySelectorAll(".dni-formateado");
+            elementosDNI.forEach(function (elemento) {
+                elemento.textContent = formatearDNI(elemento.textContent);
+            });
+        });
+    </script>
+}
+

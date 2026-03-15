@@ -83,8 +83,19 @@ namespace CemSys3.Business.Persona
                 Dni = s.Dni,
                 Sexo = s.Sexo,
                 Visibilidad = s.Visibilidad,
-                CategoriaPersonaId = s.CategoriaPersonaId
-
+                CategoriaPersonaId = s.CategoriaPersonaId,
+                Domicilio = s.Domicilio,
+                Correo = s.Correo,
+                Celular = s.Celular,
+                FechaNacimiento = s.FechaNacimiento,
+                FechaDefuncion = s.FechaDefuncion,
+                InformacionAdicional = s.InformacionAdicional,
+                NroActa = s.NroActa,
+                NroFolio = s.NroFolio,
+                NroSerie = s.NroSerie,
+                NroAge = s.NroAge,
+                NroTomo = s.NroTomo,
+                EstadoDifuntoId = s.EstadoDifuntoId
             }).FirstOrDefaultAsync();
         }
 

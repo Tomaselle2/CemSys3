@@ -86,6 +86,27 @@ namespace CemSys3.Enumerables
         Recordatorio = 2,
     }
 
+    public enum CuotasEnum
+    {
+        [Display(Name = "1 pago")]
+        cuota1 = 1,
+
+        [Display(Name = "2 cuotas")]
+        cuota2 = 2,
+
+        [Display(Name = "3 cuotas")]
+        cuota3 = 3,
+
+        [Display(Name = "4 cuotas")]
+        cuota4 = 4,
+
+        [Display(Name = "5 cuotas")]
+        cuota5 = 5,
+
+        [Display(Name = "6 cuotas")]
+        cuota6 = 6,
+    }
+
     //Categoria Persona
     public enum CategoriaPersonaEnum
     {
@@ -246,7 +267,9 @@ namespace CemSys3.Enumerables
         PorcentajeAumentoConcesionesOtrasLocalidades = 21,
         PorcentajeAumentoIntroduccionDerechoOficinaOtrasLocalidades = 22,
         PorcentajePreciosNichosUrnariosConcesionSecc16_18 = 23,
-        PorcentajeIntroduccionUrnaDerechoOficina = 24
+        PorcentajeIntroduccionUrnaDerechoOficina = 24,
+        ConcesionNicho = 16,
+        ConcesionFosa = 17,
     }
 
     public enum CategoriaArchivosEnum //cada categoria que se agrega debe ser al final siempre

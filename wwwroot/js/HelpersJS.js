@@ -21,11 +21,22 @@ function hasNoLoaderFlag(element) {
     return false;
 }
 
+function formRequestsLoaderShouldBeSkipped(form, submitter) {
+    if (!form) return false;
+    // atributo explícito en el form o en el botón
+    if (form.hasAttribute('data-no-loader') || form.hasAttribute('data-skip-loader')) return true;
+    if (submitter && (submitter.hasAttribute('data-no-loader') || submitter.hasAttribute('data-skip-loader'))) return true;
+    // formularios que están dentro de un modal => no mostrar loader global
+    if (form.closest && form.closest('.modal')) return true;
+    return false;
+}
+
 // Antes de navegar (links normales)
 document.addEventListener("click", function (e) {
     const link = e.target.closest("a");
     if (!link) return;
     if (link.target === "_blank") return;
+    if (link.hasAttribute("data-no-loader") || link.hasAttribute("data-skip-loader")) return;
     if (hasNoLoaderFlag(link)) return;
     if (link.getAttribute("href")?.startsWith("#")) return;
     // si es HTMX
@@ -40,6 +51,9 @@ document.addEventListener("submit", async function (e) {
 
     // si es HTMX, manejar aparte
     if (form.hasAttribute("hx-post")) return;
+
+    // Si debemos saltar el loader para este form (p. ej. modal), no mostrarlo
+    if (formRequestsLoaderShouldBeSkipped(form, submitter)) return;
 
     // Evitar mostrar loader si el form o el botón piden no mostrarlo
     const formTarget = form.target || "";

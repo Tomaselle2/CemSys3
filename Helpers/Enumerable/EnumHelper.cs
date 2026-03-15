@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using CemSys3.Enumerables;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
@@ -72,6 +73,19 @@ namespace CemSys3.Helpers.Enumerable
             var attr = field?.GetCustomAttribute<DisplayAttribute>();
 
             return attr?.Name ?? name;
+        }
+
+        public static int ObtenerAnios(AniosConcesionEnum aniosEnum)
+        {
+            return aniosEnum switch
+            {
+                AniosConcesionEnum.anio1 => 1,
+                AniosConcesionEnum.anio5 => 5,
+                AniosConcesionEnum.anio10 => 10,
+                AniosConcesionEnum.anio15 => 15,
+                AniosConcesionEnum.anio25 => 25,
+                _ => 0
+            };
         }
     }
 }

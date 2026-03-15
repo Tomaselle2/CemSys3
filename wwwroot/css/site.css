@@ -605,3 +605,43 @@ body {
         flex-grow: 1;
     }
 
+
+    /*--------------------------------------ESTILOS PARA CONCESIONES--------------------------------*/
+.contenedor-2-elementos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    justify-content: center;
+    align-items: start;
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+    .contenedor-2-elementos > .card-presentacion-datos:only-child {
+        grid-column: span 2;
+        justify-self: center;
+        /*max-width: 800px;*/
+    }
+
+.datoEncabezadoHistorialParcela {
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.card-presentacion-datos {
+    background-color: #feffff;
+    border-radius: 12px;
+    box-shadow: 1px 1px 4px 1px #bbc1b9;
+    padding: 10px;
+    margin: 10px;
+    width: 100%; 
+    box-sizing: border-box;
+}
+
+.titulo-intermedio {
+    color: #2E8B57;
+    font-size: 1.5em;
+    font-weight: 700;
+    text-align: center
+}
