@@ -18,6 +18,7 @@ using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
+using static iText.Kernel.Pdf.Colorspace.PdfSpecialCs;
 
 namespace CemSys3.Business.Ingreso
 {
@@ -170,6 +171,19 @@ namespace CemSys3.Business.Ingreso
                     concesion.InformacionAdicional = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} en {ubicacion} se genera concesión en estado '{EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>((int)EstadosConcesionEnum.SinContrato)}'.";
                     GenericResultDTO resultadoConcesion = await _concesionService.Add(concesion);
                 }
+
+                if (!existeConcesion && ingreso.Parcela.TipoParcelaId == (int)TipoParcelaEnum.Panteon)
+                {
+                    //se crea la concesion para cada panteon registrado, con estado vigente
+                    ConcesionDTO concesion = new ConcesionDTO();
+                    concesion.Visibilidad = true;
+                    concesion.ParcelaId = ingreso.Parcela.Id;
+                    concesion.TipoParcela = EnumHelper.GetDisplayNameByValue<TipoParcelaEnum>(ingreso.Parcela.TipoParcelaId ?? 0);
+                    concesion.UsuarioId = ingreso.UsuarioId;
+                    concesion.EstadoTramiteId = (int)EstadosConcesionEnum.Vigente;
+                    GenericResultDTO resultadoConcesion = await _concesionService.Add(concesion);
+                }
+                
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();

@@ -3,13 +3,11 @@ using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Seccion;
 using CemSys3.Enumerables;
-using CemSys3.Helpers.Enumerable;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Seccion;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 namespace CemSys3.Business.Seccion
 {

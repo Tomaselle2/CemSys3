@@ -66,8 +66,6 @@ namespace CemSys3.Business.Tramite
             await _context.Tramites.AddAsync(tramite);
 
             return tramite.Id;
-
-            //el historial depende de cada negocio
         }
 
         public async Task<TramiteDTO> Get(int id)
