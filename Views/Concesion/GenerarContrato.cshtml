@@ -884,38 +884,35 @@
         function SubirContrato() {
             btnSubirContrato.style.display = 'block';
 
-            // ⚠️ Solo agregar listener si no existe ya
             if (!btnSubirContrato.dataset.listenerAdded) {
+
                 btnSubirContrato.addEventListener('click', () => {
-                    // Obtener valores necesarios
-                    const nroConcesion = nroConcesionInput.value;
-                    const parcelaId = '@Model.contrato?.ParcelaId'; // Usar el valor del modelo
 
                     const modalHTML = `
                     <div class="modal fade" id="modalSubirContrato" tabindex="-1">
                         <div class="modal-dialog">
                             <div class="modal-content">
+
                                 <div class="modal-header">
-                                    <h5 class="modal-title">Advertencia</h5>
+                                    <h5 class="modal-title">Confirmar acción</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
-                                <form method="post" action="@Url.Action("PendienteDocumentacion", "ContratoConcesion")">
-                                    @Html.AntiForgeryToken()
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <p>El contrato debe estar firmado y escaneado para continuar</p>
-                                        </div>
-                                        <div id="titularesSubirContrato"></div> <!-- Contenedor para titulares -->
-                                    </div>
 
-                                    <input type="hidden" name="NroConcesion" value="${nroConcesion}" />
-                                    <input type="hidden" name="ParcelaId" value="${parcelaId}" />
+                                <div class="modal-body">
+                                    <p>El contrato debe estar firmado y escaneado para continuar.</p>
+                                    <p><strong>¿Desea confirmar el contrato?</strong></p>
+                                </div>
 
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                        <button type="submit" class="btn btn-primary">Continuar</button>
-                                    </div>
-                                </form>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Cancelar
+                                    </button>
+
+                                    <button type="button" class="btn btn-primary" id="btnConfirmarContrato">
+                                        Confirmar
+                                    </button>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -923,26 +920,23 @@
 
                     document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-                    // Copiar titulares al formulario del modal
-                    const titularesSubirContrato = document.getElementById('titularesSubirContrato');
-                    titulares.forEach((titular, index) => {
-                        titularesSubirContrato.innerHTML += `
-                            <input type="hidden" name="contrato.Titulares[${index}].Id" value="${titular.id}" />
-                            <input type="hidden" name="contrato.Titulares[${index}].Dni" value="${titular.dni}" />
-                            <input type="hidden" name="contrato.Titulares[${index}].Nombre" value="${titular.nombre}" />
-                            <input type="hidden" name="contrato.Titulares[${index}].Apellido" value="${titular.apellido}" />
-                            <input type="hidden" name="contrato.Titulares[${index}].Domicilio" value="${titular.domicilio}" />
-                            <input type="hidden" name="contrato.Titulares[${index}].Sexo" value="${titular.sexo}" />
-                            <input type="hidden" name="contrato.Titulares[${index}].Celular" value="${titular.celular || ''} " />
-                            <input type="hidden" name="contrato.Titulares[${index}].CorreoElectronico" value="${titular.correo || ''}" />
-                        `;
-                    });
-
-                    const modal = new bootstrap.Modal(document.getElementById('modalSubirContrato'));
+                    const modalElement = document.getElementById('modalSubirContrato');
+                    const modal = new bootstrap.Modal(modalElement);
                     modal.show();
 
-                    document.getElementById('modalSubirContrato').addEventListener('hidden.bs.modal', () => {
-                        document.getElementById('modalSubirContrato').remove();
+                    // BOTÓN CONFIRMAR
+                    document.getElementById('btnConfirmarContrato').addEventListener('click', () => {
+
+                        //CAMBIAR ACCIÓN DEL FORM PRINCIPAL
+                        formPrincipal.action = '/Concesion/ContratoFirmado';
+                        formPrincipal.target = '_self'; // importante
+
+                        formPrincipal.submit();
+                    });
+
+                    // limpiar modal al cerrar
+                    modalElement.addEventListener('hidden.bs.modal', () => {
+                        modalElement.remove();
                     });
                 });
 

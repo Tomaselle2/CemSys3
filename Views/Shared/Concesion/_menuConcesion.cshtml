@@ -1,0 +1,78 @@
+﻿<style>
+    .sidebar-right {
+        width: 250px;
+        position: fixed;
+        right: 0;
+        top: 0;
+        height: 100vh;
+        background: #ffffff;
+        border-left: 1px solid #ddd;
+    }
+
+    .sidebar_concesion {
+        padding: 5px;
+    }
+
+    .sidebar_concesion h3 {
+            margin-bottom: 20px;
+    }
+
+    .sidebar_concesion ul {
+            list-style: none;
+            padding: 0;
+    }
+
+    .sidebar_concesion li {
+        margin-bottom: 10px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .sidebar_concesion li:hover {
+                background: #D67ADE; /* color suave */
+    }
+
+    .sidebar_concesion li.active {
+        background: #D67ADE;
+        font-weight: 600;
+    }
+
+    .sidebar_concesion li.active a {
+        color: #000;
+    }
+
+    .sidebar_concesion li a {
+        display: block;       /* CLAVE */
+        padding: 10px;
+        text-decoration: none;
+        color: #333;
+    }
+
+    .sidebar_concesion a {
+            text-decoration: none;
+            color: #333;
+    }
+
+</style>
+
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+}
+<div class="sidebar-right">
+    <div class="sidebar_concesion">
+        <ul>
+            <li class="@(action == "Concesion" ? "active" : "")">
+                <a asp-controller="Concesion" asp-action="Concesion">Información General</a>
+            </li>
+
+            <li class="@(action == "Archivos" ? "active" : "")">
+                <a asp-controller="Concesion" asp-action="Archivos">Archivos Adjuntos</a>
+            </li>
+
+            <li class="@(action == "Deuda" ? "active" : "")">
+                <a asp-controller="Concesion" asp-action="Deuda">Avisos de Deuda</a>
+            </li>
+        </ul>
+    </div>
+</div>
+

@@ -1,0 +1,126 @@
+﻿@using CemSys3.ViewModels.Concesion
+@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@model ConcesionVM
+
+@{
+    ViewData["Title"] = $"Concesion {Model.NroConcesion?.ToString("D5") }";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@await Html.PartialAsync("Concesion/_menuConcesion")
+
+<style>
+    .cardsConcesion-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .cardConcesion {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        flex: 1;
+    }
+
+    .labelConcesion {
+        font-size: 12px;
+        color: gray;
+    }
+
+    .badgeConcesion {
+        background: #28a745;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 20px;
+    }
+
+    .gridConcesion {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .contenidoConcesion{
+        margin-right: 230px;
+    }
+
+    /* Mobile / pantallas chicas */
+    @@media (max-width: 768px) {
+        .sidebar-right {
+            position: relative;
+            width: 100%;
+            height: auto;
+            border-left: none;
+            border-top: 1px solid #ddd;
+        }
+
+        .contenidoConcesion {
+            margin-right: 0;
+        }
+    }
+</style>
+
+@{
+    string nroConcesion = Model.NroConcesion.HasValue ? Model.NroConcesion.Value.ToString("D5") : "-----";
+    string estadoTramite = EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(Model.EstadoTramiteId);
+    string fechaVencimiento = Model.Vencimiento.ToString("dd/MM/yyyy");
+}
+<div class="contenidoConcesion">
+    <h1>Detalle de Concesión</h1>
+
+    <div class="cardsConcesion-row">
+        <div class="cardConcesion">
+            <span class="labelConcesion">NRO. CONCESIÓN</span>
+            <h2>@nroConcesion</h2>
+        </div>
+
+        <div class="cardConcesion">
+            <span class="labelConcesion">ESTADO</span>
+            <span class="badgeConcesion">@estadoTramite</span>
+
+            @if (Model.EstadoTramiteId == (int)EstadosConcesionEnum.SinContrato)
+            {
+                <form asp-action="GenerarContrato" asp-controller="Concesion" method="get">
+                    <input type="hidden" name="idTramite" value="@Model.TramiteId" />
+                    <button type="submit" class="btn btn-danger mt-2">Generar Contrato</button>
+                </form>
+            }
+        </div>
+
+        <div class="cardConcesion">
+            <span class="labelConcesion">VENCIMIENTO</span>
+            <h2>@fechaVencimiento</h2>
+        </div>
+    </div>
+
+    <div class="gridConcesion">
+        <div class="cardConcesion">
+            <h3>Datos de la Parcela</h3>
+            <p><strong>Tipo:</strong> Bóveda Familiar</p>
+            <p><strong>Sección:</strong> B-12</p>
+            <p><strong>Parcela:</strong> 045</p>
+        </div>
+
+        <div class="cardConcesion">
+            <h3>Datos del Titular</h3>
+            <p><strong>Nombre:</strong> Juan Pérez</p>
+            <p><strong>DNI:</strong> 20.456.789</p>
+            <p><strong>Celular:</strong> +54 11 4567-8901</p>
+        </div>
+    </div>
+
+    <div class="cardConcesion">
+        <h3>Datos del Difunto</h3>
+        <p><strong>Nombre:</strong> Marta Rodríguez</p>
+        <p><strong>DNI:</strong> 12.345.678</p>
+        <p><strong>Fecha:</strong> 10/02/2020</p>
+    </div>
+
+</div>
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />

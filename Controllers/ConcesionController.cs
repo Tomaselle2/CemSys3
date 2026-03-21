@@ -1,5 +1,8 @@
 ﻿using AspNetCoreGeneratedDocument;
+using CemSys3.Business.Archivo;
+using CemSys3.DTOs.Archivo;
 using CemSys3.DTOs.Concesion;
+using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.PDF;
 using CemSys3.DTOs.Persona;
@@ -9,6 +12,7 @@ using CemSys3.Helpers;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.PDF;
 using CemSys3.Helpers.Roles_Autenticacion;
+using CemSys3.Interfaces.Archivo;
 using CemSys3.Interfaces.Concesion;
 using CemSys3.Interfaces.PDF;
 using CemSys3.ViewModels.Concesion;
@@ -21,12 +25,14 @@ namespace CemSys3.Controllers
         public readonly IConcesion _concesionService;
         private readonly IViewRenderService _viewRenderService;
         private readonly PlaywrightPdfGenerator _pdfGenerator;
+        private readonly IArchivo _archivoService;
 
-        public ConcesionController(IConcesion concesion, IViewRenderService render, PlaywrightPdfGenerator pdfGenerator)
+        public ConcesionController(IConcesion concesion, IViewRenderService render, PlaywrightPdfGenerator pdfGenerator, IArchivo archivo)
         {
             _concesionService = concesion;
             _viewRenderService = render;
             _pdfGenerator = pdfGenerator;
+            _archivoService = archivo;
         }
 
         //tabla general de concesiones, con paginacion y filtro por estado
@@ -134,14 +140,7 @@ namespace CemSys3.Controllers
             {
                 string html = await _viewRenderService.RenderToStringAsync($"Concesion/{nombreVistaContrato}", contratoGenerado);
 
-                var pdfBytes = await _pdfGenerator.GenerateFromHtmlAsync(
-                       html,
-                       new PdfOptionsDto
-                       {
-                           Landscape = false,
-                           MarginTop = "20px",
-                           MarginLeft = "30px"
-                       });
+                var pdfBytes = await GenerarPdfContrato(contratoGenerado, nombreVistaContrato);
                 return File(pdfBytes, "application/pdf");
             }
             catch (Exception ex)
@@ -158,6 +157,7 @@ namespace CemSys3.Controllers
 
         }
 
+        //btn para pasar a la pantalla de contrato. Guarda en BD.
         [HttpPost]
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> ContratoFirmado(GenerarContratoVM viewModel)
@@ -174,6 +174,7 @@ namespace CemSys3.Controllers
                 return View(viewModel);
             }
 
+            //todos los datos se deben guardar al precionar en contrato firmado, no antes, para evitar que se guarden datos erroneos en la base de datos.
             ConcesionDTO dto = new ConcesionDTO();
             dto.TramiteId = viewModel.contrato.TramiteId;
             dto.Concesion = viewModel.contrato.NroConcesion;
@@ -184,6 +185,9 @@ namespace CemSys3.Controllers
             dto.CuotaId = viewModel.CantidadCuotaSeleccionada;
             dto.UsuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
             dto.EstadoTramiteId = viewModel.contrato.EstadoTramiteId;
+            dto.TipoParcela = viewModel.contrato.TipoParcela;
+            dto.ParcelaId = viewModel.contrato.ParcelaId;
+            dto.EstadoTramiteId = (int)EstadosConcesionEnum.Vigente;
 
             //pasar de TitularesDTO a PersonaDTO
             List<PersonaDTO> titulares = new List<PersonaDTO>();
@@ -198,18 +202,103 @@ namespace CemSys3.Controllers
                     Domicilio = titular.Domicilio,
                     Celular = titular.Celular,
                     Sexo = titular.Sexo,
-                    Correo = titular.CorreoElectronico
+                    Correo = titular.CorreoElectronico,
+                    Visibilidad = true,
+                    CategoriaPersonaId = (int)CategoriaPersonaEnum.Titular
                 };
                 titulares.Add(persona);
             }
 
             dto.Titulares = titulares;
 
-            //todos los datos se deben guardar al precionar en contrato firmado, no antes, para evitar que se guarden datos erroneos en la base de datos.
-            //recibir el viewmodel con los datos del contrato.
-            //Update al contrato con los datos
-            //generar el pdf del contrato y guardarlo en el servidor
+            // 1. Armar nuevamente el DTO del contrato (igual que en GenerarContrato)
+            GenerarContratoDTO contratoGenerado = new GenerarContratoDTO
+            {
+                TramiteId = viewModel.contrato.TramiteId,
+                EstadoTramiteId = viewModel.contrato.EstadoTramiteId,
+                ParcelaId = viewModel.contrato.ParcelaId,
+                TipoParcela = viewModel.contrato.TipoParcela,
+                SeccionId = viewModel.contrato.SeccionId,
+                NombreSeccion = viewModel.contrato.NombreSeccion,
+                NroParcela = viewModel.contrato.NroParcela,
+                NroFila = viewModel.contrato.NroFila,
+                NroConcesion = viewModel.contrato.NroConcesion,
+                Difuntos = viewModel.contrato.Difuntos,
+                Titulares = viewModel.contrato.Titulares,
+                baseUrl = $"{Request.Scheme}://{Request.Host}",
+                PrecioEnLetras = NumeroALetras.ConvertirALetras(viewModel.PrecioFinal),
+                formaPago = viewModel.FormaDePago ?? "",
+                CuotaId = viewModel.CantidadCuotaSeleccionada,
+                Precio = viewModel.PrecioFinal,
+                OtraFormaPago = viewModel.otraFormaPago,
+                CantidadAniosId = viewModel.CantidadAniosId.Value,
+                Vencimiento = viewModel.Vencimiento.Value,
+                fechaGeneracion = DateTime.Now
+            };
 
+            string nombreVistaContrato = viewModel.contrato.TipoParcela ?? "";
+
+            //Update al contrato con los datos
+            GenericResultDTO resultado = new GenericResultDTO();
+            try
+            {
+                resultado = await _concesionService.Update(dto);
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al guardar el contrato: {ex.Message}",
+                    Tipo = "error"
+                };
+                return RedirectToAction("GenerarContrato", new { idTramite = contratoGenerado.TramiteId });
+            }
+
+
+            if (resultado.Success == false)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al guardar el contrato.",
+                    Tipo = "error"
+                };
+                return RedirectToAction("GenerarContrato", new { idTramite = contratoGenerado.TramiteId });
+            }
+
+            
+
+            // 2. Generar PDF
+            var pdfBytes = await GenerarPdfContrato(contratoGenerado, nombreVistaContrato);
+
+            // 3. Crear ArchivoDTO
+            ArchivoDTO archivoDto = new ArchivoDTO
+            {
+                TramiteId = viewModel.contrato.TramiteId,
+                CategoriaArchivo = CategoriaArchivosEnum.Contrato_Concesion.ToString(),
+                NombreArchivo = $"Contrato_{viewModel.contrato.NroConcesion?.ToString("D5")}_{DateTime.Now.Year.ToString()}.pdf",
+                MimeType = "application/pdf",
+                Descripcion = $"Contrato concesión {viewModel.contrato.NroConcesion?.ToString("D5")} sin firmar",
+                Contenido = pdfBytes
+            };
+
+            try
+            {
+                // 4. Guardar
+                await _archivoService.AddDesdeBytes(archivoDto);
+                return RedirectToAction("Concesion", new { tramiteId = contratoGenerado.TramiteId });
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al guardar el contrato: {ex.Message}",
+                    Tipo = "error"
+                };
+                return RedirectToAction("GenerarContrato", new { idTramite = contratoGenerado.TramiteId });
+            }
 
             //La nota del contrato se genera al momento de confirmar que el contrato esta firmado.
             //nota de tipo recordatorio para el contrato
@@ -217,7 +306,45 @@ namespace CemSys3.Controllers
             //-Modificar el vencimiento en Progam
             //-Modificar el titular en Program
             //-Generar el cobro en Program (se datalla como)
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> Concesion(int tramiteId)
+        {
+            ConcesionVM viewModel = new ConcesionVM();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+            try
+            {
+                //viewModel = await _concesionService.GetConcesionByTramiteId(tramiteId);
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al cargar los datos de la concesión: {ex.Message}",
+                    Tipo = "error"
+                };
+            }
             return View();
+        }
+
+        private async Task<byte[]> GenerarPdfContrato(GenerarContratoDTO contratoGenerado, string nombreVistaContrato)
+        {
+            string html = await _viewRenderService.RenderToStringAsync(
+                $"Concesion/{nombreVistaContrato}", contratoGenerado);
+
+            var pdfBytes = await _pdfGenerator.GenerateFromHtmlAsync(
+                html,
+                new PdfOptionsDto
+                {
+                    Landscape = false,
+                    MarginTop = "20px",
+                    MarginLeft = "30px"
+                });
+
+            return pdfBytes;
         }
     }
 }

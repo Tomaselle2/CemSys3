@@ -36,13 +36,32 @@ namespace CemSys3.Business.Archivo
                 archivo.CategoriaArchivo = dto.CategoriaArchivo;
                 archivo.TramiteId = dto.TramiteId;
                 archivo.NombreArchivo = Path.GetFileName(dto.Archivo.FileName);
-                archivo.TipoArchivo = dto.MimeType ?? "";
+                archivo.TipoArchivo = dto.MimeType ?? "application/octet-stream";
                 archivo.TamanoBytes = dto.Archivo.Length;
                 archivo.Contenido = contenido;
                 archivo.Descripcion = dto.Descripcion?.Trim();
                 archivo.FechaCreacion = DateTime.Now;
                 archivo.Visibilidad = true;
             }
+
+            await _context.Archivos.AddAsync(archivo);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddDesdeBytes(ArchivoDTO dto)
+        {
+            Models.Archivo archivo = new Models.Archivo
+            {
+                CategoriaArchivo = dto.CategoriaArchivo,
+                TramiteId = dto.TramiteId,
+                NombreArchivo = dto.NombreArchivo,
+                TipoArchivo = dto.MimeType ?? "application/octet-stream",
+                TamanoBytes = dto.Contenido?.Length ?? 0,
+                Contenido = dto.Contenido ?? Array.Empty<byte>(),
+                Descripcion = dto.Descripcion?.Trim(),
+                FechaCreacion = DateTime.Now,
+                Visibilidad = true
+            };
 
             await _context.Archivos.AddAsync(archivo);
             await _context.SaveChangesAsync();

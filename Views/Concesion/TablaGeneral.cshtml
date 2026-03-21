@@ -76,13 +76,7 @@
                                         <td>@opc.Vencimiento?.ToString("dd/MM/yyyy")</td>
                                         <td>@estadoTramiteDisplay</td>
                                         <td>
-                                            @* <form asp-action="ContratoIniciado" asp-controller="ContratoConcesion" target="_blank" method="get" style="display: inline-block;">
-                                                <input type="hidden" name="parcelaId" value="@opc.parcelaId" />
-                                                <input type="hidden" name="nroConcesion" value="@opc.NroConcesion" />
-                                                <button type="submit" class="btn btn-info" title="Ir a concesión">
-                                                    <i class="bi bi-box-arrow-in-up-right"></i>
-                                                </button>
-                                            </form> *@
+                                            <a asp-action="Concesion" asp-controller="Concesion" asp-route-tramiteId="@opc.TramiteId"><i class="bi bi-box-arrow-in-right"></i></a>
                                         </td>
                                     </tr>
                                 }
