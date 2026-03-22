@@ -174,7 +174,7 @@ namespace CemSys3.Business.Concesion
                         //si existe actualizo
                         if (existe)
                         {
-                            PersonaDTO personaExistente = new PersonaDTO();
+                            PersonaDTO personaExistente = await _personaService.GetByDNISexo(int.Parse(persona.Dni), persona.Sexo);
                             personaExistente.Dni = persona.Dni?.PadLeft(8, '0');
                             personaExistente.Nombre = persona.Nombre;
                             personaExistente.Apellido = persona.Apellido;
@@ -182,6 +182,7 @@ namespace CemSys3.Business.Concesion
                             personaExistente.Celular = persona.Celular;
                             personaExistente.Correo = persona.Correo;
                             personaExistente.Domicilio = persona.Domicilio;
+                            personaExistente.CategoriaPersonaId = (int)CategoriaPersonaEnum.Titular;
 
                             int personaCargada = await _personaService.Update(personaExistente);
 
@@ -198,6 +199,7 @@ namespace CemSys3.Business.Concesion
                             personaNueva.Celular = persona.Celular;
                             personaNueva.Correo = persona.Correo;
                             personaNueva.Domicilio = persona.Domicilio;
+                            personaNueva.CategoriaPersonaId = (int)CategoriaPersonaEnum.Titular;
 
                             int personaCargada = await _personaService.Add(personaNueva);
 
@@ -206,6 +208,22 @@ namespace CemSys3.Business.Concesion
                         }
                     }
                 }
+
+                //Actualiar tramite
+
+                TramiteDTO tramite = await _tramiteService.Get(dto.TramiteId);
+                tramite.EstadoActualId = dto.EstadoTramiteId; //viene por el dto, depende cada caso
+
+                await _tramiteService.Update(tramite);
+
+                //2- registrar Historial del tramite
+                HistorialEstadosDTO historial = new HistorialEstadosDTO
+                {
+                    Fecha = DateTime.Now,
+                    TramiteId = tramite.Id,
+                    EstadoTramiteId = tramite.EstadoActualId
+                };
+                await _historialEstadosService.Add(historial);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -344,11 +362,11 @@ namespace CemSys3.Business.Concesion
         {
             GenerarContratoDTO dto = new GenerarContratoDTO();
 
-            Models.Concesione concesion = _context.Concesiones
+            Models.Concesione concesion = await _context.Concesiones
                 .Include(c => c.Tramite)
                 .Include(c => c.Parcela)
                     .ThenInclude(p => p.Seccion)
-                .FirstOrDefault(c => c.TramiteId == idTramite) ?? throw new Exception("Concesión no encontrada.");
+                .FirstOrDefaultAsync(c => c.TramiteId == idTramite) ?? throw new Exception("Concesión no encontrada.");
 
             dto.TramiteId = concesion.TramiteId;
             dto.EstadoTramiteId = concesion.Tramite.EstadoActualId;
@@ -425,6 +443,56 @@ namespace CemSys3.Business.Concesion
             return dto;
         }
 
-        
+        public async Task<InfoGeneralDTO> InfoGeneral(int idTramite)
+        {
+            InfoGeneralDTO dto = new InfoGeneralDTO();
+            Models.Concesione concesion = await _context.Concesiones
+               .Include(c => c.Tramite)
+               .Include(c => c.Parcela)
+                   .ThenInclude(p => p.Seccion)
+               .FirstOrDefaultAsync(c => c.TramiteId == idTramite) ?? throw new Exception("Concesión no encontrada.");
+
+            dto.TramiteId = concesion.TramiteId;
+            dto.EstadoTramiteId = concesion.Tramite.EstadoActualId;
+            dto.ParcelaId = concesion.ParcelaId;
+            dto.TipoParcela = concesion.TipoParcela;
+            dto.SeccionId = concesion.Parcela.SeccionId;
+            dto.NombreSeccion = concesion.Parcela.Seccion.Nombre;
+            dto.NroParcela = concesion.Parcela.NroParcela;
+            dto.NroFila = concesion.Parcela.NroFila;
+            dto.NroConcesion = concesion.Concesion;
+            dto.Vencimiento = concesion.Vencimiento;
+            dto.InfoAdicional = concesion.InformacionAdicional ?? "";
+
+            //consultar los difuntos relacionados a la parcela
+            dto.Difuntos = await _context.ParcelaDifuntos
+                .Where(p => p.ParcelaId == dto.ParcelaId && p.FechaRetiro == null)
+                .Select(p => new DifuntoContratoDTO
+                {
+                    Id = p.Id,
+                    DNI = p.Difunto.Dni,
+                    Nombre = p.Difunto.Nombre,
+                    Apellido = p.Difunto.Apellido,
+                    FechaIngreso = p.FechaIngreso,
+                    EstadoDifuntoId = p.Difunto.EstadoDifuntoId
+                }).ToListAsync();
+
+            //Traer Titulares en una sola consulta
+            dto.Titulares = await _context.HistorialTitularesConcesiones
+                .Where(h => h.ConcesionId == idTramite && h.FechaFin == null)
+                .Select(h => new TitularesContratoDTO
+                {
+                    Id = h.Persona.Id,
+                    Dni = h.Persona.Dni,
+                    Nombre = h.Persona.Nombre,
+                    Apellido = h.Persona.Apellido,
+                    Sexo = h.Persona.Sexo,
+                    Celular = h.Persona.Celular,
+                    CorreoElectronico = h.Persona.Correo,
+                    Domicilio = h.Persona.Domicilio
+                }).ToListAsync();
+
+            return dto;
+        }
     }
 }

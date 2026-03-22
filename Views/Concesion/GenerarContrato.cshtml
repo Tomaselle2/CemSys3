@@ -14,7 +14,7 @@
 <div style="max-width: 1400px; margin: 0 auto; padding: 0 10px;">
     <div class="d-flex align-items-center justify-content-between">
         <div>
-            <h3><b>Concesión:</b> <span class="nroTramite">@(Model.contrato.NroConcesion == null ? "-----" : Model.contrato.NroConcesion.Value.ToString("D8"))</span></h3>
+            <h3><b>Concesión:</b> <span class="nroTramite">@(Model.contrato.NroConcesion == null ? "-----" : Model.contrato.NroConcesion.Value.ToString("D5"))</span></h3>
         </div>
         <div>
             <h3><strong>Estado: <span class="estadoTramite">@(EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(Model.contrato.EstadoTramiteId))</span></strong></h3>

@@ -1,6 +1,4 @@
-﻿using AspNetCoreGeneratedDocument;
-using CemSys3.Business.Archivo;
-using CemSys3.DTOs.Archivo;
+﻿using CemSys3.DTOs.Archivo;
 using CemSys3.DTOs.Concesion;
 using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Paginacion;
@@ -211,7 +209,7 @@ namespace CemSys3.Controllers
 
             dto.Titulares = titulares;
 
-            // 1. Armar nuevamente el DTO del contrato (igual que en GenerarContrato)
+            // 1. Armar nuevamente el DTO del contrato (igual que en GenerarContrato) para genera el PDF sin mostrarlo
             GenerarContratoDTO contratoGenerado = new GenerarContratoDTO
             {
                 TramiteId = viewModel.contrato.TramiteId,
@@ -246,24 +244,26 @@ namespace CemSys3.Controllers
             }
             catch (Exception ex)
             {
-                viewModel.SweetAlert = new SweetAlertDTO
+                TempData.SetSweetAlert(new SweetAlertDTO
                 {
                     Titulo = "Error",
                     Mensaje = $"Ocurrió un error al guardar el contrato: {ex.Message}",
                     Tipo = "error"
-                };
+                });
+
                 return RedirectToAction("GenerarContrato", new { idTramite = contratoGenerado.TramiteId });
             }
 
 
             if (resultado.Success == false)
             {
-                viewModel.SweetAlert = new SweetAlertDTO
+                TempData.SetSweetAlert(new SweetAlertDTO
                 {
                     Titulo = "Error",
                     Mensaje = $"Ocurrió un error al guardar el contrato.",
                     Tipo = "error"
-                };
+                });
+
                 return RedirectToAction("GenerarContrato", new { idTramite = contratoGenerado.TramiteId });
             }
 
@@ -276,7 +276,7 @@ namespace CemSys3.Controllers
             ArchivoDTO archivoDto = new ArchivoDTO
             {
                 TramiteId = viewModel.contrato.TramiteId,
-                CategoriaArchivo = CategoriaArchivosEnum.Contrato_Concesion.ToString(),
+                CategoriaArchivo = ((int)CategoriaArchivosEnum.Contrato_Concesion).ToString(),
                 NombreArchivo = $"Contrato_{viewModel.contrato.NroConcesion?.ToString("D5")}_{DateTime.Now.Year.ToString()}.pdf",
                 MimeType = "application/pdf",
                 Descripcion = $"Contrato concesión {viewModel.contrato.NroConcesion?.ToString("D5")} sin firmar",
@@ -287,16 +287,25 @@ namespace CemSys3.Controllers
             {
                 // 4. Guardar
                 await _archivoService.AddDesdeBytes(archivoDto);
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = $"Concesión {contratoGenerado.NroConcesion?.ToString("D5")} realizada correctamente",
+                    Tipo = "success"
+                });
+
                 return RedirectToAction("Concesion", new { tramiteId = contratoGenerado.TramiteId });
             }
             catch (Exception ex)
             {
-                viewModel.SweetAlert = new SweetAlertDTO
+                TempData.SetSweetAlert(new SweetAlertDTO
                 {
                     Titulo = "Error",
                     Mensaje = $"Ocurrió un error al guardar el contrato: {ex.Message}",
                     Tipo = "error"
-                };
+                });
+
                 return RedirectToAction("GenerarContrato", new { idTramite = contratoGenerado.TramiteId });
             }
 
@@ -314,9 +323,10 @@ namespace CemSys3.Controllers
         {
             ConcesionVM viewModel = new ConcesionVM();
             viewModel.SweetAlert = TempData.GetSweetAlert();
+
             try
             {
-                //viewModel = await _concesionService.GetConcesionByTramiteId(tramiteId);
+                viewModel.Dto = await _concesionService.InfoGeneral(tramiteId);
             }
             catch (Exception ex)
             {
@@ -327,7 +337,7 @@ namespace CemSys3.Controllers
                     Tipo = "error"
                 };
             }
-            return View();
+            return View(viewModel);
         }
 
         private async Task<byte[]> GenerarPdfContrato(GenerarContratoDTO contratoGenerado, string nombreVistaContrato)

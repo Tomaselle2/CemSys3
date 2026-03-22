@@ -15,5 +15,7 @@ namespace CemSys3.Interfaces.Concesion
             int porPagina = 10);
 
         public Task<GenerarContratoDTO> SolicitarDatosParaGenerarContrato(int idTramite);
+
+        public Task<InfoGeneralDTO> InfoGeneral(int idTramite);
     }
 }
