@@ -9,5 +9,6 @@ namespace CemSys3.Interfaces.HistorialEstados
 
         Task VincularTramiteAPersona(int tramiteId, int personaId);
         Task VincularTramiteAParcela(int tramiteId, int parcelaId);
+        Task VincularTitularAConcesion(int personaId, int tramiteId);
     }
 }

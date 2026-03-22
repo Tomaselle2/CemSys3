@@ -8,7 +8,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@await Html.PartialAsync("Concesion/_menuConcesion")
+@await Html.PartialAsync("Concesion/_menuConcesion", Model.Dto.TramiteId)
 
 <style>
     .cardsConcesion-row {
@@ -68,6 +68,24 @@
     string nroConcesion = Model.Dto.NroConcesion.HasValue ? Model.Dto.NroConcesion.Value.ToString("D5") : "-----";
     string estadoTramite = EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(Model.Dto.EstadoTramiteId);
     string fechaVencimiento = Model.Dto.Vencimiento != null ? Model.Dto.Vencimiento.Value.ToString("dd/MM/yyyy") : "--/--/----";
+    string tipoParcela = Model.Dto.TipoParcela ?? "N/A";
+    string nombreSeccion = Model.Dto.NombreSeccion;
+
+    string parcela = "";
+    if (Model.Dto.TipoParcela == "Nicho") //nicho
+    {
+        parcela = $"Nicho {Model.Dto.NroParcela.ToString()} Fila {Model.Dto.NroFila.ToString()}";
+    }
+
+    if (Model.Dto.TipoParcela == "Fosa")//fosa
+    {
+        parcela = $"Fosa {Model.Dto.NroParcela.ToString()}";
+    }
+
+    if (Model.Dto.TipoParcela == "Panteon")//panteon
+    {
+        parcela = $"Lote {Model.Dto.NroParcela.ToString()}";
+    }
 }
 <div class="contenidoConcesion">
     <div class="cardsConcesion-row my-4">
@@ -84,7 +102,7 @@
             {
                 <form asp-action="GenerarContrato" asp-controller="Concesion" method="get">
                     <input type="hidden" name="idTramite" value="@Model.Dto.TramiteId" />
-                    <button type="submit" class="btn btn-danger mt-2">Generar Contrato</button>
+                    <button type="submit" class="btn btn-danger btn-sm mt-2">Generar Contrato</button>
                 </form>
             }
         </div>
@@ -98,25 +116,32 @@
     <div class="gridConcesion">
         <div class="cardConcesion">
             <h3>Datos de la Parcela</h3>
-            <p><strong>Tipo:</strong> Bóveda Familiar</p>
-            <p><strong>Sección:</strong> B-12</p>
-            <p><strong>Parcela:</strong> 045</p>
+            <p><strong>Tipo:</strong> @tipoParcela</p>
+            <p><strong>Sección:</strong> @nombreSeccion.ToUpper()</p>
+            <p><strong>Parcela:</strong> @parcela</p>
         </div>
-
-        <div class="cardConcesion">
-            <h3>Datos del Titular</h3>
-            <p><strong>Nombre:</strong> Juan Pérez</p>
-            <p><strong>DNI:</strong> 20.456.789</p>
-            <p><strong>Celular:</strong> +54 11 4567-8901</p>
+        @foreach (var titular in Model.Dto.Titulares)
+        {
+            <div class="cardConcesion">
+                <h3>Titular</h3>
+                <p><strong>Nombre:</strong> @titular.Apellido?.ToUpper(), @titular.Nombre?.ToUpper()</p>
+                <p><strong>DNI:</strong> @(!string.IsNullOrEmpty(titular.Dni) ? titular.Dni : "")</p>
+                <p><strong>Celular:</strong> @(!string.IsNullOrEmpty(titular.Celular) ? titular.Celular : "")</p>
+                <p><strong>E-mail:</strong> @(!string.IsNullOrEmpty(titular.CorreoElectronico) ? titular.CorreoElectronico : "")</p>
+                <p><strong>Domicilio:</strong> @(!string.IsNullOrEmpty(titular.Domicilio) ? titular.Domicilio : "")</p>
+            </div>
+        }
+    </div>
+    @foreach (var difunto in Model.Dto.Difuntos)
+    {
+        <div class="cardConcesion mb-3">
+            <h3>Difunto</h3>
+            <p><strong>Nombre:</strong> @difunto.Apellido?.ToUpper(), @difunto.Nombre?.ToUpper()</p>
+            <p><strong>DNI:</strong> @(!string.IsNullOrEmpty(difunto.DNI) ? difunto.DNI : "")</p>
+            <p><strong>Ingreso:</strong> @(!string.IsNullOrEmpty(difunto.FechaIngreso.ToString()) ? difunto.FechaIngreso?.ToString("dd/MM/yyyy HH:mm") : "")</p>
         </div>
-    </div>
-
-    <div class="cardConcesion">
-        <h3>Datos del Difunto</h3>
-        <p><strong>Nombre:</strong> Marta Rodríguez</p>
-        <p><strong>DNI:</strong> 12.345.678</p>
-        <p><strong>Fecha:</strong> 10/02/2020</p>
-    </div>
+    }
+    
 
 </div>
 

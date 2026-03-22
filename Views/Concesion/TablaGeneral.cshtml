@@ -5,7 +5,7 @@
 @model TablaGeneralVM
 
 @{
-    ViewData["Title"] = "Ingresos";
+    ViewData["Title"] = "Tabla concesiones";
 }
 
 <div class="page-header-container">
@@ -76,7 +76,7 @@
                                         <td>@opc.Vencimiento?.ToString("dd/MM/yyyy")</td>
                                         <td>@estadoTramiteDisplay</td>
                                         <td>
-                                            <a asp-action="Concesion" asp-controller="Concesion" asp-route-tramiteId="@opc.TramiteId"><i class="bi bi-box-arrow-in-right"></i></a>
+                                            <a asp-action="Concesion" asp-controller="Concesion" asp-route-tramiteId="@opc.TramiteId" target="_blank"><i class="bi bi-box-arrow-in-right"></i></a>
                                         </td>
                                     </tr>
                                 }

@@ -70,5 +70,21 @@ namespace CemSys3.Business.HistorialEstadoService
                 });
             }
         }
+
+        public async Task VincularTitularAConcesion(int personaId, int tramiteId)
+        {
+            bool existe = await _context.HistorialTitularesConcesiones
+                .AnyAsync(x => x.ConcesionId == tramiteId && x.PersonaId == personaId);
+
+            if (!existe)
+            {
+                _context.HistorialTitularesConcesiones.Add(new HistorialTitularesConcesione
+                {
+                    ConcesionId = tramiteId,
+                    PersonaId = personaId,
+                    FechaInicio = DateTime.Now
+                });
+            }
+        }
     }
 }

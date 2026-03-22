@@ -926,6 +926,16 @@
 
                     // BOTÓN CONFIRMAR
                     document.getElementById('btnConfirmarContrato').addEventListener('click', () => {
+                        const btn = this;
+
+                        // Deshabilitar botón
+                        btn.disabled = true;
+
+                        // Mostrar spinner + texto
+                        btn.innerHTML = `
+                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            Procesando...
+                        `;
 
                         //CAMBIAR ACCIÓN DEL FORM PRINCIPAL
                         formPrincipal.action = '/Concesion/ContratoFirmado';

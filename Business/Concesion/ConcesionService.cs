@@ -102,6 +102,7 @@ namespace CemSys3.Business.Concesion
 
                             //6 - relacion de titulares con tramite
                             await _historialEstadosService.VincularTramiteAPersona(tramiteId, personaCargada);
+                            await _historialEstadosService.VincularTitularAConcesion(personaCargada, tramiteId);
                         }
                         else //si no existe creo una nueva persona
                         {
@@ -118,6 +119,7 @@ namespace CemSys3.Business.Concesion
 
                             //6 - relacion de titulares con tramite
                             await _historialEstadosService.VincularTramiteAPersona(tramiteId, personaCargada);
+                            await _historialEstadosService.VincularTitularAConcesion(personaCargada, tramiteId);
                         }
                     }
                 }
@@ -188,6 +190,8 @@ namespace CemSys3.Business.Concesion
 
                             //relacion de titulares con tramite
                             await _historialEstadosService.VincularTramiteAPersona(dto.TramiteId, personaCargada);
+                            await _historialEstadosService.VincularTitularAConcesion(personaCargada, dto.TramiteId);
+
                         }
                         else //si no existe creo una nueva persona
                         {
@@ -205,6 +209,7 @@ namespace CemSys3.Business.Concesion
 
                             //relacion de titulares con tramite
                             await _historialEstadosService.VincularTramiteAPersona(dto.TramiteId, personaCargada);
+                            await _historialEstadosService.VincularTitularAConcesion(personaCargada, dto.TramiteId);
                         }
                     }
                 }

@@ -1,4 +1,5 @@
-﻿<style>
+﻿@model int
+<style>
     .sidebar-right {
         width: 250px;
         position: fixed;
@@ -62,15 +63,15 @@
     <div class="sidebar_concesion">
         <ul>
             <li class="@(action == "Concesion" ? "active" : "")">
-                <a asp-controller="Concesion" asp-action="Concesion">Información General</a>
+                <a asp-controller="Concesion" asp-action="Concesion" asp-route-tramiteId="@Model">Información General</a>
             </li>
 
-            <li class="@(action == "Archivos" ? "active" : "")">
-                <a asp-controller="Concesion" asp-action="Archivos">Archivos Adjuntos</a>
+            <li class="@(action == "ArchivosConcesion" ? "active" : "")">
+                <a asp-controller="Concesion" asp-action="ArchivosConcesion" asp-route-tramiteId="@Model">Archivos Adjuntos</a>
             </li>
 
             <li class="@(action == "Deuda" ? "active" : "")">
-                <a asp-controller="Concesion" asp-action="Deuda">Avisos de Deuda</a>
+                <a asp-controller="Concesion" asp-action="Deuda" asp-route-tramiteId="@Model">Avisos de Deuda</a>
             </li>
         </ul>
     </div>

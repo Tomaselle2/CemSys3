@@ -340,6 +340,30 @@ namespace CemSys3.Controllers
             return View(viewModel);
         }
 
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> ArchivosConcesion(int tramiteId)
+        {
+            ArchivosConcesionVM viewModel = new ArchivosConcesionVM();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+
+            try
+            {
+                viewModel.TramiteId = tramiteId;
+                viewModel.Archivos = await _archivoService.GetAllByTramiteId(tramiteId);
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al cargar los archivos de la concesión: {ex.Message}",
+                    Tipo = "error"
+                };
+            }
+            return View(viewModel);
+        }
+
         private async Task<byte[]> GenerarPdfContrato(GenerarContratoDTO contratoGenerado, string nombreVistaContrato)
         {
             string html = await _viewRenderService.RenderToStringAsync(
