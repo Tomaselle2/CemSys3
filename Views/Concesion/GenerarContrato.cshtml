@@ -173,6 +173,18 @@
                                         selected="@(Model.PrecioSeleccionado == precio.Id ? "selected" : null)">
                                     @(EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(precio.AniosConcesionId.Value)) - $ @precio.Precio.ToString("N2")
                                 </option>
+
+                            }
+
+                            @for (int i = 0; i < Model.contrato.PreciosNichos.Count; i++)
+                            {
+                                <input type="hidden" asp-for="contrato.PreciosNichos[i].Id" />
+                                <input type="hidden" asp-for="contrato.PreciosNichos[i].AniosConcesionId" />
+                                <input type="hidden" asp-for="contrato.PreciosNichos[i].ConceptoTarifariaId" />
+                                <input type="hidden" asp-for="contrato.PreciosNichos[i].NroFila" />
+                                <input type="hidden" asp-for="contrato.PreciosNichos[i].Precio" />
+                                <input type="hidden" asp-for="contrato.PreciosNichos[i].SeccionId" />
+                                <input type="hidden" asp-for="contrato.PreciosNichos[i].Visibilidad" />
                             }
                         }else{
                             @foreach (var precio in Model.contrato.PreciosFosas)
@@ -182,8 +194,19 @@
                                         data-cantidad-anios-id="@precio.AniosConcesionId"
                                         data-anios="@EnumHelper.ObtenerAnios((AniosConcesionEnum)precio.AniosConcesionId.Value)"
                                         selected="@(Model.PrecioSeleccionado == precio.Id ? "selected" : null)">
-                                    @precio.AniosConcesionId años - $ @precio.Precio.ToString("N2")
+                                    @(EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(precio.AniosConcesionId.Value)) - $ @precio.Precio.ToString("N2")
                                 </option>
+                            }
+
+                            @for (int i = 0; i < Model.contrato.PreciosFosas.Count; i++)
+                            {
+                                <input type="hidden" asp-for="contrato.PreciosFosas[i].Id" />
+                                <input type="hidden" asp-for="contrato.PreciosFosas[i].AniosConcesionId" />
+                                <input type="hidden" asp-for="contrato.PreciosFosas[i].ConceptoTarifariaId" />
+                                <input type="hidden" asp-for="contrato.PreciosFosas[i].NroFila" />
+                                <input type="hidden" asp-for="contrato.PreciosFosas[i].Precio" />
+                                <input type="hidden" asp-for="contrato.PreciosFosas[i].SeccionId" />
+                                <input type="hidden" asp-for="contrato.PreciosFosas[i].Visibilidad" />
                             }
                         }
                         
@@ -789,11 +812,12 @@
                         <div class="form-columns-container3">
                             <div>
                                 <label>Sexo<span class="obligatorio"> * </span></label>
-                                <select class="form-select" name="contrato.Titulares[${index}].Sexo" required>
+                                <select class="form-select" disabled name="contrato.Titulares[${index}].Sexo" required>
                                     <option value="masculino" ${titular.sexo === 'masculino' ? 'selected' : ''}>Masculino</option>
                                     <option value="femenino" ${titular.sexo === 'femenino' ? 'selected' : ''}>Femenino</option>
                                     <option value="otro" ${titular.sexo === 'otro' ? 'selected' : ''}>Otro</option>
                                 </select>
+                                <input type="hidden" name="contrato.Titulares[${index}].Sexo" value="${titular.sexo}" />
                                 <div class="invalid-feedback">El sexo es obligatorio</div>
                             </div>
                             <div>

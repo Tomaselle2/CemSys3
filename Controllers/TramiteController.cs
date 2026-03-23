@@ -25,9 +25,8 @@ namespace CemSys3.Controllers
                     case (int)TipoTramiteEnum.Ingreso:
                         return RedirectToAction("ResumenIngreso", "Ingreso", new { ingresoId = tramiteId }); //tramite ya registrado como ingreso
 
-                    //case (int)TipoTramiteEnum.ContratoConcesion:
-                    //    var contrato = await _concesionesBusiness.ConsultarContratoConcesion(tramiteId);
-                    //    return RedirectToAction("ContratoIniciado", "ContratoConcesion", new { nroConcesion = contrato.Concesion, parcelaId = contrato.ParcelaId });
+                    case (int)TipoTramiteEnum.ContratoConcesion:
+                        return RedirectToAction("Concesion", "Concesion", new { tramiteId = tramiteId });
 
                     default:
                         return Content($$"""

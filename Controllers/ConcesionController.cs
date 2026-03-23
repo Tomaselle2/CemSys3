@@ -75,7 +75,11 @@ namespace CemSys3.Controllers
             try
             {
                 viewModel.contrato = await _concesionService.SolicitarDatosParaGenerarContrato(idTramite);
-                viewModel.CalcularPrecioNichoUnAnio();
+
+                if (viewModel.contrato.TipoParcela == "Nicho")
+                {
+                    viewModel.CalcularPrecioNichoUnAnio();
+                }
             }
             catch (Exception ex)
             {
@@ -98,7 +102,7 @@ namespace CemSys3.Controllers
             ModelState.Remove("contrato.NroConcesion");
 
             if (!ModelState.IsValid)
-           {
+            {
                 viewModel.SweetAlert = new SweetAlertDTO
                 {
                     Titulo = "Error",
@@ -106,7 +110,23 @@ namespace CemSys3.Controllers
                     Tipo = "error"
                 };
                 return View(viewModel);
-           }
+            }
+
+            if(viewModel.contrato.NroConcesion != null)
+            {
+                bool existeNroConcesion = await _concesionService.ExisteNroConcesion(viewModel.contrato.NroConcesion.Value);
+
+                if (existeNroConcesion)
+                {
+                    viewModel.SweetAlert = new SweetAlertDTO
+                    {
+                        Titulo = "Error",
+                        Mensaje = $"El número de concesión {viewModel.contrato.NroConcesion.Value.ToString("D5")} ya existe. Por favor, ingrese un número de concesión diferente.",
+                        Tipo = "error"
+                    };
+                    return View(viewModel);
+                }
+            }
 
             //generar el pdf del contrato.
             GenerarContratoDTO contratoGenerado = new GenerarContratoDTO();

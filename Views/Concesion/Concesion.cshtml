@@ -115,7 +115,7 @@
 
     <div class="gridConcesion">
         <div class="cardConcesion">
-            <h3>Datos de la Parcela</h3>
+            <h3><i class="bi bi-pin-map-fill text-primary"></i> Parcela</h3>
             <p><strong>Tipo:</strong> @tipoParcela</p>
             <p><strong>Sección:</strong> @nombreSeccion.ToUpper()</p>
             <p><strong>Parcela:</strong> @parcela</p>
@@ -123,7 +123,7 @@
         @foreach (var titular in Model.Dto.Titulares)
         {
             <div class="cardConcesion">
-                <h3>Titular</h3>
+                <h3><i class="bi bi-person-fill text-primary"></i> Titular</h3>
                 <p><strong>Nombre:</strong> @titular.Apellido?.ToUpper(), @titular.Nombre?.ToUpper()</p>
                 <p><strong>DNI:</strong> @(!string.IsNullOrEmpty(titular.Dni) ? titular.Dni : "")</p>
                 <p><strong>Celular:</strong> @(!string.IsNullOrEmpty(titular.Celular) ? titular.Celular : "")</p>
@@ -135,10 +135,13 @@
     @foreach (var difunto in Model.Dto.Difuntos)
     {
         <div class="cardConcesion mb-3">
-            <h3>Difunto</h3>
+            <h3><i class="bi bi-person-fill-x text-primary"></i> Difunto</h3>
             <p><strong>Nombre:</strong> @difunto.Apellido?.ToUpper(), @difunto.Nombre?.ToUpper()</p>
             <p><strong>DNI:</strong> @(!string.IsNullOrEmpty(difunto.DNI) ? difunto.DNI : "")</p>
             <p><strong>Ingreso:</strong> @(!string.IsNullOrEmpty(difunto.FechaIngreso.ToString()) ? difunto.FechaIngreso?.ToString("dd/MM/yyyy HH:mm") : "")</p>
+            <p>
+                <strong>Estado:</strong> @(EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(difunto.EstadoDifuntoId ?? 0))
+            </p>
         </div>
     }
     

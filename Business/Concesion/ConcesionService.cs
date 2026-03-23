@@ -431,7 +431,7 @@ namespace CemSys3.Business.Concesion
             //consultar los precios relacionados a la parcela dependiendo del tipo de parcela
             if (dto.TipoParcela == "Fosa")
             {
-                dto.PreciosNichos = await _context.PreciosTarifarias
+                dto.PreciosFosas = await _context.PreciosTarifarias
                     .Where(t => t.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.ConcesionFosa)
                     .Select(t => new PrecioTarifariaDTO
                     {
@@ -498,6 +498,12 @@ namespace CemSys3.Business.Concesion
                 }).ToListAsync();
 
             return dto;
+        }
+
+        public async Task<bool> ExisteNroConcesion(int nroConcesion)
+        {
+            bool existe = await _context.Concesiones.AnyAsync(c => c.Concesion == nroConcesion);
+            return existe;
         }
     }
 }
