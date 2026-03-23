@@ -58,7 +58,7 @@
                                     }
 
                                     <tr>
-                                        <td>@(opc.Concesion != null ? opc.Concesion : "---")</td>
+                                        <td>@(opc.Concesion != null ? opc.Concesion.Value.ToString("D5") : "---")</td>
                                         <td>
                                             @(opc.Difuntos != null && opc.Difuntos.Any()
                                                                                 ? Html.Raw(string.Join("<br>",
@@ -76,7 +76,7 @@
                                         <td>@opc.Vencimiento?.ToString("dd/MM/yyyy")</td>
                                         <td>@estadoTramiteDisplay</td>
                                         <td>
-                                            <a asp-action="Concesion" asp-controller="Concesion" asp-route-tramiteId="@opc.TramiteId" target="_blank"><i class="bi bi-box-arrow-in-right"></i></a>
+                                            <a asp-action="Concesion" asp-controller="Concesion" asp-route-tramiteId="@opc.TramiteId" title="Ir a conesión" target="_blank"><i class="bi bi-box-arrow-in-right fs-3"></i></a>
                                         </td>
                                     </tr>
                                 }

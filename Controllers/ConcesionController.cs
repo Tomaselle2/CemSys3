@@ -98,36 +98,6 @@ namespace CemSys3.Controllers
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> GenerarContrato(GenerarContratoVM viewModel)
         {
-            //quitar la validacion de contrato.NroConcesion
-            ModelState.Remove("contrato.NroConcesion");
-
-            if (!ModelState.IsValid)
-            {
-                viewModel.SweetAlert = new SweetAlertDTO
-                {
-                    Titulo = "Error",
-                    Mensaje = "Los datos ingresados no son válidos. Por favor, revise el formulario.",
-                    Tipo = "error"
-                };
-                return View(viewModel);
-            }
-
-            if(viewModel.contrato.NroConcesion != null)
-            {
-                bool existeNroConcesion = await _concesionService.ExisteNroConcesion(viewModel.contrato.NroConcesion.Value);
-
-                if (existeNroConcesion)
-                {
-                    viewModel.SweetAlert = new SweetAlertDTO
-                    {
-                        Titulo = "Error",
-                        Mensaje = $"El número de concesión {viewModel.contrato.NroConcesion.Value.ToString("D5")} ya existe. Por favor, ingrese un número de concesión diferente.",
-                        Tipo = "error"
-                    };
-                    return View(viewModel);
-                }
-            }
-
             //generar el pdf del contrato.
             GenerarContratoDTO contratoGenerado = new GenerarContratoDTO();
             contratoGenerado.TramiteId = viewModel.contrato.TramiteId;
@@ -173,6 +143,39 @@ namespace CemSys3.Controllers
                 return View(viewModel);
             }
 
+        }
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> ValidarContrato(GenerarContratoVM viewModel)
+        {
+            ModelState.Remove("contrato.NroConcesion");
+
+            if (!ModelState.IsValid)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Los datos ingresados no son válidos."
+                });
+            }
+
+            if (viewModel.contrato.NroConcesion != null)
+            {
+                bool existe = await _concesionService
+                    .ExisteNroConcesion(viewModel.contrato.NroConcesion.Value);
+
+                if (existe)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = $"El número de concesión {viewModel.contrato.NroConcesion.Value.ToString("D5")} ya existe."
+                    });
+                }
+            }
+
+            return Json(new { success = true });
         }
 
         //btn para pasar a la pantalla de contrato. Guarda en BD.

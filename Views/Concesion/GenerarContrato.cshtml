@@ -24,7 +24,7 @@
 
 
 
-<form asp-action="GenerarContrato" method="post" id="formPrincipal" target="_blank">
+<form asp-action="GenerarContrato" method="post" id="formPrincipal">
 
     <input type="hidden" asp-for="contrato.TramiteId" />
     <input type="hidden" asp-for="contrato.EstadoTramiteId" />
@@ -267,7 +267,7 @@
                 <input type="hidden" asp-for="contrato.NroParcela" value="@Model.contrato.NroParcela" />
 
                 <div class="text-center p-3">
-                    <input type="submit" value="Generar contrato" class="btn btn-success" />
+                    <input type="submit" value="Generar contrato" class="btn btn-success" id="btnGenerarContrato" data-no-loader="true" />
                 </div>
 
             </div>
@@ -290,7 +290,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <label for="dniInput">DNI<span class="obligatorio"> * </span></label>
-                            <input class="form-control" id="dniInput" type="text" pattern="[0-9]+" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required />
+                            <input class="form-control" id="dniInput" type="text" pattern="[0-9]+" maxlength="8" autocomplete="off" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required />
                             <div class="invalid-feedback">El DNI es obligatorio</div>
                         </div>
                         <div class="col-md-6">
@@ -547,10 +547,15 @@
 
 
         // Validar formulario principal antes de enviar
-        formPrincipal.addEventListener('submit', function(event) {
+        formPrincipal.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const btnGenerar = document.getElementById('btnGenerarContrato');
+
+            btnGenerar.disabled = true;
+            btnGenerar.value = "Procesando...";
+
             // Primero verificamos la validez del formulario
             if (!this.checkValidity()) {
-                event.preventDefault();
                 event.stopPropagation();
                 ocultarBoton();
                 return;
@@ -592,9 +597,46 @@
                 return;
             }
 
-            // Si todo es válido, permitimos el submit (los inputs ya están en el form)
-            // no preventDefault aquí para que el form haga POST (abre en nueva pestaña)
-            SubirContrato();
+                //VALIDACIÓN EN SERVIDOR
+            const formData = new FormData(this);
+
+            try {
+                const response = await fetch('/Concesion/ValidarContrato', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    AlertService.show("Error", result.message, "error");
+                    ocultarBoton();
+                    btnGenerar.disabled = false;
+                    btnGenerar.value = "Generar contrato";
+                    return;
+                }
+
+                // ✅ TODO OK → abrir nueva pestaña SOLO AHORA
+                this.target = "_blank";
+                this.action = "/Concesion/GenerarContrato";
+
+                this.submit();
+
+                // (opcional) restaurar
+                this.target = "_self";
+
+                // Mostrar botón contrato firmado
+                SubirContrato();
+
+                btnGenerar.disabled = false;
+                btnGenerar.value = "Generar contrato";
+
+            } catch (error) {
+                console.error(error);
+                AlertService.show("Error", "Error de conexión con el servidor", "error");
+                btnGenerar.disabled = false;
+                btnGenerar.value = "Generar contrato";
+            }
 
         });
 
@@ -954,12 +996,7 @@
 
                         // Deshabilitar botón
                         btn.disabled = true;
-
-                        // Mostrar spinner + texto
-                        btn.innerHTML = `
-                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-                            Procesando...
-                        `;
+                        setButtonLoading(btnGenerar);
 
                         //CAMBIAR ACCIÓN DEL FORM PRINCIPAL
                         formPrincipal.action = '/Concesion/ContratoFirmado';
@@ -988,16 +1025,6 @@
         function ocultarBoton() {
             btnSubirContrato.style.display = 'none';
         }
-
-        // Lógica de vencimiento
-        // function extraerAnios(textoOpcion) {
-        //     // Usamos una expresión regular para encontrar el número de años
-        //     const match = textoOpcion.match(/^(\d+)\s*años/);
-        //     if (match && match[1]) {
-        //         return parseInt(match[1]);
-        //     }
-        //     return 0;
-        // }
 
         // Función para calcular la fecha de vencimiento
         function calcularVencimiento() {

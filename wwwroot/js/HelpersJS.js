@@ -21,6 +21,21 @@ function hasNoLoaderFlag(element) {
     return false;
 }
 
+//btn con sprinner
+function setButtonLoading(button, text = "Procesando...") {
+    if (!button) return;
+
+    button.disabled = true;
+
+    // Guardar texto original
+    button.dataset.originalText = button.innerHTML;
+
+    button.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        ${text}
+    `;
+}
+
 function formRequestsLoaderShouldBeSkipped(form, submitter) {
     if (!form) return false;
     // atributo explícito en el form o en el botón
