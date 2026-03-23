@@ -388,7 +388,7 @@ namespace CemSys3.Business.Concesion
                 .Where(p => p.ParcelaId == dto.ParcelaId && p.FechaRetiro == null)
                 .Select(p => new DifuntoContratoDTO
                 {
-                    Id = p.Id,
+                    Id = p.Difunto.Id,
                     DNI = p.Difunto.Dni,
                     Nombre = p.Difunto.Nombre,
                     Apellido = p.Difunto.Apellido,
@@ -474,7 +474,7 @@ namespace CemSys3.Business.Concesion
                 .Where(p => p.ParcelaId == dto.ParcelaId && p.FechaRetiro == null)
                 .Select(p => new DifuntoContratoDTO
                 {
-                    Id = p.Id,
+                    Id = p.Difunto.Id,
                     DNI = p.Difunto.Dni,
                     Nombre = p.Difunto.Nombre,
                     Apellido = p.Difunto.Apellido,
