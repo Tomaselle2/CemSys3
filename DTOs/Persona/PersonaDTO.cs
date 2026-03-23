@@ -39,5 +39,7 @@
         public int? EstadoDifuntoId { get; set; }
 
         public int? CategoriaPersonaId { get; set; }
+
+        public DateTime? FechaIngreso { get; set; }
     }
 }

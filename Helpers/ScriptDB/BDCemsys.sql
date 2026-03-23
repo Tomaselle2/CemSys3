@@ -164,9 +164,6 @@ CREATE TABLE [dbo].[Personas] (
     CONSTRAINT [Personas_estadoDifuntoId_fk] FOREIGN KEY([estadoDifuntoId]) REFERENCES [dbo].[EstadosDifunto]([id])
 );
 
-alter table Personas drop column domicilioEnTirolesa
-alter table Personas drop column fallecioEnTirolesa
-
 
 CREATE TABLE [dbo].[EstadosTramites] (
     [id] int NOT NULL IDENTITY(1,1),

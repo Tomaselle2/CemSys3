@@ -4,6 +4,7 @@ using CemSys3.Interfaces.Persona;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
+using Microsoft.Playwright;
 
 namespace CemSys3.Business.Persona
 {
@@ -47,6 +48,7 @@ namespace CemSys3.Business.Persona
         public async Task<PersonaDTO> Get(int id)
         {
             Models.Persona persona = await _context.Personas.FindAsync(id) ?? throw new Exception("Persona no encontrada");
+            Models.ParcelaDifunto parcelaDifunto = await _context.ParcelaDifuntos.Where(p => p.DifuntoId == persona.Id).FirstOrDefaultAsync() ?? throw new Exception("Error al obtener la fecha de ingreso");
             
             return new PersonaDTO
             {
@@ -68,14 +70,15 @@ namespace CemSys3.Business.Persona
                 NroAge = persona.NroAge,
                 NroTomo = persona.NroTomo,
                 EstadoDifuntoId = persona.EstadoDifuntoId,
-                CategoriaPersonaId = persona.CategoriaPersonaId
+                CategoriaPersonaId = persona.CategoriaPersonaId,
+                FechaIngreso = parcelaDifunto.FechaIngreso
             };
         }
 
         public async Task<PersonaDTO> GetByDNISexo(int dni, string sexo)
         {
             string dniString = dni.ToString("D8");
-            return await _context.Personas.Where(p=> p.Dni == dniString && p.Sexo == sexo).Select(s => new PersonaDTO
+            PersonaDTO persona = await _context.Personas.Where(p => p.Dni == dniString && p.Sexo == sexo).Select(s => new PersonaDTO
             {
                 Id = s.Id,
                 Nombre = s.Nombre,
@@ -96,7 +99,12 @@ namespace CemSys3.Business.Persona
                 NroAge = s.NroAge,
                 NroTomo = s.NroTomo,
                 EstadoDifuntoId = s.EstadoDifuntoId
-            }).FirstOrDefaultAsync();
+            }).FirstOrDefaultAsync() ?? throw new Exception("Persona no encontrada");
+
+            Models.ParcelaDifunto parcelaDifunto = await _context.ParcelaDifuntos.Where(p => p.DifuntoId == persona.Id).FirstOrDefaultAsync() ?? throw new Exception("Error al obtener la fecha de ingreso");
+            persona.FechaIngreso = parcelaDifunto.FechaIngreso;
+
+            return persona;
         }
 
         public async Task<HistorialPersonaDTO> HistorialPersona(int id)
@@ -158,6 +166,13 @@ namespace CemSys3.Business.Persona
         public async Task<int> Update(PersonaDTO dto)
         {
             Models.Persona persona = await _context.Personas.FindAsync(dto.Id) ?? throw new Exception("Persona no encontrada");
+            Models.ParcelaDifunto parcelaDifunto = await _context.ParcelaDifuntos.Where(p => p.DifuntoId == persona.Id).FirstOrDefaultAsync() ?? throw new Exception("Error al actualizar la fecha de ingreso");
+            Models.Introduccione introduccion = await _context.Introducciones.Where(p => p.DifuntoId == persona.Id && p.ParcelaId == parcelaDifunto.ParcelaId).FirstOrDefaultAsync() ?? throw new Exception("Error al actualizar la fecha de ingreso");
+
+
+            parcelaDifunto.FechaIngreso = dto.FechaIngreso;
+            introduccion.FechaIngreso = dto.FechaIngreso;
+            
 
             persona.Nombre = dto.Nombre?.Trim();
             persona.Apellido = dto.Apellido?.Trim();

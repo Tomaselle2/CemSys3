@@ -81,6 +81,11 @@
                                     <select class="form-control form-select" asp-items="@(EnumHelper.GetSelectListItems<EstadoDifuntoEnum>())" asp-for="persona.Persona.EstadoDifuntoId">
                                     </select>
                                 </div>
+
+                                <div class="mt-3">
+                                    <label for="fechaIngreso">Ingreso</label>
+                                    <input class="form-control" id="fechaIngreso" type="datetime-local" asp-for="persona.Persona.FechaIngreso" />
+                                </div>
                             }
                         </div>
                         @if (Model.persona.Persona.CategoriaPersonaId == (int)CategoriaPersonaEnum.Fallecido)
