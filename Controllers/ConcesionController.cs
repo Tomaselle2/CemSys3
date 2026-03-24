@@ -160,20 +160,20 @@ namespace CemSys3.Controllers
                 });
             }
 
-            if (viewModel.contrato.NroConcesion != null)
-            {
-                bool existe = await _concesionService
-                    .ExisteNroConcesion(viewModel.contrato.NroConcesion.Value);
+            //if (viewModel.contrato.NroConcesion != null)
+            //{
+            //    bool existe = await _concesionService
+            //        .ExisteNroConcesion(viewModel.contrato.NroConcesion.Value);
 
-                if (existe)
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = $"El número de concesión {viewModel.contrato.NroConcesion.Value.ToString("D5")} ya existe."
-                    });
-                }
-            }
+            //    if (existe)
+            //    {
+            //        return Json(new
+            //        {
+            //            success = false,
+            //            message = $"El número de concesión {viewModel.contrato.NroConcesion.Value.ToString("D5")} ya existe."
+            //        });
+            //    }
+            //}
 
             return Json(new { success = true });
         }

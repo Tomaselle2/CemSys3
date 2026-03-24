@@ -502,7 +502,7 @@
                 apellido: (t.apellido ?? t.Apellido ?? '') || '',
                 sexo: (t.sexo ?? t.Sexo ?? '').toLowerCase(),
                 celular: t.celular ?? t.Celular ?? '',
-                correo: t.correo ?? t.Correo ?? t.CorreoElectronico ?? '',
+                correoElectronico: t.correo ?? t.correoElectronico ?? t.CorreoElectronico ?? '',
                 domicilio: t.domicilio ?? t.Domicilio ?? ''
             }));
 
@@ -744,7 +744,7 @@
                 nombre: nombreInput.value.trim(),
                 apellido: apellidoInput.value.trim(),
                 celular: celularInput.value.trim(),
-                correo: correoInput.value.trim(),
+                correoElectronico: correoInput.value.trim(),
                 domicilio: domicilioInput.value.trim()
             };
 
@@ -786,7 +786,7 @@
                 apellido: titular.apellido ?? titular.Apellido ?? '',
                 sexo: (titular.sexo ?? titular.Sexo ?? '').toLowerCase(),
                 celular: titular.celular ?? titular.Celular ?? '',
-                correo: titular.correo ?? titular.Correo ?? titular.CorreoElectronico ?? '',
+                correoElectronico: titular.correo ?? titular.correoElectronico ?? titular.CorreoElectronico ?? '',
                 domicilio: titular.domicilio ?? titular.Domicilio ?? ''
             };
 
@@ -825,6 +825,7 @@
             contenedorTitulares.innerHTML = '';
 
             titulares.forEach((titular, index) => {
+                console.log(titular)
                 const titularDiv = document.createElement('div');
                 titularDiv.className = 'titular-item';
                 // Nombres de inputs con prefijo 'contrato.Titulares[...]' para bind a Model.contrato.Titulares
@@ -876,7 +877,7 @@
                             </div>
                             <div>
                                 <label>Correo</label>
-                                <input class="form-control" type="text" name="contrato.Titulares[${index}].CorreoElectronico" value="${titular.correo || ''}" maxlength="100" />
+                                <input class="form-control" type="text" name="contrato.Titulares[${index}].CorreoElectronico" value="${titular.correoElectronico || titular.CorreoElectronico || ''}" maxlength="100" />                            
                             </div>
                         </div>
                     </div>

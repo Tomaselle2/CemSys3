@@ -598,3 +598,39 @@ null, --cierre fosa
 
 
 select * from EstadosTramites
+
+
+--Job para pasar de concesion vigente a vencida 
+--BEGIN TRANSACTION;
+
+---- 1. Obtener trámites que pasan a vencido
+--DECLARE @TramitesVencidos TABLE (
+--    tramiteId INT
+--);
+
+--INSERT INTO @TramitesVencidos (tramiteId)
+--SELECT t.id
+--FROM Tramites t
+--INNER JOIN Concesiones c ON c.tramiteId = t.id
+--WHERE 
+--    c.vencimiento < GETDATE()
+--    AND t.estadoActualId = 6; -- Vigente
+
+
+---- 2. Actualizar estado actual
+--UPDATE t
+--SET estadoActualId = 7 -- Vencido
+--FROM Tramites t
+--INNER JOIN @TramitesVencidos tv ON tv.tramiteId = t.id;
+
+
+---- 3. Insertar historial
+--INSERT INTO HistorialEstadoTramite (fecha, tramiteId, estadoTramiteId)
+--SELECT 
+--    GETDATE(),
+--    tramiteId,
+--    7 -- Vencido
+--FROM @TramitesVencidos;
+
+
+--COMMIT;
