@@ -97,6 +97,17 @@ builder.Services.AddScoped<PlaywrightPdfGenerator>();
 var app = builder.Build();
 app.UseSession();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    // Calienta EF + SQL
+    context.Concesiones.AsNoTracking().FirstOrDefault();
+
+    // Opcional: precargar relaciones típicas
+    context.Parcelas.AsNoTracking().FirstOrDefault();
+    context.Personas.AsNoTracking().FirstOrDefault();
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -124,3 +135,5 @@ app.MapControllerRoute(
 
 
 app.Run();
+
+

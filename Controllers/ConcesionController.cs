@@ -7,6 +7,7 @@ using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
 using CemSys3.Helpers;
+using CemSys3.Helpers.Enumerable;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.PDF;
 using CemSys3.Helpers.Roles_Autenticacion;
@@ -160,21 +161,6 @@ namespace CemSys3.Controllers
                 });
             }
 
-            //if (viewModel.contrato.NroConcesion != null)
-            //{
-            //    bool existe = await _concesionService
-            //        .ExisteNroConcesion(viewModel.contrato.NroConcesion.Value);
-
-            //    if (existe)
-            //    {
-            //        return Json(new
-            //        {
-            //            success = false,
-            //            message = $"El número de concesión {viewModel.contrato.NroConcesion.Value.ToString("D5")} ya existe."
-            //        });
-            //    }
-            //}
-
             return Json(new { success = true });
         }
 
@@ -209,6 +195,8 @@ namespace CemSys3.Controllers
             dto.TipoParcela = viewModel.contrato.TipoParcela;
             dto.ParcelaId = viewModel.contrato.ParcelaId;
             dto.EstadoTramiteId = (int)EstadosConcesionEnum.Vigente;
+            dto.MensajeParcela = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizo contrato de concesión ({viewModel.contrato.NroConcesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(viewModel.CantidadAniosId.Value)}. Vencimiento {viewModel.Vencimiento}.";
+            dto.InformacionAdicional = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizo contrato de concesión ({viewModel.contrato.NroConcesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(viewModel.CantidadAniosId.Value)}. Vencimiento {viewModel.Vencimiento}.";
 
             //pasar de TitularesDTO a PersonaDTO
             List<PersonaDTO> titulares = new List<PersonaDTO>();
@@ -231,6 +219,7 @@ namespace CemSys3.Controllers
             }
 
             dto.Titulares = titulares;
+            dto.Difuntos = viewModel.contrato.Difuntos;
 
             // 1. Armar nuevamente el DTO del contrato (igual que en GenerarContrato) para genera el PDF sin mostrarlo
             GenerarContratoDTO contratoGenerado = new GenerarContratoDTO

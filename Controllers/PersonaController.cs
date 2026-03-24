@@ -175,6 +175,11 @@ namespace CemSys3.Controllers
             }
             catch (Exception ex)
             {
+                // Si el mensaje indica que no existe, tratarlo como "no encontrado"
+                if (ex.Message.Contains("no encontrada") || ex.Message.Contains("not found"))
+                {
+                    return Json(new { success = true, contribuyente = (object)null });
+                }
                 return Json(new { success = false, message = ex.Message });
             }
         }

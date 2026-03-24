@@ -172,6 +172,11 @@
         parcela = $"Lote {Model.Dto.NroParcela.ToString()}";
     }
 }
+
+<!-- Contenedor para alerta de htmx de informacion adicional -->
+<div id="htmx-alert-container" style="display:none;"></div>
+
+
 <div class="contenidoConcesion">
     <div class="cardsConcesion-row my-4">
         <div class="cardConcesion">
@@ -292,9 +297,45 @@
         </div>
     </div>
 }
-    
 
+    <div class="cardConcesion mb-3 my-3">
+        <div class="cardConcesion-content">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">
+                    <i class="bi bi-info-circle-fill text-primary"></i> Informacion adicional
+                </h3>
+            </div>
+            <div>
+                <textarea id="textareaInfoAdicional" name="informacionAdicionaTramite" style="overflow:hidden;" 
+                oninput="document.getElementById('btnActualizar').disabled = false; autoResize(this)" class="form-control auto-resize" 
+                asp-for="Dto.InfoAdicional"></textarea>
+            </div>
+            <div class="my-2">
+                <input type="hidden" name="tramiteId" value="@Model.Dto.TramiteId" id="tramiteIdHidden" />
+                <input type="submit" id="btnActualizar" class="btn btn-success" value="Actualizar" disabled
+                       hx-post="/Tramite/ActualizarInfoAdicionalTramite"
+                       hx-include="#textareaInfoAdicional, #tramiteIdHidden"
+                       hx-target="#htmx-alert-container"
+                       hx-swap="innerHTML" />
+            </div>
+        </div>
+    </div>
 </div>
 
 @* Renderizamos el manejador pasándole el DTO del modelo *@
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"></script>
+     <partial name="_ValidationScriptsPartial" />
+     <script>
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+
+        window.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('.auto-resize').forEach(t => autoResize(t));
+        });
+    </script>
+}

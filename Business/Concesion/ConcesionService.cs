@@ -6,6 +6,7 @@ using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Tarifaria;
 using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
+using CemSys3.Helpers.Enumerable;
 using CemSys3.Interfaces.Concesion;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Persona;
@@ -128,8 +129,6 @@ namespace CemSys3.Business.Concesion
                 Models.Parcela parcela = await _context.Parcelas.FindAsync(dto.ParcelaId) ?? throw new Exception("Parcela no encontrada.");
                 parcela.InformacionAdicional += dto.MensajeParcela;
 
-                //8- en concesion se modifica el info adicional
-
                 await _context.SaveChangesAsync();
                 return new GenericResultDTO
                 {
@@ -160,7 +159,8 @@ namespace CemSys3.Business.Concesion
                 concesion.CantidadAniosId = dto.CantidadAniosId;
                 concesion.CuotaId = dto.CuotaId;
                 concesion.UsuarioId = dto.UsuarioId;
-                //(tudo) revisar como hacer con la info adicional. 
+                concesion.InformacionAdicional += dto.InformacionAdicional;
+
 
                 //relacion de titulares con concesiones(si existe)
                 if (dto.Titulares != null && dto.Titulares.Count > 0)
@@ -185,6 +185,7 @@ namespace CemSys3.Business.Concesion
                             personaExistente.Correo = persona.Correo;
                             personaExistente.Domicilio = persona.Domicilio;
                             personaExistente.CategoriaPersonaId = (int)CategoriaPersonaEnum.Titular;
+                            personaExistente.InformacionAdicional += $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizo contrato de concesión ({dto.Concesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(dto.CantidadAniosId.Value)}. Vencimiento {dto.Vencimiento}.";
 
                             int personaCargada = await _personaService.Update(personaExistente);
 
@@ -204,6 +205,7 @@ namespace CemSys3.Business.Concesion
                             personaNueva.Correo = persona.Correo;
                             personaNueva.Domicilio = persona.Domicilio;
                             personaNueva.CategoriaPersonaId = (int)CategoriaPersonaEnum.Titular;
+                            personaNueva.InformacionAdicional += $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizo contrato de concesión ({dto.Concesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(dto.CantidadAniosId.Value)}. Vencimiento {dto.Vencimiento}.";
 
                             int personaCargada = await _personaService.Add(personaNueva);
 
@@ -211,6 +213,17 @@ namespace CemSys3.Business.Concesion
                             await _historialEstadosService.VincularTramiteAPersona(dto.TramiteId, personaCargada);
                             await _historialEstadosService.VincularTitularAConcesion(personaCargada, dto.TramiteId);
                         }
+                    }
+                }
+
+                //actualizo a todos los difuntos el info adicional
+                if (dto.Difuntos != null && dto.Difuntos.Count > 0)
+                {
+                    foreach (var difunto in dto.Difuntos)
+                    {
+                        PersonaDTO difuntoCargado = await _personaService.Get(difunto.Id);
+                        difuntoCargado.InformacionAdicional += $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizo contrato de concesión ({dto.Concesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(dto.CantidadAniosId.Value)}. Vencimiento {dto.Vencimiento}.";
+                        int id = await _personaService.Update(difuntoCargado);
                     }
                 }
 
@@ -229,6 +242,10 @@ namespace CemSys3.Business.Concesion
                     EstadoTramiteId = tramite.EstadoActualId
                 };
                 await _historialEstadosService.Add(historial);
+
+                //3- en parcela se modifica el info adicional
+                Models.Parcela parcela = await _context.Parcelas.FindAsync(dto.ParcelaId) ?? throw new Exception("Parcela no encontrada.");
+                parcela.InformacionAdicional += dto.MensajeParcela;
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -367,7 +384,7 @@ namespace CemSys3.Business.Concesion
         {
             GenerarContratoDTO dto = new GenerarContratoDTO();
 
-            Models.Concesione concesion = await _context.Concesiones
+            Models.Concesione concesion = await _context.Concesiones.AsNoTracking()
                 .Include(c => c.Tramite)
                 .Include(c => c.Parcela)
                     .ThenInclude(p => p.Seccion)

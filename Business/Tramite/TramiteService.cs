@@ -38,11 +38,15 @@ namespace CemSys3.Business.Tramite
                     result.Success = true;
                     result.Id = tramiteId;
                     break;
-                //case (int)TipoTramiteEnum.ContratoConcesion:
-                //    Concesione concesion = await _context.Concesiones.FindAsync(tramiteId) ?? throw new Exception("No se encontro el contrato de concesión");
-                //    concesion.i = informacionAdicionalTramite;
-                //    await _context.SaveChangesAsync();
-                //    break;
+                case (int)TipoTramiteEnum.ContratoConcesion:
+                    Concesione concesion = await _context.Concesiones.FindAsync(tramiteId) ?? throw new Exception("No se encontro la concesión");
+                    concesion.InformacionAdicional = informacionAdicionalTramite;
+                    await _context.SaveChangesAsync();
+
+                    result.Message = "Información adicional actualizada correctamente";
+                    result.Success = true;
+                    result.Id = tramiteId;
+                    break;
             }
 
             return result;

@@ -113,6 +113,7 @@
 
         @for (int i = 0; i < Model.contrato.Difuntos.Count; i++)
         {
+            <input type="hidden" asp-for="contrato.Difuntos[i].Id" />
             <input type="hidden" asp-for="contrato.Difuntos[i].DNI" />
             <input type="hidden" asp-for="contrato.Difuntos[i].Nombre" />
             <input type="hidden" asp-for="contrato.Difuntos[i].Apellido" />
@@ -713,6 +714,7 @@
             })
             .then(response => response.json())
             .then(data => {
+                console.log('Respuesta servidor:', data);
                 mostrarCargando(false);
                 if (data.success) {
                     if (data.contribuyente) {
@@ -970,7 +972,7 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <p>El contrato debe estar firmado y escaneado para continuar.</p>
+                                    <p>El contrato debe estar firmado para continuar.</p>
                                     <p><strong>¿Desea confirmar el contrato?</strong></p>
                                 </div>
                                 <div class="modal-footer">

@@ -159,6 +159,7 @@ namespace CemSys3.Business.Ingreso
 
                 //12- informacion adicional de ingreso (difunto)
                 parcelaDifunto.Difunto.InformacionAdicional += $"\n● El {dto.FechaIngreso?.ToString("dd/MM/yyyy HH:mm")} se realizó el ingreso en {ubicacion} en estado {EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(dto.EstadoDifuntoId)}.";
+                parcelaDifunto.Difunto.InformacionAdicional += $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} en {ubicacion} se genera concesión en estado '{EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>((int)EstadosConcesionEnum.SinContrato)}'.";
 
                 if (!existeConcesion && ingreso.Parcela.TipoParcelaId != (int)TipoParcelaEnum.Panteon)
                 {

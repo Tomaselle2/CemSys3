@@ -29,6 +29,8 @@ namespace CemSys3.DTOs.Concesion
         //---
         public int EstadoTramiteId { get; set; }
         public List<PersonaDTO>? Titulares { get; set; }
+        public List<DifuntoContratoDTO> Difuntos { get; set; } = new List<DifuntoContratoDTO>();
+
         public string MensajeParcela { get; set; } = string.Empty;
     }
 }
