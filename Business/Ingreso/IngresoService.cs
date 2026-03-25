@@ -124,21 +124,9 @@ namespace CemSys3.Business.Ingreso
                 };
                 _context.Introducciones.Add(ingreso);
 
-                //8- se debe sumar en 1 la cantidad de difuntos en la parcela
-                await _parcelaService.AumentarDifunto(ingreso.ParcelaId);
-
-                //9- Vincular la nota con el ingreso
-                await _notaService.VincularNotaConIngreso(dto.NotaId, tramiteId);
-
-                //10- se inicia el contrato de concesion en estado "Sin Contrato" solo si es nicho o fosa
-
-                bool existeConcesion = await _context.Concesiones
-                    .AnyAsync(c => c.ParcelaId == ingreso.ParcelaId && c.Visibilidad == true);
-
                 var parcela = await _context.Parcelas
                     .Include(p => p.Seccion)
                     .FirstOrDefaultAsync(p => p.Id == dto.ParcelaId) ?? throw new Exception("Parcela no encontrada");
-
                 string ubicacion = "";
 
                 if (parcela.TipoParcelaId == (int)TipoParcelaEnum.Nicho) //nicho
@@ -154,12 +142,29 @@ namespace CemSys3.Business.Ingreso
                     ubicacion = $"Lote {parcela.NroParcela.ToString()} Sección {parcela.Seccion.Nombre.ToUpper()}";
                 }
 
+                if (parcela.CantidadDifuntos == 0)
+                {
+                    parcelaDifunto.Difunto.InformacionAdicional += $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} en {ubicacion} se genera concesión en estado '{EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>((int)EstadosConcesionEnum.SinContrato)}'.";
+                }
+
+                //8- se debe sumar en 1 la cantidad de difuntos en la parcela
+                await _parcelaService.AumentarDifunto(ingreso.ParcelaId);
+
+                //9- Vincular la nota con el ingreso
+                await _notaService.VincularNotaConIngreso(dto.NotaId, tramiteId);
+
+                //10- se inicia el contrato de concesion en estado "Sin Contrato" solo si es nicho o fosa
+
+                bool existeConcesion = await _context.Concesiones
+                    .AnyAsync(c => c.ParcelaId == ingreso.ParcelaId && c.Visibilidad == true);
+
+
                 //11- informacion adicional de ingreso (parcela)
                 parcelaDifunto.Parcela.InformacionAdicional += $"\n● El {dto.FechaIngreso?.ToString("dd/MM/yyyy HH:mm")} se realizó el ingreso del difunto {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} en estado {EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(dto.EstadoDifuntoId)}.";
 
                 //12- informacion adicional de ingreso (difunto)
                 parcelaDifunto.Difunto.InformacionAdicional += $"\n● El {dto.FechaIngreso?.ToString("dd/MM/yyyy HH:mm")} se realizó el ingreso en {ubicacion} en estado {EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(dto.EstadoDifuntoId)}.";
-                parcelaDifunto.Difunto.InformacionAdicional += $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} en {ubicacion} se genera concesión en estado '{EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>((int)EstadosConcesionEnum.SinContrato)}'.";
+
 
                 if (!existeConcesion && ingreso.Parcela.TipoParcelaId != (int)TipoParcelaEnum.Panteon)
                 {

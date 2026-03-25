@@ -30,5 +30,10 @@ namespace CemSys3.DTOs.Concesion
         public DateOnly Vencimiento { get; set; }
         public DateTime fechaGeneracion { get; set; }
 
+        public decimal PorcentajeDescuentoRenovacionConcesionAlDia { get; set; }
+        public decimal PorcentajeAumentoConcesionesOtrasLocalidades { get; set; }
+        public decimal PorcentajeFondoAyudaCentroSalud { get; set; }
+
+
     }
 }

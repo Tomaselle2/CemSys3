@@ -224,6 +224,7 @@ namespace CemSys3.Business.Concesion
                         PersonaDTO difuntoCargado = await _personaService.Get(difunto.Id);
                         difuntoCargado.InformacionAdicional += $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizo contrato de concesión ({dto.Concesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(dto.CantidadAniosId.Value)}. Vencimiento {dto.Vencimiento}.";
                         int id = await _personaService.Update(difuntoCargado);
+                        await _historialEstadosService.VincularTramiteAPersona(dto.TramiteId, difuntoCargado.Id);
                     }
                 }
 
@@ -462,6 +463,13 @@ namespace CemSys3.Business.Concesion
                     }).ToListAsync();
             }
 
+            Models.PreciosTarifaria porcentajeAumentoOtrasLocalidades = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.PorcentajeAumentoConcesionesOtrasLocalidades).FirstOrDefaultAsync() ?? throw new Exception("No se encontro el % fondo ayuda");
+            Models.PreciosTarifaria porcentajeDescuentoRenovacion = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.PorcentajeDescuentoRenovacionConcesionAlDia).FirstOrDefaultAsync() ?? throw new Exception("No se encontro el % fondo ayuda");
+            Models.PreciosTarifaria porcentajeFondo = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.PorcentajeFondoAyudaCentroSalud).FirstOrDefaultAsync() ?? throw new Exception("No se encontro el % fondo ayuda");
+
+            dto.PorcentajeDescuentoRenovacionConcesionAlDia = porcentajeDescuentoRenovacion.Precio;
+            dto.PorcentajeAumentoConcesionesOtrasLocalidades = porcentajeAumentoOtrasLocalidades.Precio;
+            dto.PorcentajeFondoAyudaCentroSalud = porcentajeFondo.Precio;
             return dto;
         }
 

@@ -552,6 +552,10 @@ body {
     background-color: #eee;
 }
 
+.card-vencida {
+    box-shadow: 0 0 12px 4px rgba(220, 53, 69, 0.75);
+}
+
 
 
 

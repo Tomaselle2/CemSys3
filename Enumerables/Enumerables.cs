@@ -270,6 +270,7 @@ namespace CemSys3.Enumerables
         PorcentajeIntroduccionUrnaDerechoOficina = 24,
         ConcesionNicho = 16,
         ConcesionFosa = 17,
+        PorcentajeDescuentoRenovacionConcesionAlDia = 25
     }
 
     public enum CategoriaArchivosEnum //cada categoria que se agrega debe ser al final siempre

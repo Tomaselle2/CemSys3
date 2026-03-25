@@ -127,7 +127,7 @@
             @foreach (var nota in Model.ListaNotas)
             {
                 <div class="col">
-                    <div class="card h-100 cursor-pointer"
+                    <div class="card h-100 cursor-pointer @(nota.TipoNotaId == (int)TipoNotaEnum.Recordatorio && nota.EstadoId == (int)EstadosNotaEnum.NotaPendiente && nota.FechaFinRecordatorio.HasValue && nota.FechaFinRecordatorio.Value < DateTime.Now ? "card-vencida" : "")"
                          style="background-color: @nota.Color;"
                          hx-get="@Url.Action(action: "Visualizar", controller: "Nota", values: new { id = nota.Id})"
                          hx-target="#modal-container"

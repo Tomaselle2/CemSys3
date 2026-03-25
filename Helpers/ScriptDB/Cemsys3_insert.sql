@@ -102,10 +102,8 @@ INSERT INTO ConceptosTarifaria (nombre, temaId) VALUES
 ('% de aumento de concesiones de otras localidades',7), --21
 ('% de aumento de introducción derecho de oficina de otras localidades',7), --22
 ('% de precios de nichos urnarios de secc 16-18',7), --23
-('% de introducción de urna de derecho de oficina',7); --24
-
-
-
+('% de introducción de urna de derecho de oficina',7),--24
+('% de descuento de renovacion de concesión al dia',7); --25
 
 
 --INSERT PreciosTarifaria
@@ -131,7 +129,8 @@ INSERT INTO PreciosTarifarias (precio, conceptoTarifariaId, visibilidad) values
 (0.50, 21, 1), --% de aumento de concesiones de otras localidades
 (1.00, 22, 1), --% de aumento de introduccion derecho de oficina de otras localidades
 (0.50, 23, 1), --% de precios de nichos urnarios de secc 16-18
-(0.25, 24, 1); --% de introduccion de urna de derecho de oficina
+(0.25, 24, 1), --% de introduccion de urna de derecho de oficina
+(0.30, 25, 1); --% de descuento de renovacion de concesión al dia
 
 --para fosas
 INSERT INTO PreciosTarifarias (precio, conceptoTarifariaId, visibilidad, nroFila, aniosConcesionId) values 

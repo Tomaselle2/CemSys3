@@ -167,6 +167,15 @@
                     </div>
                 </div>
 
+                <div class="p-3">
+                    <label>Se aplicará el siguiente tipo de precio:<span class="obligatorio"> * </span></label>
+                    <select class="form-control form-select" id="cambioPrecioSelect">
+                        <option value="regular" selected>Precio regular (base + @(Model.contrato.PorcentajeFondoAyudaCentroSalud * 100)%)</option>
+                        <option value="otraLocalidad">Aumento de otra localidad (base + @(Model.contrato.PorcentajeAumentoConcesionesOtrasLocalidades * 100)% + @(Model.contrato.PorcentajeFondoAyudaCentroSalud * 100)%)</option>
+                        <option value="descuentoRenovacion">Descuento renovación (base - @(Model.contrato.PorcentajeDescuentoRenovacionConcesionAlDia * 100)% + @(Model.contrato.PorcentajeFondoAyudaCentroSalud * 100)%)</option>
+                    </select>
+                </div>
+
 
                 <div class="p-3">
                     <label>Precio de la concesión<span class="obligatorio"> * </span></label>
@@ -1242,15 +1251,73 @@
         }
 
 
+        function calcularPrecioSegunTipo(precioBase, tipo) {
+            const fondo = @Model.contrato.PorcentajeFondoAyudaCentroSalud;
+            const aumento = @Model.contrato.PorcentajeAumentoConcesionesOtrasLocalidades;
+            const descuento = @Model.contrato.PorcentajeDescuentoRenovacionConcesionAlDia;
+
+            switch (tipo) {
+                case 'regular':
+                    return precioBase + (precioBase * fondo);
+
+                case 'otraLocalidad':
+                    return (precioBase + (precioBase * aumento)) * (1 + fondo);
+
+                case 'descuentoRenovacion':
+                    return (precioBase - (precioBase * descuento)) * (1 + fondo);
+
+                default:
+                    return precioBase;
+            }
+        }
 
 
+        function actualizarPreciosSelect() {
+            const tipo = document.getElementById('cambioPrecioSelect').value;
+            const select = document.getElementById('selectCantidadPrecio');
 
+            Array.from(select.options).forEach(option => {
+                if (!option.value) return;
+
+                const precioBase = parseFloat(option.dataset.precio);
+                const nuevoPrecio = calcularPrecioSegunTipo(precioBase, tipo);
+
+                // Guardar el nuevo precio para cálculos posteriores
+                option.dataset.precioFinal = nuevoPrecio;
+
+                // Obtener texto original (años)
+                const textoOriginal = option.textContent.split('-')[0].trim();
+
+                option.textContent = `${textoOriginal} - $ ${nuevoPrecio.toLocaleString('es-AR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                })}`;
+            });
+
+            // actualizar precio hidden
+            precioFinalHidden.value = getPrecioSeleccionado() || 0;
+
+            calcularValorCuota();
+        }
+
+        document.getElementById('cambioPrecioSelect').addEventListener('change', function () {
+            actualizarPreciosSelect();
+        });
+
+        function getPrecioSeleccionado() {
+            const opt = selectCantidadPrecio.selectedOptions && selectCantidadPrecio.selectedOptions[0];
+            if (!opt) return NaN;
+
+            let raw = opt.dataset.precioFinal ?? opt.dataset.precio ?? '';
+            return parsePrecioString(raw);
+        }
 
 
 
 
         // Aplicar el formato a los elementos con la clase 'dni-formateado'
         document.addEventListener("DOMContentLoaded", function () {
+            actualizarPreciosSelect();
             const elementosDNI = document.querySelectorAll(".dni-formateado");
             elementosDNI.forEach(function (elemento) {
                 elemento.textContent = formatearDNI(elemento.textContent);
