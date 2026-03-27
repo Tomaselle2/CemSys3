@@ -4,20 +4,41 @@
 @using CemSys3.Helpers.Enumerable
 @model ArchivosConcesionVM
 
+<style>
+    .main-content {
+        margin-right: 180px; /* un poco más que el sidebar */
+    }
+
+    @@media (max-width: 992px) {
+        .main-content {
+            margin-right: 0;
+        }
+
+        .sidebar-right {
+            position: static;
+            width: 100%;
+            height: auto;
+            border-left: none;
+        }
+    }
+</style>
 @{
     ViewData["Title"] = $"Archivos de concesion";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
 @await Html.PartialAsync("Concesion/_menuConcesion", Model.TramiteId)
 
-<!-- Archivos-->
-@await Html.PartialAsync("ArchivoPV/_ArchivoPV",
-new ArchivoVM
-{
-    Archivos = Model.Archivos,
-    TramiteId = Model.TramiteId
-})
+<div class="main-content">
+    <!-- Archivos-->
+    @await Html.PartialAsync("ArchivoPV/_ArchivoPV",
+    new ArchivoVM
+    {
+        Archivos = Model.Archivos,
+        TramiteId = Model.TramiteId
+    })
+</div>
+
+
 
 @* Renderizamos el manejador pasándole el DTO del modelo *@
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />

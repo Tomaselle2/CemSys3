@@ -18,6 +18,7 @@ using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 using static iText.Kernel.Pdf.Colorspace.PdfSpecialCs;
 
 namespace CemSys3.Business.Ingreso
@@ -142,7 +143,14 @@ namespace CemSys3.Business.Ingreso
                     ubicacion = $"Lote {parcela.NroParcela.ToString()} Sección {parcela.Seccion.Nombre.ToUpper()}";
                 }
 
-                if (parcela.CantidadDifuntos == 0)
+                // 11 - informacion adicional de ingreso(parcela)
+                parcelaDifunto.Parcela.InformacionAdicional += $"\n● El {dto.FechaIngreso?.ToString("dd/MM/yyyy HH:mm")} se realizó el ingreso del difunto {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} en estado {EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(dto.EstadoDifuntoId)}.";
+
+                //12- informacion adicional de ingreso (difunto)
+                parcelaDifunto.Difunto.InformacionAdicional += $"\n● El {dto.FechaIngreso?.ToString("dd/MM/yyyy HH:mm")} se realizó el ingreso en {ubicacion} en estado {EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(dto.EstadoDifuntoId)}.";
+
+
+                if (parcela.CantidadDifuntos == 0 && parcela.TipoParcelaId != (int)TipoParcelaEnum.Panteon)
                 {
                     parcelaDifunto.Difunto.InformacionAdicional += $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} en {ubicacion} se genera concesión en estado '{EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>((int)EstadosConcesionEnum.SinContrato)}'.";
                 }
@@ -157,13 +165,6 @@ namespace CemSys3.Business.Ingreso
 
                 bool existeConcesion = await _context.Concesiones
                     .AnyAsync(c => c.ParcelaId == ingreso.ParcelaId && c.Visibilidad == true);
-
-
-                //11- informacion adicional de ingreso (parcela)
-                parcelaDifunto.Parcela.InformacionAdicional += $"\n● El {dto.FechaIngreso?.ToString("dd/MM/yyyy HH:mm")} se realizó el ingreso del difunto {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} en estado {EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(dto.EstadoDifuntoId)}.";
-
-                //12- informacion adicional de ingreso (difunto)
-                parcelaDifunto.Difunto.InformacionAdicional += $"\n● El {dto.FechaIngreso?.ToString("dd/MM/yyyy HH:mm")} se realizó el ingreso en {ubicacion} en estado {EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(dto.EstadoDifuntoId)}.";
 
 
                 if (!existeConcesion && ingreso.Parcela.TipoParcelaId != (int)TipoParcelaEnum.Panteon)

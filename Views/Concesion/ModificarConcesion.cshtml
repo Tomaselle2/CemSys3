@@ -1,0 +1,731 @@
+﻿@using CemSys3.ViewModels.Concesion
+@model ModificarConcesionVM
+
+@{
+    ViewData["Title"] = $"Concesion {Model.Dto.NroConcesion?.ToString("D5")}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@await Html.PartialAsync("Concesion/_menuConcesion", Model.Dto.TramiteId)
+
+<!-- CSS adicional para múltiples titulares -->
+<style>
+    .titular-item {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+
+    .titular-header {
+        background-color: #e9ecef;
+        padding: 10px 15px;
+        border-radius: 8px 8px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .titular-number {
+        font-weight: bold;
+        color: #495057;
+    }
+
+    .btn-eliminar {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+</style>
+
+
+
+<h1>Modificar concesión</h1>
+<div class="contenidoConcesion">
+    <form asp-action="ModificarConcesion" method="post" id="formPrincipal">
+        <input type="hidden" asp-for="Dto.TramiteId" />
+
+        <div class="gridConcesion">
+            <div class="cardConcesion">
+
+                <div class="cardConcesion-content">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-pin-map-fill text-primary"></i> Vencimiento <span class="obligatorio"> * </span>
+                        </h3>
+                    </div>
+                    <div>
+                        <input class="form-control" type="date" required asp-for="Dto.Vencimiento" />
+                        <span asp-validation-for="Dto.Vencimiento" class="text-danger"></span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="cardConcesion">
+
+                <div class="cardConcesion-content">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-pin-map-fill text-primary"></i> N° Concesión <span class="obligatorio"> * </span>
+                        </h3>
+                    </div>
+                    <div>
+                        <input class="form-control" type="text" required autocomplete="off"
+                               id="nroConcesion" asp-for="Dto.NroConcesion" maxlength="5" />
+                        <span asp-validation-for="Dto.NroConcesion" class="text-danger"></span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Sección de titulares -->
+        <div class="accordion" id="accordionTitulares">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="panelsStayOpen-headingTitulares">
+                    <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-target="#panelsStayOpen-collapseTitulares" aria-expanded="true" aria-controls="panelsStayOpen-collapseTitulares">
+                        Titulares (<span id="contadorTitulares">0</span>)
+                    </button>
+                </h2>
+                <p class="obligatorio m-2">Si cambia el titular, quitar el actual y agregar el nuevo. No reemplazar los datos.</p>
+
+                <div id="panelsStayOpen-collapseTitulares" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingTitulares">
+                    <div class="mb-3 p-3">
+                        <!-- Contenedor para titulares (aquí se renderizarán los inputs) -->
+                        <div id="contenedorTitulares"></div>
+
+                        <!-- Botón para agregar titular -->
+                        <div class="text-center mt-3">
+                            <button class="btn btn-success" id="agregarContribuyenteButton" type="button">
+                                <i class="bi bi-person-plus" id="contribuyenteIcon"></i> Agregar Titular
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center p-3">
+            <input type="submit" value="Actualizar concesión" class="btn btn-success" id="btnGenerarContrato" />
+        </div>
+    </form>
+</div>
+
+<!-- Modal contribuyente-->
+<div class="modal fade" id="TitularModal" tabindex="-1" aria-labelledby="titularModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="titularModalLabel">Buscar/Registrar Titular</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formContribuyente" class="needs-validation" novalidate data-no-loader="true">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="dniInput">DNI<span class="obligatorio"> * </span></label>
+                            <input class="form-control" id="dniInput" type="text" pattern="[0-9]+" maxlength="8" autocomplete="off" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required />
+                            <div class="invalid-feedback">El DNI es obligatorio</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sexoInput">Sexo<span class="obligatorio"> * </span></label>
+                            <select class="form-select" id="sexoInput" required>
+                                <option value="">--Elija una opción--</option>
+                                <option value="masculino">Masculino</option>
+                                <option value="femenino">Femenino</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                            <div class="invalid-feedback">El sexo es obligatorio</div>
+                        </div>
+                    </div>
+
+                    <!-- Campos adicionales (inicialmente ocultos) -->
+                    <div id="camposAdicionales" style="display: none;">
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="nombreInput">Nombre<span class="obligatorio"> * </span></label>
+                                <input class="form-control" id="nombreInput" type="text" maxlength="60" minlength="2" />
+                                <div class="invalid-feedback">El nombre es obligatorio</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="apellidoInput">Apellido<span class="obligatorio"> * </span></label>
+                                <input class="form-control" type="text" id="apellidoInput" maxlength="60" minlength="2" />
+                                <div class="invalid-feedback">El apellido es obligatorio</div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="celularInput">Celular</label>
+                                <input class="form-control" type="text" id="celularInput" maxlength="25" pattern="[0-9]+" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                <div class="invalid-feedback">No puede tener más de 25 dígitos</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="correoInput">Correo electrónico</label>
+                                <input class="form-control" type="email" maxlength="100" id="correoInput" />
+                                <div class="invalid-feedback">Debe contener "@@" y "." </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="domicilioInput">Domicilio<span class="obligatorio"> * </span></label>
+                            <input class="form-control" type="text" maxlength="100" minlength="2" id="domicilioInput" />
+                            <div class="invalid-feedback">El domicilio es obligatorio</div>
+                        </div>
+                    </div>
+
+                    <!-- Mensaje de error -->
+                    <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="formContribuyente" class="btn btn-primary" id="btnAccionContribuyente">Buscar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Confirmación Quitar contribuyente -->
+<div class="modal fade" id="confirmarEliminarModal" tabindex="-1" aria-labelledby="confirmarEliminarModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title" id="confirmarEliminarModalLabel">Advertencia</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                ¿Está seguro de que desea quitar este titular?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnConfirmarEliminar" class="btn btn-danger">Quitar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@{
+    var jsonOptions = new System.Text.Json.JsonSerializerOptions
+    {
+        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
+        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+    };
+
+    var titularesProjection = Model.Dto?.Titulares?
+        .Select(t => new
+        {
+            Id = t.Id,
+            Dni = t.Dni,
+            Nombre = t.Nombre,
+            Apellido = t.Apellido,
+            Sexo = t.Sexo,
+            Celular = t.Celular,
+            CorreoElectronico = t.CorreoElectronico,
+            Domicilio = t.Domicilio
+        })
+        .ToList();
+
+    // Cast a object? para que el ?? compare objetos y devuelva un array vacío si es null
+    var titularesJson = System.Text.Json.JsonSerializer.Serialize((object?)titularesProjection ?? System.Array.Empty<object>(), jsonOptions);
+}
+
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
+@section Scripts {
+    <script>
+         // Elementos del DOM
+        const nroConcesionInput = document.getElementById('nroConcesion');
+
+
+
+
+        // Variables globales
+        // Inicializo titulares desde el servidor (Model.contrato.Titulares)
+        const initialTitulares = @Html.Raw(titularesJson);
+        let titulares = [];
+
+        let estadoModal = 'buscar';
+        let titularAEliminar = null;
+        const normalizarDni = (v) => String(v ?? '').trim().replace(/\D/g, '');
+
+        // Elementos del DOM - Titulares
+        const formPrincipal = document.getElementById('formPrincipal');
+        const agregarTitularButton = document.getElementById('agregarContribuyenteButton');
+        const formTitular = document.getElementById('formContribuyente');
+        const contenedorTitulares = document.getElementById('contenedorTitulares');
+        const contadorTitularesSpan = document.getElementById('contadorTitulares');
+        const dniInput = document.getElementById('dniInput');
+        const sexoInput = document.getElementById('sexoInput');
+        const nombreInput = document.getElementById('nombreInput');
+        const apellidoInput = document.getElementById('apellidoInput');
+        const celularInput = document.getElementById('celularInput');
+        const correoInput = document.getElementById('correoInput');
+        const domicilioInput = document.getElementById('domicilioInput');
+        const camposAdicionales = document.getElementById('camposAdicionales');
+        const btnAccionTitular = document.getElementById('btnAccionContribuyente');
+        const errorMessage = document.getElementById('errorMessage');
+
+
+
+
+        // Inicializar titulares desde el server si vienen
+        (function initTitularesFromServer() {
+            if (!initialTitulares || !Array.isArray(initialTitulares) || initialTitulares.length === 0) return;
+
+            titulares = initialTitulares.map(t => ({
+                id: t.id ?? t.Id ?? Date.now(),
+                dni: normalizarDni(t.dni ?? t.Dni ?? t.DNI),
+                nombre: (t.nombre ?? t.Nombre ?? '') || '',
+                apellido: (t.apellido ?? t.Apellido ?? '') || '',
+                sexo: (t.sexo ?? t.Sexo ?? '').toLowerCase(),
+                celular: t.celular ?? t.Celular ?? '',
+                correoElectronico: t.correo ?? t.correoElectronico ?? t.CorreoElectronico ?? '',
+                domicilio: t.domicilio ?? t.Domicilio ?? ''
+            }));
+
+
+            renderizarTitulares();
+            actualizarContador();
+        })();
+
+        // Valida el formulario del modal (usa validación HTML5 y muestra mensajes)
+        function validarFormulario() {
+            // limpiar estado previo
+            formTitular.classList.remove('was-validated');
+            ocultarError();
+
+            // En modo registrar, aseguramos que los campos adicionales estén marcados como required
+            if (estadoModal === 'registrar') {
+                nombreInput.setAttribute('required', '');
+                apellidoInput.setAttribute('required', '');
+                domicilioInput.setAttribute('required', '');
+            }
+
+            // Usar validación nativa
+            if (!formTitular.checkValidity()) {
+                formTitular.classList.add('was-validated');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Event Listeners - Titulares
+        agregarTitularButton.addEventListener('click', function() {
+            resetearModal();
+            $('#TitularModal').modal('show');
+        });
+
+
+
+        formTitular.addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (!validarFormulario()) return;
+
+            if (estadoModal === 'buscar') {
+                buscarTitular();
+            } else if (estadoModal === 'registrar') {
+                registrarTitular();
+            }
+        });
+
+
+
+        // Validar formulario principal antes de enviar
+        formPrincipal.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const btnGenerar = document.getElementById('btnGenerarContrato');
+
+            btnGenerar.disabled = true;
+            btnGenerar.value = "Procesando...";
+
+            // Primero verificamos la validez del formulario
+            if (!this.checkValidity()) {
+                event.stopPropagation();
+                return;
+            }
+
+            // Validación personalizada adicional
+            let valido = true;
+
+            // Validar que haya al menos un titular
+            if (titulares.length === 0) {
+                valido = false;
+                AlertService.show("Verificar", "Debe agregar al menos un titular", "warning");
+                btnGenerar.disabled = false;
+                btnGenerar.value = "Actualizar concesión";
+            }
+
+
+            if (!valido) {
+                event.preventDefault();
+                event.stopPropagation();
+                this.classList.add('was-validated');
+                btnGenerar.disabled = false;
+                btnGenerar.value = "Actualizar concesión";
+                return;
+            }
+
+
+            this.submit();
+
+            
+
+        });
+
+        // Funciones principales - Titulares
+        function validarFormulario() {
+            let esValido = true;
+            formTitular.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+
+            // Validar DNI
+            if (!dniInput.value.trim() || dniInput.value.length < 1) {
+                dniInput.classList.add('is-invalid');
+                esValido = false;
+            }
+
+            // Validar sexo
+            if (!sexoInput.value) {
+                sexoInput.classList.add('is-invalid');
+                esValido = false;
+            }
+
+            // Verificar si el DNI ya existe
+            const dniNorm = normalizarDni(dniInput.value);
+            if (titulares.some(t => normalizarDni(t.dni ?? t.Dni) === dniNorm)) {
+                dniInput.classList.add('is-invalid');
+                mostrarError('Ya existe un titular con este DNI');
+                return false;
+            }
+
+            // Si estamos en modo registrar, validar campos adicionales
+            if (estadoModal === 'registrar') {
+                if (!nombreInput.value.trim() || nombreInput.value.length < 2) {
+                    nombreInput.classList.add('is-invalid');
+                    esValido = false;
+                }
+                if (!apellidoInput.value.trim() || apellidoInput.value.length < 2) {
+                    apellidoInput.classList.add('is-invalid');
+                    esValido = false;
+                }
+                if (!domicilioInput.value.trim() || domicilioInput.value.length < 2) {
+                    domicilioInput.classList.add('is-invalid');
+                    esValido = false;
+                }
+            }
+
+            return esValido;
+        }
+
+
+
+        function buscarTitular() {
+            mostrarCargando(true);
+            ocultarError();
+
+            const datos = {
+                Dni: parseInt(dniInput.value),
+                Sexo: sexoInput.value,
+            };
+
+            fetch('/Persona/BuscarContribuyenteContrato', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: JSON.stringify(datos)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Respuesta servidor:', data);
+                mostrarCargando(false);
+                if (data.success) {
+                    if (data.contribuyente) {
+                        // Asegurar que el titular tenga un ID único
+                        data.contribuyente.id = data.contribuyente.id || Date.now();
+                        agregarTitular(data.contribuyente);
+                        $('#TitularModal').modal('hide');
+                    } else {
+                        cambiarAModoRegistrar();
+                    }
+                } else {
+                    mostrarError(data.message || 'Error al buscar titular');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarCargando(false);
+                mostrarError('Error de conexión');
+            });
+        }
+
+        function registrarTitular() {
+            mostrarCargando(true);
+            ocultarError();
+
+            const datos = {
+                dni: dniInput.value.trim(),
+                sexo: sexoInput.value,
+                nombre: nombreInput.value.trim(),
+                apellido: apellidoInput.value.trim(),
+                celular: celularInput.value.trim(),
+                correoElectronico: correoInput.value.trim(),
+                domicilio: domicilioInput.value.trim()
+            };
+
+            fetch('/Persona/RegistrarContribuyenteContrato', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: JSON.stringify(datos)
+            })
+            .then(response => response.json())
+            .then(data => {
+                mostrarCargando(false);
+                if (data.success) {
+                    // Asegurar que el titular tenga un ID único
+                    data.contribuyente.id = data.contribuyente.id || Date.now();
+                    agregarTitular(data.contribuyente);
+                    $('#TitularModal').modal('hide');
+                } else {
+                    mostrarError(data.message || 'Error al registrar titular');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarCargando(false);
+                mostrarError('Error de conexión');
+            });
+        }
+
+
+
+        // Funciones principales - Titulares (se mantienen, solo renderizar cambia nombres)
+        function agregarTitular(titular) {
+            const tNorm = {
+                id: titular.id ?? titular.Id ?? Date.now(),
+                dni: normalizarDni(titular.dni ?? titular.Dni ?? titular.DNI),
+                nombre: titular.nombre ?? titular.Nombre ?? '',
+                apellido: titular.apellido ?? titular.Apellido ?? '',
+                sexo: (titular.sexo ?? titular.Sexo ?? '').toLowerCase(),
+                celular: titular.celular ?? titular.Celular ?? '',
+                correoElectronico: titular.correo ?? titular.correoElectronico ?? titular.CorreoElectronico ?? '',
+                domicilio: titular.domicilio ?? titular.Domicilio ?? ''
+            };
+
+            if (titulares.some(t => normalizarDni(t.dni ?? t.Dni) === tNorm.dni)) {
+                mostrarError('Ya existe un titular con este DNI');
+                return;
+            }
+
+            titulares.push(tNorm);
+            renderizarTitulares();
+            actualizarContador();
+        }
+
+
+
+        function eliminarTitular(id) {
+            titularAEliminar = id;
+            $('#confirmarEliminarModal').modal('show');
+        }
+
+
+
+        document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
+            if (titularAEliminar !== null) {
+                titulares = titulares.filter(t => t.id !== titularAEliminar);
+                renderizarTitulares();
+                actualizarContador();
+                titularAEliminar = null;
+                $('#confirmarEliminarModal').modal('hide');
+            }
+        });
+
+
+
+        function renderizarTitulares() {
+            contenedorTitulares.innerHTML = '';
+
+            titulares.forEach((titular, index) => {
+                console.log(titular)
+                const titularDiv = document.createElement('div');
+                titularDiv.className = 'titular-item';
+                // Nombres de inputs con prefijo 'contrato.Titulares[...]' para bind a Model.contrato.Titulares
+                titularDiv.innerHTML = `
+                    <div class="titular-header">
+                        <span class="titular-number">Titular ${index + 1}</span>
+                        <button type="button" class="btn btn-danger btn-sm btn-eliminar" onclick="eliminarTitular(${titular.id})">
+                            <i class="bi bi-trash"></i> Quitar
+                        </button>
+                    </div>
+                    <div class="p-3">
+                        <input type="hidden" name="Dto.Titulares[${index}].Id" value="${titular.id}" />
+                        <div class="form-columns-container3 mb-3">
+                            <div>
+                                <label>DNI<span class="obligatorio"> * </span></label>
+                                <input class="form-control" type="text" name="Dto.Titulares[${index}].Dni" value="${titular.dni}" readonly required />
+                                <div class="invalid-feedback">El DNI es obligatorio</div>
+                            </div>
+                            <div>
+                                <label>Nombre<span class="obligatorio"> * </span></label>
+                                <input class="form-control" type="text" name="Dto.Titulares[${index}].Nombre" value="${titular.nombre}" maxlength="60" required />
+                                <div class="invalid-feedback">El nombre es obligatorio</div>
+                            </div>
+                            <div>
+                                <label>Apellido<span class="obligatorio"> * </span></label>
+                                <input class="form-control" type="text" name="Dto.Titulares[${index}].Apellido" value="${titular.apellido}" maxlength="60" required />
+                                <div class="invalid-feedback">El apellido es obligatorio</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Domicilio<span class="obligatorio"> * </span></label>
+                            <input class="form-control" type="text" name="Dto.Titulares[${index}].Domicilio" value="${titular.domicilio}" maxlength="100" required />
+                            <div class="invalid-feedback">El domicilio es obligatorio</div>
+                        </div>
+                        <div class="form-columns-container3">
+                            <div>
+                                <label>Sexo<span class="obligatorio"> * </span></label>
+                                <select class="form-select" disabled name="Dto.Titulares[${index}].Sexo" required>
+                                    <option value="masculino" ${titular.sexo === 'masculino' ? 'selected' : ''}>Masculino</option>
+                                    <option value="femenino" ${titular.sexo === 'femenino' ? 'selected' : ''}>Femenino</option>
+                                    <option value="otro" ${titular.sexo === 'otro' ? 'selected' : ''}>Otro</option>
+                                </select>
+                                <input type="hidden" name="Dto.Titulares[${index}].Sexo" value="${titular.sexo}" />
+                                <div class="invalid-feedback">El sexo es obligatorio</div>
+                            </div>
+                            <div>
+                                <label>Teléfono</label>
+                                <input class="form-control" type="text" name="Dto.Titulares[${index}].Celular" value="${titular.celular || ''}" maxlength="25" />
+                            </div>
+                            <div>
+                                <label>Correo</label>
+                                <input class="form-control" type="text" name="Dto.Titulares[${index}].CorreoElectronico" value="${titular.correoElectronico || titular.CorreoElectronico || ''}" maxlength="100" />
+                            </div>
+                        </div>
+                    </div>
+                `;
+                contenedorTitulares.appendChild(titularDiv);
+            });
+        }
+
+
+
+        function actualizarContador() {
+            contadorTitularesSpan.textContent = titulares.length;
+        }
+
+
+
+        function cambiarAModoRegistrar() {
+            estadoModal = 'registrar';
+            camposAdicionales.style.display = 'block';
+            btnAccionTitular.textContent = 'Registrar';
+            nombreInput.setAttribute('required', '');
+            apellidoInput.setAttribute('required', '');
+            domicilioInput.setAttribute('required', '');
+        }
+
+
+        
+
+        function resetearModal() {
+            estadoModal = 'buscar';
+            formTitular.reset();
+            formTitular.classList.remove('was-validated');
+            camposAdicionales.style.display = 'none';
+            btnAccionTitular.textContent = 'Buscar';
+            ocultarError();
+
+            // Remover required de campos
+            nombreInput.removeAttribute('required');
+            apellidoInput.removeAttribute('required');
+            domicilioInput.removeAttribute('required');
+
+            // Limpiar validaciones
+            formTitular.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        }
+
+
+
+        // Funciones auxiliares
+        function mostrarCargando(mostrar) {
+            if (mostrar) {
+                btnAccionTitular.disabled = true;
+                btnAccionTitular.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Procesando...';
+            } else {
+                btnAccionTitular.disabled = false;
+                btnAccionTitular.textContent = estadoModal === 'buscar' ? 'Buscar' : 'Registrar';
+            }
+        }
+
+
+
+        function mostrarError(mensaje) {
+            errorMessage.textContent = mensaje;
+            errorMessage.style.display = 'block';
+        }
+
+
+
+        function ocultarError() {
+            errorMessage.style.display = 'none';
+        }
+
+
+
+
+
+
+
+        // Validación número de concesión
+        if (nroConcesionInput) {
+            nroConcesionInput.addEventListener('blur', function() {
+                formatearNumeroConcesion(this);
+            });
+
+            nroConcesionInput.addEventListener('input', function() {
+                // Permitir solo números y guiones, limitar a 5 caracteres
+                this.value = this.value.replace(/[^0-9\-]/g, '');
+                if (this.value.length > 5) {
+                    this.value = this.value.slice(0, 5);
+                }
+            });
+        }
+
+        function formatearNumeroConcesion(input) {
+            let valor = input.value.trim();
+
+            if (valor === '') {
+                input.setCustomValidity('El número de concesión es requerido');
+                return;
+            }
+
+            // Verificar si son exactamente 5 guiones
+            if (valor === '-----') {
+                input.setCustomValidity(''); // Limpiar cualquier error
+                input.reportValidity(); // Forzar actualización de la validación
+                return; // No formatear, mantener los guiones
+            }
+
+            // Si no son 5 guiones, debe ser un número
+            // Verificar que solo contenga números
+            if (!/^\d+$/.test(valor)) {
+                input.setCustomValidity('El número de concesión debe contener solo números o exactamente 5 guiones (-----)');
+                return;
+            }
+
+            // Asegurar que tenga exactamente 5 dígitos con ceros a la izquierda
+            input.value = valor.padStart(5, '0');
+            input.setCustomValidity('');
+        }
+    </script>
+}

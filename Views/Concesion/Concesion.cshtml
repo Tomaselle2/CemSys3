@@ -1,6 +1,7 @@
 ﻿@using CemSys3.ViewModels.Concesion
 @using CemSys3.Enumerables
 @using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.Historial
 @model ConcesionVM
 
 @{
@@ -11,142 +12,7 @@
 @await Html.PartialAsync("Concesion/_menuConcesion", Model.Dto.TramiteId)
 
 <style>
-    .cardsConcesion-row {
-        display: flex;
-        gap: 20px;
-        margin-bottom: 20px;
-        align-items: stretch;
-    }
-
-    .cardConcesion {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .cardConcesion-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .cardConcesion .labelConcesion {
-        font-size: 12px;
-        color: gray;
-        display: block;
-        margin-bottom: 8px;
-    }
-
-    .cardConcesion h2 {
-        margin-bottom: 0;
-    }
-
-    .estado-card .badgeConcesion {
-        color: white;
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 18px;
-        font-weight: 600;
-        display: inline-block;
-        width: fit-content;
-    }
-
-    .estado-card .btn-container {
-        margin-top: auto;
-        padding-top: 15px;
-    }
-
-    .estado-card .cardConcesion-content,
-    .estado-card .estado-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .labelConcesion {
-        font-size: 12px;
-        color: gray;
-    }
-
-    .badgeConcesion {
-        color: white;
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 18px;
-        font-weight: 600;
-    }
-
-    .gridConcesion {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        margin-bottom: 20px;
-        align-items: stretch;
-    }
-
-        /* Asegura que las tarjetas dentro del grid tengan la misma altura */
-        .gridConcesion > .cardConcesion {
-            height: auto; /* Elimina cualquier altura fija */
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Para los contenedores de titular y difunto que tienen mb-3 */
-        .gridConcesion .cardConcesion.mb-3,
-        .cardConcesion.mb-3 {
-            height: auto;
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 0 !important; /* Elimina el margen inferior que causa desalineación */
-        }
-
-            /* Asegura que el contenido interno ocupe todo el espacio disponible */
-            .gridConcesion .cardConcesion > *:last-child,
-            .cardConcesion.mb-3 > *:last-child {
-                margin-top: auto;
-            }
-
-    .contenidoConcesion {
-        margin-right: 230px;
-    }
-
-    .Vigente{
-        background: #28a745;
-    }
-
-    .SinContrato{
-        background: #E31409;
-    }
-
-    .Vencido{
-        background: #E31409;
-    }
-
-    .Caducado{
-        background: #BF5D08;
-    }
-    /* Mobile / pantallas chicas */
-    @@media (max-width: 768px) {
-        .sidebar-right {
-            position: relative;
-            width: 100%;
-            height: auto;
-            border-left: none;
-            border-top: 1px solid #ddd;
-        }
-
-        .contenidoConcesion {
-            margin-right: 0;
-        }
-
-        .gridConcesion {
-            grid-template-columns: 1fr; /* En móvil una sola columna */
-        }
-    }
+    
 </style>
 
 @{
@@ -167,7 +33,7 @@
         parcela = $"Fosa {Model.Dto.NroParcela.ToString()}";
     }
 
-    if (Model.Dto.TipoParcela == "Panteon")//panteon
+    if (Model.Dto.TipoParcela == "Panteón")//panteon
     {
         parcela = $"Lote {Model.Dto.NroParcela.ToString()}";
     }
@@ -176,6 +42,15 @@
 <!-- Contenedor para alerta de htmx de informacion adicional -->
 <div id="htmx-alert-container" style="display:none;"></div>
 
+<!-- Panel lateral derecho del historial -->
+@await Html.PartialAsync("HistorialPV/_HistorialOffcanvas",
+new HistorialOffcanvasVM
+{
+    Historial = Model.historial,
+    EnumType = typeof(EstadosConcesionEnum),
+    OffcanvasId = $"offcanvasHistorial_{Model.Dto.TramiteId}",
+    Titulo = "Historial de la concesión"
+})
 
 <div class="contenidoConcesion">
     <div class="cardsConcesion-row my-4">
@@ -188,7 +63,15 @@
 
         <div class="cardConcesion estado-card">
             <div class="cardConcesion-content">
-                <span class="labelConcesion">ESTADO</span>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="labelConcesion">ESTADO</span>
+                    <!--Btn historial-->
+                    <div>
+                        <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="offcanvas" title="Historial" data-bs-target="#offcanvasHistorial_@Model.Dto.TramiteId">
+                            <i class="bi bi-clock-history"></i>
+                        </button>
+                    </div>
+                </div>
                 <span class="badgeConcesion @claseEstado px-3 py-2">@estadoTramite</span>
 
                 @if (Model.Dto.EstadoTramiteId == (int)EstadosConcesionEnum.SinContrato)

@@ -73,6 +73,10 @@
             <li class="@(action == "Deuda" ? "active" : "")">
                 <a asp-controller="Concesion" asp-action="Deuda" asp-route-tramiteId="@Model">Avisos de Deuda</a>
             </li>
+
+            <li class="@(action == "ModificarConcesion" ? "active" : "")">
+                <a asp-controller="Concesion" asp-action="ModificarConcesion" asp-route-tramiteId="@Model">Modificar Concesión</a>
+            </li>
         </ul>
     </div>
 </div>

@@ -13,6 +13,7 @@ using CemSys3.Helpers.PDF;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Archivo;
 using CemSys3.Interfaces.Concesion;
+using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.PDF;
 using CemSys3.ViewModels.Concesion;
 using Microsoft.AspNetCore.Mvc;
@@ -25,13 +26,16 @@ namespace CemSys3.Controllers
         private readonly IViewRenderService _viewRenderService;
         private readonly PlaywrightPdfGenerator _pdfGenerator;
         private readonly IArchivo _archivoService;
+        private readonly IHistorialEstados _historialEstadosService;
 
-        public ConcesionController(IConcesion concesion, IViewRenderService render, PlaywrightPdfGenerator pdfGenerator, IArchivo archivo)
+        public ConcesionController(IConcesion concesion, IViewRenderService render, PlaywrightPdfGenerator pdfGenerator, IArchivo archivo,
+            IHistorialEstados historialEstados)
         {
             _concesionService = concesion;
             _viewRenderService = render;
             _pdfGenerator = pdfGenerator;
             _archivoService = archivo;
+            _historialEstadosService = historialEstados;
         }
 
         //tabla general de concesiones, con paginacion y filtro por estado
@@ -329,6 +333,7 @@ namespace CemSys3.Controllers
             //-Generar el cobro en Program (se datalla como)
         }
 
+        //vista de menu
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> Concesion(int tramiteId)
@@ -339,6 +344,8 @@ namespace CemSys3.Controllers
             try
             {
                 viewModel.Dto = await _concesionService.InfoGeneral(tramiteId);
+                viewModel.historial = await _historialEstadosService.GetAllById(tramiteId);
+
             }
             catch (Exception ex)
             {
@@ -352,6 +359,7 @@ namespace CemSys3.Controllers
             return View(viewModel);
         }
 
+        //vista de menu
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> ArchivosConcesion(int tramiteId)
@@ -373,6 +381,38 @@ namespace CemSys3.Controllers
                     Tipo = "error"
                 };
             }
+            return View(viewModel);
+        }
+
+        //vista de menu
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> ModificarConcesion(int tramiteId)
+        {
+            ModificarConcesionVM viewModel = new();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+
+            try
+            {
+                viewModel.Dto = await _concesionService.ModificarDatosConecesion(tramiteId);
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al cargar los datos de la concesión: {ex.Message}",
+                    Tipo = "error"
+                };
+            }
+            return View(viewModel);
+        }
+
+        //vista de menu
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> ModificarConcesion(ModificarConcesionVM viewModel)
+        {
             return View(viewModel);
         }
 

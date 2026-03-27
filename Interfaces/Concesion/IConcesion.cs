@@ -19,5 +19,9 @@ namespace CemSys3.Interfaces.Concesion
         public Task<InfoGeneralDTO> InfoGeneral(int idTramite);
 
         public Task<bool> ExisteNroConcesion(int nroConcesion);
+
+        public Task<ModificarDatosConcesionDTO> ModificarDatosConecesion(int tramiteId);
+        public Task ModificarDatosConecesion(ModificarDatosConcesionDTO dto);
+
     }
 }
