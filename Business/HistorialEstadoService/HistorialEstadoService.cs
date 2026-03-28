@@ -1,4 +1,5 @@
-﻿using CemSys3.DTOs.HistorialEstado;
+﻿using CemSys3.DTOs.Concesion;
+using CemSys3.DTOs.HistorialEstado;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
@@ -73,18 +74,38 @@ namespace CemSys3.Business.HistorialEstadoService
 
         public async Task VincularTitularAConcesion(int personaId, int tramiteId)
         {
-            bool existe = await _context.HistorialTitularesConcesiones
-                .AnyAsync(x => x.ConcesionId == tramiteId && x.PersonaId == personaId);
+            bool existeActivo = await _context.HistorialTitularesConcesiones
+                .AnyAsync(x => x.ConcesionId == tramiteId
+                            && x.PersonaId == personaId
+                            && x.FechaFin == null);
 
-            if (!existe)
+            if (!existeActivo)
             {
                 _context.HistorialTitularesConcesiones.Add(new HistorialTitularesConcesione
                 {
                     ConcesionId = tramiteId,
                     PersonaId = personaId,
-                    FechaInicio = DateTime.Now
+                    FechaInicio = DateTime.Now,
+                    FechaFin = null
                 });
             }
+        }
+
+        //titulares de concesion
+        public async Task<IEnumerable<HistorialTitularesDTO>> HistorialTitulares(int concesionId)
+        {
+            return await _context.HistorialTitularesConcesiones
+                .Where(h => h.ConcesionId == concesionId)
+                .OrderByDescending(h => h.FechaInicio)
+                .Select(s => new HistorialTitularesDTO
+                {
+                    ConcesionId = s.ConcesionId,
+                    PersonaId = s.PersonaId,
+                    Nombre = s.Persona.Nombre,
+                    Apellido = s.Persona.Apellido,
+                    FechaInicio = s.FechaInicio,
+                    FechaFin = s.FechaFin
+                }).ToListAsync();
         }
     }
 }

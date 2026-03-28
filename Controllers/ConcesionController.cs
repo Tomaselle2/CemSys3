@@ -413,6 +413,78 @@ namespace CemSys3.Controllers
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> ModificarConcesion(ModificarConcesionVM viewModel)
         {
+            ModificarDatosConcesionDTO dto = new ModificarDatosConcesionDTO();
+            //pasar de TitularesDTO a PersonaDTO
+            List<PersonaDTO> titulares = new List<PersonaDTO>();
+            foreach (var titular in viewModel.Dto.Titulares)
+            {
+                PersonaDTO persona = new PersonaDTO
+                {
+                    Id = titular.Id ?? 0,
+                    Nombre = titular.Nombre,
+                    Apellido = titular.Apellido,
+                    Dni = titular.Dni,
+                    Domicilio = titular.Domicilio,
+                    Celular = titular.Celular,
+                    Sexo = titular.Sexo,
+                    Correo = titular.CorreoElectronico,
+                    Visibilidad = true,
+                    CategoriaPersonaId = (int)CategoriaPersonaEnum.Titular
+                };
+
+                titulares.Add(persona);
+            }
+
+            dto.Vencimiento = viewModel.Dto.Vencimiento;
+            dto.NroConcesion = viewModel.Dto.NroConcesion;
+            dto.TramiteId = viewModel.Dto.TramiteId;
+            dto.TitularesPost = titulares;
+
+            try
+            {
+                await _concesionService.ModificarDatosConecesion(dto);
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = $"Concesión actualizada correctamente",
+                    Tipo = "success"
+                });
+            }
+            catch (Exception ex) {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al enviar los datos de la concesión: {ex.Message}",
+                    Tipo = "error"
+                };
+                return View(viewModel);
+
+            }
+
+            return RedirectToAction("ModificarConcesion", new {tramiteId = viewModel.Dto.TramiteId});
+        }
+
+        //vista de menu
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> HistorialConcesion(int tramiteId)
+        {
+            HistorialConcesionVM viewModel = new HistorialConcesionVM();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+            try
+            {
+                viewModel.TramiteId = tramiteId;
+                viewModel.Titulares = await _historialEstadosService.HistorialTitulares(tramiteId);
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al cargar el historial de la concesión: {ex.Message}",
+                    Tipo = "error"
+                };
+            }
             return View(viewModel);
         }
 

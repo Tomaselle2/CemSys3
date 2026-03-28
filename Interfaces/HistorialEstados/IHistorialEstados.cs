@@ -1,4 +1,5 @@
-﻿using CemSys3.DTOs.HistorialEstado;
+﻿using CemSys3.DTOs.Concesion;
+using CemSys3.DTOs.HistorialEstado;
 
 namespace CemSys3.Interfaces.HistorialEstados
 {
@@ -10,5 +11,6 @@ namespace CemSys3.Interfaces.HistorialEstados
         Task VincularTramiteAPersona(int tramiteId, int personaId);
         Task VincularTramiteAParcela(int tramiteId, int parcelaId);
         Task VincularTitularAConcesion(int personaId, int tramiteId);
+        Task<IEnumerable<HistorialTitularesDTO>> HistorialTitulares(int concesionId);
     }
 }
