@@ -11,5 +11,7 @@ namespace CemSys3.Interfaces.Notas
         Task<NotaDTO> GetNotaIngreso(int tramiteIngresoId); //devuelve la nota vinculada al ingreso con id ingreso
         Task<PaginadoResponse<NotaDTO>> GetPaginadoByTipo(DateOnly? fechaDesde, DateOnly? fechaHasta, int estadoId, int filtroTipoNota = 0, int pagina = 1, int porPagina = 10);
         Task VincularNotaConIngreso(int notaId, int ingresoId);
+        Task<int> GenerarTramiteNota(int usuarioId);
+        Task GenerarNotaSinTransaccion(int tramiteId, NotaDTO dto);
     }
 }

@@ -25,6 +25,8 @@ namespace CemSys3.ViewModels.Nota
         public int tramiteVinculadoId { get; set; }
         public string controlador { get; set; } = string.Empty;
         public DateTime? FechaCreacion { get; set; }
+
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-ddTHH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? FechaFinRecordatorio { get; set; }
 
         public List<TareaDTO> Tareas { get; set; } = new();

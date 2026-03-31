@@ -3,8 +3,8 @@
 @model GenerarContratoDTO
 @{
     Layout = null;
-    var imgEncabezado = $"{Model.baseUrl}/fotos/logoMuni.png";
-    var pieContrato = $"{Model.baseUrl}/fotos/pieContrato.png";
+    var imgEncabezado = $"{Model.baseUrl}/fotos/logoMuni.png?v={DateTime.Now.Ticks}";
+    var pieContrato = $"{Model.baseUrl}/fotos/pieContrato.png?v={DateTime.Now.Ticks}";
 }
 <!DOCTYPE html>
 <html lang="es">
@@ -341,7 +341,7 @@
     
         <div class="contenido-contrato">
             <p>
-                Entre la Municipalidad de Colonia Tirolesa, representada en este acto por el Sr. Intendente Municipal Sr. JUAN DOMINGO PANICHELLI y @bloqueTitular Convienen en celebrar el siguiente contrato de concesión del derecho real de uso que se regirá por las siguientes cláusulas:
+                Entre la Municipalidad de Colonia Tirolesa, representada en este acto por el Intendente Municipal @Model.NombreIntendente.ToUpper() y @bloqueTitular Convienen en celebrar el siguiente contrato de concesión del derecho real de uso que se regirá por las siguientes cláusulas:
             </p>
         
             <p>

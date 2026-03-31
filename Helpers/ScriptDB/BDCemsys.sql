@@ -358,6 +358,8 @@ CREATE TABLE [dbo].[Concesiones] (
     [parcelaId] int NOT NULL,
     [cantidadAniosId] int,
     [cuotaId] int,
+	FechaInicio datetime2 null,
+	FechaFin datetime2 null,
     [usuarioId] int,
     PRIMARY KEY ([tramiteId]),
     CONSTRAINT [Concesiones_cantidadAniosId_fk] FOREIGN KEY([cantidadAniosId]) REFERENCES [dbo].[AnioConcesion]([id]),

@@ -27,6 +27,10 @@ public partial class Concesione
 
     public string? InformacionAdicional { get; set; }
 
+    public DateTime? FechaInicio { get; set; }
+
+    public DateTime? FechaFin { get; set; }
+
     public virtual AnioConcesion? CantidadAnios { get; set; }
 
     public virtual CantidadCuota? Cuota { get; set; }

@@ -1,0 +1,50 @@
+﻿@using CemSys3.ViewModels.Imagenes
+@model ImagenesVM
+@{
+    ViewData["Title"] = "Gestión de Imágenes";
+}
+
+<div class="page-header-container">
+    <a asp-action="Index" asp-controller="Configuracion" class="btn btn-secondary m-3" title="Configuración"><i class="bi bi-arrow-left"></i></a>
+    <h1 class="title-page">Imagenes del sistema</h1>
+</div>
+<hr />
+
+<div class="p-3">
+    <h4>Logo Municipalidad</h4>
+    <img src="~/fotos/logoMuni.png?v=@DateTime.Now.Ticks" width="400" />
+</div>
+<p class="my-1">Actualizar Logo<span class="obligatorio"> * Debe ser imagen .png</span> </p>
+<form asp-action="SubirLogo" method="post" enctype="multipart/form-data">
+    <input type="file" name="archivo" class="form-control shadow-sm mb-3" />
+    <button type="submit" class="btn btn-primary">Actualizar</button>
+</form>
+
+<hr />
+
+<div class="p-3">
+    <h4>Pie de contrato</h4>
+    <img src="~/fotos/pieContrato.png?v=@DateTime.Now.Ticks" width="700" />
+</div>
+<p class="my-1">Actualizar Pie<span class="obligatorio"> * Debe ser imagen .png</span></p>
+<form asp-action="SubirPie" method="post" enctype="multipart/form-data">
+    <input type="file" name="archivo" class="form-control shadow-sm mb-3" />
+    <button type="submit" class="btn btn-primary">Actualizar</button>
+</form>
+
+<hr />
+
+<h4>Intendente actual</h4>
+<form asp-action="GuardarIntendente" method="post">
+    <input type="text" class="form-control shadow-sm" asp-for="nombreIntendente" style="width:300px;" />
+    <button type="submit" class="btn btn-primary my-3">Actualizar</button>
+</form>
+
+<hr />
+
+
+
+
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />

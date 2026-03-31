@@ -34,62 +34,8 @@ namespace CemSys3.Business.Notas
 
             try
             {
-                //se registra el trámite
-                TramiteDTO tramiteDTO = new TramiteDTO
-                {
-                    FechaCreacion = DateTime.Now,
-                    TipoTramiteId = (int)TipoTramiteEnum.Nota,
-                    UsuarioId = dto.UsurioId,
-                    EstadoActualId = (int)EstadosNotaEnum.NotaPendiente,
-                    Visibilidad = true
-                };
-                int tramiteId = await _tramiteService.Add(tramiteDTO);
-                await _context.SaveChangesAsync(); //guardar el trámite para obtener el Id
-
-
-                //se registra la nota
-                Nota nuevaNota = new Nota
-                {
-                    TramiteId = tramiteId,
-                    Nombre = dto.Nombre,
-                    TipoNotaId = dto.TipoNotaId,
-                    Descripcion = dto.Descripcion,
-                    Color = dto.Color,
-                    Visibilidad = true,
-                    FechaFinRecordatorio = dto.FechaFinRecordatorio
-                };
-
-                await _context.Notas.AddAsync(nuevaNota);
-                await _context.SaveChangesAsync();
-
-                //se registran las tareas asociadas a la nota
-
-                if (dto.Tareas != null && dto.Tareas.Count > 0)
-                {
-                    foreach (var tareaDto in dto.Tareas)
-                    {
-                        if (!tareaDto.Eliminada)
-                        {
-                            TareaDTO nuevaTarea = new TareaDTO
-                            {
-                                NotaId = nuevaNota.TramiteId,
-                                Estado = tareaDto.Estado,
-                                Descripcion = tareaDto.Descripcion,
-                                Visibilidad = true
-                            };
-                            await _tareaService.Add(nuevaTarea);
-                        }
-                    }
-                }
-
-                //se registra el historial de estados
-                HistorialEstadosDTO dtoHistorial = new HistorialEstadosDTO
-                {
-                    Fecha = DateTime.Now,
-                    TramiteId = tramiteId,
-                    EstadoTramiteId = (int)EstadosNotaEnum.NotaPendiente
-                };
-                await _historialEstadoService.Add(dtoHistorial);
+                int tramiteId = await GenerarTramiteNota(dto.UsurioId);
+                await GenerarNotaSinTransaccion(tramiteId, dto);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -106,7 +52,7 @@ namespace CemSys3.Business.Notas
             NotaDTO notaDTO = new NotaDTO();
 
             //obtener la nota por id
-            Nota nota = await _context.Notas.Include(t=>t.Tramite).Where(n=> n.TramiteId == id).FirstOrDefaultAsync() ?? throw new Exception("Nota no encontrada");
+            Nota nota = await _context.Notas.Include(t => t.Tramite).Where(n => n.TramiteId == id).FirstOrDefaultAsync() ?? throw new Exception("Nota no encontrada");
 
             //obtener todas las tareas asociadas a la nota
             IEnumerable<TareaDTO> tareas = await _tareaService.GetAllByNota(nota.TramiteId);
@@ -157,9 +103,9 @@ namespace CemSys3.Business.Notas
             PaginadoResponse<NotaDTO> resultado = new PaginadoResponse<NotaDTO>();
 
             // Filtro por estado de la nota
-            var query = _context.Notas.Include(t=> t.Tramite).Where(n=> n.Tramite.EstadoActualId == estadoId);
+            var query = _context.Notas.Include(t => t.Tramite).Where(n => n.Tramite.EstadoActualId == estadoId);
 
-            if(query != null)
+            if (query != null)
             {
                 // Filtro por tipo de nota
                 switch (filtroTipoNota)
@@ -197,7 +143,7 @@ namespace CemSys3.Business.Notas
             // Total de registros
             var total = query != null ? await query.CountAsync() : 0;
 
-            if(total > 0 && query != null)
+            if (total > 0 && query != null)
             {
                 // Paginación
                 resultado.Paginacion.TotalPaginas = (int)Math.Ceiling(total / (double)porPagina);
@@ -326,6 +272,70 @@ namespace CemSys3.Business.Notas
             Nota nota = await _context.Notas.Where(n => n.TramiteId == notaId).FirstOrDefaultAsync() ?? throw new Exception("Nota no encontrada");
 
             nota.TramiteIngresoId = ingresoId;
+        }
+
+        //metedo sin transaccion
+        public async Task<int> GenerarTramiteNota(int usuarioId)
+        {
+            //se registra el trámite
+            TramiteDTO tramiteDTO = new TramiteDTO
+            {
+                FechaCreacion = DateTime.Now,
+                TipoTramiteId = (int)TipoTramiteEnum.Nota,
+                UsuarioId = usuarioId,
+                EstadoActualId = (int)EstadosNotaEnum.NotaPendiente,
+                Visibilidad = true
+            };
+            int tramiteId = await _tramiteService.Add(tramiteDTO);
+            await _context.SaveChangesAsync(); //guardar el trámite para obtener el Id
+
+            //se registra el historial de estados
+            HistorialEstadosDTO dtoHistorial = new HistorialEstadosDTO
+            {
+                Fecha = DateTime.Now,
+                TramiteId = tramiteId,
+                EstadoTramiteId = (int)EstadosNotaEnum.NotaPendiente
+            };
+            await _historialEstadoService.Add(dtoHistorial);
+
+            return tramiteId;
+        }
+        public async Task GenerarNotaSinTransaccion(int tramiteId, NotaDTO dto)
+        {
+            //se registra la nota
+            Nota nuevaNota = new Nota
+            {
+                TramiteId = tramiteId,
+                Nombre = dto.Nombre,
+                TipoNotaId = dto.TipoNotaId,
+                Descripcion = dto.Descripcion,
+                Color = dto.Color,
+                Visibilidad = true,
+                FechaFinRecordatorio = dto.FechaFinRecordatorio
+            };
+
+            await _context.Notas.AddAsync(nuevaNota);
+            await _context.SaveChangesAsync();
+
+            //se registran las tareas asociadas a la nota
+
+            if (dto.Tareas != null && dto.Tareas.Count > 0)
+            {
+                foreach (var tareaDto in dto.Tareas)
+                {
+                    if (!tareaDto.Eliminada)
+                    {
+                        TareaDTO nuevaTarea = new TareaDTO
+                        {
+                            NotaId = nuevaNota.TramiteId,
+                            Estado = tareaDto.Estado,
+                            Descripcion = tareaDto.Descripcion,
+                            Visibilidad = true
+                        };
+                        await _tareaService.Add(nuevaTarea);
+                    }
+                }
+            }
         }
     }
 }

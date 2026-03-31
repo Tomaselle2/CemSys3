@@ -27,15 +27,17 @@ namespace CemSys3.Controllers
         private readonly PlaywrightPdfGenerator _pdfGenerator;
         private readonly IArchivo _archivoService;
         private readonly IHistorialEstados _historialEstadosService;
+        private readonly IWebHostEnvironment _env;
 
         public ConcesionController(IConcesion concesion, IViewRenderService render, PlaywrightPdfGenerator pdfGenerator, IArchivo archivo,
-            IHistorialEstados historialEstados)
+            IHistorialEstados historialEstados, IWebHostEnvironment env)
         {
             _concesionService = concesion;
             _viewRenderService = render;
             _pdfGenerator = pdfGenerator;
             _archivoService = archivo;
             _historialEstadosService = historialEstados;
+            _env = env;
         }
 
         //tabla general de concesiones, con paginacion y filtro por estado
@@ -103,6 +105,12 @@ namespace CemSys3.Controllers
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> GenerarContrato(GenerarContratoVM viewModel)
         {
+            var ruta = Path.Combine(_env.WebRootPath, "config", "intendente.txt");
+
+            string intendente = System.IO.File.Exists(ruta)
+                ? System.IO.File.ReadAllText(ruta)
+                : "-----";
+
             //generar el pdf del contrato.
             GenerarContratoDTO contratoGenerado = new GenerarContratoDTO();
             contratoGenerado.TramiteId = viewModel.contrato.TramiteId;
@@ -125,6 +133,7 @@ namespace CemSys3.Controllers
             contratoGenerado.CantidadAniosId = viewModel.CantidadAniosId.Value;
             contratoGenerado.Vencimiento = viewModel.Vencimiento.Value;
             contratoGenerado.fechaGeneracion = DateTime.Now;
+            contratoGenerado.NombreIntendente = intendente;
 
             //si es nicho voy a vista de contrato nicho sino contrato fosa
             string nombreVistaContrato = viewModel.contrato.TipoParcela ?? "";
@@ -475,6 +484,7 @@ namespace CemSys3.Controllers
             {
                 viewModel.TramiteId = tramiteId;
                 viewModel.Titulares = await _historialEstadosService.HistorialTitulares(tramiteId);
+                viewModel.Tramites = await _historialEstadosService.HistorialTramitesConcesion(tramiteId);
             }
             catch (Exception ex)
             {

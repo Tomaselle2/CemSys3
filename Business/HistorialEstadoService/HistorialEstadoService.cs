@@ -1,5 +1,7 @@
 ﻿using CemSys3.DTOs.Concesion;
 using CemSys3.DTOs.HistorialEstado;
+using CemSys3.DTOs.Tramite;
+using CemSys3.Enumerables;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
@@ -106,6 +108,79 @@ namespace CemSys3.Business.HistorialEstadoService
                     FechaInicio = s.FechaInicio,
                     FechaFin = s.FechaFin
                 }).ToListAsync();
+        }
+
+        public async Task<IEnumerable<TramiteDTO>> HistorialTramitesConcesion(int concesionId)
+        {
+            var concesion = await _context.Concesiones
+                .Include(c => c.Tramite)
+                .FirstOrDefaultAsync(c => c.TramiteId == concesionId)
+                ?? throw new Exception("Concesión no encontrada");
+
+            DateTime fechaInicio = concesion.FechaInicio ?? concesion.Tramite.FechaCreacion;
+            DateTime fechaFin = concesion.FechaFin ?? DateTime.Now;
+
+            // 🔹 1. Último ingreso previo a la concesión
+            var ingresoPrevio = await _context.TramitesParcelas
+                .AsNoTracking()
+                .Where(tp => tp.ParcelaId == concesion.ParcelaId)
+                .Join(_context.Tramites,
+                    tp => tp.TramiteId,
+                    t => t.Id,
+                    (tp, t) => t)
+                .Where(t =>
+                    t.FechaCreacion < fechaInicio &&
+                    t.TipoTramiteId == (int)TipoTramiteEnum.Ingreso
+                )
+                .OrderByDescending(t => t.FechaCreacion)
+                .Select(t => new TramiteDTO
+                {
+                    Id = t.Id,
+                    Visibilidad = t.Visibilidad,
+                    FechaCreacion = t.FechaCreacion,
+                    TipoTramiteId = t.TipoTramiteId,
+                    UsuarioId = t.UsuarioId,
+                    EstadoActualId = t.EstadoActualId
+                })
+                .FirstOrDefaultAsync();
+
+            // 🔹 2. Trámites dentro del rango de la concesión
+            var tramitesDentro = await _context.TramitesParcelas
+                .AsNoTracking()
+                .Where(tp => tp.ParcelaId == concesion.ParcelaId)
+                .Join(_context.Tramites,
+                    tp => tp.TramiteId,
+                    t => t.Id,
+                    (tp, t) => t)
+                .Where(t =>
+                    t.FechaCreacion >= fechaInicio &&
+                    t.FechaCreacion <= fechaFin &&
+                    t.TipoTramiteId != (int)TipoTramiteEnum.ContratoConcesion
+                )
+                .OrderBy(t => t.FechaCreacion)
+                .Select(t => new TramiteDTO
+                {
+                    Id = t.Id,
+                    Visibilidad = t.Visibilidad,
+                    FechaCreacion = t.FechaCreacion,
+                    TipoTramiteId = t.TipoTramiteId,
+                    UsuarioId = t.UsuarioId,
+                    EstadoActualId = t.EstadoActualId
+                })
+                .ToListAsync();
+
+            // 🔹 3. Unir resultados
+            var resultado = new List<TramiteDTO>();
+
+            if (ingresoPrevio != null)
+                resultado.Add(ingresoPrevio);
+
+            resultado.AddRange(tramitesDentro);
+
+            // 🔹 4. Orden final
+            return resultado
+                .OrderBy(t => t.FechaCreacion)
+                .ToList();
         }
     }
 }
