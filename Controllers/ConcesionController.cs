@@ -105,35 +105,7 @@ namespace CemSys3.Controllers
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> GenerarContrato(GenerarContratoVM viewModel)
         {
-            var ruta = Path.Combine(_env.WebRootPath, "config", "intendente.txt");
-
-            string intendente = System.IO.File.Exists(ruta)
-                ? System.IO.File.ReadAllText(ruta)
-                : "-----";
-
-            //generar el pdf del contrato.
-            GenerarContratoDTO contratoGenerado = new GenerarContratoDTO();
-            contratoGenerado.TramiteId = viewModel.contrato.TramiteId;
-            contratoGenerado.EstadoTramiteId = viewModel.contrato.EstadoTramiteId;
-            contratoGenerado.ParcelaId = viewModel.contrato.ParcelaId;
-            contratoGenerado.TipoParcela = viewModel.contrato.TipoParcela;
-            contratoGenerado.SeccionId = viewModel.contrato.SeccionId;
-            contratoGenerado.NombreSeccion = viewModel.contrato.NombreSeccion;
-            contratoGenerado.NroParcela = viewModel.contrato.NroParcela;
-            contratoGenerado.NroFila = viewModel.contrato.NroFila;
-            contratoGenerado.NroConcesion = viewModel.contrato.NroConcesion != null ? viewModel.contrato.NroConcesion : null;
-            contratoGenerado.Difuntos = viewModel.contrato.Difuntos;
-            contratoGenerado.Titulares = viewModel.contrato.Titulares;
-            contratoGenerado.baseUrl = $"{Request.Scheme}://{Request.Host}";
-            contratoGenerado.PrecioEnLetras = NumeroALetras.ConvertirALetras(viewModel.PrecioFinal);
-            contratoGenerado.formaPago = viewModel.FormaDePago ?? "";
-            contratoGenerado.CuotaId = viewModel.CantidadCuotaSeleccionada;
-            contratoGenerado.Precio = viewModel.PrecioFinal;
-            contratoGenerado.OtraFormaPago = viewModel.otraFormaPago;
-            contratoGenerado.CantidadAniosId = viewModel.CantidadAniosId.Value;
-            contratoGenerado.Vencimiento = viewModel.Vencimiento.Value;
-            contratoGenerado.fechaGeneracion = DateTime.Now;
-            contratoGenerado.NombreIntendente = intendente;
+            GenerarContratoDTO contratoGenerado = DatosConcesionParaPDF(viewModel);
 
             //si es nicho voy a vista de contrato nicho sino contrato fosa
             string nombreVistaContrato = viewModel.contrato.TipoParcela ?? "";
@@ -157,6 +129,48 @@ namespace CemSys3.Controllers
                 return View(viewModel);
             }
 
+        }
+
+        private GenerarContratoDTO DatosConcesionParaPDF(GenerarContratoVM viewModel)
+        {
+            GenerarContratoDTO contratoGenerado = new GenerarContratoDTO
+            {
+                TramiteId = viewModel.contrato.TramiteId,
+                EstadoTramiteId = viewModel.contrato.EstadoTramiteId,
+                ParcelaId = viewModel.contrato.ParcelaId,
+                TipoParcela = viewModel.contrato.TipoParcela,
+                SeccionId = viewModel.contrato.SeccionId,
+                NombreSeccion = viewModel.contrato.NombreSeccion,
+                NroParcela = viewModel.contrato.NroParcela,
+                NroFila = viewModel.contrato.NroFila,
+                NroConcesion = viewModel.contrato.NroConcesion,
+                Difuntos = viewModel.contrato.Difuntos,
+                Titulares = viewModel.contrato.Titulares,
+                baseUrl = $"{Request.Scheme}://{Request.Host}",
+                PrecioEnLetras = NumeroALetras.ConvertirALetras(viewModel.PrecioFinal),
+                formaPago = viewModel.FormaDePago ?? "",
+                CuotaId = viewModel.CantidadCuotaSeleccionada,
+                Precio = viewModel.PrecioFinal,
+                OtraFormaPago = viewModel.otraFormaPago,
+                CantidadAniosId = viewModel.CantidadAniosId.Value,
+                Vencimiento = viewModel.Vencimiento.Value,
+                fechaGeneracion = DateTime.Now
+            };
+
+            var ruta = Path.Combine(_env.WebRootPath, "config", "intendente.txt");
+
+            string intendente = System.IO.File.Exists(ruta)
+                ? System.IO.File.ReadAllText(ruta)
+                : "-----";
+            contratoGenerado.NombreIntendente = intendente;
+
+            if (viewModel.contrato.EstadoTramiteId == (int)EstadosConcesionEnum.Vencido)
+            {
+                contratoGenerado.EsRenovacion = true;
+            }
+
+            
+            return contratoGenerado;
         }
 
         [HttpPost]
@@ -235,29 +249,7 @@ namespace CemSys3.Controllers
             dto.Difuntos = viewModel.contrato.Difuntos;
 
             // 1. Armar nuevamente el DTO del contrato (igual que en GenerarContrato) para genera el PDF sin mostrarlo
-            GenerarContratoDTO contratoGenerado = new GenerarContratoDTO
-            {
-                TramiteId = viewModel.contrato.TramiteId,
-                EstadoTramiteId = viewModel.contrato.EstadoTramiteId,
-                ParcelaId = viewModel.contrato.ParcelaId,
-                TipoParcela = viewModel.contrato.TipoParcela,
-                SeccionId = viewModel.contrato.SeccionId,
-                NombreSeccion = viewModel.contrato.NombreSeccion,
-                NroParcela = viewModel.contrato.NroParcela,
-                NroFila = viewModel.contrato.NroFila,
-                NroConcesion = viewModel.contrato.NroConcesion,
-                Difuntos = viewModel.contrato.Difuntos,
-                Titulares = viewModel.contrato.Titulares,
-                baseUrl = $"{Request.Scheme}://{Request.Host}",
-                PrecioEnLetras = NumeroALetras.ConvertirALetras(viewModel.PrecioFinal),
-                formaPago = viewModel.FormaDePago ?? "",
-                CuotaId = viewModel.CantidadCuotaSeleccionada,
-                Precio = viewModel.PrecioFinal,
-                OtraFormaPago = viewModel.otraFormaPago,
-                CantidadAniosId = viewModel.CantidadAniosId.Value,
-                Vencimiento = viewModel.Vencimiento.Value,
-                fechaGeneracion = DateTime.Now
-            };
+            GenerarContratoDTO contratoGenerado = DatosConcesionParaPDF(viewModel);
 
             string nombreVistaContrato = viewModel.contrato.TipoParcela ?? "";
 
@@ -334,12 +326,6 @@ namespace CemSys3.Controllers
                 return RedirectToAction("GenerarContrato", new { idTramite = contratoGenerado.TramiteId });
             }
 
-            //La nota del contrato se genera al momento de confirmar que el contrato esta firmado.
-            //nota de tipo recordatorio para el contrato
-            //-Guardar el contrato en la carpeta.
-            //-Modificar el vencimiento en Progam
-            //-Modificar el titular en Program
-            //-Generar el cobro en Program (se datalla como)
         }
 
         //vista de menu

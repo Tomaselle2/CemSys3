@@ -14,7 +14,7 @@
     <h4>Logo Municipalidad</h4>
     <img src="~/fotos/logoMuni.png?v=@DateTime.Now.Ticks" width="400" />
 </div>
-<p class="my-1">Actualizar Logo<span class="obligatorio"> * Debe ser imagen .png</span> </p>
+<p class="my-1">Actualizar Logo<span class="obligatorio"> * Debe ser imagen .png. (H= 140px, W= 600px)</span> </p>
 <form asp-action="SubirLogo" method="post" enctype="multipart/form-data">
     <input type="file" name="archivo" class="form-control shadow-sm mb-3" />
     <button type="submit" class="btn btn-primary">Actualizar</button>
@@ -26,7 +26,7 @@
     <h4>Pie de contrato</h4>
     <img src="~/fotos/pieContrato.png?v=@DateTime.Now.Ticks" width="700" />
 </div>
-<p class="my-1">Actualizar Pie<span class="obligatorio"> * Debe ser imagen .png</span></p>
+<p class="my-1">Actualizar Pie<span class="obligatorio"> * Debe ser imagen .png (H= 150px, W= 1024px)</span></p>
 <form asp-action="SubirPie" method="post" enctype="multipart/form-data">
     <input type="file" name="archivo" class="form-control shadow-sm mb-3" />
     <button type="submit" class="btn btn-primary">Actualizar</button>

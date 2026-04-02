@@ -215,8 +215,9 @@ namespace CemSys3.Business.Concesion
                 string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
                 string vencimiento = $"Modificar vencimiento a {concesion.Vencimiento}";
                 string titularNota = $"El titular debe ser {dto.Titulares?[0].Apellido?.ToUpper()}, {dto.Titulares?[0].Nombre?.ToUpper()}";
+                string pago = $"Generar cuotas concesión";
 
-                await GenerarNotaRecordatorio(descripcionNota, nombreNota, vencimiento, titularNota, dto.UsuarioId ?? 0);
+                await GenerarNotaRecordatorio(descripcionNota, nombreNota, vencimiento, titularNota, dto.UsuarioId ?? 0, pago);
 
 
                 await _context.SaveChangesAsync();
@@ -698,7 +699,7 @@ namespace CemSys3.Business.Concesion
         }
 
 
-        private async Task GenerarNotaRecordatorio(string descripcionNota, string nombreNota, string vencimiento, string titularNota, int usuarioId)
+        private async Task GenerarNotaRecordatorio(string descripcionNota, string nombreNota, string vencimiento, string titularNota, int usuarioId, string pago)
         {
             NotaDTO nota = new NotaDTO();
             nota.Nombre = nombreNota;
@@ -713,7 +714,8 @@ namespace CemSys3.Business.Concesion
             nota.Tareas = new List<TareaDTO>
                 {
                     new() { Descripcion = vencimiento, Estado = false },
-                    new() { Descripcion = titularNota, Estado = false }
+                    new() { Descripcion = titularNota, Estado = false },
+                    new() { Descripcion = pago, Estado = false }
                 };
 
             int tramiteNotaId = await _notasService.GenerarTramiteNota(usuarioId);

@@ -157,7 +157,7 @@ namespace CemSys3.Controllers
             {
                 var ruta = Path.Combine(_env.WebRootPath, "config", "intendente.txt");
 
-                System.IO.File.WriteAllText(ruta, viewModel.nombreIntendente.Trim());
+                System.IO.File.WriteAllText(ruta, viewModel.nombreIntendente.Trim().ToUpper());
 
                 TempData.SetSweetAlert(new SweetAlertDTO
                 {
