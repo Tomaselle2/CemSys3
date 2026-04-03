@@ -10,6 +10,9 @@ namespace CemSys3.ViewModels.Concesion
         public int NroConcesion { get; set; }
         public IEnumerable<HistorialTitularesDTO> Titulares { get; set; } = new List<HistorialTitularesDTO>();
         public IEnumerable<TramiteDTO> Tramites { get; set; } = new List<TramiteDTO>();
+
+        public InfoGeneralDTO Dto { get; set; } = new InfoGeneralDTO();
+
         //manero de errores
         public SweetAlertDTO? SweetAlert { get; set; }
     }

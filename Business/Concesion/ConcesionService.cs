@@ -448,7 +448,7 @@ namespace CemSys3.Business.Concesion
         public async Task<InfoGeneralDTO> InfoGeneral(int idTramite)
         {
             InfoGeneralDTO dto = new InfoGeneralDTO();
-            Models.Concesione concesion = await _context.Concesiones
+            Models.Concesione concesion = await _context.Concesiones.AsNoTracking()
                .Include(c => c.Tramite)
                .Include(c => c.Parcela)
                    .ThenInclude(p => p.Seccion)
@@ -496,7 +496,20 @@ namespace CemSys3.Business.Concesion
 
             return dto;
         }
+        public async Task<InfoGeneralDTO> InfoGeneralMinima(int idTramite)
+        {
+            InfoGeneralDTO dto = new InfoGeneralDTO();
+            Models.Concesione concesion = await _context.Concesiones.AsNoTracking()
+               .Include(c => c.Tramite)
+               .FirstOrDefaultAsync(c => c.TramiteId == idTramite) ?? throw new Exception("Concesión no encontrada.");
 
+            dto.TramiteId = concesion.TramiteId;
+            dto.EstadoTramiteId = concesion.Tramite.EstadoActualId;
+            dto.NroConcesion = concesion.Concesion;
+            dto.Vencimiento = concesion.Vencimiento;
+
+            return dto;
+        }
         public async Task<bool> ExisteNroConcesion(int nroConcesion)
         {
             bool existe = await _context.Concesiones.AnyAsync(c => c.Concesion == nroConcesion);
@@ -721,5 +734,7 @@ namespace CemSys3.Business.Concesion
             int tramiteNotaId = await _notasService.GenerarTramiteNota(usuarioId);
             await _notasService.GenerarNotaSinTransaccion(tramiteNotaId, nota);
         }
+
+        
     }
 }

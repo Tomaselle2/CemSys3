@@ -6,21 +6,73 @@
 @{
     ViewData["Title"] = $" Deuda Concesión";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string nroConcesion = Model.Dto.NroConcesion.HasValue ? Model.Dto.NroConcesion.Value.ToString("D5") : "-----";
+    string estadoTramite = EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(Model.Dto.EstadoTramiteId);
+    string claseEstado = Enum.GetName(typeof(EstadosConcesionEnum), Model.Dto.EstadoTramiteId); string fechaVencimiento = Model.Dto.Vencimiento != null ? Model.Dto.Vencimiento.Value.ToString("dd/MM/yyyy") : "--/--/----";
 }
 
 @await Html.PartialAsync("Concesion/_menuConcesion", Model.TramiteId)
 <div class="contenidoConcesion">
+
+    <div class="cardsConcesion-row my-4">
+        <div class="cardConcesion">
+            <div class="cardConcesion-content">
+                <span class="labelConcesion">NRO. CONCESIÓN</span>
+                <h2>@nroConcesion</h2>
+            </div>
+        </div>
+
+        <div class="cardConcesion estado-card">
+            <div class="cardConcesion-content">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="labelConcesion">ESTADO</span>
+                </div>
+                <span class="badgeConcesion @claseEstado px-3 py-2">@estadoTramite</span>
+
+                @if (Model.Dto.EstadoTramiteId == (int)EstadosConcesionEnum.SinContrato)
+                {
+                    <div class="btn-container">
+                        <form asp-action="GenerarContrato" asp-controller="Concesion" method="get" class="mt-2">
+                            <input type="hidden" name="idTramite" value="@Model.Dto.TramiteId" />
+                            <button type="submit" class="btn btn-danger btn-sm">Generar contrato</button>
+                        </form>
+                    </div>
+                }
+
+                @if (Model.Dto.EstadoTramiteId == (int)EstadosConcesionEnum.Vencido)
+                {
+                    <div class="btn-container">
+                        <form asp-action="GenerarContrato" asp-controller="Concesion" method="get" class="mt-2">
+                            <input type="hidden" name="idTramite" value="@Model.Dto.TramiteId" />
+                            <button type="submit" class="btn btn-danger btn-sm">Renovar contrato</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="cardConcesion">
+            <div class="cardConcesion-content">
+                <span class="labelConcesion">VENCIMIENTO</span>
+                <h2>@fechaVencimiento</h2>
+            </div>
+        </div>
+    </div>
+
+
+
     <div class="cardConcesion mb-3 my-3">
         <div class="cardConcesion-content">
             <div class="d-flex justify-content-between align-items-center">
                 <h3 class="mb-0">
-                    <i class="bi bi-info-circle-fill text-primary"></i> Deuda
+                    <i class="bi bi-calendar-week text-primary"></i> Deuda
                 </h3>
             </div>
             <p><span class="obligatorio">Los precios son (base + fondo)</span></p>
             <div>
                 <textarea id="textareaInfoAdicional" name="informacionAdicionaTramite" style="overflow:hidden;"
-                          oninput="document.getElementById('btnActualizar').disabled = false; autoResize(this)" class="form-control auto-resize"
+                          oninput="autoResize(this)" class="form-control auto-resize"
                           asp-for="MensajeDeuda"></textarea>
             </div>
         </div>

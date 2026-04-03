@@ -1,9 +1,15 @@
-﻿@using CemSys3.ViewModels.Concesion
+﻿@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.Concesion
 @model ModificarConcesionVM
 
 @{
     ViewData["Title"] = $"Concesion {Model.Dto.NroConcesion?.ToString("D5")}";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string nroConcesion = Model.DtoInfo.NroConcesion.HasValue ? Model.DtoInfo.NroConcesion.Value.ToString("D5") : "-----";
+    string estadoTramite = EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(Model.DtoInfo.EstadoTramiteId);
+    string claseEstado = Enum.GetName(typeof(EstadosConcesionEnum), Model.DtoInfo.EstadoTramiteId); string fechaVencimiento = Model.Dto.Vencimiento != null ? Model.Dto.Vencimiento.Value.ToString("dd/MM/yyyy") : "--/--/----";
 }
 
 @await Html.PartialAsync("Concesion/_menuConcesion", Model.Dto.TramiteId)
@@ -37,9 +43,55 @@
 </style>
 
 
-
-<h1>Modificar concesión</h1>
 <div class="contenidoConcesion">
+
+    <div class="cardsConcesion-row my-4">
+        <div class="cardConcesion">
+            <div class="cardConcesion-content">
+                <span class="labelConcesion">NRO. CONCESIÓN</span>
+                <h2>@nroConcesion</h2>
+            </div>
+        </div>
+
+        <div class="cardConcesion estado-card">
+            <div class="cardConcesion-content">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="labelConcesion">ESTADO</span>
+                </div>
+                <span class="badgeConcesion @claseEstado px-3 py-2">@estadoTramite</span>
+
+                @if (Model.DtoInfo.EstadoTramiteId == (int)EstadosConcesionEnum.SinContrato)
+                {
+                    <div class="btn-container">
+                        <form asp-action="GenerarContrato" asp-controller="Concesion" method="get" class="mt-2">
+                            <input type="hidden" name="idTramite" value="@Model.DtoInfo.TramiteId" />
+                            <button type="submit" class="btn btn-danger btn-sm">Generar contrato</button>
+                        </form>
+                    </div>
+                }
+
+                @if (Model.DtoInfo.EstadoTramiteId == (int)EstadosConcesionEnum.Vencido)
+                {
+                    <div class="btn-container">
+                        <form asp-action="GenerarContrato" asp-controller="Concesion" method="get" class="mt-2">
+                            <input type="hidden" name="idTramite" value="@Model.DtoInfo.TramiteId" />
+                            <button type="submit" class="btn btn-danger btn-sm">Renovar contrato</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="cardConcesion">
+            <div class="cardConcesion-content">
+                <span class="labelConcesion">VENCIMIENTO</span>
+                <h2>@fechaVencimiento</h2>
+            </div>
+        </div>
+    </div>
+
+
+
     <form asp-action="ModificarConcesion" method="post" id="formPrincipal">
         <input type="hidden" asp-for="Dto.TramiteId" />
 

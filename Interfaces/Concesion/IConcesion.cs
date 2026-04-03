@@ -17,6 +17,8 @@ namespace CemSys3.Interfaces.Concesion
         public Task<GenerarContratoDTO> SolicitarDatosParaGenerarContrato(int idTramite);
 
         public Task<InfoGeneralDTO> InfoGeneral(int idTramite);
+        public Task<InfoGeneralDTO> InfoGeneralMinima(int idTramite);
+
 
         public Task<bool> ExisteNroConcesion(int nroConcesion);
 

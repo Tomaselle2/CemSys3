@@ -63,22 +63,22 @@
     <div class="sidebar_concesion">
         <ul>
             <li class="@(action == "Concesion" ? "active" : "")">
-                <a asp-controller="Concesion" asp-action="Concesion" asp-route-tramiteId="@Model">Información General</a>
+                <a asp-controller="Concesion" asp-action="Concesion" asp-route-tramiteId="@Model"><i class="bi bi-info-square"></i> Información General</a>
             </li>
 
             <li class="@(action == "ArchivosConcesion" ? "active" : "")">
-                <a asp-controller="Concesion" asp-action="ArchivosConcesion" asp-route-tramiteId="@Model">Archivos Adjuntos</a>
+                <a asp-controller="Concesion" asp-action="ArchivosConcesion" asp-route-tramiteId="@Model"><i class="bi bi-file-earmark-pdf"></i> Archivos Adjuntos</a>
             </li>
 
             <li class="@(action == "CalcularDeuda" ? "active" : "")">
-                <a asp-controller="Concesion" asp-action="CalcularDeuda" asp-route-tramiteId="@Model">Calcular Deuda</a>
+                <a asp-controller="Concesion" asp-action="CalcularDeuda" asp-route-tramiteId="@Model"><i class="bi bi-calculator-fill"></i> Calcular Deuda</a>
             </li>
             <li class="@(action == "HistorialConcesion" ? "active" : "")">
-                <a asp-controller="Concesion" asp-action="HistorialConcesion" asp-route-tramiteId="@Model">Historial</a>
+                <a asp-controller="Concesion" asp-action="HistorialConcesion" asp-route-tramiteId="@Model"><i class="bi bi-hourglass-bottom"></i> Historial</a>
             </li>
             
             <li class="@(action == "ModificarConcesion" ? "active" : "")">
-                <a asp-controller="Concesion" asp-action="ModificarConcesion" asp-route-tramiteId="@Model">Modificar Concesión</a>
+                <a asp-controller="Concesion" asp-action="ModificarConcesion" asp-route-tramiteId="@Model"><i class="bi bi-pencil-square"></i> Modificar Concesión</a>
             </li>
         </ul>
     </div>

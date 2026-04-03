@@ -367,6 +367,7 @@ namespace CemSys3.Controllers
             try
             {
                 viewModel.TramiteId = tramiteId;
+                viewModel.Dto = await _concesionService.InfoGeneralMinima(tramiteId);
                 viewModel.Archivos = await _archivoService.GetAllByTramiteId(tramiteId);
             }
             catch (Exception ex)
@@ -392,6 +393,8 @@ namespace CemSys3.Controllers
             try
             {
                 viewModel.Dto = await _concesionService.ModificarDatosConecesion(tramiteId);
+                viewModel.DtoInfo = await _concesionService.InfoGeneralMinima(tramiteId);
+
             }
             catch (Exception ex)
             {
@@ -473,6 +476,8 @@ namespace CemSys3.Controllers
                 viewModel.TramiteId = tramiteId;
                 viewModel.Titulares = await _historialEstadosService.HistorialTitulares(tramiteId);
                 viewModel.Tramites = await _historialEstadosService.HistorialTramitesConcesion(tramiteId);
+                viewModel.Dto = await _concesionService.InfoGeneralMinima(tramiteId);
+
             }
             catch (Exception ex)
             {
@@ -497,6 +502,8 @@ namespace CemSys3.Controllers
             try
             {
                 viewModel.MensajeDeuda = await _deudaConcesionService.CalculoDeudaConcesion(tramiteId);
+                viewModel.Dto = await _concesionService.InfoGeneralMinima(tramiteId);
+
             }
             catch (Exception ex)
             {
