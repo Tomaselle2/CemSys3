@@ -78,6 +78,8 @@ builder.Services.AddScoped<IArchivo, ArchivoService>();
 builder.Services.AddScoped<IConcesion, ConcesionService>();
 builder.Services.AddScoped<INotificaciones, NotificacionService>();
 builder.Services.AddScoped<IViewRenderService, ViewRenderService>();
+builder.Services.AddScoped<IDeudaConcesion, DeudaConcesionService>();
+
 
 builder.Services.AddSingleton<IBrowser>(sp =>
 {
