@@ -41,6 +41,24 @@ namespace CemSys3.Enumerables
         Nota = 7,
     }
 
+    public enum TipoEscenarioPlantillaCambioTirularEnum
+    {
+        [Display(Name = "Ambos titulares estan presentes")]
+        Presente = 1,
+
+        [Display(Name = "El titular actual se encuentra fallecido")]
+        Fallecido = 2,
+    }
+
+    public enum PlantillasTramitesEnum
+    {
+        [Display(Name = "Cambio Titular - Presente")]
+        CambioTipo1 = 1,
+
+        [Display(Name = "Cambio Titular - Fallecido")]
+        CambioTipo2 = 2,
+    }
+
     public enum  TipoNichoEnum
     {
         [Display(Name = "Féretro")]

@@ -19,6 +19,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Archivo> Archivos { get; set; }
 
+    public virtual DbSet<CambiosTitularidad> CambiosTitularidads { get; set; }
+
     public virtual DbSet<CantidadCuota> CantidadCuotas { get; set; }
 
     public virtual DbSet<CategoriasPersona> CategoriasPersonas { get; set; }
@@ -49,6 +51,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Persona> Personas { get; set; }
 
+    public virtual DbSet<PlantillasTramite> PlantillasTramites { get; set; }
+
     public virtual DbSet<PreciosTarifaria> PreciosTarifarias { get; set; }
 
     public virtual DbSet<ReglasIngreso> ReglasIngresos { get; set; }
@@ -77,10 +81,13 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<TramitePersona> TramitePersonas { get; set; }
 
+    public virtual DbSet<TramitesCosto> TramitesCostos { get; set; }
+
     public virtual DbSet<TramitesParcela> TramitesParcelas { get; set; }
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
+   
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AnioConcesion>(entity =>
@@ -127,6 +134,46 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.Tramite).WithMany(p => p.Archivos)
                 .HasForeignKey(d => d.TramiteId)
                 .HasConstraintName("Archivos_tramiteId_fk");
+        });
+
+        modelBuilder.Entity<CambiosTitularidad>(entity =>
+        {
+            entity.HasKey(e => e.TramiteId).HasName("PK__CambiosT__324535470760D90A");
+
+            entity.ToTable("CambiosTitularidad");
+
+            entity.Property(e => e.TramiteId)
+                .ValueGeneratedNever()
+                .HasColumnName("tramiteId");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaCreacion");
+            entity.Property(e => e.FechaFinalizacion)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaFinalizacion");
+            entity.Property(e => e.InfoAdicional).HasColumnName("infoAdicional");
+            entity.Property(e => e.ParcelaId).HasColumnName("parcelaId");
+            entity.Property(e => e.TipoCambio).HasColumnName("tipoCambio");
+            entity.Property(e => e.UsuarioId).HasColumnName("usuarioId");
+            entity.Property(e => e.Visibilidad)
+                .HasDefaultValue(true)
+                .HasColumnName("visibilidad");
+
+            entity.HasOne(d => d.Parcela).WithMany(p => p.CambiosTitularidads)
+                .HasForeignKey(d => d.ParcelaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CT_Parcela");
+
+            entity.HasOne(d => d.Tramite).WithOne(p => p.CambiosTitularidad)
+                .HasForeignKey<CambiosTitularidad>(d => d.TramiteId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CT_Tramite");
+
+            entity.HasOne(d => d.Usuario).WithMany(p => p.CambiosTitularidads)
+                .HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CT_Usuario");
         });
 
         modelBuilder.Entity<CantidadCuota>(entity =>
@@ -526,6 +573,33 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("Personas_estadoDifuntoId_fk");
         });
 
+        modelBuilder.Entity<PlantillasTramite>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Plantill__3213E83FCE927FDF");
+
+            entity.ToTable("PlantillasTramite");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Activo)
+                .HasDefaultValue(true)
+                .HasColumnName("activo");
+            entity.Property(e => e.Contenido).HasColumnName("contenido");
+            entity.Property(e => e.FechaModificacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaModificacion");
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(100)
+                .HasColumnName("nombre");
+            entity.Property(e => e.TipoEscenario).HasColumnName("tipoEscenario");
+            entity.Property(e => e.TipoTramiteId).HasColumnName("tipoTramiteId");
+
+            entity.HasOne(d => d.TipoTramite).WithMany(p => p.PlantillasTramites)
+                .HasForeignKey(d => d.TipoTramiteId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PT_TipoTramite");
+        });
+
         modelBuilder.Entity<PreciosTarifaria>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__PreciosT__3213E83F2E81FC16");
@@ -801,6 +875,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.FechaCreacion)
                 .HasColumnType("datetime")
                 .HasColumnName("fechaCreacion");
+            entity.Property(e => e.FechaFinalizacion)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaFinalizacion");
             entity.Property(e => e.TipoTramiteId).HasColumnName("tipoTramiteId");
             entity.Property(e => e.UsuarioId).HasColumnName("usuarioId");
             entity.Property(e => e.Visibilidad)
@@ -844,6 +921,35 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.TramiteId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("TramitePersona_tramiteId_fk");
+        });
+
+        modelBuilder.Entity<TramitesCosto>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Tramites__3213E83FFDF3FB4C");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ConceptoTarifariaId).HasColumnName("conceptoTarifariaId");
+            entity.Property(e => e.FechaRegistro)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaRegistro");
+            entity.Property(e => e.Monto)
+                .HasColumnType("decimal(15, 2)")
+                .HasColumnName("monto");
+            entity.Property(e => e.TramiteId).HasColumnName("tramiteId");
+            entity.Property(e => e.Visibilidad)
+                .HasDefaultValue(true)
+                .HasColumnName("visibilidad");
+
+            entity.HasOne(d => d.ConceptoTarifaria).WithMany(p => p.TramitesCostos)
+                .HasForeignKey(d => d.ConceptoTarifariaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TC_Concepto");
+
+            entity.HasOne(d => d.Tramite).WithMany(p => p.TramitesCostos)
+                .HasForeignKey(d => d.TramiteId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TC_Tramite");
         });
 
         modelBuilder.Entity<TramitesParcela>(entity =>

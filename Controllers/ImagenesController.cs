@@ -16,6 +16,8 @@ namespace CemSys3.Controllers
             _env = env;
         }
 
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
         public IActionResult Index()
         {
             ImagenesVM viewModel = new ImagenesVM();

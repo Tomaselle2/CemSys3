@@ -38,4 +38,6 @@ public partial class ConceptosTarifarium
     public virtual ICollection<ReglasIngreso> ReglasIngresoPorcentajeIntroduccionUrnaDerechoOficnaNavigations { get; set; } = new List<ReglasIngreso>();
 
     public virtual TemasTarifarium Tema { get; set; } = null!;
+
+    public virtual ICollection<TramitesCosto> TramitesCostos { get; set; } = new List<TramitesCosto>();
 }

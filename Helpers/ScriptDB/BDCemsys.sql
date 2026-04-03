@@ -1,12 +1,12 @@
-create database cemsys;
+ï»¿create database cemsys;
 go
 use cemsys;
 go
 -- Script para crear todas las tablas del sistema de cementerio
--- Orden basado en dependencias de claves foráneas
+-- Orden basado en dependencias de claves forÃ¡neas
 
 -- ==========================================
--- CONFIGURACIÓN PREVIA FILESTREAM
+-- CONFIGURACIÃ“N PREVIA FILESTREAM
 -- ==========================================
 
 -- NOTA: Antes de ejecutar este script
@@ -20,14 +20,14 @@ ADD FILEGROUP [CementerioFileStreamGroupArchive] CONTAINS FILESTREAM;
 
 go
 
--- Agregar archivo físico para FILESTREAM
+-- Agregar archivo fÃ­sico para FILESTREAM
 ALTER DATABASE [cemsys] 
 ADD FILE (
     NAME = 'CementerioFileStreamFile',
     FILENAME = 'C:\CemsysArchive3' -- RUTA
 ) TO FILEGROUP [CementerioFileStreamGroupArchive];
 
-PRINT 'Configuración FILESTREAM completada.';
+PRINT 'ConfiguraciÃ³n FILESTREAM completada.';
 
 IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'dbo') 
 BEGIN 
@@ -401,7 +401,7 @@ CREATE TABLE ReglasIngreso (
     visibilidad BIT NOT NULL DEFAULT 1,
 	cierreNicho int null,
 	cierreFosa int null
-     -- FOREIGN KEYS (TODAS CON NOMBRES ÚNICOS)
+     -- FOREIGN KEYS (TODAS CON NOMBRES ÃšNICOS)
     CONSTRAINT FK_RI_TipoParcela 
         FOREIGN KEY (tipoParcelaId) REFERENCES TipoParcela(id),
 
@@ -446,4 +446,57 @@ CREATE TABLE ReglasIngreso (
 
     CONSTRAINT FK_RI_CierreFosa 
         FOREIGN KEY (cierreFosa) REFERENCES ConceptosTarifaria(id)
+);
+
+--nuevas tablas
+CREATE TABLE TramitesCostos (
+    id INT IDENTITY PRIMARY KEY,
+    tramiteId INT NOT NULL,
+    conceptoTarifariaId INT NOT NULL,
+    monto DECIMAL(15,2) NOT NULL,
+    fechaRegistro DATETIME DEFAULT GETDATE(),
+    visibilidad BIT DEFAULT 1,
+
+    CONSTRAINT FK_TC_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_TC_Concepto FOREIGN KEY (conceptoTarifariaId) REFERENCES ConceptosTarifaria(id)
+);
+
+CREATE TABLE CambiosTitularidad (
+    tramiteId INT PRIMARY KEY,
+    parcelaId INT NOT NULL,
+    usuarioId INT NOT NULL,
+
+    fechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+    fechaFinalizacion DATETIME NULL,
+
+    infoAdicional NVARCHAR(MAX) null,
+
+    -- CLAVE
+    tipoCambio INT NOT NULL, 
+    -- 1 = titular presente
+    -- 2 = titular fallecido
+
+    visibilidad BIT DEFAULT 1,
+
+    CONSTRAINT FK_CT_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_CT_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_CT_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id)
+);
+
+CREATE TABLE PlantillasTramite (
+    id INT IDENTITY PRIMARY KEY,
+    tipoTramiteId INT NOT NULL,
+
+    nombre NVARCHAR(100),
+    contenido NVARCHAR(MAX), -- HTML con variables
+
+    tipoEscenario INT NULL, 
+    -- ðŸ”¥ CLAVE
+    -- 1 = titular presente
+    -- 2 = titular fallecido
+
+    activo BIT DEFAULT 1,
+    fechaModificacion DATETIME DEFAULT GETDATE(),
+
+    CONSTRAINT FK_PT_TipoTramite FOREIGN KEY (tipoTramiteId) REFERENCES TipoTramite(id)
 );

@@ -596,7 +596,11 @@ null, --cierre fosa
 1);-- visibilidad
 
 
-select * from EstadosTramites
+insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoEscenario, activo) values (6, 'Cambio de Titular - Ambos Presente', 'cambioooo', 1, 1);
+
+
+
+
 
 
 --Job para pasar de concesion vigente a vencida 

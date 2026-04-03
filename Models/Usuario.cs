@@ -21,6 +21,8 @@ public partial class Usuario
 
     public int RolId { get; set; }
 
+    public virtual ICollection<CambiosTitularidad> CambiosTitularidads { get; set; } = new List<CambiosTitularidad>();
+
     public virtual ICollection<Concesione> Concesiones { get; set; } = new List<Concesione>();
 
     public virtual ICollection<Introduccione> Introducciones { get; set; } = new List<Introduccione>();

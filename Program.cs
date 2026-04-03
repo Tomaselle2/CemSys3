@@ -11,6 +11,7 @@ using CemSys3.Business.Notificacion;
 using CemSys3.Business.Parcela;
 using CemSys3.Business.PDF;
 using CemSys3.Business.Persona;
+using CemSys3.Business.PlantillaTramite;
 using CemSys3.Business.Seccion;
 using CemSys3.Business.Tarea;
 using CemSys3.Business.Tarifaria;
@@ -30,6 +31,7 @@ using CemSys3.Interfaces.Notificaciones;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.PDF;
 using CemSys3.Interfaces.Persona;
+using CemSys3.Interfaces.PlantillaTramite;
 using CemSys3.Interfaces.Seccion;
 using CemSys3.Interfaces.Tarea;
 using CemSys3.Interfaces.Tarifaria;
@@ -79,6 +81,8 @@ builder.Services.AddScoped<IConcesion, ConcesionService>();
 builder.Services.AddScoped<INotificaciones, NotificacionService>();
 builder.Services.AddScoped<IViewRenderService, ViewRenderService>();
 builder.Services.AddScoped<IDeudaConcesion, DeudaConcesionService>();
+builder.Services.AddScoped<IPlantillaTramite, PlantillaTramiteService>();
+
 
 
 builder.Services.AddSingleton<IBrowser>(sp =>

@@ -17,7 +17,11 @@ public partial class Tramite
 
     public int EstadoActualId { get; set; }
 
+    public DateTime? FechaFinalizacion { get; set; }
+
     public virtual ICollection<Archivo> Archivos { get; set; } = new List<Archivo>();
+
+    public virtual CambiosTitularidad? CambiosTitularidad { get; set; }
 
     public virtual Concesione? Concesione { get; set; }
 
@@ -40,6 +44,8 @@ public partial class Tramite
     public virtual TipoTramite TipoTramite { get; set; } = null!;
 
     public virtual ICollection<TramitePersona> TramitePersonas { get; set; } = new List<TramitePersona>();
+
+    public virtual ICollection<TramitesCosto> TramitesCostos { get; set; } = new List<TramitesCosto>();
 
     public virtual ICollection<TramitesParcela> TramitesParcelas { get; set; } = new List<TramitesParcela>();
 
