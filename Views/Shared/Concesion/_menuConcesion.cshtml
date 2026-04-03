@@ -70,9 +70,9 @@
                 <a asp-controller="Concesion" asp-action="ArchivosConcesion" asp-route-tramiteId="@Model">Archivos Adjuntos</a>
             </li>
 
-           @*  <li class="@(action == "Deuda" ? "active" : "")">
-                <a asp-controller="Concesion" asp-action="Deuda" asp-route-tramiteId="@Model">Avisos de Deuda</a>
-            </li> *@
+            <li class="@(action == "CalcularDeuda" ? "active" : "")">
+                <a asp-controller="Concesion" asp-action="CalcularDeuda" asp-route-tramiteId="@Model">Calcular Deuda</a>
+            </li>
             <li class="@(action == "HistorialConcesion" ? "active" : "")">
                 <a asp-controller="Concesion" asp-action="HistorialConcesion" asp-route-tramiteId="@Model">Historial</a>
             </li>

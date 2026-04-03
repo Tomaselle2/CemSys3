@@ -1,0 +1,70 @@
+﻿@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.Concesion
+@model CalculoDeudaVM
+
+@{
+    ViewData["Title"] = $" Deuda Concesión";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@await Html.PartialAsync("Concesion/_menuConcesion", Model.TramiteId)
+<div class="contenidoConcesion">
+    <div class="cardConcesion mb-3 my-3">
+        <div class="cardConcesion-content">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">
+                    <i class="bi bi-info-circle-fill text-primary"></i> Deuda
+                </h3>
+            </div>
+            <p><span class="obligatorio">Los precios son (base + fondo)</span></p>
+            <div>
+                <textarea id="textareaInfoAdicional" name="informacionAdicionaTramite" style="overflow:hidden;"
+                          oninput="document.getElementById('btnActualizar').disabled = false; autoResize(this)" class="form-control auto-resize"
+                          asp-for="MensajeDeuda"></textarea>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center my-3">
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="copiarTexto()">
+                <i class="bi bi-clipboard"></i> Copiar
+            </button>
+        </div>
+
+
+
+    </div>
+
+ 
+</div>
+
+
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
+@section Scripts {
+    <script>
+        function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+
+        window.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.auto-resize').forEach(t => autoResize(t));
+        });
+
+        function copiarTexto() {
+            const textarea = document.getElementById("textareaInfoAdicional");
+            const btn = event.currentTarget;
+
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                btn.innerHTML = "✔ Copiado";
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="bi bi-clipboard"></i> Copiar';
+                }, 2000);
+            });
+        }
+    </script>
+}

@@ -28,9 +28,10 @@ namespace CemSys3.Controllers
         private readonly IArchivo _archivoService;
         private readonly IHistorialEstados _historialEstadosService;
         private readonly IWebHostEnvironment _env;
+        private readonly IDeudaConcesion _deudaConcesionService;
 
         public ConcesionController(IConcesion concesion, IViewRenderService render, PlaywrightPdfGenerator pdfGenerator, IArchivo archivo,
-            IHistorialEstados historialEstados, IWebHostEnvironment env)
+            IHistorialEstados historialEstados, IWebHostEnvironment env, IDeudaConcesion deudaConcesionService)
         {
             _concesionService = concesion;
             _viewRenderService = render;
@@ -38,6 +39,7 @@ namespace CemSys3.Controllers
             _archivoService = archivo;
             _historialEstadosService = historialEstados;
             _env = env;
+            _deudaConcesionService = deudaConcesionService;
         }
 
         //tabla general de concesiones, con paginacion y filtro por estado
@@ -481,6 +483,31 @@ namespace CemSys3.Controllers
                     Tipo = "error"
                 };
             }
+            return View(viewModel);
+        }
+
+        //vista de menu
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> CalcularDeuda(int tramiteId)
+        {
+            CalculoDeudaVM viewModel = new CalculoDeudaVM();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+            viewModel.TramiteId = tramiteId;
+            try
+            {
+                viewModel.MensajeDeuda = await _deudaConcesionService.CalculoDeudaConcesion(tramiteId);
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al calcular la deuda de la concesión: {ex.Message}",
+                    Tipo = "error"
+                };
+            }
+
             return View(viewModel);
         }
 
