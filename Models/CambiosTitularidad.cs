@@ -17,8 +17,6 @@ public partial class CambiosTitularidad
 
     public string? InfoAdicional { get; set; }
 
-    public int TipoCambio { get; set; }
-
     public bool? Visibilidad { get; set; }
 
     public virtual Parcela Parcela { get; set; } = null!;

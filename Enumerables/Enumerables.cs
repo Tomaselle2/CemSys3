@@ -34,7 +34,7 @@ namespace CemSys3.Enumerables
         [Display(Name = "Autorización para traslado")]
         Traslado = 5,
 
-        [Display(Name = "Cambio de titularidad")]
+        [Display(Name = "Cambio de titular")]
         CambioTitular = 6,
 
         [Display(Name = "Nota")]
@@ -252,6 +252,18 @@ namespace CemSys3.Enumerables
         Caducado = 8,
     }
 
+    //Estados de notas
+    public enum EstadosCambioTitularEnum
+    {
+        [Display(Name = "Iniciado")]
+        Iniciado = 9,
+
+        [Display(Name = "Finalizado")]
+        Finalizado = 10,
+    }
+
+
+    //Todos los estados de los tramites, para filtro general   
     public enum EstadosTramiteEnum
     {
         [Display(Name = "Registrado")]
@@ -271,6 +283,12 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Caducado")]
         Caducado = 8,
+
+        [Display(Name = "Iniciado")]
+        Iniciado = 9,
+
+        [Display(Name = "Finalizado")]
+        Finalizado = 10,
     }
 
     //concepto de la tarifaria 

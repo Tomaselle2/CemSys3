@@ -1,0 +1,59 @@
+﻿@using CemSys3.Enumerables
+@using CemSys3.ViewModels.TramiteConcesion
+@model CambioTitularVM
+
+@{
+    ViewData["Title"] = "Cambio de Titular";
+}
+
+<h1>Cambio de titular (ambos titulares presentes)</h1>
+
+<form asp-action="/" asp-controller="/" method="post">
+    <input type="hidden" asp-for="PlantillaTramite.Id" />
+    <input type="hidden" asp-for="PlantillaTramite.TipoTramiteId" />
+    <input type="hidden" asp-for="PlantillaTramite.TipoEscenario" />
+
+    <textarea id="editor" asp-for="PlantillaTramite.Contenido"></textarea>
+    <br />
+    <button type="submit" class="btn btn-outline-success">Guardar</button>
+</form>
+
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
+
+
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        // inicializar CKEditor acá
+        ClassicEditor
+        .create(document.querySelector('#editor'), {
+        toolbar: [
+        'heading', '|',
+        'bold', 'italic',
+        'link',
+        'bulletedList', 'numberedList',
+        '|',
+        'imageUpload',
+        '|',
+        'undo', 'redo'
+        ],
+        ckfinder: {
+        uploadUrl: '/PlantillaTramite/SubirImagen' // 👈 CLAVE
+        }
+        })
+        .then(editor => {
+
+        document.querySelector('form').addEventListener('submit', function () {
+        document.querySelector('#editor').value = editor.getData();
+        });
+
+        })
+        .catch(error => console.error(error));
+        });
+        
+    </script>
+}

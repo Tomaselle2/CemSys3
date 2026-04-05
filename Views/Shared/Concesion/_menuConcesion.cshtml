@@ -73,10 +73,15 @@
             <li class="@(action == "CalcularDeuda" ? "active" : "")">
                 <a asp-controller="Concesion" asp-action="CalcularDeuda" asp-route-tramiteId="@Model"><i class="bi bi-calculator-fill"></i> Calcular Deuda</a>
             </li>
+
             <li class="@(action == "HistorialConcesion" ? "active" : "")">
                 <a asp-controller="Concesion" asp-action="HistorialConcesion" asp-route-tramiteId="@Model"><i class="bi bi-hourglass-bottom"></i> Historial</a>
             </li>
-            
+
+            <li class="@(action == "Index" ? "active" : "")">
+                <a asp-controller="TramiteConcesion" asp-action="Index" target="_blank" asp-route-tramiteId="@Model"><i class="bi bi-file-earmark-text"></i> Trámites</a>
+            </li>
+
             <li class="@(action == "ModificarConcesion" ? "active" : "")">
                 <a asp-controller="Concesion" asp-action="ModificarConcesion" asp-route-tramiteId="@Model"><i class="bi bi-pencil-square"></i> Modificar Concesión</a>
             </li>

@@ -17,6 +17,7 @@ namespace CemSys3.Controllers
         {
             _cementerioService = cementerio;
         }
+
         [HttpGet]
         [AuthorizeRole(RolUsuario.Administrador)]
         public async Task<IActionResult> Index(string? filtro, int pagina = 1, int porPagina = 10)

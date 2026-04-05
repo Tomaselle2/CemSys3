@@ -1,0 +1,52 @@
+﻿@using CemSys3.ViewModels.TramiteConcesion
+@using CemSys3.Enumerables
+@model ListadoTramitesVM
+@{
+    ViewData["Title"] = "Trámites de concesión";
+}
+
+<div class="cardConcesion my-4">
+    <div class="cardConcesion-content">
+        <h3>Cambio de titular (ambos titulares presentes)</h3>
+        <textarea class="form-control"></textarea>
+        <div class="d-flex justify-content-md-start align-items-center">
+            <div class="my-2 me-2">
+                <button class="btn btn-outline-primary">Copiar</button>
+            </div>
+            <div class="my-2">
+                @{
+                    var hayTramiteEnProceso = Model.Dto.TramitesIniciados.Any(t =>
+                        t.TipoTramiteId == (int)TipoTramiteEnum.CambioTitular &&
+                        t.EstadoActualId != (int)EstadosCambioTitularEnum.Finalizado);
+                }
+
+                <form asp-action="CambioTitular" asp-controller="CambioTitular" method="get">
+                    <input type="hidden" name="tramiteConcesionId" value="@Model.Dto.ConcesionId" />
+
+                    @if (hayTramiteEnProceso)
+                    {
+                        <p class="obligatorio">Existe un trámite en proceso</p>
+                    }
+                    else
+                    {
+                        <input type="submit" value="Iniciar trámite" class="btn btn-success" />
+                    }
+                </form>
+            </div>
+            
+        </div>
+        
+    </div>
+</div>
+
+@* <div class="cardConcesion my-4">
+    <div class="cardConcesion-content">
+        <h3>Aceptación de titularidad (titular actual fallecido)</h3>
+
+    </div>
+</div> *@
+
+
+
+
+    

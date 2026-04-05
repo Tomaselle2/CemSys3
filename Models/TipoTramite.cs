@@ -15,5 +15,7 @@ public partial class TipoTramite
 
     public virtual ICollection<PlantillasTramite> PlantillasTramites { get; set; } = new List<PlantillasTramite>();
 
+    public virtual ICollection<RequisitosTramite> RequisitosTramites { get; set; } = new List<RequisitosTramite>();
+
     public virtual ICollection<Tramite> Tramites { get; set; } = new List<Tramite>();
 }

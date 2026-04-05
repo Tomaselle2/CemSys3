@@ -89,6 +89,53 @@ namespace CemSys3.Business.Tramite
             return dto;
         }
 
+        public async Task<ListadoTramitesDeConcesionDTO> GetListadoTramitesDeConcesion(int concesionId)
+        {
+            ListadoTramitesDeConcesionDTO dto = new ListadoTramitesDeConcesionDTO();
+
+            int parcelaId = await _context.TramitesParcelas
+                .Where(tp => tp.TramiteId == concesionId)
+                .Select(tp => tp.ParcelaId)
+                .FirstOrDefaultAsync();
+
+            IEnumerable<Models.Tramite> tramites = await _context.TramitesParcelas
+                .Where(tp => tp.ParcelaId == parcelaId)
+                .Select(tp => tp.Tramite)
+                .ToListAsync();
+
+            int[] tiposNoPermitidos = new[] { (int)TipoTramiteEnum.Nota, (int)TipoTramiteEnum.Ingreso, (int)TipoTramiteEnum.ContratoConcesion };
+
+            var tramitesFiltrados = tramites
+                .Where(t => !tiposNoPermitidos.Contains(t.TipoTramiteId)) 
+                .ToList();
+
+            dto.Requisitos = await _context.RequisitosTramites
+                .Where(rt => rt.Activo == true)
+                .Select(rt => new RequisitosTramiteDTO
+                {
+                    Id = rt.Id,
+                    TipoTramiteId = rt.TipoTramiteId,
+                    Descripcion = rt.Descripcion ?? ""
+                })
+                .ToListAsync();
+
+            dto.ConcesionId = concesionId;
+            dto.ParcelaId = parcelaId;
+
+            dto.TramitesIniciados = tramitesFiltrados.Select(t => new TramiteDTO
+            {
+                Id = t.Id,
+                Visibilidad = t.Visibilidad,
+                FechaCreacion = t.FechaCreacion,
+                TipoTramiteId = t.TipoTramiteId,
+                UsuarioId = t.UsuarioId,
+                EstadoActualId = t.EstadoActualId
+            }).ToList();
+
+
+          return dto;
+        }
+
         public async Task Update(TramiteDTO dto)
         {
             Models.Tramite tramite = await _context.Tramites.FindAsync(dto.Id) ?? throw new Exception("No se encontro el trámite");

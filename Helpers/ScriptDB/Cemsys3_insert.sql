@@ -66,6 +66,16 @@ INSERT INTO TipoTramite (tipo) VALUES
 ('Cambio de titularidad'), --6
 ('Nota'); --7
 
+INSERT INTO RequisitosTramite (tipoTramiteId, descripcion)
+VALUES 
+(1, 'Debe presentarse el {titular} con DNI'),
+(2, 'Adjuntar acta de defunción si el titular está fallecido'),
+(3, 'Presentar libreta de familia'),
+(4, 'Adjuntar acta de defunción si el titular está fallecido'),
+(5, 'Adjuntar acta de defunción si el titular está fallecido'),
+(6, 'Adjuntar acta de defunción si el titular está fallecido');
+
+
 -- INSERT para TipoParcela
 INSERT INTO TipoParcela (tipo) VALUES 
 ('Nicho'),
@@ -147,8 +157,12 @@ VALUES
 ('SinContrato', 4), --contrato de concesion 5
 ('Vigente', 4), --contrato de concesion 6
 ('Vencido', 4), --contrato de concesion 7
-('Caducado', 4); --contrato de concesion 8
+('Caducado', 4), --contrato de concesion 8
+('Iniciado', 6), --cambio de titularidad 9
+('Finalizado', 6); --cambio de titularidad 10
 
+--select * from EstadosTramites
+--insert into EstadosTramites (estado, tipoTramiteId) values ('Iniciado', 6), ('Finalizado', 6);
 INSERT INTO Usuarios (nombre, apellido, correo, usuario, clave, rolId) values ('Tomas', 'Carreras', 'tomaselle2@gmail.com', 'Tomaselle2', 'P7eSe/VyhW8UaKMx5qghSw==.JYrOO0ZJQLp0A82FUreiYz7mWl+BpZykU1AfM1ZOpZU=', 2);
 
 --precios de nichos
@@ -594,11 +608,6 @@ null,--conceptoTranscripcionId --no aplica
 null, --cierre nicho --no aplica
 null, --cierre fosa
 1);-- visibilidad
-
-
-insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoEscenario, activo) values (6, 'Cambio de Titular - Ambos Presente', 'cambioooo', 1, 1);
-
-
 
 
 

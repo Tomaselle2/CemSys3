@@ -16,6 +16,7 @@ using CemSys3.Business.Seccion;
 using CemSys3.Business.Tarea;
 using CemSys3.Business.Tarifaria;
 using CemSys3.Business.Tramite;
+using CemSys3.Business.TramiteConcesion;
 using CemSys3.Business.Usuario;
 using CemSys3.Helpers.PDF;
 using CemSys3.Interfaces.Archivo;
@@ -36,6 +37,7 @@ using CemSys3.Interfaces.Seccion;
 using CemSys3.Interfaces.Tarea;
 using CemSys3.Interfaces.Tarifaria;
 using CemSys3.Interfaces.Tramite;
+using CemSys3.Interfaces.TramiteConcesion;
 using CemSys3.Interfaces.Usuario;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
@@ -82,6 +84,7 @@ builder.Services.AddScoped<INotificaciones, NotificacionService>();
 builder.Services.AddScoped<IViewRenderService, ViewRenderService>();
 builder.Services.AddScoped<IDeudaConcesion, DeudaConcesionService>();
 builder.Services.AddScoped<IPlantillaTramite, PlantillaTramiteService>();
+builder.Services.AddScoped<ICambioTitular, CambioTitularService>();
 
 
 

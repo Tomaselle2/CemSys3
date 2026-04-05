@@ -181,6 +181,7 @@ CREATE TABLE [dbo].[Tramites] (
     [tipoTramiteId] int NOT NULL,
     [usuarioId] int NOT NULL,
     [estadoActualId] int NOT NULL,
+	FechaFinalizacion datetime null,
     PRIMARY KEY ([id]),
     CONSTRAINT [Tramites_estadoActualId_fk] FOREIGN KEY([estadoActualId]) REFERENCES [dbo].[EstadosTramites]([id]),
     CONSTRAINT [Tramites_tipoTramiteId_fk] FOREIGN KEY([tipoTramiteId]) REFERENCES [dbo].[TipoTramite]([id]),
@@ -471,11 +472,6 @@ CREATE TABLE CambiosTitularidad (
 
     infoAdicional NVARCHAR(MAX) null,
 
-    -- CLAVE
-    tipoCambio INT NOT NULL, 
-    -- 1 = titular presente
-    -- 2 = titular fallecido
-
     visibilidad BIT DEFAULT 1,
 
     CONSTRAINT FK_CT_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
@@ -490,13 +486,35 @@ CREATE TABLE PlantillasTramite (
     nombre NVARCHAR(100),
     contenido NVARCHAR(MAX), -- HTML con variables
 
-    tipoEscenario INT NULL, 
-    -- 🔥 CLAVE
-    -- 1 = titular presente
-    -- 2 = titular fallecido
-
     activo BIT DEFAULT 1,
     fechaModificacion DATETIME DEFAULT GETDATE(),
 
     CONSTRAINT FK_PT_TipoTramite FOREIGN KEY (tipoTramiteId) REFERENCES TipoTramite(id)
+);
+
+CREATE TABLE DocumentosTramite (
+    id INT IDENTITY PRIMARY KEY,
+    tramiteId INT NOT NULL,
+    plantillaId INT NULL,          -- de qué plantilla partió (puede ser null si es libre)
+    nombre NVARCHAR(150) NOT NULL, -- ej: "Acta de cambio de titular"
+    contenidoHtml NVARCHAR(MAX),   -- lo que guarda CKEditor
+    version INT NOT NULL DEFAULT 1,-- por si querés historial de ediciones
+    fechaUltimaEdicion DATETIME DEFAULT GETDATE(),
+    usuarioId INT NOT NULL,        -- quién lo editó por última vez
+    visibilidad BIT DEFAULT 1,
+
+    CONSTRAINT FK_DT_Tramite   FOREIGN KEY (tramiteId)  REFERENCES Tramites(id),
+    CONSTRAINT FK_DT_Plantilla FOREIGN KEY (plantillaId) REFERENCES PlantillasTramite(id),
+    CONSTRAINT FK_DT_Usuario   FOREIGN KEY (usuarioId)   REFERENCES Usuarios(id)
+);
+
+CREATE TABLE RequisitosTramite (
+    id INT IDENTITY PRIMARY KEY,
+    tipoTramiteId INT NOT NULL,
+
+    descripcion NVARCHAR(MAX), -- texto con variables
+    activo BIT DEFAULT 1,
+
+    CONSTRAINT FK_RT_TipoTramite 
+        FOREIGN KEY (tipoTramiteId) REFERENCES TipoTramite(id)
 );
