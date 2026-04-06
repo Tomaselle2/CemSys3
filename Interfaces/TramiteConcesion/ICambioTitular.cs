@@ -5,6 +5,7 @@ namespace CemSys3.Interfaces.TramiteConcesion
     public interface ICambioTitular
     {
         Task<CambioTitularDTO> AddCambioTitular(int tramiteConcesionId, int usuarioId); //get
+        Task<CambioTitularDTO> Get(int cambioTitularId, int concesionId); //get id del tramite de cambio de titular
 
         Task<int> CambioTitular(CambioTitularDTO dto); //post
     }

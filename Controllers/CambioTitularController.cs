@@ -2,8 +2,11 @@
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
+using CemSys3.Interfaces.Archivo;
+using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.PlantillaTramite;
 using CemSys3.Interfaces.TramiteConcesion;
+using CemSys3.Models;
 using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,16 +16,22 @@ namespace CemSys3.Controllers
     {
         private readonly IPlantillaTramite _planillasService;
         private readonly ICambioTitular _cambioTitular;
-        public CambioTitularController(IPlantillaTramite planillasService, ICambioTitular cambioTitular)
+        private readonly IArchivo _archivoService;
+        private readonly IHistorialEstados _historialService;
+
+        public CambioTitularController(IPlantillaTramite planillasService, ICambioTitular cambioTitular, IArchivo archivoService, IHistorialEstados historialService)
         {
             _planillasService = planillasService;
             _cambioTitular = cambioTitular;
+            _archivoService = archivoService;
+            _historialService = historialService;
         }
 
-        //tramite de cambio de titular ambos titulares presentes. Se genera el tramite
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> CambioTitular(int tramiteConcesionId)
+        public async Task<IActionResult> CambioTitular(
+            int? cambioTitularId,
+            int? concesionId)
         {
             CambioTitularVM viewModel = new CambioTitularVM();
             viewModel.SweetAlert = TempData.GetSweetAlert();
@@ -30,20 +39,40 @@ namespace CemSys3.Controllers
             try
             {
                 viewModel.PlantillaTramite = await _planillasService.Get((int)PlantillasTramitesEnum.CambioTipo1);
+
                 int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
-                viewModel.Dto = await _cambioTitular.AddCambioTitular(tramiteConcesionId, usuarioId);
+
+                if (cambioTitularId.HasValue && concesionId.HasValue)
+                {
+                    //CONTINUAR trámite existente
+                    viewModel.Dto = await _cambioTitular.Get(cambioTitularId.Value, concesionId.Value);
+                    viewModel.Archivos = await _archivoService.GetAllByTramiteId(cambioTitularId.Value);
+                    viewModel.Historial = await _historialService.GetAllById(cambioTitularId.Value);
+                }
+                else if (concesionId.HasValue)
+                {
+                    //INICIAR nuevo trámite
+                    viewModel.Dto = await _cambioTitular.AddCambioTitular(concesionId.Value, usuarioId);
+                }
+                else
+                {
+                    throw new Exception("Parámetros inválidos.");
+                }
+
+                return View(viewModel);
             }
             catch (Exception ex)
             {
-                viewModel.SweetAlert = new SweetAlertDTO
+                TempData.SetSweetAlert(new SweetAlertDTO
                 {
                     Titulo = "Error",
-                    Mensaje = $"Ocurrió un error al generar el trámite: {ex.Message}",
+                    Mensaje = ex.Message,
                     Tipo = "error"
-                };
+                });
+                return RedirectToAction("Index", "TramiteConcesion", new { tramiteId = concesionId });
+
             }
 
-            return View(viewModel);
         }
     }
 }

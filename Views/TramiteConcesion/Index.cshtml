@@ -3,48 +3,57 @@
 @model ListadoTramitesVM
 @{
     ViewData["Title"] = "Trámites de concesión";
+
+    string requisitosCambioTitularidad = string.Empty;
+
+    foreach (var requisito in Model.Dto.Requisitos)
+    {
+        if (requisito.TipoTramiteId == (int)TipoTramiteEnum.CambioTitular)
+            requisitosCambioTitularidad = requisito.Descripcion;
+    }
 }
 
 <div class="cardConcesion my-4">
     <div class="cardConcesion-content">
         <h3>Cambio de titular (ambos titulares presentes)</h3>
-        <textarea class="form-control"></textarea>
-        <div class="d-flex justify-content-md-start align-items-center">
-            <div class="my-2 me-2">
+        <textarea class="form-control mb-2" rows="3">@requisitosCambioTitularidad</textarea>
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3">
+            <div>
                 <button class="btn btn-outline-primary">Copiar</button>
             </div>
-            <div class="my-2">
+
+            <div class="text-end">
                 @{
-                    var hayTramiteEnProceso = Model.Dto.TramitesIniciados.Any(t =>
-                        t.TipoTramiteId == (int)TipoTramiteEnum.CambioTitular &&
-                        t.EstadoActualId != (int)EstadosCambioTitularEnum.Finalizado);
+                    var tramiteEnProceso = Model.Dto.TramitesIniciados
+                        .FirstOrDefault(t => t.TipoTramiteId == (int)TipoTramiteEnum.CambioTitular &&
+                                             t.EstadoActualId != (int)EstadosCambioTitularEnum.Finalizado);
                 }
-
-                <form asp-action="CambioTitular" asp-controller="CambioTitular" method="get">
-                    <input type="hidden" name="tramiteConcesionId" value="@Model.Dto.ConcesionId" />
-
-                    @if (hayTramiteEnProceso)
-                    {
-                        <p class="obligatorio">Existe un trámite en proceso</p>
-                    }
-                    else
-                    {
+                @if (tramiteEnProceso != null)
+                {
+                    <p class="obligatorio mb-2">Existe un trámite en proceso</p>
+                    <form asp-action="CambioTitular" asp-controller="CambioTitular" method="get" class="d-inline">
+                        <input type="hidden" name="cambioTitularId" value="@tramiteEnProceso.Id" />
+                        <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
+                        <input type="submit" value="Continuar trámite" class="btn btn-warning" />
+                    </form>
+                }
+                else
+                {
+                    <form asp-action="CambioTitular" asp-controller="CambioTitular" method="get">
+                        <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
                         <input type="submit" value="Iniciar trámite" class="btn btn-success" />
-                    }
-                </form>
+                    </form>
+                }
             </div>
-            
         </div>
-        
     </div>
 </div>
 
-@* <div class="cardConcesion my-4">
-    <div class="cardConcesion-content">
-        <h3>Aceptación de titularidad (titular actual fallecido)</h3>
+<!--Aqui van a ir mas tramites-->
 
-    </div>
-</div> *@
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />
 
 
 

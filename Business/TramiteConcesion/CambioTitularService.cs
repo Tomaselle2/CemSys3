@@ -118,6 +118,46 @@ namespace CemSys3.Business.TramiteConcesion
         {
             throw new NotImplementedException();
         }
+
+        public async Task<CambioTitularDTO> Get(int cambioTitularId, int concesionId)
+        {
+
+            Models.Concesione concesion = await _context.Concesiones.AsNoTracking()
+                   .Include(c => c.Tramite)
+                   .Include(c => c.Parcela)
+                       .ThenInclude(p => p.Seccion)
+                   .FirstOrDefaultAsync(c => c.TramiteId == concesionId) ?? throw new Exception("Concesion no encontrada para inicar el trámite.");
+
+            Models.CambiosTitularidad cambioTitularidad = await _context.CambiosTitularidads.AsNoTracking()
+                .Include(t=> t.Tramite)
+                .FirstOrDefaultAsync(ct => ct.TramiteId == cambioTitularId) ?? throw new Exception("Trámite de cambio de titularidad no encontrado.");
+
+            CambioTitularDTO dto = new CambioTitularDTO();
+            dto.TramiteId = cambioTitularidad.TramiteId;
+            dto.EstadoTramiteId = cambioTitularidad.Tramite.EstadoActualId;
+            dto.ParcelaId = cambioTitularidad.ParcelaId;
+            dto.TipoParcela = concesion.TipoParcela;
+            dto.NombreSeccion = concesion.Parcela.Seccion.Nombre;
+            dto.NroParcela = concesion.Parcela.NroParcela;
+            dto.NroFila = concesion.Parcela.NroFila;
+            dto.NroConcesion = concesion.Concesion;
+
+            dto.TitularesActuales = await _context.HistorialTitularesConcesiones
+                    .Where(h => h.ConcesionId == concesionId && h.FechaFin == null)
+                    .Select(h => new TitularesContratoDTO
+                    {
+                        Id = h.Persona.Id,
+                        Dni = h.Persona.Dni,
+                        Nombre = h.Persona.Nombre,
+                        Apellido = h.Persona.Apellido,
+                        Sexo = h.Persona.Sexo,
+                        Celular = h.Persona.Celular,
+                        CorreoElectronico = h.Persona.Correo,
+                        Domicilio = h.Persona.Domicilio
+                    }).ToListAsync();
+
+            return dto;
+        }
     }
 }
 

@@ -69,6 +69,7 @@
                                             </button>
 
                                             <form asp-action="Eliminar"
+
                                                   asp-controller="Archivo"
                                                   method="get"
                                                   style="display: inline-block;"
@@ -76,7 +77,7 @@
                                                   data-confirm-title="Confirmar eliminación"
                                                   data-confirm-message="¿Está seguro de eliminar el archivo @opc.Descripcion?.ToUpper()?"
                                                   data-confirm-icon="warning">
-
+                                                 <input type="hidden" name="returnUrl" value="@Model.returnUrl" />
                                                 <input type="hidden" name="archivoId" value="@opc.Id" />
                                                 <input type="hidden" name="tramiteId" value="@Model.TramiteId"/>
 
@@ -123,6 +124,7 @@
             </div>
             <div class="modal-body">
                 <form asp-action="Editar" asp-controller="Archivo" method="post" id="formEditarArchivo" class="form-box" enctype="multipart/form-data">
+                    <input type="hidden" asp-for="returnUrl" />
                     <div class="mb-3">
                         <label for="descripcionArchivoEdicion">Descripción<span class="obligatorio"> * </span></label>
                         <input asp-for="Descripcion" id="descripcionArchivoEdicion" class="form-control" type="text" maxlength="255" required />
@@ -193,6 +195,7 @@
             </div>
             <div class="modal-body">
                 <form asp-action="Subir" asp-controller="Archivo" method="post" id="subirArchivoContratoForm" class="form-box" enctype="multipart/form-data">
+                    <input type="hidden" asp-for="returnUrl" />
                     <div class="mb-3">
                         <label for="descripcionArchivo">Descripción<span class="obligatorio"> * </span></label>
                         <input asp-for="Descripcion" id="descripcionArchivo" class="form-control" type="text" maxlength="255" required />

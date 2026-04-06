@@ -7,6 +7,7 @@ using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Archivo;
 using CemSys3.Models;
 using CemSys3.ViewModels.Archivo;
+using CemSys3.ViewModels.Concesion;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CemSys3.Controllers
@@ -33,7 +34,11 @@ namespace CemSys3.Controllers
                     Tipo = "error"
                 });
 
-                return RedirectToAction("IrATramite", "Tramite", new { tramiteId = viewModel.TramiteId });
+                if (!string.IsNullOrEmpty(viewModel.returnUrl) && Url.IsLocalUrl(viewModel.returnUrl))
+                {
+                    return Redirect(viewModel.returnUrl);
+                }
+                return RedirectToAction("IrATramite", "Tramite", new { tramiteId = viewModel.TramiteId});
             }
 
             if (viewModel.Archivo == null || viewModel.Archivo.Length == 0)
@@ -45,7 +50,11 @@ namespace CemSys3.Controllers
                     Tipo = "error"
                 });
 
-                return RedirectToAction("IrATramite", "Tramite", new { tramiteId = viewModel.TramiteId });
+                if (!string.IsNullOrEmpty(viewModel.returnUrl) && Url.IsLocalUrl(viewModel.returnUrl))
+                {
+                    return Redirect(viewModel.returnUrl);
+                }
+                return RedirectToAction("IrATramite", "Tramite", new { tramiteId = viewModel.TramiteId});
             }
 
             // Validar extensión
@@ -60,6 +69,10 @@ namespace CemSys3.Controllers
                     Tipo = "error"
                 });
 
+                if (!string.IsNullOrEmpty(viewModel.returnUrl) && Url.IsLocalUrl(viewModel.returnUrl))
+                {
+                    return Redirect(viewModel.returnUrl);
+                }
                 return RedirectToAction("IrATramite", "Tramite", new { tramiteId = viewModel.TramiteId });
             }
 
@@ -93,6 +106,11 @@ namespace CemSys3.Controllers
                     Mensaje = "Archivo subido correctamente",
                     Tipo = "success"
                 });
+
+                if (!string.IsNullOrEmpty(viewModel.returnUrl) && Url.IsLocalUrl(viewModel.returnUrl))
+                {
+                    return Redirect(viewModel.returnUrl);
+                }
                 return RedirectToAction("IrATramite", "Tramite", new { tramiteId = viewModel.TramiteId });
             }
             catch (Exception ex)
@@ -103,6 +121,11 @@ namespace CemSys3.Controllers
                     Mensaje = "Error al subir el archivo: " + ex.Message,
                     Tipo = "error"
                 });
+
+                if (!string.IsNullOrEmpty(viewModel.returnUrl) && Url.IsLocalUrl(viewModel.returnUrl))
+                {
+                    return Redirect(viewModel.returnUrl);
+                }
 
                 return RedirectToAction("IrATramite", "Tramite", new { tramiteId = viewModel.TramiteId });
             }
@@ -121,6 +144,11 @@ namespace CemSys3.Controllers
                     Tipo = "error"
                 });
 
+                if (!string.IsNullOrEmpty(viewModel.returnUrl) && Url.IsLocalUrl(viewModel.returnUrl))
+                {
+                    return Redirect(viewModel.returnUrl);
+                }
+
                 return RedirectToAction("IrATramite", "Tramite", new { tramiteId = viewModel.TramiteId });
             }
 
@@ -133,6 +161,10 @@ namespace CemSys3.Controllers
                     Tipo = "error"
                 });
 
+                if (!string.IsNullOrEmpty(viewModel.returnUrl) && Url.IsLocalUrl(viewModel.returnUrl))
+                {
+                    return Redirect(viewModel.returnUrl);
+                }
                 return RedirectToAction("IrATramite", "Tramite", new { tramiteId = viewModel.TramiteId });
             }
 
@@ -156,7 +188,12 @@ namespace CemSys3.Controllers
                     Mensaje = "Archivo editado correctamente",
                     Tipo = "success"
                 });
-                return RedirectToAction("IrATramite", "Tramite", new { tramiteId = viewModel.TramiteId });
+
+                if (!string.IsNullOrEmpty(viewModel.returnUrl) && Url.IsLocalUrl(viewModel.returnUrl))
+                {
+                    return Redirect(viewModel.returnUrl);
+                }
+                return RedirectToAction("IrATramite", "Tramite", new { tramiteId = viewModel.TramiteId});
             }
             catch (Exception ex)
             {
@@ -167,13 +204,17 @@ namespace CemSys3.Controllers
                     Tipo = "error"
                 });
 
+                if (!string.IsNullOrEmpty(viewModel.returnUrl) && Url.IsLocalUrl(viewModel.returnUrl))
+                {
+                    return Redirect(viewModel.returnUrl);
+                }
                 return RedirectToAction("IrATramite", "Tramite", new { tramiteId = viewModel.TramiteId });
             }
         }
 
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado, RolUsuario.Administrador)]
-        public async Task<IActionResult> Eliminar(int tramiteId, Guid archivoId)
+        public async Task<IActionResult> Eliminar(int tramiteId, Guid archivoId, string returnUrl)
         {
             try
             {
@@ -185,7 +226,12 @@ namespace CemSys3.Controllers
                     Mensaje = "Archivo eliminado correctamente",
                     Tipo = "success"
                 });
-                return RedirectToAction("IrATramite", "Tramite", new { tramiteId = tramiteId });
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+                return RedirectToAction("IrATramite", "Tramite", new { tramiteId = tramiteId});
             }
             catch (Exception ex)
             {
@@ -195,7 +241,10 @@ namespace CemSys3.Controllers
                     Mensaje = "Error al eliminar el archivo: " + ex.Message,
                     Tipo = "error"
                 });
-
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
                 return RedirectToAction("IrATramite", "Tramite", new { tramiteId = tramiteId });
             }
         }
