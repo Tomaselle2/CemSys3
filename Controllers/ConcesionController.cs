@@ -76,7 +76,7 @@ namespace CemSys3.Controllers
         //vista para hacer el contrato de conesion, por primera vez o para renovacion, dependiendo del estado del tramite
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> GenerarContrato(int idTramite)
+        public async Task<IActionResult> GenerarContrato(int idTramite, bool EsRenovacion)
         {
             GenerarContratoVM viewModel = new GenerarContratoVM();
             viewModel.SweetAlert = TempData.GetSweetAlert();
@@ -84,6 +84,7 @@ namespace CemSys3.Controllers
             try
             {
                 viewModel.contrato = await _concesionService.SolicitarDatosParaGenerarContrato(idTramite);
+                viewModel.contrato.EsRenovacion = EsRenovacion;
 
                 if (viewModel.contrato.TipoParcela == "Nicho")
                 {
@@ -156,7 +157,8 @@ namespace CemSys3.Controllers
                 OtraFormaPago = viewModel.otraFormaPago,
                 CantidadAniosId = viewModel.CantidadAniosId.Value,
                 Vencimiento = viewModel.Vencimiento.Value,
-                fechaGeneracion = DateTime.Now
+                fechaGeneracion = DateTime.Now,
+                EsRenovacion = viewModel.contrato.EsRenovacion
             };
 
             var ruta = Path.Combine(_env.WebRootPath, "config", "intendente.txt");
@@ -165,12 +167,6 @@ namespace CemSys3.Controllers
                 ? System.IO.File.ReadAllText(ruta)
                 : "-----";
             contratoGenerado.NombreIntendente = intendente;
-
-            if (viewModel.contrato.EstadoTramiteId == (int)EstadosConcesionEnum.Vencido)
-            {
-                contratoGenerado.EsRenovacion = true;
-            }
-
             
             return contratoGenerado;
         }

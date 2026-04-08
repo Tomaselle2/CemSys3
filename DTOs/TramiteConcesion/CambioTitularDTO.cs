@@ -15,6 +15,9 @@ namespace CemSys3.DTOs.TramiteConcesion
         public int NroFila { get; set; }
 
         public List<TitularesContratoDTO> TitularesActuales { get; set; } = new List<TitularesContratoDTO>(); //no se modifican, vienen de BD
-        public List<PersonaDTO>? NuevosTitulares { get; set; } //solo para el post pasan a metodo de modificar.
+
+        public List<TitularesContratoDTO> NuevosTitulares { get; set; } = new List<TitularesContratoDTO>(); 
+
+        public List<PersonaDTO>? NuevosTitularesPost { get; set; } //solo para el post pasan a metodo de modificar.
     }
 }

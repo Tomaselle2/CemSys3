@@ -283,6 +283,7 @@
                 <input type="hidden" asp-for="PrecioFinal" id="precioFinal" name="PrecioFinal" />
                 <input type="hidden" asp-for="contrato.NroFila" value="@Model.contrato.NroFila" />
                 <input type="hidden" asp-for="contrato.NroParcela" value="@Model.contrato.NroParcela" />
+                <input type="hidden" asp-for="contrato.EsRenovacion"/>
 
                 <div class="text-center p-3">
                     <input type="submit" value="Generar contrato" class="btn btn-success" id="btnGenerarContrato" data-no-loader="true" />

@@ -25,7 +25,7 @@ namespace CemSys3.Controllers
         [AuthorizeRole(RolUsuario.Empleado, RolUsuario.Administrador)]
         public async Task<IActionResult> Subir(ArchivoVM viewModel)
         {
-            if (string.IsNullOrWhiteSpace(viewModel.Descripcion) || string.IsNullOrWhiteSpace(viewModel.CategoriaArchivo))
+            if (string.IsNullOrEmpty(viewModel.Descripcion) || string.IsNullOrEmpty(viewModel.CategoriaArchivo))
             {
                 TempData.SetSweetAlert(new DTOs.SweetAlert.SweetAlertDTO
                 {

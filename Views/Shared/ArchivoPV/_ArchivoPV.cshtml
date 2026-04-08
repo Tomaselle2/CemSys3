@@ -127,7 +127,7 @@
                     <input type="hidden" asp-for="returnUrl" />
                     <div class="mb-3">
                         <label for="descripcionArchivoEdicion">Descripción<span class="obligatorio"> * </span></label>
-                        <input asp-for="Descripcion" id="descripcionArchivoEdicion" class="form-control" type="text" maxlength="255" required />
+                        <input asp-for="Descripcion" id="descripcionArchivoEdicion" class="form-control" type="text" maxlength="255" required autocomplete="off"/>
                         <span asp-validation-for="Descripcion" class="text-danger"></span>
                     </div>
                     <div class="form-group mb-3">
@@ -198,7 +198,7 @@
                     <input type="hidden" asp-for="returnUrl" />
                     <div class="mb-3">
                         <label for="descripcionArchivo">Descripción<span class="obligatorio"> * </span></label>
-                        <input asp-for="Descripcion" id="descripcionArchivo" class="form-control" type="text" maxlength="255" required />
+                        <input asp-for="Descripcion" id="descripcionArchivo" class="form-control" type="text" maxlength="255" required autocomplete="off"/>
                         <span asp-validation-for="Descripcion" class="text-danger"></span>
                     </div>
                     <div class="form-group mb-3">

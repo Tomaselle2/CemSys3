@@ -82,13 +82,12 @@ new HistorialOffcanvasVM
                             <button type="submit" class="btn btn-danger btn-sm">Generar contrato</button>
                         </form>
                     </div>
-                }
-
-                @if (Model.Dto.EstadoTramiteId == (int)EstadosConcesionEnum.Vencido)
+                }else if(Model.Dto.PuedeRenovar)
                 {
                     <div class="btn-container">
                         <form asp-action="GenerarContrato" asp-controller="Concesion" method="get" class="mt-2">
                             <input type="hidden" name="idTramite" value="@Model.Dto.TramiteId" />
+                            <input type="hidden" name="EsRenovacion" value="true" />
                             <button type="submit" class="btn btn-danger btn-sm">Renovar contrato</button>
                         </form>
                     </div>

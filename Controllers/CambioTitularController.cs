@@ -1,4 +1,5 @@
 ﻿using CemSys3.DTOs.SweetAlert;
+using CemSys3.DTOs.TramiteConcesion;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
@@ -52,7 +53,12 @@ namespace CemSys3.Controllers
                 else if (concesionId.HasValue)
                 {
                     //INICIAR nuevo trámite
-                    viewModel.Dto = await _cambioTitular.AddCambioTitular(concesionId.Value, usuarioId);
+                    CambioTitularDTO Dto = await _cambioTitular.AddCambioTitular(concesionId.Value, usuarioId);
+                    return RedirectToAction("CambioTitular", new
+                    {
+                        cambioTitularId = Dto.TramiteId, // o el id correcto
+                        concesionId = concesionId.Value
+                    });
                 }
                 else
                 {
@@ -70,9 +76,9 @@ namespace CemSys3.Controllers
                     Tipo = "error"
                 });
                 return RedirectToAction("Index", "TramiteConcesion", new { tramiteId = concesionId });
-
             }
-
         }
+
+
     }
 }

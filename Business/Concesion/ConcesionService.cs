@@ -442,6 +442,7 @@ namespace CemSys3.Business.Concesion
             dto.PorcentajeDescuentoRenovacionConcesionAlDia = porcentajeDescuentoRenovacion.Precio;
             dto.PorcentajeAumentoConcesionesOtrasLocalidades = porcentajeAumentoOtrasLocalidades.Precio;
             dto.PorcentajeFondoAyudaCentroSalud = porcentajeFondo.Precio;
+            
             return dto;
         }
 
@@ -493,6 +494,25 @@ namespace CemSys3.Business.Concesion
                     CorreoElectronico = h.Persona.Correo,
                     Domicilio = h.Persona.Domicilio
                 }).ToListAsync();
+
+            var hoy = DateTime.Today;
+
+            if (dto.Vencimiento.HasValue)
+            {
+                var venc = dto.Vencimiento.Value.ToDateTime(TimeOnly.MinValue);
+
+                bool estaVencido = dto.EstadoTramiteId == (int)EstadosConcesionEnum.Vencido;
+
+                bool mismoMes =
+                    venc.Month == hoy.Month &&
+                    venc.Year == hoy.Year;
+
+                dto.PuedeRenovar = estaVencido || mismoMes;
+            }
+            else
+            {
+                dto.PuedeRenovar = false;
+            }
 
             return dto;
         }

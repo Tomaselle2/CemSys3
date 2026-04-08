@@ -18,5 +18,7 @@ namespace CemSys3.DTOs.Concesion
         public List<DifuntoContratoDTO> Difuntos { get; set; } = new List<DifuntoContratoDTO>();
         public List<TitularesContratoDTO> Titulares { get; set; } = new List<TitularesContratoDTO>();
 
+        public bool PuedeRenovar { get; set; }
+
     }
 }
