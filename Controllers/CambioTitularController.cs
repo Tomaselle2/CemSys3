@@ -41,7 +41,7 @@ namespace CemSys3.Controllers
 
             try
             {
-                viewModel.PlantillaTramite = await _planillasService.Get((int)PlantillasTramitesEnum.Cambio_Titular_Ambos_Presentes);
+                viewModel.PlantillaTramite = await _planillasService.Get((int)TipoAutorizacionEnum.Cambio_Titular_Ambos_Presentes);
 
                 int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
 

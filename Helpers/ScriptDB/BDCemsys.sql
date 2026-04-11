@@ -482,10 +482,9 @@ CREATE TABLE CambiosTitularidad (
 CREATE TABLE PlantillasTramite (
     id INT IDENTITY PRIMARY KEY,
     tipoTramiteId INT NOT NULL,
-
     nombre NVARCHAR(100),
     contenido NVARCHAR(MAX), -- HTML con variables
-	int codigo null,
+	codigo int  null,
     activo BIT DEFAULT 1,
     fechaModificacion DATETIME DEFAULT GETDATE(),
 

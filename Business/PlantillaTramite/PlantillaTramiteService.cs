@@ -1,12 +1,7 @@
 ﻿using CemSys3.DTOs.PlantillaTramite;
-using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.PlantillaTramite;
-using CemSys3.Interfaces.Tramite;
 using CemSys3.Models;
-using iText.Forms.Form.Element;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace CemSys3.Business.PlantillaTramite
 {

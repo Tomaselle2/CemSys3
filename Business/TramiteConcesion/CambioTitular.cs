@@ -12,13 +12,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CemSys3.Business.TramiteConcesion
 {
-    public class CambioTitularBuilder : ICambioTitular
+    public class CambioTitular : ICambioTitular
     {
         private readonly AppDbContext _context;
         public readonly IHistorialEstados _historialEstadosService;
         public readonly ITramite _tramiteService;
 
-        public CambioTitularBuilder(AppDbContext context, ITramite tramiteService, IHistorialEstados historialEstadosService)
+        public CambioTitular(AppDbContext context, ITramite tramiteService, IHistorialEstados historialEstadosService)
         {
             _context = context;
             _tramiteService = tramiteService;
@@ -115,7 +115,7 @@ namespace CemSys3.Business.TramiteConcesion
 
         }
 
-        public Task<int> CambioTitular(CambioTitularDTO dto) //post
+        public Task<int> CambioTitularPost(CambioTitularDTO dto) //post
         {
             throw new NotImplementedException();
         }
