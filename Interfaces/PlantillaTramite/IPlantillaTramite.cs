@@ -7,5 +7,6 @@ namespace CemSys3.Interfaces.PlantillaTramite
         Task<int> Add(PlantillaTramiteDTO dto);
         Task<int> Update(PlantillaTramiteDTO dto);
         Task<PlantillaTramiteDTO> Get(int id);
+        Task<List<PlantillaTramiteDTO>> GetByTipoTramite(int tipoTramiteId);
     }
 }

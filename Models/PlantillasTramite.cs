@@ -19,6 +19,8 @@ public partial class PlantillasTramite
 
     public DateTime? FechaModificacion { get; set; }
 
+    public int? Codigo { get; set; }
+
     public virtual ICollection<DocumentosTramite> DocumentosTramites { get; set; } = new List<DocumentosTramite>();
 
     public virtual TipoTramite TipoTramite { get; set; } = null!;

@@ -285,7 +285,7 @@ new HistorialOffcanvasVM
 </form>
 
 
-<form asp-action="/" asp-controller="/" method="post">
+@* <form asp-action="/" asp-controller="/" method="post">
     <input type="hidden" asp-for="PlantillaTramite.Id" />
     <input type="hidden" asp-for="PlantillaTramite.TipoTramiteId" />
     <input type="hidden" asp-for="PlantillaTramite.TipoEscenario" />
@@ -293,7 +293,16 @@ new HistorialOffcanvasVM
     <textarea id="editor" asp-for="PlantillaTramite.Contenido"></textarea>
     <br />
     <button type="submit" class="btn btn-outline-success">Guardar</button>
-</form>
+</form> *@
+
+@foreach (var plantilla in Model.Plantillas)
+{
+    <button class="btn btn-outline-primary generarPlantilla"
+            data-id="@plantilla.Id"
+            data-tipo="CambioTitular">
+        @plantilla.Nombre
+    </button>
+}
 
 
 <!-- Archivos-->
@@ -344,7 +353,7 @@ new ArchivoVM
 
 <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
 @section Scripts {
-    <script>
+    @* <script>
         document.addEventListener('DOMContentLoaded', function () {
         // inicializar CKEditor acá
         ClassicEditor
@@ -373,6 +382,43 @@ new ArchivoVM
         .catch(error => console.error(error));
         });
         
+    </script> *@
+
+    <script>
+        document.querySelectorAll('.generarPlantilla').forEach(btn => {
+        btn.addEventListener('click', function () {
+
+        const plantillaId = this.dataset.id;
+        const tipo = this.dataset.tipo;
+
+        const dto = {
+        tramiteId: @Model.Dto.TramiteId,
+        tipoParcela: '@Model.Dto.TipoParcela',
+        nroParcela: @Model.Dto.NroParcela,
+        nroFila: @Model.Dto.NroFila,
+        titularesActuales: @Html.Raw(Json.Serialize(Model.Dto.TitularesActuales)),
+        nuevosTitulares: titulares
+        };
+
+        fetch('/Plantilla/GenerarPlantilla', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+        plantillaId: plantillaId,
+        tipoTramite: tipo,
+        data: dto
+        })
+        })
+        .then(r => r.json())
+        .then(data => {
+        if (data.success) {
+        editor.setData(data.contenido);
+        }
+        });
+        });
+        });
     </script>
 
     <script>

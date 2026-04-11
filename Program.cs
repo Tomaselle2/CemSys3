@@ -84,8 +84,6 @@ builder.Services.AddScoped<INotificaciones, NotificacionService>();
 builder.Services.AddScoped<IViewRenderService, ViewRenderService>();
 builder.Services.AddScoped<IDeudaConcesion, DeudaConcesionService>();
 builder.Services.AddScoped<IPlantillaTramite, PlantillaTramiteService>();
-builder.Services.AddScoped<ICambioTitular, CambioTitularService>();
-
 
 
 builder.Services.AddSingleton<IBrowser>(sp =>

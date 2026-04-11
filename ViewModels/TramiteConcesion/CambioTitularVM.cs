@@ -13,6 +13,7 @@ namespace CemSys3.ViewModels.TramiteConcesion
         public CambioTitularDTO Dto { get; set; } = new CambioTitularDTO();
         public IEnumerable<ArchivoDTO> Archivos { get; set; } = new List<ArchivoDTO>();
         public IEnumerable<HistorialEstadosDTO> Historial { get; set; } = new List<HistorialEstadosDTO>();
+        public List<PlantillaTramiteDTO> Plantillas { get; set; } = new();
 
         //manero de errores
         public SweetAlertDTO? SweetAlert { get; set; }

@@ -4,6 +4,7 @@ using CemSys3.DTOs.Tramite;
 using CemSys3.DTOs.TramiteConcesion;
 using CemSys3.Enumerables;
 using CemSys3.Interfaces.HistorialEstados;
+using CemSys3.Interfaces.PlantillaTramite;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Interfaces.TramiteConcesion;
 using CemSys3.Models;
@@ -11,13 +12,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CemSys3.Business.TramiteConcesion
 {
-    public class CambioTitularService : ICambioTitular
+    public class CambioTitularBuilder : ICambioTitular
     {
         private readonly AppDbContext _context;
         public readonly IHistorialEstados _historialEstadosService;
         public readonly ITramite _tramiteService;
 
-        public CambioTitularService(AppDbContext context, ITramite tramiteService, IHistorialEstados historialEstadosService)
+        public CambioTitularBuilder(AppDbContext context, ITramite tramiteService, IHistorialEstados historialEstadosService)
         {
             _context = context;
             _tramiteService = tramiteService;
@@ -157,6 +158,33 @@ namespace CemSys3.Business.TramiteConcesion
                     }).ToListAsync();
 
             return dto;
+        }
+
+        public Dictionary<string, string> Build(object data)
+        {
+            var dto = (CambioTitularDTO)data;
+
+            return new Dictionary<string, string>
+            {
+                { "Fecha", DateTime.Now.ToString("dd/MM/yyyy") },
+                { "TitularesActuales", string.Join(", ", dto.TitularesActuales.Select(t => $"{t.Apellido} {t.Nombre}")) },
+                { "NuevosTitulares", string.Join(", ", dto.NuevosTitulares.Select(t => $"{t.Apellido} {t.Nombre}")) },
+                { "Parcela", ObtenerParcela(dto) }
+            };
+        }
+
+        private string ObtenerParcela(CambioTitularDTO dto)
+        {
+            if (dto.TipoParcela == "Nicho")
+                return $"Nicho {dto.NroParcela} Fila {dto.NroFila}";
+
+            if (dto.TipoParcela == "Fosa")
+                return $"Fosa {dto.NroParcela}";
+
+            if (dto.TipoParcela == "Panteón")
+                return $"Lote {dto.NroParcela}";
+
+            return "";
         }
     }
 }

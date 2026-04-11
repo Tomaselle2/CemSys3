@@ -625,6 +625,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Activo)
                 .HasDefaultValue(true)
                 .HasColumnName("activo");
+            entity.Property(e => e.Codigo).HasColumnName("codigo");
             entity.Property(e => e.Contenido).HasColumnName("contenido");
             entity.Property(e => e.FechaModificacion)
                 .HasDefaultValueSql("(getdate())")

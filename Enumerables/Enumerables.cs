@@ -53,7 +53,7 @@ namespace CemSys3.Enumerables
     public enum PlantillasTramitesEnum
     {
         [Display(Name = "Cambio Titular - Presente")]
-        CambioTipo1 = 1,
+        Cambio_Titular_Ambos_Presentes = 1,
 
         [Display(Name = "Cambio Titular - Fallecido")]
         CambioTipo2 = 2,

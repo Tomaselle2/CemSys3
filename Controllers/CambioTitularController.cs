@@ -1,4 +1,6 @@
-﻿using CemSys3.DTOs.SweetAlert;
+﻿using CemSys3.Business.PlantillaTramite;
+using CemSys3.DTOs.PlantillaTramite;
+using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.TramiteConcesion;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
@@ -39,7 +41,7 @@ namespace CemSys3.Controllers
 
             try
             {
-                viewModel.PlantillaTramite = await _planillasService.Get((int)PlantillasTramitesEnum.CambioTipo1);
+                viewModel.PlantillaTramite = await _planillasService.Get((int)PlantillasTramitesEnum.Cambio_Titular_Ambos_Presentes);
 
                 int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
 
@@ -49,6 +51,7 @@ namespace CemSys3.Controllers
                     viewModel.Dto = await _cambioTitular.Get(cambioTitularId.Value, concesionId.Value);
                     viewModel.Archivos = await _archivoService.GetAllByTramiteId(cambioTitularId.Value);
                     viewModel.Historial = await _historialService.GetAllById(cambioTitularId.Value);
+                    viewModel.Plantillas = await _planillasService.GetByTipoTramite((int)TipoTramiteEnum.CambioTitular);
                 }
                 else if (concesionId.HasValue)
                 {
@@ -80,5 +83,56 @@ namespace CemSys3.Controllers
         }
 
 
+        //[HttpPost]
+        //[AuthorizeRole(RolUsuario.Empleado)]
+        //public async Task<IActionResult> GenerarPlantilla([FromBody] PlantillaRequestDTO request)
+        //{
+        //    var plantilla = await _planillasService.Get(request.PlantillaId);
+
+        //    var builder = _factory.Get(request.TipoTramite);
+
+        //    var variables = builder.Build(request.Data);
+
+        //    var html = _planillasService.Render(plantilla.Contenido, variables);
+
+        //    return Json(new
+        //    {
+        //        success = true,
+        //        contenido = html
+        //    });
+        //}
+
+        //[HttpPost]
+        //public IActionResult GenerarPlantilla([FromBody] GenerarPlantillaRequest request)
+        //{
+        //    try
+        //    {
+        //        var builder = _factory.Get(request.TipoTramite);
+        //        var contenido = builder.Build(request.Data, request.PlantillaId);
+
+        //        return Json(new
+        //        {
+        //            success = true,
+        //            contenido = contenido
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new
+        //        {
+        //            success = false,
+        //            message = ex.Message
+        //        });
+        //    }
+        //}
+
+
     }
+
+    //public class GenerarPlantillaRequest
+    //{
+    //    public int PlantillaId { get; set; }
+    //    public string TipoTramite { get; set; }
+    //    public object Data { get; set; }
+    //}
 }

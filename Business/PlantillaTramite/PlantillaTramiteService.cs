@@ -5,6 +5,7 @@ using CemSys3.Interfaces.Tramite;
 using CemSys3.Models;
 using iText.Forms.Form.Element;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace CemSys3.Business.PlantillaTramite
@@ -46,11 +47,33 @@ namespace CemSys3.Business.PlantillaTramite
                 Nombre = plantilla.Nombre,
                 Contenido = plantilla.Contenido,
                 TipoEscenario = plantilla.TipoEscenario,
+                Codigo = plantilla.Codigo.Value,
                 Activo = plantilla.Activo,
+
                 FechaModificacion = plantilla.FechaModificacion
             };
             return dto;
         }
+
+        public async Task<List<PlantillaTramiteDTO>> GetByTipoTramite(int tipoTramiteId)
+        {
+            var plantillas = await _context.PlantillasTramites
+                .Where(p => p.TipoTramiteId == tipoTramiteId && p.Activo == true)
+                .OrderBy(p => p.Nombre).ToListAsync();
+
+            return plantillas.Select(p => new PlantillaTramiteDTO
+            {
+                Id = p.Id,
+                TipoTramiteId = p.TipoTramiteId,
+                Nombre = p.Nombre,
+                Contenido = p.Contenido,
+                TipoEscenario = p.TipoEscenario,
+                Codigo = p.Codigo.Value,
+                Activo = p.Activo,
+                FechaModificacion = p.FechaModificacion
+            }).ToList();
+        }
+
 
         public async Task<int> Update(PlantillaTramiteDTO dto)
         {
@@ -70,6 +93,16 @@ namespace CemSys3.Business.PlantillaTramite
             return await _context.SaveChangesAsync();
         }
 
+
+        public string Render(string html, Dictionary<string, string> variables)
+        {
+            foreach (var v in variables)
+            {
+                html = html.Replace($"{{{v.Key}}}", v.Value ?? "");
+            }
+
+            return html;
+        }
 
 
         //🧠 PASO 1: Elegir plantilla correcta

@@ -13,6 +13,7 @@
         public int? TipoEscenario { get; set; }
 
         public bool? Activo { get; set; }
+        public int Codigo { get; set; }
 
         public DateTime? FechaModificacion { get; set; }
     }

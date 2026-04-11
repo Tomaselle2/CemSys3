@@ -485,7 +485,7 @@ CREATE TABLE PlantillasTramite (
 
     nombre NVARCHAR(100),
     contenido NVARCHAR(MAX), -- HTML con variables
-
+	int codigo null,
     activo BIT DEFAULT 1,
     fechaModificacion DATETIME DEFAULT GETDATE(),
 
