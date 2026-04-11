@@ -13,6 +13,8 @@ public partial class Concesione
 
     public bool? Visibilidad { get; set; }
 
+    public string? InformacionAdicional { get; set; }
+
     public string? TipoParcela { get; set; }
 
     public DateOnly? Vencimiento { get; set; }
@@ -23,13 +25,11 @@ public partial class Concesione
 
     public int? CuotaId { get; set; }
 
-    public int? UsuarioId { get; set; }
-
-    public string? InformacionAdicional { get; set; }
-
     public DateTime? FechaInicio { get; set; }
 
     public DateTime? FechaFin { get; set; }
+
+    public int? UsuarioId { get; set; }
 
     public virtual AnioConcesion? CantidadAnios { get; set; }
 

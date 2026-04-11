@@ -45,6 +45,8 @@ public partial class Persona
 
     public virtual CategoriasPersona? CategoriaPersona { get; set; }
 
+    public virtual ICollection<DocumentosTramite> DocumentosTramites { get; set; } = new List<DocumentosTramite>();
+
     public virtual EstadosDifunto? EstadoDifunto { get; set; }
 
     public virtual ICollection<HistorialTitularesConcesione> HistorialTitularesConcesiones { get; set; } = new List<HistorialTitularesConcesione>();

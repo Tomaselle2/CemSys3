@@ -23,6 +23,12 @@ public partial class DocumentosTramite
 
     public bool? Visibilidad { get; set; }
 
+    public int? PersonaId { get; set; }
+
+    public string? Parentesco { get; set; }
+
+    public virtual Persona? Persona { get; set; }
+
     public virtual PlantillasTramite? Plantilla { get; set; }
 
     public virtual Tramite Tramite { get; set; } = null!;

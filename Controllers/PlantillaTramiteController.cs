@@ -78,7 +78,7 @@ namespace CemSys3.Controllers
                     Tipo = "success"
                 }); 
 
-                return RedirectToAction($"{viewModel.vista}", new { plantillaId = viewModel?.Dto?.Id });
+                return RedirectToAction($"{viewModel.vista}", new { plantillaId = viewModel?.Dto?.PlantillaId });
 
             }
             catch (Exception ex)

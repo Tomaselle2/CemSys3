@@ -21,7 +21,7 @@ namespace CemSys3.Business.PlantillaTramite
                 TipoTramiteId = dto.TipoTramiteId,
                 Nombre = dto.Nombre,
                 Contenido = dto.Contenido,
-                TipoEscenario = dto.TipoEscenario,
+                TipoAutorizacionId = dto.TipoAutorizacionId,
                 Activo = true,
                 FechaModificacion = DateTime.UtcNow
             };
@@ -37,12 +37,11 @@ namespace CemSys3.Business.PlantillaTramite
 
             PlantillaTramiteDTO dto = new PlantillaTramiteDTO
             {
-                Id = plantilla.Id,
+                PlantillaId = plantilla.Id,
                 TipoTramiteId = plantilla.TipoTramiteId,
                 Nombre = plantilla.Nombre,
                 Contenido = plantilla.Contenido,
-                TipoEscenario = plantilla.TipoEscenario,
-                Codigo = plantilla.Codigo.Value,
+                TipoAutorizacionId = plantilla.TipoAutorizacionId ?? 0,
                 Activo = plantilla.Activo,
 
                 FechaModificacion = plantilla.FechaModificacion
@@ -58,12 +57,11 @@ namespace CemSys3.Business.PlantillaTramite
 
             return plantillas.Select(p => new PlantillaTramiteDTO
             {
-                Id = p.Id,
+                PlantillaId = p.Id,
                 TipoTramiteId = p.TipoTramiteId,
                 Nombre = p.Nombre,
                 Contenido = p.Contenido,
-                TipoEscenario = p.TipoEscenario,
-                Codigo = p.Codigo.Value,
+                TipoAutorizacionId = p.TipoAutorizacionId ?? 0,
                 Activo = p.Activo,
                 FechaModificacion = p.FechaModificacion
             }).ToList();
@@ -72,13 +70,13 @@ namespace CemSys3.Business.PlantillaTramite
 
         public async Task<int> Update(PlantillaTramiteDTO dto)
         {
-            Models.PlantillasTramite plantilla = await _context.PlantillasTramites.FindAsync(dto.Id) ?? throw new Exception("Plantilla de trámite no encontrada");
+            Models.PlantillasTramite plantilla = await _context.PlantillasTramites.FindAsync(dto.PlantillaId) ?? throw new Exception("Plantilla de trámite no encontrada");
 
 
             plantilla.TipoTramiteId = dto.TipoTramiteId;
             plantilla.Nombre = dto.Nombre;
             plantilla.Contenido = dto.Contenido;
-            plantilla.TipoEscenario = dto.TipoEscenario;
+            plantilla.TipoAutorizacionId = dto.TipoAutorizacionId;
             plantilla.Activo = true;
             plantilla.FechaModificacion = DateTime.UtcNow;
             

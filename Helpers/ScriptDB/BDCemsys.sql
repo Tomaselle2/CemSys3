@@ -479,15 +479,23 @@ CREATE TABLE CambiosTitularidad (
     CONSTRAINT FK_CT_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id)
 );
 
+CREATE TABLE TipoAutorizacion (
+    id INT IDENTITY PRIMARY KEY,
+    tipoTramiteId INT NOT NULL,
+    nombre NVARCHAR(100),
+
+    CONSTRAINT FK_PA_TipoTramite FOREIGN KEY (tipoTramiteId) REFERENCES TipoTramite(id)
+);
+
 CREATE TABLE PlantillasTramite (
     id INT IDENTITY PRIMARY KEY,
     tipoTramiteId INT NOT NULL,
     nombre NVARCHAR(100),
     contenido NVARCHAR(MAX), -- HTML con variables
-	codigo int  null,
+	tipoAutorizacionId int null,
     activo BIT DEFAULT 1,
     fechaModificacion DATETIME DEFAULT GETDATE(),
-
+	CONSTRAINT FK_PA_TipoAutorizacion FOREIGN KEY (tipoAutorizacionId) REFERENCES TipoAutorizacion(id),
     CONSTRAINT FK_PT_TipoTramite FOREIGN KEY (tipoTramiteId) REFERENCES TipoTramite(id)
 );
 
@@ -501,11 +509,14 @@ CREATE TABLE DocumentosTramite (
     fechaUltimaEdicion DATETIME DEFAULT GETDATE(),
     usuarioId INT NOT NULL,        -- quién lo editó por última vez
     visibilidad BIT DEFAULT 1,
-
+	personaId int null,
+	parentesco nvarchar(50) null,
     CONSTRAINT FK_DT_Tramite   FOREIGN KEY (tramiteId)  REFERENCES Tramites(id),
     CONSTRAINT FK_DT_Plantilla FOREIGN KEY (plantillaId) REFERENCES PlantillasTramite(id),
-    CONSTRAINT FK_DT_Usuario   FOREIGN KEY (usuarioId)   REFERENCES Usuarios(id)
+    CONSTRAINT FK_DT_Usuario   FOREIGN KEY (usuarioId)   REFERENCES Usuarios(id),
+	CONSTRAINT FK_DT_Persona   FOREIGN KEY (personaId)   REFERENCES Personas(id)
 );
+
 
 CREATE TABLE RequisitosTramite (
     id INT IDENTITY PRIMARY KEY,

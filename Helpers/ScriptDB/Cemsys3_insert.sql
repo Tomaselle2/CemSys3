@@ -87,6 +87,8 @@ INSERT INTO TipoPanteon (tipo) VALUES
 ('Con nichos'),
 ('Sin nichos');
 
+Insert into TipoAutorizacion (tipoTramiteId, nombre) values (6, 'Cambio titular - ambos presentes');
+
 -- INSERT para conceptos
 INSERT INTO ConceptosTarifaria (nombre, temaId) VALUES
 ('Apertura de nicho con placa', 1), --1
@@ -609,6 +611,8 @@ null, --cierre nicho --no aplica
 null, --cierre fosa
 1);-- visibilidad
 
+insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values (6, 'Cambio Titular - Ambos Presentes', '<p> </p><figure class="image"><img style="aspect-ratio:600/140;" src="/fotos/logoMuni.png" alt="Logo" width="600" height="140"></figure><p> </p><p> </p><p><strong>Municipalidad de Colonia Tirolesa</strong></p><p> </p><p> </p><p><br>En la fecha {Fecha}, se presenta/n {TitularesActuales}, en calidad de titular/es de la parcela {Parcela},<br>a fin de realizar el cambio de titularidad.<br><br>Se designa como nuevo titular a {NuevosTitulares}.<br> <br>Se deja constancia que ambas partes prestan conformidad.</p><p> </p><p> </p><p>1</p><p>2</p><p>3</p><figure class="image"><img style="aspect-ratio:1024/150;" src="/fotos/pieContrato.png" width="1024" height="150"></figure><p><br> </p><p> </p>',
+1, 1);
 
 
 
