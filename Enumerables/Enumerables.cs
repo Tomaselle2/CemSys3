@@ -41,14 +41,7 @@ namespace CemSys3.Enumerables
         Nota = 7,
     }
 
-    //public enum TipoEscenarioPlantillaCambioTirularEnum
-    //{
-    //    [Display(Name = "Ambos titulares estan presentes")]
-    //    Presente = 1,
 
-    //    [Display(Name = "El titular actual se encuentra fallecido")]
-    //    Fallecido = 2,
-    //}
 
     public enum TipoAutorizacionEnum
     {

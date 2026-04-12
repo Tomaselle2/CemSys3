@@ -510,11 +510,13 @@ CREATE TABLE DocumentosTramite (
     usuarioId INT NOT NULL,        -- quién lo editó por última vez
     visibilidad BIT DEFAULT 1,
 	personaId int null,
+	tipoAutorizacionId INT not null,
 	parentesco nvarchar(50) null,
     CONSTRAINT FK_DT_Tramite   FOREIGN KEY (tramiteId)  REFERENCES Tramites(id),
     CONSTRAINT FK_DT_Plantilla FOREIGN KEY (plantillaId) REFERENCES PlantillasTramite(id),
     CONSTRAINT FK_DT_Usuario   FOREIGN KEY (usuarioId)   REFERENCES Usuarios(id),
-	CONSTRAINT FK_DT_Persona   FOREIGN KEY (personaId)   REFERENCES Personas(id)
+	CONSTRAINT FK_DT_Persona   FOREIGN KEY (personaId)   REFERENCES Personas(id),
+	CONSTRAINT FK_DT_tipoAutorizacion   FOREIGN KEY (tipoAutorizacionId) REFERENCES TipoAutorizacion(id)
 );
 
 
