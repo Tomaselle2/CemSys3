@@ -37,7 +37,6 @@ using CemSys3.Interfaces.Seccion;
 using CemSys3.Interfaces.Tarea;
 using CemSys3.Interfaces.Tarifaria;
 using CemSys3.Interfaces.Tramite;
-using CemSys3.Interfaces.TramiteConcesion;
 using CemSys3.Interfaces.Usuario;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
@@ -84,6 +83,10 @@ builder.Services.AddScoped<INotificaciones, NotificacionService>();
 builder.Services.AddScoped<IViewRenderService, ViewRenderService>();
 builder.Services.AddScoped<IDeudaConcesion, DeudaConcesionService>();
 builder.Services.AddScoped<IPlantillaTramite, PlantillaTramiteService>();
+builder.Services.AddScoped<IDocumentoTramiteService, DocumentoTramiteService>();
+builder.Services.AddScoped<ITemplateProcessor, TemplateProcessor>();
+builder.Services.AddScoped<CambioTitularStrategy>();
+builder.Services.AddScoped<IStrategyFactory, StrategyFactory>();
 
 
 builder.Services.AddSingleton<IBrowser>(sp =>

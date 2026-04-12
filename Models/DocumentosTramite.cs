@@ -27,9 +27,13 @@ public partial class DocumentosTramite
 
     public string? Parentesco { get; set; }
 
+    public int? TipoAutorizacionId { get; set; }
+
     public virtual Persona? Persona { get; set; }
 
     public virtual PlantillasTramite? Plantilla { get; set; }
+
+    public virtual TipoAutorizacion? TipoAutorizacion { get; set; }
 
     public virtual Tramite Tramite { get; set; } = null!;
 

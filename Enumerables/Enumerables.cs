@@ -42,7 +42,6 @@ namespace CemSys3.Enumerables
     }
 
 
-
     public enum TipoAutorizacionEnum
     {
         [Display(Name = "Cambio Titular - Presente")]

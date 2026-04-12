@@ -1,4 +1,5 @@
-﻿using CemSys3.DTOs.SweetAlert;
+﻿using CemSys3.DTOs.PlantillaTramite;
+using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
@@ -11,19 +12,72 @@ namespace CemSys3.Controllers
 {
     public class PlantillaTramiteController : Controller
     {
-        private readonly IPlantillaTramite _plantillaTramiteService;
+        private readonly IStrategyFactory _factory;
+        private readonly IPlantillaTramite _service;
 
-        public PlantillaTramiteController(IPlantillaTramite plantillaTramiteService)
+
+        public PlantillaTramiteController(IStrategyFactory factory, IPlantillaTramite service)
         {
-            _plantillaTramiteService = plantillaTramiteService;
+            _factory = factory;
+            _service = service;
         }
 
         //vista general donde aparecen todas las plantillas de trámite, con opciones para editar.
         [HttpGet]
         [AuthorizeRole(RolUsuario.Administrador)]
-        public IActionResult Index()
+        public IActionResult IndexPlantillas()
         {
             return View();
+        }
+
+        public async Task<IActionResult> Index(int tipoTramiteId)
+        {
+            var plantillas = await _service.ObtenerPorTipoTramiteAsync(tipoTramiteId);
+            return View(plantillas);
+        }
+
+        public IActionResult Crear(int tipoTramiteId)
+        {
+            return View(new PlantillaTramiteDTO { TipoTramiteId = tipoTramiteId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Crear(PlantillaTramiteDTO dto)
+        {
+            await _service.CrearAsync(dto);
+            return RedirectToAction("Index", new { tipoTramiteId = dto.TipoTramiteId });
+        }
+
+        public async Task<IActionResult> Editar(int id)
+        {
+            var plantilla = await _service.ObtenerPorIdAsync(id);
+            return View(plantilla);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Editar(PlantillaTramiteDTO dto)
+        {
+            await _service.ActualizarAsync(dto);
+            return RedirectToAction("Index", new { tipoTramiteId = dto.TipoTramiteId });
+        }
+
+        public async Task<IActionResult> Eliminar(int id, int tipoTramiteId)
+        {
+            await _service.EliminarAsync(id);
+            return RedirectToAction("Index", new { tipoTramiteId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GenerarAutorizaciones(
+        int tramiteId,
+        int tipoTramiteId,
+        List<int> personasIds)
+        {
+            var strategy = _factory.GetStrategy(tipoTramiteId);
+
+            await strategy.GenerarAsync(tramiteId, personasIds, 1); // usuarioId
+
+            return Ok();
         }
 
         [HttpGet]
@@ -35,63 +89,76 @@ namespace CemSys3.Controllers
 
             try
             {
-                viewModel.Dto = await _plantillaTramiteService.Get(plantillaId);
+                viewModel.Dto = await _service.ObtenerPorIdAsync(plantillaId)
+                    ?? new PlantillaTramiteDTO();
+
                 viewModel.vista = "CambioTitularPresente";
-            }
-            catch (Exception ex) {
-                viewModel.SweetAlert = new SweetAlertDTO
-                {
-                    Titulo = "Error",
-                    Mensaje = $"Ocurrió un error al cargar la plantilla de trámite: {ex.Message}",
-                    Tipo = "error"
-                };
-            }
-
-            return View(viewModel);
-        }
-
-        [HttpPost]
-        [AuthorizeRole(RolUsuario.Administrador)]
-        public async Task<IActionResult> Guardar(PlantillaTramiteVM viewModel)
-        {
-            if(viewModel.Dto.Contenido == null || viewModel.Dto?.Contenido?.Length == 0)
-            {
-                viewModel.SweetAlert = new SweetAlertDTO
-                {
-                    Titulo = "Error",
-                    Mensaje = "El contenido de la plantilla de trámite no puede estar vacío.",
-                    Tipo = "error"
-                };
-
-                return View($"{viewModel.vista}", viewModel);
-            }
-
-            try
-            {
-                viewModel.Dto.Contenido = WebUtility.HtmlDecode(viewModel.Dto.Contenido);
-                int plantillaId = await _plantillaTramiteService.Update(viewModel.Dto);
-
-                TempData.SetSweetAlert(new SweetAlertDTO
-                {
-                    Titulo = "Éxito",
-                    Mensaje = "La plantilla de trámite se ha guardado correctamente.",
-                    Tipo = "success"
-                }); 
-
-                return RedirectToAction($"{viewModel.vista}", new { plantillaId = viewModel?.Dto?.PlantillaId });
-
             }
             catch (Exception ex)
             {
                 viewModel.SweetAlert = new SweetAlertDTO
                 {
                     Titulo = "Error",
-                    Mensaje = $"Ocurrió un error al guardar la plantilla de trámite: {ex.Message}",
+                    Mensaje = $"Error al cargar la plantilla: {ex.Message}",
                     Tipo = "error"
                 };
-                return View($"{viewModel.vista}", viewModel);
             }
 
+            return View("CambioTitularPresente", viewModel);
+        }
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> Guardar(PlantillaTramiteVM viewModel)
+        {
+            if (string.IsNullOrEmpty(viewModel.Dto?.Contenido))
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "El contenido no puede estar vacío.",
+                    Tipo = "error"
+                };
+
+                return View(viewModel.vista, viewModel);
+            }
+
+            try
+            {
+                // 🔥 CKEDITOR FIX
+                viewModel.Dto.Contenido = WebUtility.HtmlDecode(viewModel.Dto.Contenido);
+
+                int plantillaId;
+
+                if (viewModel.Dto.PlantillaId == 0)
+                {
+                    plantillaId = await _service.CrearAsync(viewModel.Dto);
+                }
+                else
+                {
+                    plantillaId = await _service.ActualizarAsync(viewModel.Dto);
+                }
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "Plantilla guardada correctamente.",
+                    Tipo = "success"
+                });
+
+                return RedirectToAction(viewModel.vista, new { plantillaId });
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Error al guardar: {ex.Message}",
+                    Tipo = "error"
+                };
+
+                return View(viewModel.vista, viewModel);
+            }
         }
 
         [HttpPost]

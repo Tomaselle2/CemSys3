@@ -11,6 +11,8 @@ public partial class TipoAutorizacion
 
     public string? Nombre { get; set; }
 
+    public virtual ICollection<DocumentosTramite> DocumentosTramites { get; set; } = new List<DocumentosTramite>();
+
     public virtual ICollection<PlantillasTramite> PlantillasTramites { get; set; } = new List<PlantillasTramite>();
 
     public virtual TipoTramite TipoTramite { get; set; } = null!;

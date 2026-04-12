@@ -14,132 +14,84 @@ namespace CemSys3.Business.PlantillaTramite
             _context = context;
         }
 
-        public async Task<int> Add(PlantillaTramiteDTO dto)
+        public async Task<int> ActualizarAsync(PlantillaTramiteDTO dto)
         {
-            Models.PlantillasTramite plantilla = new Models.PlantillasTramite
+            var entity = await _context.PlantillasTramites
+                .FirstOrDefaultAsync(x => x.Id == dto.PlantillaId);
+
+            if (entity == null)
+                throw new Exception("Plantilla no encontrada");
+
+            entity.Nombre = dto.Nombre;
+            entity.Contenido = dto.Contenido;
+            entity.TipoAutorizacionId = dto.TipoAutorizacionId;
+            entity.FechaModificacion = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+
+            return entity.Id;
+        }
+
+        public async Task<int> CrearAsync(PlantillaTramiteDTO dto)
+        {
+            var entity = new PlantillasTramite
             {
                 TipoTramiteId = dto.TipoTramiteId,
+                TipoAutorizacionId = dto.TipoAutorizacionId,
                 Nombre = dto.Nombre,
                 Contenido = dto.Contenido,
-                TipoAutorizacionId = dto.TipoAutorizacionId,
                 Activo = true,
-                FechaModificacion = DateTime.UtcNow
+                FechaModificacion = DateTime.Now
             };
 
-            await _context.PlantillasTramites.AddAsync(plantilla);
+            _context.PlantillasTramites.Add(entity);
+            await _context.SaveChangesAsync();
 
-            return await _context.SaveChangesAsync();
+            return entity.Id;
         }
 
-        public async Task<PlantillaTramiteDTO> Get(int id)
+        public async Task EliminarAsync(int id)
         {
-            Models.PlantillasTramite plantilla = await _context.PlantillasTramites.FindAsync(id) ?? throw new Exception("Plantilla de trámite no encontrada");
+            var entity = await _context.PlantillasTramites
+            .FirstOrDefaultAsync(x => x.Id == id);
 
-            PlantillaTramiteDTO dto = new PlantillaTramiteDTO
-            {
-                PlantillaId = plantilla.Id,
-                TipoTramiteId = plantilla.TipoTramiteId,
-                Nombre = plantilla.Nombre,
-                Contenido = plantilla.Contenido,
-                TipoAutorizacionId = plantilla.TipoAutorizacionId ?? 0,
-                Activo = plantilla.Activo,
+            if (entity == null)
+                return;
 
-                FechaModificacion = plantilla.FechaModificacion
-            };
-            return dto;
+            entity.Activo = false;
+
+            await _context.SaveChangesAsync();
         }
 
-        public async Task<List<PlantillaTramiteDTO>> GetByTipoTramite(int tipoTramiteId)
+        public async Task<PlantillaTramiteDTO?> ObtenerPorIdAsync(int id)
         {
-            var plantillas = await _context.PlantillasTramites
-                .Where(p => p.TipoTramiteId == tipoTramiteId && p.Activo == true)
-                .OrderBy(p => p.Nombre).ToListAsync();
-
-            return plantillas.Select(p => new PlantillaTramiteDTO
-            {
-                PlantillaId = p.Id,
-                TipoTramiteId = p.TipoTramiteId,
-                Nombre = p.Nombre,
-                Contenido = p.Contenido,
-                TipoAutorizacionId = p.TipoAutorizacionId ?? 0,
-                Activo = p.Activo,
-                FechaModificacion = p.FechaModificacion
-            }).ToList();
+            return await _context.PlantillasTramites
+             .Where(x => x.Id == id)
+             .Select(x => new PlantillaTramiteDTO
+             {
+                 PlantillaId = x.Id,
+                 Nombre = x.Nombre,
+                 Contenido = x.Contenido,
+                 TipoTramiteId = x.TipoTramiteId,
+                 TipoAutorizacionId = x.TipoAutorizacionId ?? 0
+             })
+             .FirstOrDefaultAsync();
         }
 
-
-        public async Task<int> Update(PlantillaTramiteDTO dto)
+        public async Task<List<PlantillaTramiteDTO>> ObtenerPorTipoTramiteAsync(int tipoTramiteId)
         {
-            Models.PlantillasTramite plantilla = await _context.PlantillasTramites.FindAsync(dto.PlantillaId) ?? throw new Exception("Plantilla de trámite no encontrada");
-
-
-            plantilla.TipoTramiteId = dto.TipoTramiteId;
-            plantilla.Nombre = dto.Nombre;
-            plantilla.Contenido = dto.Contenido;
-            plantilla.TipoAutorizacionId = dto.TipoAutorizacionId;
-            plantilla.Activo = true;
-            plantilla.FechaModificacion = DateTime.UtcNow;
-            
-
-            _context.PlantillasTramites.Update(plantilla);
-
-            return await _context.SaveChangesAsync();
+            return await _context.PlantillasTramites
+                .Where(x => x.TipoTramiteId == tipoTramiteId && x.Activo == true)
+                .Select(x => new PlantillaTramiteDTO
+                {
+                    PlantillaId = x.Id,
+                    TipoTramiteId = x.TipoTramiteId,
+                    TipoAutorizacionId = x.TipoAutorizacionId ?? 0,
+                    Nombre = x.Nombre,
+                    Contenido = x.Contenido
+                })
+                .ToListAsync();
         }
-
-
-        public string Render(string html, Dictionary<string, string> variables)
-        {
-            foreach (var v in variables)
-            {
-                html = html.Replace($"{{{v.Key}}}", v.Value ?? "");
-            }
-
-            return html;
-        }
-
-
-        //🧠 PASO 1: Elegir plantilla correcta
-        //    var plantilla = await _context.PlantillasTramite
-        //.Where(p => p.tipoTramiteId == tramite.TipoTramiteId
-        //         && p.tipoEscenario == tipoCambio) // 🔥 importante
-        //.FirstOrDefaultAsync();
-
-
-        //PASO 2: Armar variables
-        //        var valores = new Dictionary<string, string>
-        //{
-        //    { "TitularesActuales", titularesActuales },
-        //    { "NuevosTitulares", nuevosTitulares },
-        //    { "Parcela", parcela.Descripcion },
-        //    { "Fecha", DateTime.Now.ToString("dd/MM/yyyy") }
-        //};
-
-
-        //PASO 3: Reemplazar
-        //string htmlGenerado = GenerarDocumento(plantilla.contenido, valores);
-
-        //🧠 PASO 4: Mandar a la vista
-        //        var vm = new DocumentoEditableVM
-        //        {
-        //            TramiteId = tramite.Id,
-        //            HtmlContenido = htmlGenerado
-        //        };
-
-        //return View(vm);
-
-        //6. EL USUARIO EDITA
-        //        <textarea name = "HtmlContenido" >
-        //    @Html.Raw(Model.HtmlContenido)
-        //</ textarea >
-
-        //📄 7. GENERAR PDF
-        //[HttpPost]
-        //public IActionResult GenerarPdf(DocumentoEditableVM model)
-        //{
-        //    var pdf = _pdfService.GenerarDesdeHtml(model.HtmlContenido);
-
-        //    return File(pdf, "application/pdf");
-        //}
 
     }
 }

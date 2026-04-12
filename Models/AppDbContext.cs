@@ -93,7 +93,6 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
- 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AnioConcesion>(entity =>
@@ -298,6 +297,7 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("parentesco");
             entity.Property(e => e.PersonaId).HasColumnName("personaId");
             entity.Property(e => e.PlantillaId).HasColumnName("plantillaId");
+            entity.Property(e => e.TipoAutorizacionId).HasColumnName("tipoAutorizacionId");
             entity.Property(e => e.TramiteId).HasColumnName("tramiteId");
             entity.Property(e => e.UsuarioId).HasColumnName("usuarioId");
             entity.Property(e => e.Version)
@@ -314,6 +314,10 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.Plantilla).WithMany(p => p.DocumentosTramites)
                 .HasForeignKey(d => d.PlantillaId)
                 .HasConstraintName("FK_DT_Plantilla");
+
+            entity.HasOne(d => d.TipoAutorizacion).WithMany(p => p.DocumentosTramites)
+                .HasForeignKey(d => d.TipoAutorizacionId)
+                .HasConstraintName("FK_DT_tipoAutorizacion");
 
             entity.HasOne(d => d.Tramite).WithMany(p => p.DocumentosTramites)
                 .HasForeignKey(d => d.TramiteId)
