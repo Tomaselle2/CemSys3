@@ -7,6 +7,7 @@ using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Archivo;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.PlantillaTramite;
+using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.Models;
 using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.AspNetCore.Mvc;
@@ -19,150 +20,88 @@ namespace CemSys3.Controllers
         private readonly IDocumentoTramiteService _documentoService;
         private readonly IArchivo _archivoService;
         private readonly IHistorialEstados _historialService;
+        private readonly ICambioTitular _cambioTitular;
 
         public CambioTitularController(IArchivo archivoService, IHistorialEstados historialService, IStrategyFactory factory,
-        IDocumentoTramiteService documentoService)
+        IDocumentoTramiteService documentoService, ICambioTitular cambioTitular)
         {
             _archivoService = archivoService;
             _historialService = historialService;
             _factory = factory;
             _documentoService = documentoService;
+            _cambioTitular = cambioTitular;
         }
 
-        public async Task<IActionResult> Index(int tramiteId)
+        [HttpPost]
+        public async Task<IActionResult> GenerarAutorizaciones(
+            int tramiteId,
+            List<int> personasIds)
         {
-            var documentos = await _documentoService.ObtenerPorTramiteAsync(tramiteId);
+            int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
 
-            var vm = new CambioTitularVM
-            {
-                TramiteId = tramiteId,
-                Documentos = documentos,
-                Generado = documentos.Any()
-            };
+            var strategy = _factory.GetStrategy((int)TipoTramiteEnum.CambioTitular);
 
-            // 🔥 acá deberías cargar personas reales desde DB
-        //    vm.PersonasDisponibles = new List<PersonaItemVM>
-        //{
-        //    new() { Id = 1, NombreCompleto = "Juan Perez" },
-        //    new() { Id = 2, NombreCompleto = "Maria Gomez" }
-        //};
+            await strategy.GenerarAsync(tramiteId, personasIds, usuarioId);
 
-            return View(vm);
+            return Ok();
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> Generar(CambioTitularVM vm)
-        //{
-        //    var strategy = _factory.GetStrategy((int)TipoTramiteEnum.CambioTitular);
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> CambioTitular(
+    int? cambioTitularId,
+    int? concesionId)
+        {
+            var vm = new CambioTitularVM();
+            vm.SweetAlert = TempData.GetSweetAlert();
 
-        //    await strategy.GenerarAsync(vm.TramiteId, vm.PersonasSeleccionadasIds, 1);
+            try
+            {
+                int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
 
-        //    return RedirectToAction("Index", new { tramiteId = vm.TramiteId });
-        //}
+                if (cambioTitularId.HasValue && concesionId.HasValue)
+                {
+                    // 🔹 CONTINUAR
+                    vm.Dto = await _cambioTitular.Get(cambioTitularId.Value, concesionId.Value);
 
-        //[HttpGet]
-        //[AuthorizeRole(RolUsuario.Empleado)]
-        //public async Task<IActionResult> CambioTitular(
-        //    int? cambioTitularId,
-        //    int? concesionId)
-        //{
-        //    CambioTitularVM viewModel = new CambioTitularVM();
-        //    viewModel.SweetAlert = TempData.GetSweetAlert();
+                    vm.TramiteId = vm.Dto.TramiteId;
 
-        //    try
-        //    {
-        //        viewModel.PlantillaTramite = await _planillasService.Get((int)TipoAutorizacionEnum.Cambio_Titular_Ambos_Presentes);
+                    vm.Archivos = await _archivoService.GetAllByTramiteId(vm.TramiteId);
+                    vm.Historial = await _historialService.GetAllById(vm.TramiteId);
 
-        //        int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
+                    // 🔥 NUEVO: DOCUMENTOS
+                    vm.Documentos = await _documentoService.ObtenerPorTramiteAsync(vm.TramiteId);
+                }
+                else if (concesionId.HasValue)
+                {
+                    // 🔹 INICIAR
+                    var dto = await _cambioTitular.AddCambioTitular(concesionId.Value, usuarioId);
 
-        //        if (cambioTitularId.HasValue && concesionId.HasValue)
-        //        {
-        //            //CONTINUAR trámite existente
-        //            viewModel.Dto = await _cambioTitular.Get(cambioTitularId.Value, concesionId.Value);
-        //            viewModel.Archivos = await _archivoService.GetAllByTramiteId(cambioTitularId.Value);
-        //            viewModel.Historial = await _historialService.GetAllById(cambioTitularId.Value);
-        //            viewModel.Plantillas = await _planillasService.GetByTipoTramite((int)TipoTramiteEnum.CambioTitular);
-        //        }
-        //        else if (concesionId.HasValue)
-        //        {
-        //            //INICIAR nuevo trámite
-        //            CambioTitularDTO Dto = await _cambioTitular.AddCambioTitular(concesionId.Value, usuarioId);
-        //            return RedirectToAction("CambioTitular", new
-        //            {
-        //                cambioTitularId = Dto.TramiteId, // o el id correcto
-        //                concesionId = concesionId.Value
-        //            });
-        //        }
-        //        else
-        //        {
-        //            throw new Exception("Parámetros inválidos.");
-        //        }
+                    return RedirectToAction("CambioTitular", new
+                    {
+                        cambioTitularId = dto.TramiteId,
+                        concesionId = concesionId.Value
+                    });
+                }
+                else
+                {
+                    throw new Exception("Parámetros inválidos.");
+                }
 
-        //        return View(viewModel);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        TempData.SetSweetAlert(new SweetAlertDTO
-        //        {
-        //            Titulo = "Error",
-        //            Mensaje = ex.Message,
-        //            Tipo = "error"
-        //        });
-        //        return RedirectToAction("Index", "TramiteConcesion", new { tramiteId = concesionId });
-        //    }
-        //}
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = ex.Message,
+                    Tipo = "error"
+                });
 
-
-        //[HttpPost]
-        //[AuthorizeRole(RolUsuario.Empleado)]
-        //public async Task<IActionResult> GenerarPlantilla([FromBody] PlantillaRequestDTO request)
-        //{
-        //    var plantilla = await _planillasService.Get(request.PlantillaId);
-
-        //    var builder = _factory.Get(request.TipoTramite);
-
-        //    var variables = builder.Build(request.Data);
-
-        //    var html = _planillasService.Render(plantilla.Contenido, variables);
-
-        //    return Json(new
-        //    {
-        //        success = true,
-        //        contenido = html
-        //    });
-        //}
-
-        //[HttpPost]
-        //public IActionResult GenerarPlantilla([FromBody] GenerarPlantillaRequest request)
-        //{
-        //    try
-        //    {
-        //        var builder = _factory.Get(request.TipoTramite);
-        //        var contenido = builder.Build(request.Data, request.PlantillaId);
-
-        //        return Json(new
-        //        {
-        //            success = true,
-        //            contenido = contenido
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new
-        //        {
-        //            success = false,
-        //            message = ex.Message
-        //        });
-        //    }
-        //}
-
+                return RedirectToAction("Index", "TramiteConcesion", new { tramiteId = concesionId });
+            }
+        }
 
     }
-
-    //public class GenerarPlantillaRequest
-    //{
-    //    public int PlantillaId { get; set; }
-    //    public string TipoTramite { get; set; }
-    //    public object Data { get; set; }
-    //}
 }

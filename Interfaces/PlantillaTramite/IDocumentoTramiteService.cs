@@ -12,7 +12,7 @@ namespace CemSys3.Interfaces.PlantillaTramite
         string? parentesco,
         Dictionary<string, string> variables);
 
-        Task ActualizarContenidoAsync(int id, string contenidoHtml, int usuarioId);
+        Task ActualizarAsync(DocumentoDTO dto);
 
 
         Task<List<DocumentoDTO>> ObtenerPorTramiteAsync(int tramiteId);

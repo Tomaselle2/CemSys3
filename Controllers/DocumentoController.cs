@@ -26,11 +26,7 @@ namespace CemSys3.Controllers
         [HttpPost]
         public async Task<IActionResult> Editar(DocumentoDTO dto)
         {
-            await _service.ActualizarContenidoAsync(
-                dto.Id,
-                dto.ContenidoHtml,
-                1 // usuarioId real después
-            );
+            await _service.ActualizarAsync(dto);
 
             return RedirectToAction("Index", "CambioTitular", new { tramiteId = dto.TramiteId });
         }

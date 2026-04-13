@@ -16,18 +16,12 @@ namespace CemSys3.Business.PlantillaTramite
             _processor = processor;
         }
 
-        public async Task ActualizarContenidoAsync(int id, string contenidoHtml, int usuarioId)
+        public async Task ActualizarAsync(DocumentoDTO dto)
         {
-            var entity = await _context.DocumentosTramites
-             .FirstOrDefaultAsync(x => x.Id == id);
+            var doc = await _context.DocumentosTramites.FindAsync(dto.Id) ?? throw new Exception("Documento no encontrado");
 
-            if (entity == null)
-                throw new Exception("Documento no encontrado");
-
-            entity.ContenidoHtml = contenidoHtml;
-            entity.Version++;
-            entity.UsuarioId = usuarioId;
-            entity.FechaUltimaEdicion = DateTime.Now;
+            doc.ContenidoHtml = dto.ContenidoHtml;
+            doc.FechaUltimaEdicion = DateTime.Now;
 
             await _context.SaveChangesAsync();
         }
