@@ -14,6 +14,7 @@ namespace CemSys3.DTOs.TramitesConcesion
         public int? NroParcela { get; set; }
         public int? NroFila { get; set; }
         public int? NroConcesion { get; set; }
+        public int ConcesionId { get; set; }
 
         public List<TitularesContratoDTO> TitularesActuales { get; set; } = new();
         public List<TitularesContratoDTO> NuevosTitulares { get; set; } = new();

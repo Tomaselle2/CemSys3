@@ -2,6 +2,6 @@
 {
     public interface IGeneradorAutorizacionesStrategy
     {
-        Task GenerarAsync(int tramiteId, List<int> personasIds, int usuarioId);
+        Task GenerarAsync(int tramiteId, List<int> personasIds, int usuarioId, string parentesco);
     }
 }

@@ -255,7 +255,7 @@ new HistorialOffcanvasVM
 </div>
 
 
-<form action="/" id="formPrincipal" method="post">
+<form asp-action="GenerarAutorizaciones" asp-controller="CambioTitular" id="formPrincipal" method="post">
 
     <!-- Sección de titulares -->
     <div class="accordion" id="accordionTitulares">
@@ -282,9 +282,14 @@ new HistorialOffcanvasVM
             </div>
         </div>
     </div>
+
+    <input type="hidden" asp-for="concesionId" value="@Model.Dto.ConcesionId" />
+    <input type="hidden" asp-for="TramiteId" />
+
+    <input type="submit" class="btn btn-outline-primary" id="btnGenerarAutorizacion" value="Generar Autorización" />
 </form>
 
-@foreach(var documento in Model.Documentos)
+@* @foreach(var documento in Model.Documentos)
 {
     <form asp-action="/" asp-controller="/" method="post">
         <input type="hidden" asp-for="@documento.Id" />
@@ -294,7 +299,7 @@ new HistorialOffcanvasVM
         <br />
         <button type="submit" class="btn btn-outline-success">Guardar</button>
     </form>
-}
+} *@
 
 
 @foreach (var plantilla in Model.Documentos)
@@ -356,7 +361,7 @@ new ArchivoVM
 
 <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
 @section Scripts {
-    <script>
+    @* <script>
         document.addEventListener('DOMContentLoaded', function () {
         // inicializar CKEditor acá
         ClassicEditor
@@ -386,7 +391,7 @@ new ArchivoVM
         });
         
     </script>
-
+ *@
     <script>
         document.querySelectorAll('.generarPlantilla').forEach(btn => {
         btn.addEventListener('click', function () {
@@ -520,7 +525,7 @@ new ArchivoVM
         // Validar formulario principal antes de enviar
         formPrincipal.addEventListener('submit', async function(event) {
         event.preventDefault();
-        const btnGenerar = document.getElementById('btnGenerarContrato');
+        const btnGenerar = document.getElementById('btnGenerarAutorizacion');
 
         btnGenerar.disabled = true;
         btnGenerar.value = "Procesando...";
@@ -749,47 +754,47 @@ new ArchivoVM
         </button>
         </div>
         <div class="p-3">
-        <input type="hidden" name="Dto.NuevosTitulares[${index}].Id" value="${titular.id}" />
+        <input type="hidden" name="Personas[${index}].Id" value="${titular.id}" />
         <div class="form-columns-container3 mb-3">
         <div>
         <label>DNI<span class="obligatorio"> * </span></label>
-        <input class="form-control" type="text" name="Dto.NuevosTitulares[${index}].Dni" value="${titular.dni}" readonly required />
+        <input class="form-control" type="text" name="Personas[${index}].Dni" value="${titular.dni}" readonly required />
         <div class="invalid-feedback">El DNI es obligatorio</div>
         </div>
         <div>
         <label>Nombre<span class="obligatorio"> * </span></label>
-        <input class="form-control" type="text" name="Dto.NuevosTitulares[${index}].Nombre" value="${titular.nombre}" maxlength="60" required />
+        <input class="form-control" type="text" name="Personas[${index}].Nombre" value="${titular.nombre}" maxlength="60" required />
         <div class="invalid-feedback">El nombre es obligatorio</div>
         </div>
         <div>
         <label>Apellido<span class="obligatorio"> * </span></label>
-        <input class="form-control" type="text" name="Dto.NuevosTitulares[${index}].Apellido" value="${titular.apellido}" maxlength="60" required />
+        <input class="form-control" type="text" name="Personas[${index}].Apellido" value="${titular.apellido}" maxlength="60" required />
         <div class="invalid-feedback">El apellido es obligatorio</div>
         </div>
         </div>
         <div class="mb-3">
         <label>Domicilio<span class="obligatorio"> * </span></label>
-        <input class="form-control" type="text" name="Dto.NuevosTitulares[${index}].Domicilio" value="${titular.domicilio}" maxlength="100" required />
+        <input class="form-control" type="text" name="Personas[${index}].Domicilio" value="${titular.domicilio}" maxlength="100" required />
         <div class="invalid-feedback">El domicilio es obligatorio</div>
         </div>
         <div class="form-columns-container3">
         <div>
         <label>Sexo<span class="obligatorio"> * </span></label>
-        <select class="form-select" disabled name="Dto.NuevosTitulares[${index}].Sexo" required>
+        <select class="form-select" disabled name="Personas[${index}].Sexo" required>
         <option value="masculino" ${titular.sexo === 'masculino' ? 'selected' : ''}>Masculino</option>
         <option value="femenino" ${titular.sexo === 'femenino' ? 'selected' : ''}>Femenino</option>
         <option value="otro" ${titular.sexo === 'otro' ? 'selected' : ''}>Otro</option>
         </select>
-        <input type="hidden" name="Dto.NuevosTitulares[${index}].Sexo" value="${titular.sexo}" />
+        <input type="hidden" name="Personas[${index}].Sexo" value="${titular.sexo}" />
         <div class="invalid-feedback">El sexo es obligatorio</div>
         </div>
         <div>
         <label>Teléfono</label>
-        <input class="form-control" type="text" name="Dto.NuevosTitulares[${index}].Celular" value="${titular.celular || ''}" maxlength="25" />
+        <input class="form-control" type="text" name="Personas[${index}].Celular" value="${titular.celular || ''}" maxlength="25" />
         </div>
         <div>
         <label>Correo</label>
-        <input class="form-control" type="text" name="Dto.NuevosTitulares[${index}].CorreoElectronico" value="${titular.correoElectronico || titular.CorreoElectronico || ''}" maxlength="100" />
+        <input class="form-control" type="text" name="Personas[${index}].CorreoElectronico" value="${titular.correoElectronico || titular.CorreoElectronico || ''}" maxlength="100" />
         </div>
         </div>
         </div>

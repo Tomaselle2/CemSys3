@@ -1,5 +1,4 @@
-﻿using CemSys3.Business.PlantillaTramite;
-using CemSys3.DTOs.PlantillaTramite;
+﻿using CemSys3.Business.TramiteConcesion;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
@@ -8,7 +7,6 @@ using CemSys3.Interfaces.Archivo;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.PlantillaTramite;
 using CemSys3.Interfaces.TramitesConcesion;
-using CemSys3.Models;
 using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,15 +31,32 @@ namespace CemSys3.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GenerarAutorizaciones(
-            int tramiteId,
-            List<int> personasIds)
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> GenerarAutorizaciones(CambioTitularVM viewModel)
         {
             int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
 
             var strategy = _factory.GetStrategy((int)TipoTramiteEnum.CambioTitular);
 
-            await strategy.GenerarAsync(tramiteId, personasIds, usuarioId);
+            List<int> personasIds = viewModel.Personas
+                .Where(p => p.Id.HasValue)
+                .Select(p => p.Id.Value)
+                .ToList();
+           
+            if(personasIds == null || personasIds.Count == 0)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Advertencia",
+                    Mensaje = "Seleccione un nuevo titular",
+                    Tipo = "warning"
+                });
+
+                return RedirectToAction("CambioTitular", new { cambioTitularId = viewModel.TramiteId, concesionId = viewModel.concesionId} );
+            }
+            
+            await strategy.GenerarAsync(viewModel.TramiteId, personasIds, usuarioId, "Titular");
+            
 
             return Ok();
         }

@@ -12,6 +12,8 @@ namespace CemSys3.ViewModels.TramiteConcesion
     {
         public int TramiteId { get; set; }
 
+        public int concesionId { get; set; }
+
         public CambioTitularDTO Dto { get; set; } = new();
 
         public List<TitularesContratoDTO> Personas { get; set; } = new();

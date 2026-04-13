@@ -141,6 +141,7 @@ namespace CemSys3.Business.TramiteConcesion
             dto.NroParcela = concesion.Parcela.NroParcela;
             dto.NroFila = concesion.Parcela.NroFila;
             dto.NroConcesion = concesion.Concesion;
+            dto.ConcesionId = concesion.TramiteId;
 
             dto.TitularesActuales = await _context.HistorialTitularesConcesiones
                     .Where(h => h.ConcesionId == concesionId && h.FechaFin == null)

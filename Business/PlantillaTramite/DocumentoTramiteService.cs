@@ -40,27 +40,39 @@ namespace CemSys3.Business.PlantillaTramite
             if (plantilla == null)
                 throw new Exception("Plantilla no encontrada");
 
-            var contenidoProcesado = _processor.Procesar(plantilla.Contenido, variables);
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
-            var documento = new DocumentosTramite
+            try
             {
-                TramiteId = tramiteId,
-                PlantillaId = plantillaId,
-                TipoAutorizacionId = plantilla.TipoAutorizacionId ?? 0,
-                Nombre = plantilla.Nombre,
-                ContenidoHtml = contenidoProcesado,
-                UsuarioId = usuarioId,
-                PersonaId = personaId,
-                Parentesco = parentesco,
-                Version = 1,
-                FechaUltimaEdicion = DateTime.Now,
-                Visibilidad = true
-            };
+                var contenidoProcesado = _processor.Procesar(plantilla.Contenido, variables);
 
-            _context.DocumentosTramites.Add(documento);
-            await _context.SaveChangesAsync();
+                var documento = new DocumentosTramite
+                {
+                    TramiteId = tramiteId,
+                    PlantillaId = plantillaId,
+                    TipoAutorizacionId = plantilla.TipoAutorizacionId ?? 0,
+                    Nombre = plantilla.Nombre,
+                    ContenidoHtml = contenidoProcesado,
+                    UsuarioId = usuarioId,
+                    PersonaId = personaId,
+                    Parentesco = parentesco,
+                    Version = 1,
+                    FechaUltimaEdicion = DateTime.Now,
+                    Visibilidad = true
+                };
 
-            return documento.Id;
+                _context.DocumentosTramites.Add(documento);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return documento.Id;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+
+            }
         }
 
         public async Task<List<DocumentoDTO>> ObtenerPorTramiteAsync(int tramiteId)

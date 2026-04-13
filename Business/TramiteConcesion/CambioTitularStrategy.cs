@@ -16,7 +16,7 @@ namespace CemSys3.Business.TramiteConcesion
             _documentoService = documentoService;
         }
 
-        public async Task GenerarAsync(int tramiteId, List<int> personasIds, int usuarioId)
+        public async Task GenerarAsync(int tramiteId, List<int> personasIds, int usuarioId, string parentesco)
         {
             var plantillas = await _plantillaService
                 .ObtenerPorTipoTramiteAsync((int)TipoTramiteEnum.CambioTitular);
@@ -36,7 +36,7 @@ namespace CemSys3.Business.TramiteConcesion
                         tramiteId,
                         usuarioId,
                         personaId,
-                        "Familiar",
+                        parentesco,
                         variables
                     );
                 }

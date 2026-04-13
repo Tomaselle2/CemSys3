@@ -74,8 +74,8 @@ namespace CemSys3.Controllers
         List<int> personasIds)
         {
             var strategy = _factory.GetStrategy(tipoTramiteId);
-
-            await strategy.GenerarAsync(tramiteId, personasIds, 1); // usuarioId
+            string parentesco = "Familiar";
+            await strategy.GenerarAsync(tramiteId, personasIds, 1, parentesco); // usuarioId
 
             return Ok();
         }
