@@ -1,4 +1,5 @@
-﻿using CemSys3.Enumerables;
+﻿using CemSys3.DTOs.Persona;
+using CemSys3.Enumerables;
 using CemSys3.Interfaces.PlantillaTramite;
 
 namespace CemSys3.Business.TramiteConcesion
@@ -16,26 +17,27 @@ namespace CemSys3.Business.TramiteConcesion
             _documentoService = documentoService;
         }
 
-        public async Task GenerarAsync(int tramiteId, List<int> personasIds, int usuarioId, string parentesco)
+        public async Task GenerarAsync(int tramiteId, List<TitularesContratoDTO> titularesActuales, List<TitularesContratoDTO> nuevosTitulares, int usuarioId, string parentesco)
         {
             var plantillas = await _plantillaService
                 .ObtenerPorTipoTramiteAsync((int)TipoTramiteEnum.CambioTitular);
 
-            foreach (var personaId in personasIds)
+            foreach (var nuevoTitular in nuevosTitulares)
             {
                 foreach (var plantilla in plantillas)
                 {
                     var variables = new Dictionary<string, string>
                 {
                     { "Fecha", DateTime.Now.ToShortDateString() },
-                    { "PersonaId", personaId.ToString() }
+                    { "NuevosTitulares", nuevoTitular.Apellido.ToUpper() + nuevoTitular.Nombre.ToUpper() },
+                    { "TitularesActuales", string.Join(", ", titularesActuales.Select(t => t.Apellido.ToUpper() + t.Nombre.ToUpper())) }
                 };
 
                     await _documentoService.CrearDesdePlantillaAsync(
                         plantilla.PlantillaId,
                         tramiteId,
                         usuarioId,
-                        personaId,
+                        nuevoTitular.Id,
                         parentesco,
                         variables
                     );

@@ -157,6 +157,18 @@ namespace CemSys3.Business.TramiteConcesion
                         Domicilio = h.Persona.Domicilio
                     }).ToListAsync();
 
+            dto.NuevosTitulares = await _context.DocumentosTramites.Where(t => t.TramiteId == cambioTitularidad.TramiteId).Select(h=> new TitularesContratoDTO
+            {
+                Id = h.Persona.Id,
+                Dni = h.Persona.Dni,
+                Nombre = h.Persona.Nombre,
+                Apellido = h.Persona.Apellido,
+                Sexo = h.Persona.Sexo,
+                Celular = h.Persona.Celular,
+                CorreoElectronico = h.Persona.Correo,
+                Domicilio = h.Persona.Domicilio
+            }).ToListAsync();
+
             return dto;
         }
 

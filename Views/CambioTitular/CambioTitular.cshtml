@@ -285,38 +285,38 @@ new HistorialOffcanvasVM
 
     <input type="hidden" asp-for="concesionId" value="@Model.Dto.ConcesionId" />
     <input type="hidden" asp-for="TramiteId" />
+    <input type="hidden" asp-for="Dto.TitularesActuales" />
 
     <input type="submit" class="btn btn-outline-primary" id="btnGenerarAutorizacion" value="Generar Autorización" />
 </form>
 
-@* @foreach(var documento in Model.Documentos)
+@foreach (var documento in Model.Documentos)
 {
-    <form asp-action="/" asp-controller="/" method="post">
-        <input type="hidden" asp-for="@documento.Id" />
-        <input type="hidden" asp-for="@documento.TipoAutorizacionId" />
-
-        <textarea id="editor" asp-for="@documento.ContenidoHtml"></textarea>
-        <br />
-        <button type="submit" class="btn btn-outline-success">Guardar</button>
+    string editorId = $"editor_{documento.Id}";
+    <form asp-action="GuardarDocumento" asp-controller="CambioTitular" method="post" class="documento-form mb-4" data-editor-id="@editorId">
+        <input type="hidden" name="id" value="@documento.Id" />
+        <input type="hidden" name="tipoAutorizacionId" value="@documento.TipoAutorizacionId" />
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>Documento @documento.TipoAutorizacionId</h5>
+            </div>
+            <div class="card-body">
+                <textarea id="@editorId" name="contenidoHtml">@Html.Raw(documento.ContenidoHtml)</textarea>
+            </div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-outline-success">Guardar Documento</button>
+            </div>
+        </div>
     </form>
-} *@
-
-
-@foreach (var plantilla in Model.Documentos)
-{
-    <button class="btn btn-outline-primary generarPlantilla"
-            data-id="@plantilla.Id"
-            data-tipo="CambioTitular">
-        @plantilla.Nombre
-    </button>
 }
+
 
 
 <!-- Archivos-->
 @{
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
 }
-
 @await Html.PartialAsync("ArchivoPV/_ArchivoPV",
 new ArchivoVM
 {
@@ -361,11 +361,12 @@ new ArchivoVM
 
 <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
 @section Scripts {
-    @* <script>
+    <script>
         document.addEventListener('DOMContentLoaded', function () {
-        // inicializar CKEditor acá
+        // Función para inicializar un editor
+        function inicializarEditor(elementId, formElement) {
         ClassicEditor
-        .create(document.querySelector('#editor'), {
+        .create(document.querySelector('#' + elementId), {
         toolbar: [
         'heading', '|',
         'bold', 'italic',
@@ -377,57 +378,33 @@ new ArchivoVM
         'undo', 'redo'
         ],
         ckfinder: {
-        uploadUrl: '/PlantillaTramite/SubirImagen' // 👈 CLAVE
+        uploadUrl: '/PlantillaTramite/SubirImagen'
         }
         })
         .then(editor => {
-
-        document.querySelector('form').addEventListener('submit', function () {
-        document.querySelector('#editor').value = editor.getData();
+        // Actualizar el textarea antes de enviar el formulario
+        formElement.addEventListener('submit', function () {
+        document.querySelector('#' + elementId).value = editor.getData();
         });
-
         })
-        .catch(error => console.error(error));
-        });
-        
-    </script>
- *@
-    <script>
-        document.querySelectorAll('.generarPlantilla').forEach(btn => {
-        btn.addEventListener('click', function () {
+        .catch(error => console.error('Error inicializando editor ' + elementId, error));
+        }
 
-        const plantillaId = this.dataset.id;
-        const tipo = this.dataset.tipo;
-
-        const dto = {
-        tramiteId: @Model.Dto.TramiteId,
-        tipoParcela: '@Model.Dto.TipoParcela',
-        nroParcela: @Model.Dto.NroParcela,
-        nroFila: @Model.Dto.NroFila,
-        titularesActuales: @Html.Raw(Json.Serialize(Model.Dto.TitularesActuales)),
-        nuevosTitulares: titulares
-        };
-
-        fetch('/Plantilla/GenerarPlantilla', {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-        plantillaId: plantillaId,
-        tipoTramite: tipo,
-        data: dto
-        })
-        })
-        .then(r => r.json())
-        .then(data => {
-        if (data.success) {
-        editor.setData(data.contenido);
+        // Inicializar todos los editores
+        @foreach (var documento in Model.Documentos)
+        {
+            string editorId = $"editor_{documento.Id}";
+            <text>
+                const form@(documento.Id) = document.querySelector('form[data-editor-id="@editorId"]');
+                if (form@(documento.Id)) {
+                inicializarEditor('@editorId', form@(documento.Id));
+                }
+            </text>
         }
         });
-        });
-        });
     </script>
+
+
 
     <script>
         // Variables globales

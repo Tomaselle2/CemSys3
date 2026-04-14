@@ -16,7 +16,7 @@ namespace CemSys3.ViewModels.TramiteConcesion
 
         public CambioTitularDTO Dto { get; set; } = new();
 
-        public List<TitularesContratoDTO> Personas { get; set; } = new();
+        public List<TitularesContratoDTO> Personas { get; set; } = new(); //nuevos titulares
 
         public IEnumerable<ArchivoDTO> Archivos { get; set; } = new List<ArchivoDTO>();
         public IEnumerable<HistorialEstadosDTO> Historial { get; set; } = new List<HistorialEstadosDTO>();

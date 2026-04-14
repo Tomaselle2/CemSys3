@@ -1,4 +1,5 @@
-﻿using CemSys3.DTOs.PlantillaTramite;
+﻿using CemSys3.DTOs.Persona;
+using CemSys3.DTOs.PlantillaTramite;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
@@ -71,12 +72,11 @@ namespace CemSys3.Controllers
         public async Task<IActionResult> GenerarAutorizaciones(
         int tramiteId,
         int tipoTramiteId,
-        List<int> personasIds)
+        List<TitularesContratoDTO> titularesActuales, List<TitularesContratoDTO> nuevosTitulares)
         {
             var strategy = _factory.GetStrategy(tipoTramiteId);
             string parentesco = "Familiar";
-            await strategy.GenerarAsync(tramiteId, personasIds, 1, parentesco); // usuarioId
-
+            await strategy.GenerarAsync(tramiteId, titularesActuales, nuevosTitulares, 1, parentesco); // usuarioId
             return Ok();
         }
 

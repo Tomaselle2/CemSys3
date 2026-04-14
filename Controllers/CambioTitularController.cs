@@ -38,12 +38,8 @@ namespace CemSys3.Controllers
 
             var strategy = _factory.GetStrategy((int)TipoTramiteEnum.CambioTitular);
 
-            List<int> personasIds = viewModel.Personas
-                .Where(p => p.Id.HasValue)
-                .Select(p => p.Id.Value)
-                .ToList();
            
-            if(personasIds == null || personasIds.Count == 0)
+            if(viewModel.Personas == null || viewModel.Personas.Count == 0)
             {
                 TempData.SetSweetAlert(new SweetAlertDTO
                 {
@@ -55,10 +51,16 @@ namespace CemSys3.Controllers
                 return RedirectToAction("CambioTitular", new { cambioTitularId = viewModel.TramiteId, concesionId = viewModel.concesionId} );
             }
             
-            await strategy.GenerarAsync(viewModel.TramiteId, personasIds, usuarioId, "Titular");
-            
+            await strategy.GenerarAsync(viewModel.TramiteId, viewModel.Dto.TitularesActuales, viewModel.Personas, usuarioId, "Titular");
 
-            return Ok();
+            TempData.SetSweetAlert(new SweetAlertDTO
+            {
+                Titulo = "Éxito",
+                Mensaje = "Autorizaciones generadas correctamente",
+                Tipo = "success"
+            });
+
+            return RedirectToAction("CambioTitular", new { cambioTitularId = viewModel.TramiteId, concesionId = viewModel.concesionId });
         }
 
         [HttpGet]
