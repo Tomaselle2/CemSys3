@@ -14,6 +14,8 @@
     string estadoTramite = EnumHelper.GetDisplayNameByValue<EstadosCambioTitularEnum>(Model.Dto.EstadoTramiteId);
     string tipoParcela = Model.Dto.TipoParcela ?? "N/A";
     string nombreSeccion = Model.Dto.NombreSeccion;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+
 
     string parcela = "";
     if (Model.Dto.TipoParcela == "Nicho") //nicho
@@ -265,8 +267,6 @@ new HistorialOffcanvasVM
                     Nuevo Titular (<span id="contadorTitulares">0</span>)
                 </button>
             </h2>
-            <p class="obligatorio m-2">Si cambia el titular, quitar el actual y agregar el nuevo. No reemplazar los datos.</p>
-
             <div id="panelsStayOpen-collapseTitulares" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingTitulares">
                 <div class="mb-3 p-3">
                     <!-- Contenedor para titulares (aquí se renderizarán los inputs) -->
@@ -285,7 +285,22 @@ new HistorialOffcanvasVM
 
     <input type="hidden" asp-for="concesionId" value="@Model.Dto.ConcesionId" />
     <input type="hidden" asp-for="TramiteId" />
-    <input type="hidden" asp-for="Dto.TitularesActuales" />
+    <input type="hidden" asp-for="Dto.NroParcela" />
+    <input type="hidden" asp-for="Dto.TipoParcela" />
+    <input type="hidden" asp-for="Dto.NombreSeccion" />
+    <input type="hidden" asp-for="Dto.NroFila" />
+
+    @for (int i = 0; i < Model.Dto.TitularesActuales.Count; i++)
+    {
+        <input type="hidden" asp-for="Dto.TitularesActuales[i].Id" />
+        <input type="hidden" asp-for="Dto.TitularesActuales[i].Dni" />
+        <input type="hidden" asp-for="Dto.TitularesActuales[i].Nombre" />
+        <input type="hidden" asp-for="Dto.TitularesActuales[i].Apellido" />
+        <input type="hidden" asp-for="Dto.TitularesActuales[i].Celular" />
+        <input type="hidden" asp-for="Dto.TitularesActuales[i].CorreoElectronico" />
+        <input type="hidden" asp-for="Dto.TitularesActuales[i].Domicilio" />
+        <input type="hidden" asp-for="Dto.TitularesActuales[i].Sexo" />
+    }
 
     <input type="submit" class="btn btn-outline-primary" id="btnGenerarAutorizacion" value="Generar Autorización" />
 </form>
@@ -293,30 +308,45 @@ new HistorialOffcanvasVM
 @foreach (var documento in Model.Documentos)
 {
     string editorId = $"editor_{documento.Id}";
-    <form asp-action="GuardarDocumento" asp-controller="CambioTitular" method="post" class="documento-form mb-4" data-editor-id="@editorId">
-        <input type="hidden" name="id" value="@documento.Id" />
-        <input type="hidden" name="tipoAutorizacionId" value="@documento.TipoAutorizacionId" />
-        
-        <div class="card">
-            <div class="card-header">
-                <h5>Documento @documento.TipoAutorizacionId</h5>
-            </div>
-            <div class="card-body">
-                <textarea id="@editorId" name="contenidoHtml">@Html.Raw(documento.ContenidoHtml)</textarea>
-            </div>
-            <div class="card-footer">
-                <button type="submit" class="btn btn-outline-success">Guardar Documento</button>
-            </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>Autorización @documento.Parentesco?.ToUpper()</h5>
+            <form asp-action="Eliminar" asp-controller="CambioTitular" method="get" class="documento-form mb-4 js-confirm">
+                <input type="hidden" name="documentoId" value="@documento.Id" />
+                <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
+                <input type="hidden" name="tramiteId" value="@Model.TramiteId" />
+
+                <button type="submit" class="btn btn-outline-danger">
+                    Eliminar Autorización
+                </button>
+            </form>
         </div>
-    </form>
+        <form asp-action="Editar" asp-controller="Documento" method="post" class="documento-form mb-4" data-editor-id="@editorId">
+                <div class="card-body">
+                    <textarea id="@editorId" name="contenidoHtml">
+                        @Html.Raw(documento.ContenidoHtml)
+                    </textarea>
+                </div>
+
+                <div class="card-footer">
+                    <input type="hidden" name="id" value="@documento.Id" />
+                    <input type="hidden" name="tramiteId" value="@documento.TramiteId" />
+                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                    <button type="submit" class="btn btn-outline-success">
+                        Guardar Autorización
+                    </button>
+                </div>
+        </form>
+    </div>
+
 }
 
 
 
 <!-- Archivos-->
-@{
-    var returnUrl = Context.Request.Path + Context.Request.QueryString;
-}
+
 @await Html.PartialAsync("ArchivoPV/_ArchivoPV",
 new ArchivoVM
 {
@@ -521,7 +551,7 @@ new ArchivoVM
         valido = false;
         AlertService.show("Verificar", "Debe agregar al menos un titular", "warning");
         btnGenerar.disabled = false;
-        btnGenerar.value = "Actualizar concesión";
+        btnGenerar.value = "Generar autorización";
         }
 
 
@@ -530,7 +560,7 @@ new ArchivoVM
         event.stopPropagation();
         this.classList.add('was-validated');
         btnGenerar.disabled = false;
-        btnGenerar.value = "Actualizar concesión";
+        btnGenerar.value = "Generar autorización";
         return;
         }
 

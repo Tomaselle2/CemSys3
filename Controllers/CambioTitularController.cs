@@ -1,4 +1,4 @@
-﻿using CemSys3.Business.TramiteConcesion;
+﻿using CemSys3.DTOs.PlantillaTramite;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
@@ -50,8 +50,21 @@ namespace CemSys3.Controllers
 
                 return RedirectToAction("CambioTitular", new { cambioTitularId = viewModel.TramiteId, concesionId = viewModel.concesionId} );
             }
-            
-            await strategy.GenerarAsync(viewModel.TramiteId, viewModel.Dto.TitularesActuales, viewModel.Personas, usuarioId, "Titular");
+
+            GeneraStrategyDTO dto = new GeneraStrategyDTO
+            {
+                TramiteId = viewModel.TramiteId,
+                NuevosTitulares = viewModel.Personas,
+                TitularesActuales = viewModel.Dto.TitularesActuales,
+                UsuarioId = usuarioId,
+                Parentesco = "Titular",
+                NroParcela = viewModel.Dto.NroParcela.Value,
+                NroFila = viewModel.Dto.NroFila.Value,
+                NombreSeccion = viewModel.Dto.NombreSeccion,
+                TipoParcela = viewModel.Dto.TipoParcela
+            };
+
+            await strategy.GenerarAsync(dto);
 
             TempData.SetSweetAlert(new SweetAlertDTO
             {
@@ -61,6 +74,32 @@ namespace CemSys3.Controllers
             });
 
             return RedirectToAction("CambioTitular", new { cambioTitularId = viewModel.TramiteId, concesionId = viewModel.concesionId });
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> Eliminar(int documentoId, int tramiteId, int concesionId)
+        {
+            try
+            {
+                await _documentoService.Delete(documentoId);
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "Autorización eliminada correctamente",
+                    Tipo = "success"
+                });
+            }
+            catch (Exception ex) {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "Error al eliminar el documento. " + ex.Message,
+                    Tipo = "error"
+                });
+            }
+            return RedirectToAction("CambioTitular", new { cambioTitularId = tramiteId, concesionId = concesionId });
         }
 
         [HttpGet]

@@ -26,5 +26,6 @@ namespace CemSys3.ViewModels.TramiteConcesion
         public bool Generado => Documentos.Any();
 
         public SweetAlertDTO? SweetAlert { get; set; }
+
     }
 }

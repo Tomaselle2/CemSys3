@@ -172,32 +172,6 @@ namespace CemSys3.Business.TramiteConcesion
             return dto;
         }
 
-        public Dictionary<string, string> Build(object data)
-        {
-            var dto = (CambioTitularDTO)data;
-
-            return new Dictionary<string, string>
-            {
-                { "Fecha", DateTime.Now.ToString("dd/MM/yyyy") },
-                { "TitularesActuales", string.Join(", ", dto.TitularesActuales.Select(t => $"{t.Apellido} {t.Nombre}")) },
-                { "NuevosTitulares", string.Join(", ", dto.NuevosTitulares.Select(t => $"{t.Apellido} {t.Nombre}")) },
-                { "Parcela", ObtenerParcela(dto) }
-            };
-        }
-
-        private string ObtenerParcela(CambioTitularDTO dto)
-        {
-            if (dto.TipoParcela == "Nicho")
-                return $"Nicho {dto.NroParcela} Fila {dto.NroFila}";
-
-            if (dto.TipoParcela == "Fosa")
-                return $"Fosa {dto.NroParcela}";
-
-            if (dto.TipoParcela == "Panteón")
-                return $"Lote {dto.NroParcela}";
-
-            return "";
-        }
     }
 }
 

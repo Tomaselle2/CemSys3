@@ -1,6 +1,8 @@
 ﻿using CemSys3.DTOs.PlantillaTramite;
+using CemSys3.Helpers.Mensajes;
 using CemSys3.Interfaces.PlantillaTramite;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace CemSys3.Controllers
 {
@@ -13,26 +15,54 @@ namespace CemSys3.Controllers
             _service = service;
         }
 
-        public async Task<IActionResult> Editar(int id)
-        {
-            var doc = await _service.ObtenerPorTramiteAsync(id);
-
-            if (doc == null)
-                return NotFound();
-
-            return View(doc);
-        }
-
         [HttpPost]
-        public async Task<IActionResult> Editar(DocumentoDTO dto)
+        public async Task<IActionResult> Editar(int id, string contenidoHtml, int tramiteId, string returnUrl)
         {
-            await _service.ActualizarAsync(dto);
+            contenidoHtml = WebUtility.HtmlDecode(contenidoHtml);
 
-            return RedirectToAction("Index", "CambioTitular", new { tramiteId = dto.TramiteId });
+            DocumentoDTO dto = new DocumentoDTO
+            {
+                Id = id,
+                ContenidoHtml = contenidoHtml,
+                TramiteId = tramiteId
+            };
+
+            try
+            {
+                await _service.ActualizarAsync(dto);
+
+                TempData.SetSweetAlert(new DTOs.SweetAlert.SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "El documento se ha actualizado correctamente.",
+                    Tipo = "success"
+                });
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                TempData.SetSweetAlert(new DTOs.SweetAlert.SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al actualizar el documento: {ex.Message}",
+                    Tipo = "error"
+                });
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+            }
+
+            return RedirectToAction("Index", "TramiteConcesion", new { tramiteId = tramiteId });
         }
-        public IActionResult Index()
-        {
-            return View();
-        }
+
+
     }
 }

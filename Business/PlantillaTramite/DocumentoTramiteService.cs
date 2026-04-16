@@ -75,6 +75,15 @@ namespace CemSys3.Business.PlantillaTramite
             }
         }
 
+        public async Task Delete(int id)
+        {
+            Models.DocumentosTramite doc = await _context.DocumentosTramites.FindAsync(id) ?? throw new Exception("Documento no encontrado");
+
+            _context.DocumentosTramites.Remove(doc);
+
+            await _context.SaveChangesAsync();            
+        }
+
         public async Task<List<DocumentoDTO>> ObtenerPorTramiteAsync(int tramiteId)
         {
             return await _context.DocumentosTramites

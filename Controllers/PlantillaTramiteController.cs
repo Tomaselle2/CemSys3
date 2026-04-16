@@ -31,55 +31,6 @@ namespace CemSys3.Controllers
             return View();
         }
 
-        public async Task<IActionResult> Index(int tipoTramiteId)
-        {
-            var plantillas = await _service.ObtenerPorTipoTramiteAsync(tipoTramiteId);
-            return View(plantillas);
-        }
-
-        public IActionResult Crear(int tipoTramiteId)
-        {
-            return View(new PlantillaTramiteDTO { TipoTramiteId = tipoTramiteId });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Crear(PlantillaTramiteDTO dto)
-        {
-            await _service.CrearAsync(dto);
-            return RedirectToAction("Index", new { tipoTramiteId = dto.TipoTramiteId });
-        }
-
-        public async Task<IActionResult> Editar(int id)
-        {
-            var plantilla = await _service.ObtenerPorIdAsync(id);
-            return View(plantilla);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Editar(PlantillaTramiteDTO dto)
-        {
-            await _service.ActualizarAsync(dto);
-            return RedirectToAction("Index", new { tipoTramiteId = dto.TipoTramiteId });
-        }
-
-        public async Task<IActionResult> Eliminar(int id, int tipoTramiteId)
-        {
-            await _service.EliminarAsync(id);
-            return RedirectToAction("Index", new { tipoTramiteId });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> GenerarAutorizaciones(
-        int tramiteId,
-        int tipoTramiteId,
-        List<TitularesContratoDTO> titularesActuales, List<TitularesContratoDTO> nuevosTitulares)
-        {
-            var strategy = _factory.GetStrategy(tipoTramiteId);
-            string parentesco = "Familiar";
-            await strategy.GenerarAsync(tramiteId, titularesActuales, nuevosTitulares, 1, parentesco); // usuarioId
-            return Ok();
-        }
-
         [HttpGet]
         [AuthorizeRole(RolUsuario.Administrador)]
         public async Task<IActionResult> CambioTitularPresente(int plantillaId)

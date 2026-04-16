@@ -1,13 +1,10 @@
 ﻿using CemSys3.DTOs.Archivo;
-using CemSys3.DTOs.Generics;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.PDF;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Archivo;
-using CemSys3.Models;
 using CemSys3.ViewModels.Archivo;
-using CemSys3.ViewModels.Concesion;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CemSys3.Controllers
