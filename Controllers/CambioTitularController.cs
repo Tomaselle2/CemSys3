@@ -78,32 +78,6 @@ namespace CemSys3.Controllers
 
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> Eliminar(int documentoId, int tramiteId, int concesionId)
-        {
-            try
-            {
-                await _documentoService.Delete(documentoId);
-
-                TempData.SetSweetAlert(new SweetAlertDTO
-                {
-                    Titulo = "Éxito",
-                    Mensaje = "Autorización eliminada correctamente",
-                    Tipo = "success"
-                });
-            }
-            catch (Exception ex) {
-                TempData.SetSweetAlert(new SweetAlertDTO
-                {
-                    Titulo = "Error",
-                    Mensaje = "Error al eliminar el documento. " + ex.Message,
-                    Tipo = "error"
-                });
-            }
-            return RedirectToAction("CambioTitular", new { cambioTitularId = tramiteId, concesionId = concesionId });
-        }
-
-        [HttpGet]
-        [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> CambioTitular(
     int? cambioTitularId,
     int? concesionId)

@@ -312,10 +312,10 @@ new HistorialOffcanvasVM
     <div class="card">
         <div class="card-header">
             <h5>Autorización @documento.Parentesco?.ToUpper()</h5>
-            <form asp-action="Eliminar" asp-controller="CambioTitular" method="get" class="documento-form mb-4 js-confirm">
+            <form asp-action="Eliminar" asp-controller="Documento" method="get" class="documento-form mb-4 js-confirm">
                 <input type="hidden" name="documentoId" value="@documento.Id" />
-                <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
-                <input type="hidden" name="tramiteId" value="@Model.TramiteId" />
+                <input type="hidden" name="tramiteId" value="@documento.TramiteId" />
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
 
                 <button type="submit" class="btn btn-outline-danger">
                     Eliminar Autorización
@@ -335,7 +335,7 @@ new HistorialOffcanvasVM
                     <input type="hidden" name="returnUrl" value="@returnUrl" />
 
                     <button type="submit" class="btn btn-outline-success">
-                        Guardar Autorización
+                        Actualizar Autorización
                     </button>
                 </div>
         </form>
