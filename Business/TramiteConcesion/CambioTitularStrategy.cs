@@ -1,7 +1,7 @@
 ﻿using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.PlantillaTramite;
-using CemSys3.DTOs.TramitesConcesion;
 using CemSys3.Enumerables;
+using CemSys3.Helpers;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.PlantillaTramite;
 
@@ -23,6 +23,7 @@ namespace CemSys3.Business.TramiteConcesion
             _personaService = personaService;
         }
 
+
         public async Task GenerarAsync(GeneraStrategyDTO dto)
         {
             var plantillas = await _plantillaService
@@ -40,14 +41,27 @@ namespace CemSys3.Business.TramiteConcesion
                 
                 int personaId = await _personaService.Update(persona);
 
+                string difuntosFormateados = DifuntoFormatter.FormatearDifuntos(dto.Difuntos);
+
+                var primerTitular = dto.TitularesActuales.FirstOrDefault();
+                string sexoReferencia = primerTitular?.Sexo ?? "masculino"; // Valor por defecto
+
                 foreach (var plantilla in plantillas)
                 {
                     var variables = new Dictionary<string, string>
                 {
-                    { "Fecha", DateTime.Now.ToShortDateString() },
-                    { "NuevosTitulares", nuevoTitular.Apellido.ToUpper() + " " + nuevoTitular.Nombre.ToUpper() },
+                    { "Fecha", DateTime.Now.ToLongDateString() },
+                    { "articuloTitularActual", sexoReferencia  == "masculino" ? "el" : "la"},
+                    { "sr/sraTitularActual", sexoReferencia  == "masculino" ? "Sr." : "Sra."},
                     { "TitularesActuales", string.Join(", ", dto.TitularesActuales.Select(t => t.Apellido.ToUpper() + " " + t.Nombre.ToUpper())) },
-                    { "Parcela", ObtenerParcela(dto.TipoParcela, dto.NroParcela, dto.NroFila, dto.NombreSeccion.ToUpper()) }
+                    { "DniTitularActual", string.Join(", ", dto.TitularesActuales.Select(t => StringExtensions.FormatearDni(t.Dni))) },
+                    { "Parcela", ParcelaFormatter.ObtenerParcela(dto.TipoParcela, dto.NroParcela, dto.NroFila, dto.NombreSeccion.ToUpper()) },
+                    { "Difuntos", difuntosFormateados },
+                    { "articuloNuevoTitular", persona.Sexo == "masculino" ? "al" : "a la"},
+                    { "sr/sraNuevoTitular", persona.Sexo == "masculino" ? "Sr." : "Sra."},
+                    { "NuevosTitulares", nuevoTitular.Apellido.ToUpper() + " " + nuevoTitular.Nombre.ToUpper() },
+                    { "DniNuevosTitulares", string.Join(", ", dto.NuevosTitulares.Select(t => StringExtensions.FormatearDni(t.Dni)))  },
+
                 };
 
                     await _documentoService.CrearDesdePlantillaAsync(
@@ -62,18 +76,5 @@ namespace CemSys3.Business.TramiteConcesion
             }
         }
 
-        private string ObtenerParcela(string TipoParcela, int NroParcela, int NroFila, string NombreSeccion)
-        {
-            if (TipoParcela == "Nicho")
-                return $"Nicho {NroParcela} Secc {NombreSeccion} Fila {  NroFila}";
-
-            if (TipoParcela == "Fosa")
-                return $"Fosa {NroParcela} Secc {NombreSeccion}";
-
-            if (TipoParcela == "Panteón")
-                return $"Lote {NroParcela} Secc {NombreSeccion} (panteón)";
-
-            return "";
-        }
     }
 }

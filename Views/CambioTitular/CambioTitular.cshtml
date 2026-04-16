@@ -257,7 +257,7 @@ new HistorialOffcanvasVM
 </div>
 
 
-<form asp-action="GenerarAutorizaciones" asp-controller="CambioTitular" id="formPrincipal" method="post">
+<form asp-action="GenerarAutorizaciones" asp-controller="CambioTitular" id="formPrincipal" method="post" class="mb-3">
 
     <!-- Sección de titulares -->
     <div class="accordion" id="accordionTitulares">
@@ -300,6 +300,13 @@ new HistorialOffcanvasVM
         <input type="hidden" asp-for="Dto.TitularesActuales[i].CorreoElectronico" />
         <input type="hidden" asp-for="Dto.TitularesActuales[i].Domicilio" />
         <input type="hidden" asp-for="Dto.TitularesActuales[i].Sexo" />
+    }
+
+    @for (int i = 0; i < Model.Dto.Difuntos.Count; i++)
+    {
+        <input type="hidden" asp-for="Dto.Difuntos[i].Id" />
+        <input type="hidden" asp-for="Dto.Difuntos[i].Nombre" />
+        <input type="hidden" asp-for="Dto.Difuntos[i].Apellido" />
     }
 
     <input type="submit" class="btn btn-outline-primary" id="btnGenerarAutorizacion" value="Generar Autorización" />

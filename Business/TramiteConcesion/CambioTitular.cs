@@ -169,6 +169,19 @@ namespace CemSys3.Business.TramiteConcesion
                 Domicilio = h.Persona.Domicilio
             }).ToListAsync();
 
+            //consultar los difuntos relacionados a la parcela
+            dto.Difuntos = await _context.ParcelaDifuntos
+                .Where(p => p.ParcelaId == dto.ParcelaId && p.FechaRetiro == null)
+                .Select(p => new DifuntoContratoDTO
+                {
+                    Id = p.Difunto.Id,
+                    DNI = p.Difunto.Dni,
+                    Nombre = p.Difunto.Nombre,
+                    Apellido = p.Difunto.Apellido,
+                    FechaIngreso = p.FechaIngreso,
+                    EstadoDifuntoId = p.Difunto.EstadoDifuntoId
+                }).ToListAsync();
+
             return dto;
         }
 

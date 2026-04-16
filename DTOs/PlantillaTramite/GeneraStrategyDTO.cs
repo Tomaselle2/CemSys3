@@ -7,6 +7,8 @@ namespace CemSys3.DTOs.PlantillaTramite
         public int TramiteId;
         public List<TitularesContratoDTO> TitularesActuales = new List<TitularesContratoDTO>();
         public List<TitularesContratoDTO> NuevosTitulares = new List<TitularesContratoDTO>();
+        public List<DifuntoContratoDTO> Difuntos { get; set; } = new List<DifuntoContratoDTO>();
+
         public int UsuarioId;
         public string Parentesco = string.Empty;
         public int NroParcela;

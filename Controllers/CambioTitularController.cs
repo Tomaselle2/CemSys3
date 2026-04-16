@@ -61,7 +61,8 @@ namespace CemSys3.Controllers
                 NroParcela = viewModel.Dto.NroParcela.Value,
                 NroFila = viewModel.Dto.NroFila.Value,
                 NombreSeccion = viewModel.Dto.NombreSeccion,
-                TipoParcela = viewModel.Dto.TipoParcela
+                TipoParcela = viewModel.Dto.TipoParcela,
+                Difuntos = viewModel.Dto.Difuntos,
             };
 
             await strategy.GenerarAsync(dto);
@@ -99,7 +100,7 @@ namespace CemSys3.Controllers
                     vm.Archivos = await _archivoService.GetAllByTramiteId(vm.TramiteId);
                     vm.Historial = await _historialService.GetAllById(vm.TramiteId);
 
-                    // 🔥 NUEVO: DOCUMENTOS
+                    //  DOCUMENTOS
                     vm.Documentos = await _documentoService.ObtenerPorTramiteAsync(vm.TramiteId);
                 }
                 else if (concesionId.HasValue)
