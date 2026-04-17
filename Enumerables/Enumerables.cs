@@ -252,6 +252,9 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Finalizado")]
         Finalizado = 10,
+
+        [Display(Name = "Cancelado")]
+        Cancelado = 11,
     }
 
 
@@ -277,10 +280,13 @@ namespace CemSys3.Enumerables
         Caducado = 8,
 
         [Display(Name = "Iniciado")]
-        Iniciado = 9,
+        IniciadoCambioTitular = 9,
 
         [Display(Name = "Finalizado")]
-        Finalizado = 10,
+        FinalizadoCambioTitular = 10,
+
+        [Display(Name = "Cancelado")]
+        CanceladoCambioTitular = 11,
     }
 
     //concepto de la tarifaria 
