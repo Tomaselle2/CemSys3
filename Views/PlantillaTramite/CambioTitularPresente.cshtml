@@ -48,36 +48,34 @@
 
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
 
-<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+<script src="~/tinymce/js/tinymce/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
+
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-        // inicializar CKEditor acá
-            ClassicEditor
-            .create(document.querySelector('#editor'), {
-            toolbar: [
-            'heading', '|',
-            'bold', 'italic',
-            'link',
-            'bulletedList', 'numberedList',
-            '|',
-            'imageUpload',
-            '|',
-            'undo', 'redo'
-            ],
-            ckfinder: {
-            uploadUrl: '/PlantillaTramite/SubirImagen' // 👈 CLAVE
-            }
-            })
-            .then(editor => {
+        tinymce.init({
+        selector: '#editor',
+        license_key: 'gpl',
+        language: 'es_MX',
+        menu: {
+          file: { title: 'File', items: 'newdocument restoredraft | preview | importword exportpdf exportword | print | deleteallconversations' },
+          edit: { title: 'Edit', items: 'undo redo | cut copy paste pastetext | selectall | searchreplace' },
+          view: { title: 'View', items: 'code suggestededits revisionhistory | visualaid visualchars visualblocks | spellchecker | preview fullscreen | showcomments' },
+          insert: { title: 'Insert', items: 'image link media addcomment pageembed codesample inserttable | math | charmap emoticons hr | pagebreak nonbreaking anchor tableofcontents | insertdatetime' },
+          format: { title: 'Format', items: 'bold italic underline strikethrough superscript subscript codeformat | styles blocks fontfamily fontsize align lineheight | forecolor backcolor | language | removeformat' },
+          tools: { title: 'Tools', items: 'spellchecker spellcheckerlanguage | a11ycheck code wordcount' },
+          table: { title: 'Table', items: 'inserttable | cell row column | advtablesort | tableprops deletetable' }
+        },
+        toolbar: 'undo redo | styles forecolor | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | image | code',
+        statusbar: false,
+        plugins: 'image code autoresize',
 
-            document.querySelector('form').addEventListener('submit', function () {
-            document.querySelector('#editor').value = editor.getData();
-            });
-
-            })
-            .catch(error => console.error(error));
+        // Configuración de autoresize
+                autoresize_bottom_margin: 20,      // Margen inferior en píxeles
+                autoresize_min_height: 200,         // Altura mínima (evita que se encoja demasiado)
+                autoresize_max_height: 800,         // Altura máxima (opcional, evita que crezca infinitamente)
+                autoresize_overflow_padding: 10,    // Padding adicional
+           
         });
-        
     </script>
 }
+

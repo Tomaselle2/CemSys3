@@ -60,7 +60,7 @@ namespace CemSys3.Business.TramiteConcesion
                     { "articuloNuevoTitular", persona.Sexo == "masculino" ? "al" : "a la"},
                     { "sr/sraNuevoTitular", persona.Sexo == "masculino" ? "Sr." : "Sra."},
                     { "NuevosTitulares", nuevoTitular.Apellido.ToUpper() + " " + nuevoTitular.Nombre.ToUpper() },
-                    { "DniNuevosTitulares", string.Join(", ", dto.NuevosTitulares.Select(t => StringExtensions.FormatearDni(t.Dni)))  },
+                    { "DniNuevosTitulares", StringExtensions.FormatearDni(nuevoTitular.Dni)  },
 
                 };
 

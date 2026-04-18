@@ -10,6 +10,7 @@ using CemSys3.Interfaces.PlantillaTramite;
 using CemSys3.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Text.RegularExpressions;
 
 namespace CemSys3.Controllers
 {
@@ -92,21 +93,85 @@ namespace CemSys3.Controllers
 
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> GenerarPDF(string contenidoHtml)
+        public async Task<IActionResult> GenerarPDF(int id)  // Cambiar a recibir ID en lugar de HTML
         {
+            // Obtener el contenido del documento por ID
+            var documento = await _service.ObtenerDocumentoPorId(id);
+            if (documento == null)
+                return NotFound();
+
+            // Reemplazar las rutas de imágenes con la URL completa
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var contenidoConImagenes = ReemplazarRutasImagenes(documento.ContenidoHtml, baseUrl);
+
+            // Renderizar la plantilla PDF con el contenido modificado
             string html = await _viewRenderService.RenderToStringAsync(
-               $"TramiteConcesion/PlantillaPDF", contenidoHtml);
+                "TramiteConcesion/PlantillaPDF",
+                contenidoConImagenes);
 
             var pdfBytes = await _pdfGenerator.GenerateFromHtmlAsync(
                 html,
                 new PdfOptionsDto
                 {
                     Landscape = false,
-                    MarginTop = "20px",
-                    MarginLeft = "30px"
+                    MarginTop = "5px",
+                    MarginLeft = "60px",
+                    MarginRight = "30px"
                 });
 
             return File(pdfBytes, "application/pdf");
+        }
+
+        // Método auxiliar para reemplazar rutas de imágenes
+        private string ReemplazarRutasImagenes(string html, string baseUrl)
+        {
+            if (string.IsNullOrEmpty(html))
+                return html;
+
+            // Limpiar query strings
+            html = Regex.Replace(html, @"\?v=\d+", "");
+
+            // Reemplazar cualquier src que no sea URL absoluta
+            html = Regex.Replace(html,
+                @"src=""(?!https?:\/\/)([^""]+)""",
+                match =>
+                {
+                    var ruta = match.Groups[1].Value;
+
+                    // Limpiar la ruta
+                    ruta = ruta.TrimStart('/', '.');
+                    ruta = ruta.Replace("../", "").Replace("./", "");
+
+                    // Si la ruta empieza con "fotos/", mantenerla, si no, agregar "fotos/"
+                    if (!ruta.StartsWith("fotos/"))
+                    {
+                        // Intentar extraer solo el nombre del archivo
+                        var nombreArchivo = Path.GetFileName(ruta);
+                        ruta = $"fotos/{nombreArchivo}";
+                    }
+
+                    return $"src=\"{baseUrl}/{ruta}\"";
+                });
+
+            // Mismo proceso para comillas simples
+            html = Regex.Replace(html,
+                @"src='(?!https?:\/\/)([^']+)'",
+                match =>
+                {
+                    var ruta = match.Groups[1].Value;
+                    ruta = ruta.TrimStart('/', '.');
+                    ruta = ruta.Replace("../", "").Replace("./", "");
+
+                    if (!ruta.StartsWith("fotos/"))
+                    {
+                        var nombreArchivo = Path.GetFileName(ruta);
+                        ruta = $"fotos/{nombreArchivo}";
+                    }
+
+                    return $"src='{baseUrl}/{ruta}'";
+                });
+
+            return html;
         }
 
 

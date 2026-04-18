@@ -16,7 +16,7 @@ namespace CemSys3.Interfaces.PlantillaTramite
 
 
         Task<List<DocumentoDTO>> ObtenerPorTramiteAsync(int tramiteId);
-
+        Task<DocumentoDTO> ObtenerDocumentoPorId(int id);
         Task Delete(int id);
     }
 }

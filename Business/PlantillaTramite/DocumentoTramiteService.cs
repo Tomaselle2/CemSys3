@@ -84,6 +84,22 @@ namespace CemSys3.Business.PlantillaTramite
             await _context.SaveChangesAsync();            
         }
 
+        public async Task<DocumentoDTO> ObtenerDocumentoPorId(int id)
+        {
+            Models.DocumentosTramite doc = await _context.DocumentosTramites.FindAsync(id) ?? throw new Exception("Documento no encontrado");
+
+            return new DocumentoDTO
+            {
+                Id = doc.Id,
+                TramiteId = doc.TramiteId,
+                TipoAutorizacionId = doc.TipoAutorizacionId ?? 0,
+                Nombre = doc.Nombre,
+                ContenidoHtml = doc.ContenidoHtml,
+                PersonaId = doc.PersonaId,
+                Parentesco = doc.Parentesco
+            };
+        }
+
         public async Task<List<DocumentoDTO>> ObtenerPorTramiteAsync(int tramiteId)
         {
             return await _context.DocumentosTramites
