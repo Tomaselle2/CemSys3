@@ -27,7 +27,7 @@
                 @{
                     var tramiteEnProceso = Model.Dto.TramitesIniciados
                         .FirstOrDefault(t => t.TipoTramiteId == (int)TipoTramiteEnum.CambioTitular &&
-                     t.EstadoActualId != (int)EstadosCambioTitularEnum.Finalizado ||
+                     t.EstadoActualId != (int)EstadosCambioTitularEnum.Finalizado &&
                      t.EstadoActualId != (int)EstadosCambioTitularEnum.Cancelado);
                 }
 

@@ -67,7 +67,8 @@ namespace CemSys3.Business.TramiteConcesion
                     UsuarioId = usuarioId,
                     FechaCreacion = DateTime.Now,
                     InfoAdicional = string.Empty,
-                    Visibilidad = true
+                    Visibilidad = true,
+                    ConcesionId = tramiteConcesionId
                 };
                 await _context.CambiosTitularidads.AddAsync(cambiosTitularidad);
 

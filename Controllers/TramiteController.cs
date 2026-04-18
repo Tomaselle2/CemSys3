@@ -1,7 +1,10 @@
 ﻿using CemSys3.DTOs.Generics;
+using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
+using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Tramite;
+using CemSys3.Interfaces.TramitesConcesion;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CemSys3.Controllers
@@ -9,9 +12,11 @@ namespace CemSys3.Controllers
     public class TramiteController : Controller
     {
         private readonly ITramite _tramiteService;
-        public TramiteController(ITramite tramiteService)
+        private readonly ICancelarTramite _cancelarService;
+        public TramiteController(ITramite tramiteService, ICancelarTramite cancelarService)
         {
             _tramiteService = tramiteService;
+            _cancelarService = cancelarService;
         }
 
         public async Task<IActionResult> IrATramite(int tramiteId)
@@ -99,6 +104,37 @@ namespace CemSys3.Controllers
             """);
             }
             
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> Cancelar(int tramiteId, int concesionId)
+        {
+            try
+            {
+                await _cancelarService.CancelarTramite(tramiteId);
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "Trámite cancelado correctamente",
+                    Tipo = "success"
+                });
+
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "El trámite no se ha podido cancelar. " + ex.Message,
+                    Tipo = "error"
+                });
+
+            }
+
+            return RedirectToAction("Concesion", "Concesion", new { tramiteId = concesionId });
+
         }
     }
 }

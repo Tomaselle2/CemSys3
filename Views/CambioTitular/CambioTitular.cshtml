@@ -162,7 +162,6 @@ new HistorialOffcanvasVM
 </div>
 
 
-
 <!-- Modal contribuyente-->
 <div class="modal fade" id="TitularModal" tabindex="-1" aria-labelledby="titularModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -309,7 +308,11 @@ new HistorialOffcanvasVM
         <input type="hidden" asp-for="Dto.Difuntos[i].Apellido" />
     }
 
-    <input type="submit" class="btn btn-outline-primary" id="btnGenerarAutorizacion" value="Generar Autorización" />
+    @if (Model.Dto.EstadoTramiteId != (int)EstadosCambioTitularEnum.Finalizado &&
+        Model.Dto.EstadoTramiteId != (int)EstadosCambioTitularEnum.Cancelado)
+    {
+        <input type="submit" class="btn btn-outline-primary" id="btnGenerarAutorizacion" value="Generar Autorización" />
+    }
 </form>
 
 <!-- Visualiza para documento/autorizacion -->
@@ -342,14 +345,9 @@ new HistorialOffcanvasVM
                     <input type="hidden" name="tramiteId" value="@documento.TramiteId" />
                     <input type="hidden" name="returnUrl" value="@returnUrl" />
 
-                    <button type="submit" class="btn btn-outline-success">
+                    <button type="submit" class="btn btn-outline-primary">
                         Actualizar Autorización
                     </button>
-                @* <a asp-action="GenerarPDF" asp-controller="Documento"
-                       asp-route-id="@documento.Id"
-                       target="_blank" class="btn-pdf">
-                    Generar PDF
-                </a> *@
             </div>
         </form>
     </div>
@@ -367,6 +365,22 @@ new ArchivoVM
     TramiteId = Model.Dto.TramiteId,
     returnUrl = returnUrl
 })
+
+
+<form asp-action="Cancelar" asp-controller="Tramite" method="get" class="documento-form mb-4 js-confirm">
+    <input type="hidden" name="tramiteId" value="@Model.TramiteId" />
+    <input type="hidden" name="concesionId" value="@Model.concesionId" />
+
+    @if (Model.Dto.EstadoTramiteId != (int)EstadosCambioTitularEnum.Finalizado &&
+            Model.Dto.EstadoTramiteId != (int)EstadosCambioTitularEnum.Cancelado)
+    {
+        <button type="submit" class="btn btn-outline-danger">
+            Cancelar trámite
+        </button>
+    }
+</form>
+
+
 
 
 @* Renderizamos el manejador pasándole el DTO del modelo *@
@@ -432,37 +446,34 @@ new ArchivoVM
             autoresize_overflow_padding: 10,
 
         };
-    
+
         function inicializarEditor(elementId, formElement) {
             const textarea = document.querySelector('#' + elementId);
             if (!textarea) {
                 console.error('No se encontró el textarea:', elementId);
                 return;
             }
-        
+
             tinymce.init({
                 ...tinyConfig,
                 selector: '#' + elementId,
                 auto_focus: false,
-                init_instance_callback: function(editor) {
-                    editor.on('init', function() {
-                        editor.getBody().blur();
-                        if (editor.getContainer()) {
-                            editor.getContainer().blur();
-                        }
-                    });
-                },
                 setup: function (editor) {
                     editor.on('init', function () {
-                        console.log('Editor inicializado:', elementId);
+                        // Guardar el scroll actual para evitar el salto
+                        const scrollX = window.scrollX;
+                        const scrollY = window.scrollY;
+
                         setTimeout(() => {
-                            editor.execCommand('mceAutoResize');
-                            editor.getBody().blur();
-                        }, 100);
+                                editor.getBody().blur();
+                            // Restaurar scroll por si TinyMCE hizo scroll al foco
+                            window.scrollTo(scrollX, scrollY);
+                            document.activeElement?.blur();
+                        }, 50);
                     });
-                
+
                     if (formElement) {
-                        formElement.addEventListener('submit', function (e) {
+                        formElement.addEventListener('submit', function () {
                             editor.save();
                         });
                     }
@@ -472,6 +483,7 @@ new ArchivoVM
             });
         }
     
+        
         // Verificar si hay documentos
         if (documentosData && documentosData.length > 0) {
             documentosData.forEach(function(documento) {
@@ -539,7 +551,7 @@ new ArchivoVM
         apellido: (t.apellido ?? t.Apellido ?? '') || '',
         sexo: (t.sexo ?? t.Sexo ?? '').toLowerCase(),
         celular: t.celular ?? t.Celular ?? '',
-        correoElectronico: t.correo ?? t.correoElectronico ?? t.CorreoElectronico ?? '',
+        correoElectronico: t.correo ?? t.Correo ?? t.correoElectronico ?? t.CorreoElectronico ?? t.correoInput ?? t.correoInput ?? '',
         domicilio: t.domicilio ?? t.Domicilio ?? ''
         }));
 
@@ -730,7 +742,7 @@ new ArchivoVM
         nombre: nombreInput.value.trim(),
         apellido: apellidoInput.value.trim(),
         celular: celularInput.value.trim(),
-        correoElectronico: correoInput.value.trim(),
+        correo: correoInput.value.trim(),
         domicilio: domicilioInput.value.trim()
         };
 
@@ -772,7 +784,7 @@ new ArchivoVM
         apellido: titular.apellido ?? titular.Apellido ?? '',
         sexo: (titular.sexo ?? titular.Sexo ?? '').toLowerCase(),
         celular: titular.celular ?? titular.Celular ?? '',
-        correoElectronico: titular.correo ?? titular.correoElectronico ?? titular.CorreoElectronico ?? '',
+        correoElectronico: titular.correo ?? titular.correoElectronico ?? titular.CorreoElectronico ?? titular.Correo ?? titular.CorreoInput ?? titular.correoInput ?? '',
         domicilio: titular.domicilio ?? titular.Domicilio ?? ''
         };
 
@@ -863,7 +875,7 @@ new ArchivoVM
         </div>
         <div>
         <label>Correo</label>
-        <input class="form-control" type="text" name="Personas[${index}].CorreoElectronico" value="${titular.correoElectronico || titular.CorreoElectronico || ''}" maxlength="100" />
+        <input class="form-control" type="text" name="Personas[${index}].CorreoElectronico" value="${titular.correoElectronico || titular.CorreoElectronico || titular.Correo || titular.correo || titular.correoInput || titular.CorreoInput || ''}" maxlength="100" />
         </div>
         </div>
         </div>

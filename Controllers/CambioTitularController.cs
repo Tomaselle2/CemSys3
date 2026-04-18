@@ -116,6 +116,7 @@ namespace CemSys3.Controllers
                 vm.Dto = await _cambioTitular.Get(tramiteId);
 
                 vm.TramiteId = vm.Dto.TramiteId;
+                vm.concesionId = vm.Dto.ConcesionId;
                 vm.Archivos = await _archivoService.GetAllByTramiteId(vm.TramiteId);
                 vm.Historial = await _historialService.GetAllById(vm.TramiteId);
                 vm.Documentos = await _documentoService.ObtenerPorTramiteAsync(vm.TramiteId);

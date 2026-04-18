@@ -136,6 +136,8 @@ namespace CemSys3.Business.Tramite
           return dto;
         }
 
+
+
         public async Task Update(TramiteDTO dto)
         {
             Models.Tramite tramite = await _context.Tramites.FindAsync(dto.Id) ?? throw new Exception("No se encontro el trámite");
@@ -150,5 +152,7 @@ namespace CemSys3.Business.Tramite
             int? maxId = await _context.Tramites.MaxAsync(t => (int?)t.Id);
             return (maxId ?? 0) + 1;
         }
+
+
     }
 }

@@ -89,6 +89,8 @@ builder.Services.AddScoped<ITemplateProcessor, TemplateProcessor>();
 builder.Services.AddScoped<CambioTitularStrategy>();
 builder.Services.AddScoped<IStrategyFactory, StrategyFactory>();
 builder.Services.AddScoped<ICambioTitular, CambioTitular>();
+builder.Services.AddScoped<ICancelarTramite, CancelarService>();
+
 
 
 
