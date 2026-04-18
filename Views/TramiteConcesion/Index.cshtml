@@ -27,20 +27,21 @@
                 @{
                     var tramiteEnProceso = Model.Dto.TramitesIniciados
                         .FirstOrDefault(t => t.TipoTramiteId == (int)TipoTramiteEnum.CambioTitular &&
-                                             t.EstadoActualId != (int)EstadosCambioTitularEnum.Finalizado || t.EstadoActualId != (int)EstadosCambioTitularEnum.Cancelado);
+                     t.EstadoActualId != (int)EstadosCambioTitularEnum.Finalizado ||
+                     t.EstadoActualId != (int)EstadosCambioTitularEnum.Cancelado);
                 }
+
                 @if (tramiteEnProceso != null)
                 {
                     <p class="obligatorio mb-2">Existe un trámite en proceso</p>
-                    <form asp-action="CambioTitular" asp-controller="CambioTitular" method="get" class="d-inline">
-                        <input type="hidden" name="cambioTitularId" value="@tramiteEnProceso.Id" />
-                        <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
+                    <form asp-action="Detalle" asp-controller="CambioTitular" method="get" class="d-inline">
+                        <input type="hidden" name="tramiteId" value="@tramiteEnProceso.Id" />
                         <input type="submit" value="Continuar trámite" class="btn btn-warning" />
                     </form>
                 }
                 else
                 {
-                    <form asp-action="CambioTitular" asp-controller="CambioTitular" method="get">
+                    <form asp-action="IniciarCambioTitular" asp-controller="CambioTitular" method="post">
                         <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
                         <input type="submit" value="Iniciar trámite" class="btn btn-success" />
                     </form>

@@ -119,18 +119,18 @@ namespace CemSys3.Business.TramiteConcesion
             throw new NotImplementedException();
         }
 
-        public async Task<CambioTitularDTO> Get(int cambioTitularId, int concesionId)
+        public async Task<CambioTitularDTO> Get(int cambioTitularId)
         {
+
+            Models.CambiosTitularidad cambioTitularidad = await _context.CambiosTitularidads.AsNoTracking()
+                .Include(t => t.Tramite)
+                .FirstOrDefaultAsync(ct => ct.TramiteId == cambioTitularId) ?? throw new Exception("Trámite de cambio de titularidad no encontrado.");
 
             Models.Concesione concesion = await _context.Concesiones.AsNoTracking()
                    .Include(c => c.Tramite)
                    .Include(c => c.Parcela)
                        .ThenInclude(p => p.Seccion)
-                   .FirstOrDefaultAsync(c => c.TramiteId == concesionId) ?? throw new Exception("Concesion no encontrada para inicar el trámite.");
-
-            Models.CambiosTitularidad cambioTitularidad = await _context.CambiosTitularidads.AsNoTracking()
-                .Include(t => t.Tramite)
-                .FirstOrDefaultAsync(ct => ct.TramiteId == cambioTitularId) ?? throw new Exception("Trámite de cambio de titularidad no encontrado.");
+                   .FirstOrDefaultAsync(c => c.TramiteId == cambioTitularidad.ConcesionId) ?? throw new Exception("Concesion no encontrada para inicar el trámite.");
 
             CambioTitularDTO dto = new CambioTitularDTO();
             dto.TramiteId = cambioTitularidad.TramiteId;
@@ -144,7 +144,7 @@ namespace CemSys3.Business.TramiteConcesion
             dto.ConcesionId = concesion.TramiteId;
 
             dto.TitularesActuales = await _context.HistorialTitularesConcesiones
-                    .Where(h => h.ConcesionId == concesionId && h.FechaFin == null)
+                    .Where(h => h.ConcesionId == cambioTitularidad.ConcesionId && h.FechaFin == null)
                     .Select(h => new TitularesContratoDTO
                     {
                         Id = h.Persona.Id,

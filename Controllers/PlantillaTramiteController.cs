@@ -111,29 +111,5 @@ namespace CemSys3.Controllers
                 return View(viewModel.vista, viewModel);
             }
         }
-
-        //[HttpPost]
-        //public async Task<IActionResult> SubirImagen(IFormFile upload)
-        //{
-        //    if (upload == null || upload.Length == 0)
-        //        return BadRequest("Archivo inválido");
-
-        //    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(upload.FileName);
-
-        //    var ruta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/fotos", fileName);
-
-        //    using (var stream = new FileStream(ruta, FileMode.Create))
-        //    {
-        //        await upload.CopyToAsync(stream);
-        //    }
-
-        //    var url = "/fotos/" + fileName;
-
-        //    return Json(new
-        //    {
-        //        uploaded = true,
-        //        url = url
-        //    });
-        //}
     }
 }

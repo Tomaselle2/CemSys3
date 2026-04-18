@@ -21,7 +21,9 @@ public partial class Tramite
 
     public virtual ICollection<Archivo> Archivos { get; set; } = new List<Archivo>();
 
-    public virtual CambiosTitularidad? CambiosTitularidad { get; set; }
+    public virtual ICollection<CambiosTitularidad> CambiosTitularidadConcesions { get; set; } = new List<CambiosTitularidad>();
+
+    public virtual CambiosTitularidad? CambiosTitularidadTramite { get; set; }
 
     public virtual Concesione? Concesione { get; set; }
 

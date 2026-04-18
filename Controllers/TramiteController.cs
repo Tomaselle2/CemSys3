@@ -14,7 +14,7 @@ namespace CemSys3.Controllers
             _tramiteService = tramiteService;
         }
 
-        public async Task<IActionResult> IrATramite(int tramiteId, int? concesionId)
+        public async Task<IActionResult> IrATramite(int tramiteId)
         {
             try
             {
@@ -29,7 +29,7 @@ namespace CemSys3.Controllers
                         return RedirectToAction("Concesion", "Concesion", new { tramiteId = tramiteId });
 
                     case (int)TipoTramiteEnum.CambioTitular:
-                        return RedirectToAction("CambioTitular", "CambioTitular", new { cambioTitularId = tramiteId, concesionId = concesionId });
+                        return RedirectToAction("Detalle", "CambioTitular", new { tramiteId = tramiteId});
 
                     default:
                         return Content($$"""

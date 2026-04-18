@@ -8,7 +8,7 @@ namespace CemSys3.Interfaces.TramitesConcesion
 
         Task<int> CambioTitularPost(CambioTitularDTO dto); //post
 
-        Task<CambioTitularDTO> Get(int cambioTitularId, int concesionId);
+        Task<CambioTitularDTO> Get(int cambioTitularId);
 
     }
 }

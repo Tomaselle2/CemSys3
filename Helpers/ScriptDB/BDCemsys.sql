@@ -471,11 +471,13 @@ CREATE TABLE CambiosTitularidad (
     fechaFinalizacion DATETIME NULL,
 
     infoAdicional NVARCHAR(MAX) null,
+	concesionId int null,
 
     visibilidad BIT DEFAULT 1,
 
     CONSTRAINT FK_CT_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
-    CONSTRAINT FK_CT_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_CT_concesionId FOREIGN KEY (concesionId) REFERENCES Tramites(id),
+	CONSTRAINT FK_CT_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
     CONSTRAINT FK_CT_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id)
 );
 

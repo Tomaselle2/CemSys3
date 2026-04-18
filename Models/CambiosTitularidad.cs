@@ -19,6 +19,10 @@ public partial class CambiosTitularidad
 
     public bool? Visibilidad { get; set; }
 
+    public int? ConcesionId { get; set; }
+
+    public virtual Tramite? Concesion { get; set; }
+
     public virtual Parcela Parcela { get; set; } = null!;
 
     public virtual Tramite Tramite { get; set; } = null!;

@@ -345,11 +345,11 @@ new HistorialOffcanvasVM
                     <button type="submit" class="btn btn-outline-success">
                         Actualizar Autorización
                     </button>
-                <a asp-action="GenerarPDF" asp-controller="Documento"
+                @* <a asp-action="GenerarPDF" asp-controller="Documento"
                        asp-route-id="@documento.Id"
                        target="_blank" class="btn-pdf">
                     Generar PDF
-                </a>
+                </a> *@
             </div>
         </form>
     </div>
@@ -429,7 +429,8 @@ new ArchivoVM
             autoresize_bottom_margin: 20,
             autoresize_min_height: 200,
             autoresize_max_height: 800,
-            autoresize_overflow_padding: 10
+            autoresize_overflow_padding: 10,
+
         };
     
         function inicializarEditor(elementId, formElement) {

@@ -48,7 +48,7 @@ namespace CemSys3.Controllers
                     Tipo = "warning"
                 });
 
-                return RedirectToAction("CambioTitular", new { cambioTitularId = viewModel.TramiteId, concesionId = viewModel.concesionId} );
+                return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId} );
             }
 
             GeneraStrategyDTO dto = new GeneraStrategyDTO
@@ -74,52 +74,21 @@ namespace CemSys3.Controllers
                 Tipo = "success"
             });
 
-            return RedirectToAction("CambioTitular", new { cambioTitularId = viewModel.TramiteId, concesionId = viewModel.concesionId });
+            return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId });
         }
 
-        [HttpGet]
-        [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> CambioTitular(
-    int? cambioTitularId,
-    int? concesionId)
-        {
-            var vm = new CambioTitularVM();
-            vm.SweetAlert = TempData.GetSweetAlert();
 
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> IniciarCambioTitular(int concesionId)
+        {
             try
             {
                 int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
 
-                if (cambioTitularId.HasValue && concesionId.HasValue)
-                {
-                    // 🔹 CONTINUAR
-                    vm.Dto = await _cambioTitular.Get(cambioTitularId.Value, concesionId.Value);
+                var dto = await _cambioTitular.AddCambioTitular(concesionId, usuarioId);
 
-                    vm.TramiteId = vm.Dto.TramiteId;
-
-                    vm.Archivos = await _archivoService.GetAllByTramiteId(vm.TramiteId);
-                    vm.Historial = await _historialService.GetAllById(vm.TramiteId);
-
-                    //  DOCUMENTOS
-                    vm.Documentos = await _documentoService.ObtenerPorTramiteAsync(vm.TramiteId);
-                }
-                else if (concesionId.HasValue)
-                {
-                    // 🔹 INICIAR
-                    var dto = await _cambioTitular.AddCambioTitular(concesionId.Value, usuarioId);
-
-                    return RedirectToAction("CambioTitular", new
-                    {
-                        cambioTitularId = dto.TramiteId,
-                        concesionId = concesionId.Value
-                    });
-                }
-                else
-                {
-                    throw new Exception("Parámetros inválidos.");
-                }
-
-                return View(vm);
+                return RedirectToAction("Detalle", new { tramiteId = dto.TramiteId });
             }
             catch (Exception ex)
             {
@@ -131,6 +100,38 @@ namespace CemSys3.Controllers
                 });
 
                 return RedirectToAction("Index", "TramiteConcesion", new { tramiteId = concesionId });
+            }
+
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> Detalle(int tramiteId)
+        {
+            var vm = new CambioTitularVM();
+            vm.SweetAlert = TempData.GetSweetAlert();
+
+            try
+            {
+                vm.Dto = await _cambioTitular.Get(tramiteId);
+
+                vm.TramiteId = vm.Dto.TramiteId;
+                vm.Archivos = await _archivoService.GetAllByTramiteId(vm.TramiteId);
+                vm.Historial = await _historialService.GetAllById(vm.TramiteId);
+                vm.Documentos = await _documentoService.ObtenerPorTramiteAsync(vm.TramiteId);
+
+                return View("CambioTitular", vm);
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = ex.Message,
+                    Tipo = "error"
+                });
+
+                return RedirectToAction("Index", "TramiteConcesion", new { tramiteId = vm.Dto.ConcesionId });
             }
         }
 
