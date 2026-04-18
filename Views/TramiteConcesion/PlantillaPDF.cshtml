@@ -1,0 +1,23 @@
+﻿@model string
+
+<html>
+<head>
+    <style>
+            body {
+                font-family: "Inter", sans-serif;
+                font-size: 18px;
+            }
+
+            .header {
+                text-align: center;
+            }
+    </style>
+</head>
+<body>
+    <div class="header">Autorización</div>
+
+    <div>
+        @Html.Raw(Model)
+    </div>
+</body>
+</html>

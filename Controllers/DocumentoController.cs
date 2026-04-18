@@ -1,8 +1,11 @@
-﻿using CemSys3.DTOs.PlantillaTramite;
+﻿using CemSys3.DTOs.PDF;
+using CemSys3.DTOs.PlantillaTramite;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
+using CemSys3.Helpers.PDF;
 using CemSys3.Helpers.Roles_Autenticacion;
+using CemSys3.Interfaces.PDF;
 using CemSys3.Interfaces.PlantillaTramite;
 using CemSys3.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +16,15 @@ namespace CemSys3.Controllers
     public class DocumentoController : Controller
     {
         private readonly IDocumentoTramiteService _service;
+        private readonly PlaywrightPdfGenerator _pdfGenerator;
+        private readonly IViewRenderService _viewRenderService;
 
-        public DocumentoController(IDocumentoTramiteService service)
+
+        public DocumentoController(IDocumentoTramiteService service, PlaywrightPdfGenerator pdfGenerator, IViewRenderService viewRenderService)
         {
             _service = service;
+            _pdfGenerator = pdfGenerator;
+            _viewRenderService = viewRenderService;
         }
 
         [HttpPost]
@@ -80,6 +88,25 @@ namespace CemSys3.Controllers
             }
 
             return RedirectToAction("Index", "TramiteConcesion", new { tramiteId = tramiteId });
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> GenerarPDF(string contenidoHtml)
+        {
+            string html = await _viewRenderService.RenderToStringAsync(
+               $"TramiteConcesion/PlantillaPDF", contenidoHtml);
+
+            var pdfBytes = await _pdfGenerator.GenerateFromHtmlAsync(
+                html,
+                new PdfOptionsDto
+                {
+                    Landscape = false,
+                    MarginTop = "20px",
+                    MarginLeft = "30px"
+                });
+
+            return File(pdfBytes, "application/pdf");
         }
 
 
