@@ -280,13 +280,13 @@ namespace CemSys3.Enumerables
         Caducado = 8,
 
         [Display(Name = "Iniciado")]
-        IniciadoCambioTitular = 9,
+        Iniciado = 9,
 
         [Display(Name = "Finalizado")]
-        FinalizadoCambioTitular = 10,
+        Finalizado = 10,
 
         [Display(Name = "Cancelado")]
-        CanceladoCambioTitular = 11,
+        Cancelado = 11,
     }
 
     //concepto de la tarifaria 

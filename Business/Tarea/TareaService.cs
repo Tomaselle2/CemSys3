@@ -55,7 +55,7 @@ namespace CemSys3.Business.Tarea
                 }).ToListAsync();
         }
 
-        public async Task<IEnumerable<TareaDTO>> GetAllByTramite(int tramiteId)
+        public async Task<List<TareaDTO>> GetAllByTramite(int tramiteId)
         {
             return await _context.Tareas
                             .Where(t => t.TramiteId == tramiteId)
@@ -66,8 +66,60 @@ namespace CemSys3.Business.Tarea
                                 Descripcion = t.Descripcion,
                                 NotaId = t.NotaId,
                                 TramiteId = t.TramiteId,
+                                TareaPlantillaId = t.TareaPlantillaId ?? 0,
                                 Visibilidad = t.Visibilidad
                             }).ToListAsync();
+        }
+
+        public async Task GuardarTareas(int tramiteId, List<TareaDTO> tareas)
+        {
+            var existentes = await _context.Tareas
+                .Where(t => t.TramiteId == tramiteId)
+                .ToListAsync();
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                foreach (var tarea in tareas)
+                {
+                    // 🟢 NUEVA
+                    if (tarea.Id == 0 && !tarea.Eliminada)
+                    {
+                        await _context.Tareas.AddAsync(new Models.Tarea
+                        {
+                            Estado = tarea.Estado,
+                            Descripcion = tarea.Descripcion,
+                            NotaId = tarea.NotaId,
+                            TramiteId = tramiteId,
+                            Visibilidad = tarea.Visibilidad,
+                        });
+                    }
+                    else
+                    {
+                        var existente = existentes.FirstOrDefault(t => t.Id == tarea.Id);
+                        if (existente == null) continue;
+
+                        // 🔴 ELIMINADA
+                        if (tarea.Eliminada)
+                        {
+                            _context.Tareas.Remove(existente);
+                        }
+                        // 🟡 UPDATE
+                        else
+                        {
+                            existente.Descripcion = tarea.Descripcion;
+                            existente.Estado = tarea.Estado;
+                        }
+                    }
+                }
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task Update(TareaDTO dto)

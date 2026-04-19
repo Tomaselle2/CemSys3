@@ -1,4 +1,5 @@
-﻿@using CemSys3.ViewModels.TramiteConcesion
+﻿@using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.TramiteConcesion
 @using CemSys3.Enumerables
 @model ListadoTramitesVM
 @{
@@ -12,6 +13,74 @@
             requisitosCambioTitularidad = requisito.Descripcion;
     }
 }
+
+<!-- Tabla de historial de tramites -->
+<div class="accordion" id="accordionPanelsStayOpenExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                Trámites iniciados
+            </button>
+        </h2>
+        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            @* cuerpo del acordion *@
+            @if (Model.Dto.TramitesIniciados.Any())
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Trámite</th>
+                                    <th>Fecha inicio</th>
+                                    <th>Tipo de Trámite</th>
+                                    <th>Estado</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var opc in Model.Dto.TramitesIniciados)
+                                {
+                                    string tipoTramiteDisplay = EnumHelper.GetDisplayNameByValue<TipoTramiteEnum>(opc.TipoTramiteId);
+                                    string estadoTramiteDisplay = EnumHelper.GetDisplayNameByValue<EstadosTramiteEnum>(opc.EstadoActualId);
+
+                                    if(opc.EstadoActualId != (int)EstadosTramiteEnum.Cancelado && opc.EstadoActualId != (int)EstadosTramiteEnum.Finalizado)
+                                    {
+                                        <tr>
+                                            <td>@opc.Id</td>
+                                            <td>@(opc.FechaCreacion.ToString("dd/MM/yyyy HH:mm"))</td>
+                                            <td>@tipoTramiteDisplay</td>
+                                            <td>@estadoTramiteDisplay</td>
+                                            <td>
+                                                <form asp-action="IrATramite" asp-controller="Tramite" target="_blank" method="get" style="display: inline-block;" data-skip-loader="true">
+                                                    <input type="hidden" name="tramiteId" value="@opc.Id" />
+                                                    <button type="submit" class="btn btn-secondary btn-sm" title="Ir al trámite">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+
+                                    }
+                                    
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    No hay trámites iniciados.
+                </div>
+            }
+            @* Fin cuerpo del acordeon *@
+        </div>
+    </div>
+</div>
+
 
 <div class="cardConcesion my-4">
     <div class="cardConcesion-content">
@@ -31,21 +100,10 @@
                      t.EstadoActualId != (int)EstadosCambioTitularEnum.Cancelado);
                 }
 
-                @if (tramiteEnProceso != null)
-                {
-                    <p class="obligatorio mb-2">Existe un trámite en proceso</p>
-                    <form asp-action="Detalle" asp-controller="CambioTitular" method="get" class="d-inline">
-                        <input type="hidden" name="tramiteId" value="@tramiteEnProceso.Id" />
-                        <input type="submit" value="Continuar trámite" class="btn btn-warning" />
-                    </form>
-                }
-                else
-                {
-                    <form asp-action="IniciarCambioTitular" asp-controller="CambioTitular" method="post">
-                        <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
-                        <input type="submit" value="Iniciar trámite" class="btn btn-success" />
-                    </form>
-                }
+                <form asp-action="IniciarCambioTitular" asp-controller="CambioTitular" method="post">
+                    <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
+                    <input type="submit" value="Iniciar trámite" class="btn btn-success" />
+                </form>
             </div>
         </div>
     </div>

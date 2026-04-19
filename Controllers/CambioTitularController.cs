@@ -1,4 +1,5 @@
-﻿using CemSys3.DTOs.PlantillaTramite;
+﻿using CemSys3.Business.Tarea;
+using CemSys3.DTOs.PlantillaTramite;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
@@ -6,6 +7,7 @@ using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Archivo;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.PlantillaTramite;
+using CemSys3.Interfaces.Tarea;
 using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.AspNetCore.Mvc;
@@ -19,15 +21,17 @@ namespace CemSys3.Controllers
         private readonly IArchivo _archivoService;
         private readonly IHistorialEstados _historialService;
         private readonly ICambioTitular _cambioTitular;
+        private readonly ITarea _tareaService;
 
         public CambioTitularController(IArchivo archivoService, IHistorialEstados historialService, IStrategyFactory factory,
-        IDocumentoTramiteService documentoService, ICambioTitular cambioTitular)
+        IDocumentoTramiteService documentoService, ICambioTitular cambioTitular, ITarea tareaService)
         {
             _archivoService = archivoService;
             _historialService = historialService;
             _factory = factory;
             _documentoService = documentoService;
             _cambioTitular = cambioTitular;
+            _tareaService = tareaService;
         }
 
         [HttpPost]
@@ -120,7 +124,7 @@ namespace CemSys3.Controllers
                 vm.Archivos = await _archivoService.GetAllByTramiteId(vm.TramiteId);
                 vm.Historial = await _historialService.GetAllById(vm.TramiteId);
                 vm.Documentos = await _documentoService.ObtenerPorTramiteAsync(vm.TramiteId);
-
+                vm.Tareas = await _tareaService.GetAllByTramite(tramiteId);
                 return View("CambioTitular", vm);
             }
             catch (Exception ex)
@@ -128,7 +132,7 @@ namespace CemSys3.Controllers
                 TempData.SetSweetAlert(new SweetAlertDTO
                 {
                     Titulo = "Error",
-                    Mensaje = ex.Message,
+                    Mensaje = "Ocurrio un error al cargar los datos. " + ex.Message,
                     Tipo = "error"
                 });
 

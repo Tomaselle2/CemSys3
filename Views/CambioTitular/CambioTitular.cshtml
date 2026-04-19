@@ -356,8 +356,8 @@ new HistorialOffcanvasVM
 
 
 
-<!-- Archivos-->
 
+<!-- Archivos-->
 @await Html.PartialAsync("ArchivoPV/_ArchivoPV",
 new ArchivoVM
 {
@@ -367,15 +367,105 @@ new ArchivoVM
 })
 
 
-<form asp-action="Cancelar" asp-controller="Tramite" method="get" class="documento-form mb-4 js-confirm">
+<!-- Listado de tareas-->
+<div class="accordion">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingTareas">
+            <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-target="#panelsStayOpen-collapseTareas" aria-expanded="true" aria-controls="panelsStayOpen-collapseTareas">
+                Tareas
+            </button>
+        </h2>
+        <div id="panelsStayOpen-collapseTareas" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingTareas">
+            <div class="mb-3 p-3">
+                <form id="formTareas">
+
+                    <div id="tareas">
+                        @for (int i = 0; i < Model.Tareas.Count(); i++)
+                        {
+                            <div class="d-flex gap-2 mb-2 task-row align-items-center">
+                                <input type="hidden" asp-for="Tareas[i].Id" />
+                                <input type="hidden" asp-for="Tareas[i].Eliminada" class="eliminada-flag" />
+
+                                <input type="checkbox"
+                                        class="form-check-input border border-dark border-1"
+                                        asp-for="Tareas[i].Estado" />
+
+                                <input class="form-control flex-grow-1"
+                                        asp-for="Tareas[i].Descripcion" />
+
+                                <button type="button"
+                                        title="Eliminar tarea"
+                                        class="btn btn-danger btn-sm btn-eliminar"
+                                        onclick="marcarEliminada(this)">
+                                    ✖
+                                </button>
+
+                                <button type="button"
+                                        title="Restaurar tarea"
+                                        class="btn btn-warning btn-sm btn-restaurar d-none"
+                                        onclick="restaurar(this)">
+                                    ↩
+                                </button>
+                            </div>
+                        }
+                    </div>
+
+                    <button type="button"
+                            id="btnAgregarTarea"
+                            title="Agregar tarea"
+                            class="btn btn-sm btn-outline-primary"
+                            onclick="agregarTarea()">
+                        <i class="bi bi-plus"></i>
+                        Tarea
+                    </button>
+                    <hr />
+
+                    <input type="hidden" name="tramiteId" value="@Model.Dto.TramiteId" />
+                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                    @for (int i = 0; i < Model.Tareas.Count; i++)
+                    {
+                        <input type="hidden" asp-for="Tareas[i].Id" />
+                        <input type="hidden" asp-for="Tareas[i].Descripcion" />
+                        <input type="hidden" asp-for="Tareas[i].Eliminada" />
+                        <input type="hidden" asp-for="Tareas[i].Estado" />
+                        <input type="hidden" asp-for="Tareas[i].NotaId" />
+                        <input type="hidden" asp-for="Tareas[i].TareaPlantillaId" />
+                        <input type="hidden" asp-for="Tareas[i].TramiteId" />
+                    }
+
+
+                    <button type="button" id="btnGuardarTareas" class="btn btn-outline-secondary my-3">
+                        Actualizar tareas
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Btn Cancelar-->
+<form asp-action="Cancelar" asp-controller="Tramite" method="get" class="documento-form mb-4 js-confirm my-3">
     <input type="hidden" name="tramiteId" value="@Model.TramiteId" />
     <input type="hidden" name="concesionId" value="@Model.concesionId" />
 
-    @if (Model.Dto.EstadoTramiteId != (int)EstadosCambioTitularEnum.Finalizado &&
-            Model.Dto.EstadoTramiteId != (int)EstadosCambioTitularEnum.Cancelado)
+    @if (Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Finalizado &&
+                Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Cancelado)
     {
         <button type="submit" class="btn btn-outline-danger">
             Cancelar trámite
+        </button>
+    }
+</form>
+
+<!-- Btn Finalizar-->
+<form asp-action="/" asp-controller="/" method="post">
+    @if (Model.Dto.EstadoTramiteId != (int)EstadosCambioTitularEnum.Finalizado &&
+                Model.Dto.EstadoTramiteId != (int)EstadosCambioTitularEnum.Cancelado)
+    {
+        <button id="btnFinalizar" class="btn btn-success" disabled>
+            Finalizar trámite
         </button>
     }
 </form>
@@ -419,7 +509,7 @@ new ArchivoVM
 <script src="~/tinymce/js/tinymce/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
 @section Scripts {
 
-<script>
+    <script>
     // Pasar los datos del modelo a JavaScript
     var documentosData = @Html.Raw(Json.Serialize(Model.Documentos));
     
@@ -507,8 +597,6 @@ new ArchivoVM
         });
     });
 </script>
-
-
 
     <script>
         // Variables globales
@@ -948,4 +1036,7 @@ new ArchivoVM
         }
 
     </script>
+    <script src="~/js/tareabase.js"></script>
+    <script src="~/js/tarea-guardar.js"></script>
+    <script src="~/js/tareas-finalizar.js"></script>
 }

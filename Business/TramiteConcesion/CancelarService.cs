@@ -29,16 +29,7 @@ namespace CemSys3.Business.TramiteConcesion
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                //switch de tipo tramite
-                switch (tramite.TipoTramiteId)
-                {
-                    case (int)TipoTramiteEnum.CambioTitular:
-                        await ActualizarHistorial(tramite, (int)EstadosCambioTitularEnum.Cancelado);
-                        break;
-                    default:
-                        throw new Exception("Tipo de trámite no soportado para cancelación.");
-                }
-
+                await ActualizarHistorial(tramite, (int)EstadosTramiteEnum.Cancelado);
                 await transaction.CommitAsync();
             }
             catch (Exception) {

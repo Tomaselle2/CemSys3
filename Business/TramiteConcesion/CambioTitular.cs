@@ -4,6 +4,7 @@ using CemSys3.DTOs.Tramite;
 using CemSys3.DTOs.TramitesConcesion;
 using CemSys3.Enumerables;
 using CemSys3.Interfaces.HistorialEstados;
+using CemSys3.Interfaces.Tarea;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.Models;
@@ -14,14 +15,17 @@ namespace CemSys3.Business.TramiteConcesion
     public class CambioTitular : ICambioTitular
     {
         private readonly AppDbContext _context;
-        public readonly IHistorialEstados _historialEstadosService;
-        public readonly ITramite _tramiteService;
+        private readonly IHistorialEstados _historialEstadosService;
+        private readonly ITareaPlantilla _tareaPlantilla;
+        private readonly ITramite _tramiteService;
 
-        public CambioTitular(AppDbContext context, ITramite tramiteService, IHistorialEstados historialEstadosService)
+        public CambioTitular(AppDbContext context, ITramite tramiteService, IHistorialEstados historialEstadosService,
+            ITareaPlantilla tareaPlantilla)
         {
             _context = context;
             _tramiteService = tramiteService;
             _historialEstadosService = historialEstadosService;
+            _tareaPlantilla = tareaPlantilla;
         }
 
         public async Task<CambioTitularDTO> AddCambioTitular(int tramiteConcesionId, int usuarioId) //get genera un tramite de cambio de titular
@@ -101,6 +105,8 @@ namespace CemSys3.Business.TramiteConcesion
                         CorreoElectronico = h.Persona.Correo,
                         Domicilio = h.Persona.Domicilio
                     }).ToListAsync();
+
+                await _tareaPlantilla.CrearTareasPorTramite(tramiteId, (int)TipoTramiteEnum.CambioTitular);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();

@@ -8,7 +8,9 @@ namespace CemSys3.Interfaces.Tarea
         Task Update(TareaDTO dto);
         Task Delete(int id);
         Task<IEnumerable<TareaDTO>> GetAllByNota(int notaId);
-        Task<IEnumerable<TareaDTO>> GetAllByTramite(int tramiteId);
+        Task<List<TareaDTO>> GetAllByTramite(int tramiteId);
+
+        Task GuardarTareas(int tramiteId, List<TareaDTO> tareas);
 
     }
 }
