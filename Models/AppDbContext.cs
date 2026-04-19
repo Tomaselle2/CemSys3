@@ -67,6 +67,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Tarea> Tareas { get; set; }
 
+    public virtual DbSet<TareaPlantilla> TareaPlantillas { get; set; }
+
     public virtual DbSet<TemasTarifarium> TemasTarifaria { get; set; }
 
     public virtual DbSet<TipoAutorizacion> TipoAutorizacions { get; set; }
@@ -92,10 +94,6 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<TramitesParcela> TramitesParcelas { get; set; }
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=MSITUF; Initial Catalog= cemsys; Integrated Security= True; TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -867,9 +865,29 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.NotaId)
                 .HasConstraintName("Tareas_notaId_fk");
 
+            entity.HasOne(d => d.TareaPlantilla).WithMany(p => p.Tareas)
+                .HasForeignKey(d => d.TareaPlantillaId)
+                .HasConstraintName("FK_Tareas_TareaPlantilla");
+
             entity.HasOne(d => d.Tramite).WithMany(p => p.Tareas)
                 .HasForeignKey(d => d.TramiteId)
                 .HasConstraintName("Tareas_tramiteId_fk");
+        });
+
+        modelBuilder.Entity<TareaPlantilla>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__TareaPla__3214EC073C336B3F");
+
+            entity.ToTable("TareaPlantilla");
+
+            entity.Property(e => e.Descripcion).HasMaxLength(60);
+            entity.Property(e => e.Estado).HasColumnName("estado");
+            entity.Property(e => e.Visibilidad).HasDefaultValue(true);
+
+            entity.HasOne(d => d.TipoTramite).WithMany(p => p.TareaPlantillas)
+                .HasForeignKey(d => d.TipoTramiteId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("TareaPlantilla_TipoTramiteId_fk");
         });
 
         modelBuilder.Entity<TemasTarifarium>(entity =>

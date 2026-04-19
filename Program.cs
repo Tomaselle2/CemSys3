@@ -90,6 +90,7 @@ builder.Services.AddScoped<CambioTitularStrategy>();
 builder.Services.AddScoped<IStrategyFactory, StrategyFactory>();
 builder.Services.AddScoped<ICambioTitular, CambioTitular>();
 builder.Services.AddScoped<ICancelarTramite, CancelarService>();
+builder.Services.AddScoped<ITareaPlantilla, TareaPlantillaService>();
 
 
 

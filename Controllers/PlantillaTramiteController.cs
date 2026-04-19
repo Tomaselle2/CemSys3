@@ -1,10 +1,12 @@
 ﻿using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.PlantillaTramite;
 using CemSys3.DTOs.SweetAlert;
+using CemSys3.DTOs.Tarea;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.PlantillaTramite;
+using CemSys3.Interfaces.Tarea;
 using CemSys3.ViewModels.PlantillaTramite;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -13,14 +15,13 @@ namespace CemSys3.Controllers
 {
     public class PlantillaTramiteController : Controller
     {
-        private readonly IStrategyFactory _factory;
         private readonly IPlantillaTramite _service;
+        private readonly ITareaPlantilla _tareaPlantillaService;
 
-
-        public PlantillaTramiteController(IStrategyFactory factory, IPlantillaTramite service)
+        public PlantillaTramiteController(IPlantillaTramite service, ITareaPlantilla tareaPlantillaService)
         {
-            _factory = factory;
             _service = service;
+            _tareaPlantillaService = tareaPlantillaService;
         }
 
         //vista general donde aparecen todas las plantillas de trámite, con opciones para editar.
@@ -42,6 +43,9 @@ namespace CemSys3.Controllers
             {
                 viewModel.Dto = await _service.ObtenerPorIdAsync(plantillaId)
                     ?? new PlantillaTramiteDTO();
+
+                viewModel.Tareas = await _tareaPlantillaService.GetAllByTipoTramite(viewModel.Dto.TipoTramiteId);
+
 
                 viewModel.vista = "CambioTitularPresente";
             }
@@ -90,6 +94,14 @@ namespace CemSys3.Controllers
                     plantillaId = await _service.ActualizarAsync(viewModel.Dto);
                 }
 
+                if (viewModel.Tareas != null && viewModel.Tareas.Any())
+                {
+                    await _tareaPlantillaService.GuardarTareas(
+                        viewModel.Dto.TipoTramiteId,
+                        viewModel.Tareas
+                    );
+                }
+
                 TempData.SetSweetAlert(new SweetAlertDTO
                 {
                     Titulo = "Éxito",
@@ -111,5 +123,7 @@ namespace CemSys3.Controllers
                 return View(viewModel.vista, viewModel);
             }
         }
+
+        
     }
 }

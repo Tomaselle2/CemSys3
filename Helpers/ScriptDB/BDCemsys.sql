@@ -256,6 +256,15 @@ CREATE TABLE [dbo].[PreciosTarifarias] (
     CONSTRAINT [PreciosTarifarias_seccionId_fk] FOREIGN KEY([seccionId]) REFERENCES [dbo].[Secciones]([id])
 );
 
+CREATE TABLE TareaPlantilla (
+    Id INT IDENTITY PRIMARY KEY,
+    Descripcion NVARCHAR(60) NOT NULL,
+    TipoTramiteId INT NOT NULL,
+	estado bit not null,
+    Visibilidad BIT NOT NULL DEFAULT 1,
+	CONSTRAINT [TareaPlantilla_TipoTramiteId_fk] FOREIGN KEY(TipoTramiteId) REFERENCES TipoTramite(id)
+);
+
 CREATE TABLE [dbo].[Tareas] (
     [id] int NOT NULL IDENTITY(1,1),
     [estado] bit NOT NULL,
@@ -263,9 +272,11 @@ CREATE TABLE [dbo].[Tareas] (
     [notaId] int,
     [tramiteId] int,
 	[visibilidad] bit not null default 1,
+	TareaPlantillaId INT NULL,
     PRIMARY KEY ([id]),
     CONSTRAINT [Tareas_notaId_fk] FOREIGN KEY([notaId]) REFERENCES [dbo].[Notas]([tramiteId]),
-    CONSTRAINT [Tareas_tramiteId_fk] FOREIGN KEY([tramiteId]) REFERENCES [dbo].[Tramites]([id])
+    CONSTRAINT [Tareas_tramiteId_fk] FOREIGN KEY([tramiteId]) REFERENCES [dbo].[Tramites]([id]),
+	CONSTRAINT FK_Tareas_TareaPlantilla FOREIGN KEY (TareaPlantillaId) REFERENCES TareaPlantilla(Id)
 );
 
 
