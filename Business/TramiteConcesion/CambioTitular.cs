@@ -121,10 +121,7 @@ namespace CemSys3.Business.TramiteConcesion
 
         }
 
-        public Task<int> CambioTitularPost(CambioTitularDTO dto) //post
-        {
-            throw new NotImplementedException();
-        }
+    
 
         public async Task<CambioTitularDTO> Get(int cambioTitularId)
         {

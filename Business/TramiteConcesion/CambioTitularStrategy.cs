@@ -24,7 +24,7 @@ namespace CemSys3.Business.TramiteConcesion
         }
 
 
-        public async Task GenerarAsync(GeneraStrategyDTO dto)
+        public async Task GenerarAsync(GeneraStrategyDTO dto) //genera la plantilla clone y reemplaza las variables por los datos del tramite, luego guarda el documento generado
         {
             var plantillas = await _plantillaService
                 .ObtenerPorTipoTramiteAsync((int)TipoTramiteEnum.CambioTitular);

@@ -13,8 +13,6 @@ namespace CemSys3.Interfaces.PlantillaTramite
         Dictionary<string, string> variables);
 
         Task ActualizarAsync(DocumentoDTO dto);
-
-
         Task<List<DocumentoDTO>> ObtenerPorTramiteAsync(int tramiteId);
         Task<DocumentoDTO> ObtenerDocumentoPorId(int id);
         Task Delete(int id);
