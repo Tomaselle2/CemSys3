@@ -1,6 +1,6 @@
 ﻿using CemSys3.DTOs.Persona;
 
-namespace CemSys3.DTOs.TramitesConcesion
+namespace CemSys3.DTOs.TramitesConcesion.CambioTitular
 {
     public class CambioTitularDTO
     {

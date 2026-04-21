@@ -18,6 +18,8 @@ using CemSys3.Business.Tarifaria;
 using CemSys3.Business.Tramite;
 using CemSys3.Business.TramiteConcesion;
 using CemSys3.Business.Usuario;
+using CemSys3.DTOs.TramitesConcesion;
+using CemSys3.DTOs.TramitesConcesion.CambioTitular;
 using CemSys3.Helpers.PDF;
 using CemSys3.Interfaces.Archivo;
 using CemSys3.Interfaces.Cementerio;
@@ -86,12 +88,26 @@ builder.Services.AddScoped<IDeudaConcesion, DeudaConcesionService>();
 builder.Services.AddScoped<IPlantillaTramite, PlantillaTramiteService>();
 builder.Services.AddScoped<IDocumentoTramiteService, DocumentoTramiteService>();
 builder.Services.AddScoped<ITemplateProcessor, TemplateProcessor>();
-builder.Services.AddScoped<CambioTitularStrategy>();
-builder.Services.AddScoped<IStrategyFactory, StrategyFactory>();
-builder.Services.AddScoped<ICambioTitular, CambioTitular>();
 builder.Services.AddScoped<ICancelarTramite, CancelarService>();
 builder.Services.AddScoped<ITareaPlantilla, TareaPlantillaService>();
 
+
+// =========================
+// STRATEGIES
+// =========================
+builder.Services.AddScoped<CambioTitularStrategy>();
+
+builder.Services.AddScoped<ITramiteStrategy>(sp =>
+    sp.GetRequiredService<CambioTitularStrategy>());
+
+builder.Services.AddScoped<
+    ITramiteCreateStrategy<CrearTramiteDTO, CambioTitularDTO>>(sp =>
+    sp.GetRequiredService<CambioTitularStrategy>());
+
+// =========================
+// FACTORY
+// =========================
+builder.Services.AddScoped<IStrategyFactory, StrategyFactory>();
 
 
 

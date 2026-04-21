@@ -1,6 +1,7 @@
 ﻿using CemSys3.Business.TramiteConcesion;
 using CemSys3.Enumerables;
 using CemSys3.Interfaces.PlantillaTramite;
+using CemSys3.Interfaces.TramitesConcesion;
 
 namespace CemSys3.Business.PlantillaTramite
 {
@@ -13,7 +14,7 @@ namespace CemSys3.Business.PlantillaTramite
             _provider = provider;
         }
 
-        public IGeneradorAutorizacionesStrategy GetStrategy(int tipoTramiteId)
+        public ITramiteStrategy GetStrategy(int tipoTramiteId)
         {
             return tipoTramiteId switch
             {

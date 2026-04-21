@@ -4,7 +4,7 @@ using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.PlantillaTramite;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.Tarea;
-using CemSys3.DTOs.TramitesConcesion;
+using CemSys3.DTOs.TramitesConcesion.CambioTitular;
 //using CemSys3.DTOs.TramiteConcesion;
 
 namespace CemSys3.ViewModels.TramiteConcesion
