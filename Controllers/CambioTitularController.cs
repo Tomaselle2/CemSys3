@@ -125,7 +125,7 @@ namespace CemSys3.Controllers
             try
             {
                 vm.Dto = await _strategy.ObtenerAsync(tramiteId);
-
+                vm.TipoTramiteId = vm.Dto.TipoTramiteId;
                 vm.TramiteId = vm.Dto.TramiteId;
                 vm.concesionId = vm.Dto.ConcesionId;
                 vm.Archivos = await _archivoService.GetAllByTramiteId(vm.TramiteId);

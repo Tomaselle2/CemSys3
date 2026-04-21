@@ -3,9 +3,11 @@ using CemSys3.DTOs.Tarea;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
+using CemSys3.Interfaces.Concesion;
 using CemSys3.Interfaces.PlantillaTramite;
 using CemSys3.Interfaces.Tarea;
 using CemSys3.Interfaces.Tramite;
+using CemSys3.Models;
 using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,19 +16,22 @@ namespace CemSys3.Controllers
     public class TramiteConcesionController : Controller
     {
         private readonly IStrategyFactory _strategyFactory;
-        private readonly IServiceProvider _provider;
+        //private readonly IServiceProvider _provider;
         private readonly ITarea _tareaService;
         private readonly ITramite _tramitesService;
+        private readonly IConcesion _concesionService;
 
         public TramiteConcesionController(IStrategyFactory strategyFactory,
-        IServiceProvider provider,
+        //IServiceProvider provider,
         ITarea tareaService,
-        ITramite tramitesService)
+        ITramite tramitesService,
+        IConcesion concesionService)
         {
             _strategyFactory = strategyFactory;
-            _provider = provider;
+            //_provider = provider;
             _tareaService = tareaService;
             _tramitesService = tramitesService;
+            _concesionService = concesionService;
         }
 
         [HttpGet]
@@ -39,6 +44,7 @@ namespace CemSys3.Controllers
             try
             {
                 viewModel.Dto = await _tramitesService.GetListadoTramitesDeConcesion(tramiteId);
+                viewModel.InfoGeneral = await _concesionService.InfoGeneralMinima(viewModel.Dto.ConcesionId);
             }
             catch (Exception ex)
             {
@@ -55,7 +61,7 @@ namespace CemSys3.Controllers
 
         [HttpPost]
         [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> GuardarTareas(int tramiteId, List<TareaDTO> tareas)
+        public async Task<IActionResult> GuardarTareas(int tramiteId, List<TareaDTO> tareas, string returnUrl)
         {
             try
             {
@@ -64,25 +70,71 @@ namespace CemSys3.Controllers
                     await _tareaService.GuardarTareas(tramiteId, tareas);
                 }
 
-                return Json(new { success = true, message = "Tareas guardadas correctamente" });
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "Tareas guardadas correctamente",
+                    Tipo = "success"
+                });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Error al guardar tareas" + ex.Message });
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Error al guardar tareas: {ex.Message}",
+                    Tipo = "error"
+                });
             }
+
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
+            return RedirectToAction("IrATramite", "Tramite", new { tramiteId = tramiteId });
         }
 
 
         // =========================
         // FINALIZAR
         // =========================
-        public async Task<IActionResult> Finalizar(int tipoTramiteId, int tramiteId)
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> Finalizar(int tipoTramiteId, int tramiteId, string returnUrl, List<TareaDTO> tareas)
         {
             var strategy = _strategyFactory.GetStrategy(tipoTramiteId);
 
-            await strategy.FinalizarAsync(tramiteId);
+            int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
 
-            return Ok();
+            try
+            {
+                await _tareaService.GuardarTareas(tramiteId, tareas);
+                await strategy.FinalizarAsync(tramiteId, usuarioId);
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Trámite finalizado",
+                    Mensaje = "El trámite ha sido finalizado correctamente.",
+                    Tipo = "success"
+                });
+            }
+            catch(Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al finalizar el trámite: {ex.Message}",
+                    Tipo = "error"
+                });
+            }
+
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
+            return RedirectToAction("IrATramite", "Tramite", new { tramiteId = tramiteId });
         }
 
         // =========================
@@ -93,7 +145,7 @@ namespace CemSys3.Controllers
         int tramiteId,
         int nuevoEstado)
         {
-            int usuarioId = int.Parse(User.FindFirst("IdUsuario").Value);
+            int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
 
             var strategy = _strategyFactory.GetStrategy(tipoTramiteId);
 

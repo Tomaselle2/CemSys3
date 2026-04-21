@@ -12,8 +12,67 @@
         if (requisito.TipoTramiteId == (int)TipoTramiteEnum.CambioTitular)
             requisitosCambioTitularidad = requisito.Descripcion;
     }
+
+    string nroConcesion = Model.InfoGeneral.NroConcesion.HasValue ? Model.InfoGeneral.NroConcesion.Value.ToString("D5") : "-----";
+    string estadoTramite = EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(Model.InfoGeneral.EstadoTramiteId);
+    string claseEstado = Enum.GetName(typeof(EstadosConcesionEnum), Model.InfoGeneral.EstadoTramiteId); string fechaVencimiento = Model.InfoGeneral.Vencimiento != null ? Model.InfoGeneral.Vencimiento.Value.ToString("dd/MM/yyyy") : "--/--/----";
 }
 
+<div class="contenidoConcesion">
+
+    <div class="cardsConcesion-row my-4">
+        <div class="cardConcesion">
+            <div class="cardConcesion-content">
+                <span class="labelConcesion">NRO. CONCESIÓN</span>
+                <h2>@nroConcesion</h2>
+            </div>
+        </div>
+
+        <div class="cardConcesion estado-card">
+            <div class="cardConcesion-content">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="labelConcesion">ESTADO</span>
+                </div>
+                <span class="badgeConcesion @claseEstado px-3 py-2">@estadoTramite</span>
+
+                @if (Model.InfoGeneral.EstadoTramiteId == (int)EstadosConcesionEnum.SinContrato)
+                {
+                    <div class="btn-container">
+                        <form asp-action="GenerarContrato" asp-controller="Concesion" method="get" class="mt-2">
+                            <input type="hidden" name="idTramite" value="@Model.InfoGeneral.TramiteId" />
+                            <button type="submit" class="btn btn-danger btn-sm">Generar contrato</button>
+                        </form>
+                    </div>
+                }
+
+                @if (Model.InfoGeneral.EstadoTramiteId == (int)EstadosConcesionEnum.Vencido)
+                {
+                    <div class="btn-container">
+                        <form asp-action="GenerarContrato" asp-controller="Concesion" method="get" class="mt-2">
+                            <input type="hidden" name="idTramite" value="@Model.InfoGeneral.TramiteId" />
+                            <button type="submit" class="btn btn-danger btn-sm">Renovar contrato</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="cardConcesion">
+            <div class="cardConcesion-content">
+                <span class="labelConcesion">VENCIMIENTO</span>
+                <h2>@fechaVencimiento</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@{
+    var tramitesActivos = Model.Dto.TramitesIniciados
+        .Where(t => t.EstadoActualId != (int)EstadosTramiteEnum.Cancelado &&
+                    t.EstadoActualId != (int)EstadosTramiteEnum.Finalizado)
+        .ToList();
+}
 <!-- Tabla de historial de tramites -->
 <div class="accordion" id="accordionPanelsStayOpenExample">
     <div class="accordion-item">
@@ -24,7 +83,7 @@
         </h2>
         <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
             @* cuerpo del acordion *@
-            @if (Model.Dto.TramitesIniciados.Any())
+            @if (tramitesActivos.Any())
             {
                 <div class="card shadow-sm">
                     <div class="card-body p-0">
@@ -39,29 +98,26 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var opc in Model.Dto.TramitesIniciados)
+                                @foreach (var opc in tramitesActivos)
                                 {
                                     string tipoTramiteDisplay = EnumHelper.GetDisplayNameByValue<TipoTramiteEnum>(opc.TipoTramiteId);
                                     string estadoTramiteDisplay = EnumHelper.GetDisplayNameByValue<EstadosTramiteEnum>(opc.EstadoActualId);
 
-                                    if(opc.EstadoActualId != (int)EstadosTramiteEnum.Cancelado && opc.EstadoActualId != (int)EstadosTramiteEnum.Finalizado)
-                                    {
-                                        <tr>
-                                            <td>@opc.Id</td>
-                                            <td>@(opc.FechaCreacion.ToString("dd/MM/yyyy HH:mm"))</td>
-                                            <td>@tipoTramiteDisplay</td>
-                                            <td>@estadoTramiteDisplay</td>
-                                            <td>
-                                                <form asp-action="IrATramite" asp-controller="Tramite" target="_blank" method="get" style="display: inline-block;" data-skip-loader="true">
-                                                    <input type="hidden" name="tramiteId" value="@opc.Id" />
-                                                    <button type="submit" class="btn btn-secondary btn-sm" title="Ir al trámite">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-
-                                    }
+                                   
+                                    <tr>
+                                        <td>@opc.Id</td>
+                                        <td>@(opc.FechaCreacion.ToString("dd/MM/yyyy HH:mm"))</td>
+                                        <td>@tipoTramiteDisplay</td>
+                                        <td>@estadoTramiteDisplay</td>
+                                        <td>
+                                            <form asp-action="IrATramite" asp-controller="Tramite" target="_blank" method="get" style="display: inline-block;" data-skip-loader="true">
+                                                <input type="hidden" name="tramiteId" value="@opc.Id" />
+                                                <button type="submit" class="btn btn-secondary btn-sm" title="Ir al trámite">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
                                     
                                 }
                             </tbody>

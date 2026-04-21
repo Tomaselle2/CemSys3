@@ -6,7 +6,7 @@ namespace CemSys3.DTOs.TramitesConcesion.CambioTitular
     {
         public int TramiteId { get; set; }
         public int EstadoTramiteId { get; set; }
-
+        public int TipoTramiteId { get; set; }
         public int ParcelaId { get; set; }
         public string? TipoParcela { get; set; }
         public string? NombreSeccion { get; set; }

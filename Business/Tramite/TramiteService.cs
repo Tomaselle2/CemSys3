@@ -98,7 +98,7 @@ namespace CemSys3.Business.Tramite
                 .Select(tp => tp.ParcelaId)
                 .FirstOrDefaultAsync();
 
-            IEnumerable<Models.Tramite> tramites = await _context.TramitesParcelas
+            IEnumerable<Models.Tramite> tramites = await _context.TramitesParcelas.OrderByDescending(d=>d.FechaRegistro)
                 .Where(tp => tp.ParcelaId == parcelaId)
                 .Select(tp => tp.Tramite)
                 .ToListAsync();

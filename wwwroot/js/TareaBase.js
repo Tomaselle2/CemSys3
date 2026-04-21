@@ -1,31 +1,37 @@
-﻿    function agregarTarea() {
-            const idx = document.querySelectorAll('#tareas .task-row').length;
+﻿function agregarTarea() {
+    const idx = document.querySelectorAll('#tareas .task-row').length;
 
     document.getElementById('tareas').insertAdjacentHTML('beforeend', `
     <div class="d-flex gap-2 mb-2 task-row align-items-center">
+
         <input type="hidden" name="Tareas[${idx}].Id" value="0" />
         <input type="hidden" name="Tareas[${idx}].Eliminada" value="false" class="eliminada-flag" />
+        <input type="hidden" name="Tareas[${idx}].NotaId" value="" />
+        <input type="hidden" name="Tareas[${idx}].TareaPlantillaId" value="" />
+        <input type="hidden" name="Tareas[${idx}].TramiteId" value="" />
 
-        <input type="checkbox"
-            class="form-check-input"
-            name="Tareas[${idx}].Estado"
-            value="true" />
-
+        <!-- ORDEN CORRECTO -->
         <input type="hidden" name="Tareas[${idx}].Estado" value="false" />
 
+        <input type="checkbox"
+               class="form-check-input"
+               name="Tareas[${idx}].Estado"
+               value="true"
+               onchange="this.previousElementSibling.value = this.checked ? 'true' : 'false'" />
+
         <input class="form-control"
-            name="Tareas[${idx}].Descripcion" />
+               name="Tareas[${idx}].Descripcion" />
 
         <button type="button"
-            class="btn btn-danger btn-sm btn-eliminar"
-            onclick="marcarEliminada(this)">✖</button>
+                class="btn btn-danger btn-sm btn-eliminar"
+                onclick="marcarEliminada(this)">✖</button>
 
         <button type="button"
-            class="btn btn-warning btn-sm btn-restaurar d-none"
-            onclick="restaurar(this)">↩</button>
+                class="btn btn-warning btn-sm btn-restaurar d-none"
+                onclick="restaurar(this)">↩</button>
     </div>
     `);
-        }
+}
 
     function marcarEliminada(btn) {
             const row = btn.closest('.task-row');

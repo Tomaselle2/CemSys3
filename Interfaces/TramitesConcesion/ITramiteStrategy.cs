@@ -6,7 +6,7 @@ namespace CemSys3.Interfaces.TramitesConcesion
     {
         //genera la plantilla clone y reemplaza las variables por los datos del tramite, luego guarda el documento generado
         Task GenerarDocumentosAsync(GeneraStrategyDTO dto);
-        Task FinalizarAsync(int tramiteId);
+        Task FinalizarAsync(int tramiteId, int usuarioId);
         Task<int> AvanzarEstadoAsync(int tramiteId, int nuevoEstado, int usuarioId);
     }
 }

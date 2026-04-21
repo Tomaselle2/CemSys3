@@ -1,4 +1,5 @@
 ﻿using CemSys3.DTOs.Archivo;
+using CemSys3.DTOs.Concesion;
 using CemSys3.DTOs.HistorialEstado;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.PlantillaTramite;
@@ -15,8 +16,9 @@ namespace CemSys3.ViewModels.TramiteConcesion
 
         public int concesionId { get; set; }
 
-        public CambioTitularDTO Dto { get; set; } = new();
+        public int TipoTramiteId { get; set; }
 
+        public CambioTitularDTO Dto { get; set; } = new();
         public List<TitularesContratoDTO> Personas { get; set; } = new(); //nuevos titulares
 
         public IEnumerable<ArchivoDTO> Archivos { get; set; } = new List<ArchivoDTO>();

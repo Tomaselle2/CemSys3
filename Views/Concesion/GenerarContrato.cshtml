@@ -1,6 +1,7 @@
 ﻿@using CemSys3.ViewModels.Concesion
 @using CemSys3.Enumerables
 @using CemSys3.Helpers.Enumerable
+@using System.Globalization
 @model GenerarContratoVM
 @{
     ViewData["Title"] = "Generar Contrato Concesión";
@@ -1253,9 +1254,9 @@
 
 
         function calcularPrecioSegunTipo(precioBase, tipo) {
-            const fondo = @Model.contrato.PorcentajeFondoAyudaCentroSalud;
-            const aumento = @Model.contrato.PorcentajeAumentoConcesionesOtrasLocalidades;
-            const descuento = @Model.contrato.PorcentajeDescuentoRenovacionConcesionAlDia;
+            const fondo = @Model.contrato.PorcentajeFondoAyudaCentroSalud.ToString(CultureInfo.InvariantCulture);
+            const aumento = @Model.contrato.PorcentajeAumentoConcesionesOtrasLocalidades.ToString(CultureInfo.InvariantCulture);;
+            const descuento = @Model.contrato.PorcentajeDescuentoRenovacionConcesionAlDia.ToString(CultureInfo.InvariantCulture);;
 
             switch (tipo) {
                 case 'regular':
