@@ -160,9 +160,9 @@ VALUES
 ('Vigente', 4), --contrato de concesion 6
 ('Vencido', 4), --contrato de concesion 7
 ('Caducado', 4), --contrato de concesion 8
-('Iniciado', 6), --cambio de titularidad 9
-('Finalizado', 6), --cambio de titularidad 10
-('Cancelado', 6); --cambio de titularidad 11
+('Iniciado', 6),
+('Finalizado', 6), 
+('Cancelado', 6); 
 
 --insert into EstadosTramites (estado, tipoTramiteId) values ('Iniciado', 6), ('Finalizado', 6);
 INSERT INTO Usuarios (nombre, apellido, correo, usuario, clave, rolId) values ('Tomas', 'Carreras', 'tomaselle2@gmail.com', 'Tomaselle2', 'P7eSe/VyhW8UaKMx5qghSw==.JYrOO0ZJQLp0A82FUreiYz7mWl+BpZykU1AfM1ZOpZU=', 2);
@@ -613,7 +613,7 @@ null, --cierre fosa
 
 insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
 (6, 'Cambio Titular - Ambos Presentes',
-'<p> </p><figure class="image"><img style="aspect-ratio:600/140;" src="/fotos/logoMuni.png" alt="Logo" width="600" height="140"></figure><p> </p><p> </p><p>Colonia Tirolesa, {Fecha}</p><p> </p><p> </p><p><br>Se deja constancia de que {articuloTitularActual} {sr/sraTitularActual} <strong>{TitularesActuales} DNI {DniTitularActual}, </strong>quien suscribiera el contrato de concesión real de uso sobre <strong>{Parcela} </strong>el cual está ocupado por <strong>{Difuntos},</strong> sito en el cementerio Municipal de Colonia Tirolesa cede {articuloNuevoTitular} {sr/sraNuevoTitular} <strong>{NuevosTitulares} DNI {DniNuevosTitulares}. </strong>La concesión del bien mencionado supra de común entre las partes presentes.<br> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p> </p><p>FIRMA______________________________________________                 DNI___________________________________</p><p> </p><p>FIRMA______________________________________________                 DNI___________________________________</p><p> </p><p> </p><p> </p><p> </p><figure class="image"><img style="aspect-ratio:1024/150;" src="/fotos/pieContrato.png" width="1024" height="150"></figure><p><br> </p><p> </p>',
+'<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <p style="text-align: justify;"> </p>  <p style="text-align: justify;">Se deja constancia de que {articuloTitularActual} {sr/sraTitularActual} <strong>{TitularesActuales} DNI {DniTitularActual}, </strong>quien suscribiera el contrato de concesión real de uso sobre <strong>{Parcela} </strong>el cual está ocupado por <strong>{Difuntos},</strong> sito en el cementerio Municipal de Colonia Tirolesa cede {articuloNuevoTitular} {sr/sraNuevoTitular} <strong>{NuevosTitulares} DNI {DniNuevosTitulares}. </strong>La concesión del bien mencionado supra de común entre las partes presentes.<br> </p>  <br><br><br><br><br><br><br><br>  <p class="firma-linea">FIRMA_____________________________________                 DNI___________________________________</p>  <br><br><br>  <p class="firma-linea">FIRMA_____________________________________                 DNI___________________________________</p>  <br><br><br><br><br><br><br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png" width="700" height="100"></figure>  </div>',
 1, 1); 
 
 
