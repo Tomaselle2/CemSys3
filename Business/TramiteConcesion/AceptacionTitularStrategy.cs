@@ -20,7 +20,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CemSys3.Business.TramiteConcesion
 {
-    public class CambioTitularStrategy : ITramiteStrategy,
+    public class AceptacionTitularStrategy : ITramiteStrategy,
     ITramiteCreateStrategy<CrearTramiteDTO, CambioTitularDTO>
     {
         private readonly IPlantillaTramite _plantillaService;
@@ -32,13 +32,12 @@ namespace CemSys3.Business.TramiteConcesion
         private readonly ITramite _tramiteService;
         private readonly INotas _notasService;
 
-
-        public CambioTitularStrategy(
+        public AceptacionTitularStrategy(
             IPlantillaTramite plantillaService,
             IDocumentoTramiteService documentoService,
             IPersona personaService,
             AppDbContext context,
-            ITramite tramiteService, 
+            ITramite tramiteService,
             IHistorialEstados historialEstadosService,
             ITareaPlantilla tareaPlantilla, INotas notasService)
         {
@@ -52,9 +51,12 @@ namespace CemSys3.Business.TramiteConcesion
             _notasService = notasService;
         }
 
-       
+        public Task<int> AvanzarEstadoAsync(int tramiteId, int nuevoEstado, int usuarioId)
+        {
+            throw new NotImplementedException();
+        }
 
-        public async Task<int> CrearAsync(CrearTramiteDTO dto) //crea el tramite. 
+        public async Task<int> CrearAsync(CrearTramiteDTO dto)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
 
@@ -72,9 +74,9 @@ namespace CemSys3.Business.TramiteConcesion
                 {
                     Visibilidad = true,
                     FechaCreacion = DateTime.Now,
-                    TipoTramiteId = (int)TipoTramiteEnum.CambioTitular,
+                    TipoTramiteId = (int)TipoTramiteEnum.AceptacionTitular,
                     UsuarioId = dto.UsuarioId,
-                    EstadoActualId = (int)EstadosCambioTitularEnum.Iniciado
+                    EstadoActualId = (int)EstadosTramiteEnum.Iniciado
                 };
 
                 int tramiteId = await _tramiteService.Add(tramite);
@@ -85,12 +87,12 @@ namespace CemSys3.Business.TramiteConcesion
                 {
                     Fecha = tramite.FechaCreacion,
                     TramiteId = tramiteId,
-                    EstadoTramiteId = (int)EstadosCambioTitularEnum.Iniciado
+                    EstadoTramiteId = (int)EstadosTramiteEnum.Iniciado
                 };
                 await _historialEstadosService.Add(historial);
 
                 //3- registrar el tramite de cambio de titularidad
-                Models.CambiosTitularidad cambiosTitularidad = new Models.CambiosTitularidad
+                Models.AceptacionTitularidad aceptacionTitularidad = new Models.AceptacionTitularidad
                 {
                     TramiteId = tramiteId,
                     ParcelaId = concesion.ParcelaId,
@@ -100,13 +102,12 @@ namespace CemSys3.Business.TramiteConcesion
                     Visibilidad = true,
                     ConcesionId = dto.TramiteConcesionId
                 };
-                await _context.CambiosTitularidads.AddAsync(cambiosTitularidad);
+                await _context.AceptacionTitularidads.AddAsync(aceptacionTitularidad);
 
                 //4 - relacion de tramite con parcela
                 await _historialEstadosService.VincularTramiteAParcela(tramiteId, concesion.ParcelaId);
 
-
-                await _tareaPlantilla.CrearTareasPorTramite(tramiteId, (int)TipoTramiteEnum.CambioTitular);
+                await _tareaPlantilla.CrearTareasPorTramite(tramiteId, (int)TipoTramiteEnum.AceptacionTitular);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -120,17 +121,73 @@ namespace CemSys3.Business.TramiteConcesion
             }
         }
 
-
-
-        public Task<int> AvanzarEstadoAsync(int tramiteId, int nuevoEstado, int usuarioId)
+        public async Task FinalizarAsync(int tramiteId, int usuarioId)
         {
-            throw new NotImplementedException();
+            Models.AceptacionTitularidad cambioTitularidad = await _context.AceptacionTitularidads
+                 .Include(t => t.Tramite)
+                 .FirstOrDefaultAsync(ct => ct.TramiteId == tramiteId) ?? throw new Exception("Trámite de aceptación de titularidad no encontrado.");
+
+            Models.Concesione concesion = await _context.Concesiones
+                   .FirstOrDefaultAsync(c => c.TramiteId == cambioTitularidad.ConcesionId) ?? throw new Exception("Concesion no encontrada.");
+
+            Models.Tramite tramite = await _context.Tramites.FirstOrDefaultAsync(t => t.Id == tramiteId) ?? throw new Exception("Trámite no encontrado.");
+
+
+            List<PersonaDTO> titularesNuevos = new();
+
+            List<TitularesContratoDTO> nuevosTitulares = await _context.DocumentosTramites.Where(t => t.TramiteId == cambioTitularidad.TramiteId).Select(h => new TitularesContratoDTO
+            {
+                Id = h.Persona.Id,
+            }).ToListAsync();
+
+            foreach (var titular in nuevosTitulares)
+            {
+                titularesNuevos.Add(await _personaService.Get(titular.Id.Value));
+                await _historialEstadosService.VincularTramiteAPersona(tramiteId, titular.Id.Value);
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                //1-modificar los titulares de la concesion (agregar nuevos y cerrar los que ya no están)
+                await ProcesarTitularesConHistorial(cambioTitularidad.ConcesionId.Value, titularesNuevos, concesion, null);
+
+                //2- actualizar estado del tramite a finalizado
+                tramite.EstadoActualId = (int)EstadosTramiteEnum.Finalizado;
+
+                HistorialEstadosDTO historial = new HistorialEstadosDTO
+                {
+                    Fecha = DateTime.Now,
+                    TramiteId = tramiteId,
+                    EstadoTramiteId = (int)EstadosTramiteEnum.Finalizado
+                };
+                await _historialEstadosService.Add(historial);
+
+                //3 generar la nota de recordatorio.
+                string descripcionNota = $"\n● El {DateTime.Now:dd/MM/yyyy} se realizó la aceptación de titularidad (trámite {tramiteId})";
+                string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
+                string titularNota = $"El nuevo titular debe ser {titularesNuevos?[0].Apellido?.ToUpper()}, {titularesNuevos?[0].Nombre?.ToUpper()} con DNI {titularesNuevos?[0].Dni}";
+
+                cambioTitularidad.FechaFinalizacion = DateTime.Now;
+                tramite.FechaFinalizacion = DateTime.Now;
+
+                await GenerarNotaRecordatorio(descripcionNota, nombreNota, titularNota, usuarioId);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task GenerarDocumentosAsync(GeneraStrategyDTO dto)
         {
             var plantillas = await _plantillaService
-                .ObtenerPorTipoTramiteAsync((int)TipoTramiteEnum.CambioTitular);
+                .ObtenerPorTipoTramiteAsync((int)TipoTramiteEnum.AceptacionTitular);
 
             foreach (var nuevoTitular in dto.NuevosTitulares)
             {
@@ -146,18 +203,11 @@ namespace CemSys3.Business.TramiteConcesion
 
                 string difuntosFormateados = DifuntoFormatter.FormatearDifuntos(dto.Difuntos);
 
-                var primerTitular = dto.TitularesActuales.FirstOrDefault();
-                string sexoReferencia = primerTitular?.Sexo ?? "masculino"; // Valor por defecto
-
                 foreach (var plantilla in plantillas)
                 {
                     var variables = new Dictionary<string, string>
                     {
                         { "Fecha", DateTime.Now.ToLongDateString() },
-                        { "articuloTitularActual", sexoReferencia  == "masculino" ? "el" : "la"},
-                        { "sr/sraTitularActual", sexoReferencia  == "masculino" ? "Sr." : "Sra."},
-                        { "TitularesActuales", string.Join(", ", dto.TitularesActuales.Select(t => t.Apellido.ToUpper() + " " + t.Nombre.ToUpper())) },
-                        { "DniTitularActual", string.Join(", ", dto.TitularesActuales.Select(t => StringExtensions.FormatearDni(t.Dni))) },
                         { "Parcela", ParcelaFormatter.ObtenerParcela(dto.TipoParcela, dto.NroParcela, dto.NroFila, dto.NombreSeccion.ToUpper()) },
                         { "Difuntos", difuntosFormateados },
                         { "articuloNuevoTitular", persona.Sexo == "masculino" ? "al" : "a la"},
@@ -181,9 +231,9 @@ namespace CemSys3.Business.TramiteConcesion
 
         public async Task<CambioTitularDTO> ObtenerAsync(int tramiteId)
         {
-            Models.CambiosTitularidad cambioTitularidad = await _context.CambiosTitularidads.AsNoTracking()
-                .Include(t => t.Tramite)
-                .FirstOrDefaultAsync(ct => ct.TramiteId == tramiteId) ?? throw new Exception("Trámite de cambio de titularidad no encontrado.");
+            Models.AceptacionTitularidad cambioTitularidad = await _context.AceptacionTitularidads.AsNoTracking()
+               .Include(t => t.Tramite)
+               .FirstOrDefaultAsync(ct => ct.TramiteId == tramiteId) ?? throw new Exception("Trámite de aceptación de titularidad no encontrado.");
 
             Models.Concesione concesion = await _context.Concesiones.AsNoTracking()
                    .Include(c => c.Tramite)
@@ -244,70 +294,6 @@ namespace CemSys3.Business.TramiteConcesion
 
             return dto;
         }
-
-
-        public async Task FinalizarAsync(int tramiteId, int usuarioId)
-        {
-            Models.CambiosTitularidad cambioTitularidad = await _context.CambiosTitularidads
-                .Include(t => t.Tramite)
-                .FirstOrDefaultAsync(ct => ct.TramiteId == tramiteId) ?? throw new Exception("Trámite de cambio de titularidad no encontrado.");
-
-            Models.Concesione concesion = await _context.Concesiones
-                   .FirstOrDefaultAsync(c => c.TramiteId == cambioTitularidad.ConcesionId) ?? throw new Exception("Concesion no encontrada.");
-
-            Models.Tramite tramite = await _context.Tramites.FirstOrDefaultAsync(t => t.Id == tramiteId) ?? throw new Exception("Trámite no encontrado.");
-
-           
-            List<PersonaDTO> titularesNuevos = new();
-
-            List<TitularesContratoDTO> nuevosTitulares = await _context.DocumentosTramites.Where(t => t.TramiteId == cambioTitularidad.TramiteId).Select(h => new TitularesContratoDTO
-            {
-                Id = h.Persona.Id,
-            }).ToListAsync();
-
-            foreach (var titular in nuevosTitulares)
-            {
-                titularesNuevos.Add(await _personaService.Get(titular.Id.Value));
-                await _historialEstadosService.VincularTramiteAPersona(tramiteId, titular.Id.Value);
-            }
-
-            using var transaction = await _context.Database.BeginTransactionAsync();
-
-            try
-            {
-                //1-modificar los titulares de la concesion (agregar nuevos y cerrar los que ya no están)
-                await ProcesarTitularesConHistorial(cambioTitularidad.ConcesionId.Value, titularesNuevos, concesion, null);
-
-                //2- actualizar estado del tramite a finalizado
-                tramite.EstadoActualId = (int)EstadosTramiteEnum.Finalizado;
-
-                HistorialEstadosDTO historial = new HistorialEstadosDTO
-                {
-                    Fecha = DateTime.Now,
-                    TramiteId = tramiteId,
-                    EstadoTramiteId = (int)EstadosTramiteEnum.Finalizado
-                };
-                await _historialEstadosService.Add(historial);
-
-                //3 generar la nota de recordatorio.
-                string descripcionNota = $"\n● El {DateTime.Now:dd/MM/yyyy} se realizó cambio de titular (trámite {tramiteId})";
-                string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
-                string titularNota = $"El nuevo titular debe ser {titularesNuevos?[0].Apellido?.ToUpper()}, {titularesNuevos?[0].Nombre?.ToUpper()} con DNI {titularesNuevos?[0].Dni}";
-
-                cambioTitularidad.FechaFinalizacion = DateTime.Now;
-                tramite.FechaFinalizacion = DateTime.Now;
-
-                await GenerarNotaRecordatorio(descripcionNota, nombreNota, titularNota, usuarioId);
-
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-            }
-            catch (Exception) {
-                await transaction.RollbackAsync();
-                throw;
-            }
-        }
-
 
         private async Task ProcesarTitularesConHistorial(
             int tramiteId,
@@ -426,7 +412,6 @@ namespace CemSys3.Business.TramiteConcesion
             int tramiteNotaId = await _notasService.GenerarTramiteNota(usuarioId);
             await _notasService.GenerarNotaSinTransaccion(tramiteNotaId, nota);
         }
-
 
 
     }

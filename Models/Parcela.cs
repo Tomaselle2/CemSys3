@@ -27,6 +27,8 @@ public partial class Parcela
 
     public int? TipoParcelaId { get; set; }
 
+    public virtual ICollection<AceptacionTitularidad> AceptacionTitularidads { get; set; } = new List<AceptacionTitularidad>();
+
     public virtual ICollection<CambiosTitularidad> CambiosTitularidads { get; set; } = new List<CambiosTitularidad>();
 
     public virtual ICollection<Concesione> Concesiones { get; set; } = new List<Concesione>();

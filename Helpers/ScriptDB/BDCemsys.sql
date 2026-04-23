@@ -543,3 +543,22 @@ CREATE TABLE RequisitosTramite (
     CONSTRAINT FK_RT_TipoTramite 
         FOREIGN KEY (tipoTramiteId) REFERENCES TipoTramite(id)
 );
+
+CREATE TABLE AceptacionTitularidad (
+    tramiteId INT PRIMARY KEY,
+    parcelaId INT NOT NULL,
+    usuarioId INT NOT NULL,
+
+    fechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+    fechaFinalizacion DATETIME NULL,
+
+    infoAdicional NVARCHAR(MAX) null,
+	concesionId int null,
+
+    visibilidad BIT DEFAULT 1,
+
+    CONSTRAINT FK_AT_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_AT_concesionId FOREIGN KEY (concesionId) REFERENCES Tramites(id),
+	CONSTRAINT FK_AT_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_AT_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id)
+);

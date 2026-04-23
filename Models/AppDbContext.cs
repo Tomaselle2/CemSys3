@@ -15,6 +15,8 @@ public partial class AppDbContext : DbContext
     {
     }
 
+    public virtual DbSet<AceptacionTitularidad> AceptacionTitularidads { get; set; }
+
     public virtual DbSet<AnioConcesion> AnioConcesions { get; set; }
 
     public virtual DbSet<Archivo> Archivos { get; set; }
@@ -97,6 +99,50 @@ public partial class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AceptacionTitularidad>(entity =>
+        {
+            entity.HasKey(e => e.TramiteId).HasName("PK__Aceptaci__32453547584A2EBB");
+
+            entity.ToTable("AceptacionTitularidad");
+
+            entity.Property(e => e.TramiteId)
+                .ValueGeneratedNever()
+                .HasColumnName("tramiteId");
+            entity.Property(e => e.ConcesionId).HasColumnName("concesionId");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaCreacion");
+            entity.Property(e => e.FechaFinalizacion)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaFinalizacion");
+            entity.Property(e => e.InfoAdicional).HasColumnName("infoAdicional");
+            entity.Property(e => e.ParcelaId).HasColumnName("parcelaId");
+            entity.Property(e => e.UsuarioId).HasColumnName("usuarioId");
+            entity.Property(e => e.Visibilidad)
+                .HasDefaultValue(true)
+                .HasColumnName("visibilidad");
+
+            entity.HasOne(d => d.Concesion).WithMany(p => p.AceptacionTitularidadConcesions)
+                .HasForeignKey(d => d.ConcesionId)
+                .HasConstraintName("FK_AT_concesionId");
+
+            entity.HasOne(d => d.Parcela).WithMany(p => p.AceptacionTitularidads)
+                .HasForeignKey(d => d.ParcelaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_AT_Parcela");
+
+            entity.HasOne(d => d.Tramite).WithOne(p => p.AceptacionTitularidadTramite)
+                .HasForeignKey<AceptacionTitularidad>(d => d.TramiteId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_AT_Tramite");
+
+            entity.HasOne(d => d.Usuario).WithMany(p => p.AceptacionTitularidads)
+                .HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_AT_Usuario");
+        });
+
         modelBuilder.Entity<AnioConcesion>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__AnioConc__3213E83F1F961F36");

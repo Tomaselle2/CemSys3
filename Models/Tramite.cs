@@ -19,6 +19,10 @@ public partial class Tramite
 
     public DateTime? FechaFinalizacion { get; set; }
 
+    public virtual ICollection<AceptacionTitularidad> AceptacionTitularidadConcesions { get; set; } = new List<AceptacionTitularidad>();
+
+    public virtual AceptacionTitularidad? AceptacionTitularidadTramite { get; set; }
+
     public virtual ICollection<Archivo> Archivos { get; set; } = new List<Archivo>();
 
     public virtual ICollection<CambiosTitularidad> CambiosTitularidadConcesions { get; set; } = new List<CambiosTitularidad>();

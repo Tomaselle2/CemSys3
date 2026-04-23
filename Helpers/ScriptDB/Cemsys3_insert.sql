@@ -64,16 +64,17 @@ INSERT INTO TipoTramite (tipo) VALUES
 ('Contrato de concesión'), --4
 ('Autorización para traslado'), --5
 ('Cambio de titularidad'), --6
-('Nota'); --7
+('Nota'), --7
+('Aceptación de titularidad'); --8
 
 INSERT INTO RequisitosTramite (tipoTramiteId, descripcion)
 VALUES 
-(1, 'Debe presentarse el {titular} con DNI'),
+(8, '- Se necesita que esté presente el titular el nuevo titular.  - El trámite es sin costo.   - De lunes a viernes de 7:00hs a 12:30hs.'), --aceptacion de titularidad
 (2, 'Adjuntar acta de defunción si el titular está fallecido'),
 (3, 'Presentar libreta de familia'),
 (4, 'Adjuntar acta de defunción si el titular está fallecido'),
 (5, 'Adjuntar acta de defunción si el titular está fallecido'),
-(6, 'Adjuntar acta de defunción si el titular está fallecido');
+(6, '- Se necesita que esté presente el titular ({TitularesActuales}) y el nuevo titular.  - El trámite es sin costo.   - De lunes a viernes de 7:00hs a 12:30hs.'); --cambio de titular
 
 
 -- INSERT para TipoParcela
@@ -86,8 +87,6 @@ INSERT INTO TipoParcela (tipo) VALUES
 INSERT INTO TipoPanteon (tipo) VALUES 
 ('Con nichos'),
 ('Sin nichos');
-
-Insert into TipoAutorizacion (tipoTramiteId, nombre) values (6, 'Cambio titular - ambos presentes');
 
 -- INSERT para conceptos
 INSERT INTO ConceptosTarifaria (nombre, temaId) VALUES
@@ -616,7 +615,18 @@ insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacio
 '<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <p style="text-align: justify;"> </p>  <p style="text-align: justify;">Se deja constancia de que {articuloTitularActual} {sr/sraTitularActual} <strong>{TitularesActuales} DNI {DniTitularActual}, </strong>quien suscribiera el contrato de concesión real de uso sobre <strong>{Parcela} </strong>el cual está ocupado por <strong>{Difuntos},</strong> sito en el cementerio Municipal de Colonia Tirolesa cede {articuloNuevoTitular} {sr/sraNuevoTitular} <strong>{NuevosTitulares} DNI {DniNuevosTitulares}. </strong>La concesión del bien mencionado supra de común entre las partes presentes.<br> </p>  <br><br><br><br><br><br><br><br>  <p class="firma-linea">FIRMA_____________________________________                 DNI___________________________________</p>  <br><br><br>  <p class="firma-linea">FIRMA_____________________________________                 DNI___________________________________</p>  <br><br><br><br><br><br><br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png" width="700" height="100"></figure>  </div>',
 1, 1); 
 
+insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
+(8, 'Aceptación de titularidad',
+'<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <p style="text-align: justify;"> </p>  <p style="text-align: justify;">Se deja constancia de que {articuloTitularActual} {sr/sraTitularActual} <strong>{TitularesActuales} DNI {DniTitularActual}, </strong>quien suscribiera el contrato de concesión real de uso sobre <strong>{Parcela} </strong>el cual está ocupado por <strong>{Difuntos},</strong> sito en el cementerio Municipal de Colonia Tirolesa cede {articuloNuevoTitular} {sr/sraNuevoTitular} <strong>{NuevosTitulares} DNI {DniNuevosTitulares}. </strong>La concesión del bien mencionado supra de común entre las partes presentes.<br> </p>  <br><br><br><br><br><br><br><br>  <p class="firma-linea">FIRMA_____________________________________                 DNI___________________________________</p>  <br><br><br>  <p class="firma-linea">FIRMA_____________________________________                 DNI___________________________________</p>  <br><br><br><br><br><br><br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png" width="700" height="100"></figure>  </div>',
+2, 1);
 
+Insert into TipoAutorizacion (tipoTramiteId, nombre) values (6, 'Cambio titular - ambos presentes'), (8, 'Aceptación de titularidad');
+
+insert into TareaPlantilla (Descripcion, TipoTramiteId, Visibilidad, estado) values
+('Firmar autorización', 6,1,0),
+('Subir autorización firmada', 6,1,0),
+('Firmar autorización', 8,1,0),
+('Subir autorización firmada', 8,1,0);
 
 --Job para pasar de concesion vigente a vencida 
 --BEGIN TRANSACTION;

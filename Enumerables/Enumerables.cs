@@ -39,6 +39,9 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Nota")]
         Nota = 7,
+
+        [Display(Name = "Aceptación de titular")]
+        AceptacionTitular = 8,
     }
 
 
@@ -47,8 +50,8 @@ namespace CemSys3.Enumerables
         [Display(Name = "Cambio Titular - Presente")]
         Cambio_Titular_Ambos_Presentes = 1,
 
-        [Display(Name = "Cambio Titular - Fallecido")]
-        CambioTipo2 = 2,
+        [Display(Name = "Aceptación de Titularidad")]
+        AceptacionTitularidad = 2,
     }
 
     public enum  TipoNichoEnum

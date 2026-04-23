@@ -21,6 +21,9 @@ namespace CemSys3.Business.PlantillaTramite
                 (int)TipoTramiteEnum.CambioTitular =>
                     _provider.GetRequiredService<CambioTitularStrategy>(),
 
+                (int)TipoTramiteEnum.AceptacionTitular =>
+                    _provider.GetRequiredService<AceptacionTitularStrategy>(),
+
                 _ => throw new Exception("Strategy no implementada")
             };
         }
