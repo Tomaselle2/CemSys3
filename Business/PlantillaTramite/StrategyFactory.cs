@@ -27,5 +27,22 @@ namespace CemSys3.Business.PlantillaTramite
                 _ => throw new Exception("Strategy no implementada")
             };
         }
+
+        public ITramiteCreateStrategy GetCreateStrategy(int tipoTramiteId)
+        {
+            return tipoTramiteId switch
+            {
+                // Solicitar la interfaz en lugar de la clase concreta para evitar el error de conversión.
+                // Asegúrate de que en la configuración de DI cada estrategia esté registrada
+                // también como ITramiteCreateStrategy si procede.
+                (int)TipoTramiteEnum.CambioTitular =>
+                    _provider.GetRequiredService<CambioTitularStrategy>(),
+
+                (int)TipoTramiteEnum.AceptacionTitular =>
+                    _provider.GetRequiredService<AceptacionTitularStrategy>(),
+
+                _ => throw new Exception("CreateStrategy no implementada")
+            };
+        }
     }
 }

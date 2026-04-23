@@ -258,7 +258,7 @@ CREATE TABLE [dbo].[PreciosTarifarias] (
 
 CREATE TABLE TareaPlantilla (
     Id INT IDENTITY PRIMARY KEY,
-    Descripcion NVARCHAR(60) NOT NULL,
+    Descripcion NVARCHAR(150) NOT NULL,
     TipoTramiteId INT NOT NULL,
 	estado bit not null,
     Visibilidad BIT NOT NULL DEFAULT 1,
@@ -268,7 +268,7 @@ CREATE TABLE TareaPlantilla (
 CREATE TABLE [dbo].[Tareas] (
     [id] int NOT NULL IDENTITY(1,1),
     [estado] bit NOT NULL,
-    [descripcion] nvarchar(60) NOT NULL,
+    [descripcion] nvarchar(150) NOT NULL,
     [notaId] int,
     [tramiteId] int,
 	[visibilidad] bit not null default 1,
@@ -278,7 +278,6 @@ CREATE TABLE [dbo].[Tareas] (
     CONSTRAINT [Tareas_tramiteId_fk] FOREIGN KEY([tramiteId]) REFERENCES [dbo].[Tramites]([id]),
 	CONSTRAINT FK_Tareas_TareaPlantilla FOREIGN KEY (TareaPlantillaId) REFERENCES TareaPlantilla(Id)
 );
-
 
 -- Tablas con dependencias de tercer nivel
 CREATE TABLE [dbo].[Archivos] (

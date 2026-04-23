@@ -6,11 +6,16 @@
     ViewData["Title"] = "Trámites de concesión";
 
     string requisitosCambioTitularidad = string.Empty;
+    string requisitosAceptacionTitularidad = string.Empty;
+
 
     foreach (var requisito in Model.Dto.Requisitos)
     {
         if (requisito.TipoTramiteId == (int)TipoTramiteEnum.CambioTitular)
             requisitosCambioTitularidad = requisito.Descripcion;
+
+        if (requisito.TipoTramiteId == (int)TipoTramiteEnum.AceptacionTitular)
+            requisitosAceptacionTitularidad = requisito.Descripcion;
     }
 
     string nroConcesion = Model.InfoGeneral.NroConcesion.HasValue ? Model.InfoGeneral.NroConcesion.Value.ToString("D5") : "-----";
@@ -150,8 +155,9 @@
 
             <div class="text-end">
 
-                <form asp-action="IniciarCambioTitular" asp-controller="CambioTitular" method="post">
+                <form asp-action="IniciarTramite" asp-controller="CambioTitular" method="post">
                     <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
+                    <input type="hidden" name="tipoTramiteId" value="@((int)TipoTramiteEnum.CambioTitular)" />
                     <input type="submit" value="Iniciar trámite" class="btn btn-success" />
                 </form>
             </div>
@@ -162,7 +168,7 @@
 <div class="cardConcesion my-4">
     <div class="cardConcesion-content">
         <h3>Aceptación de Titularidad</h3>
-        <textarea class="form-control mb-2" rows="3">@requisitosCambioTitularidad</textarea>
+        <textarea class="form-control mb-2" rows="3">@requisitosAceptacionTitularidad</textarea>
 
         <div class="d-flex flex-wrap justify-content-between align-items-center mt-3">
             <div>
@@ -170,15 +176,9 @@
             </div>
 
             <div class="text-end">
-                @* @{
-                    var tramiteEnProceso = Model.Dto.TramitesIniciados
-                        .FirstOrDefault(t => t.TipoTramiteId == (int)TipoTramiteEnum.CambioTitular &&
-                     t.EstadoActualId != (int)EstadosCambioTitularEnum.Finalizado &&
-                     t.EstadoActualId != (int)EstadosCambioTitularEnum.Cancelado);
-                } *@
-
                 <form asp-action="IniciarTramite" asp-controller="AceptacionTitular" method="post">
                     <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
+                    <input type="hidden" name="tipoTramiteId" value="@((int)TipoTramiteEnum.AceptacionTitular)" />
                     <input type="submit" value="Iniciar trámite" class="btn btn-success" />
                 </form>
             </div>

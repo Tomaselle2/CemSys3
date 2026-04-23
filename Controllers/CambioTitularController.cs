@@ -17,22 +17,24 @@ namespace CemSys3.Controllers
 {
     public class CambioTitularController : Controller
     {
-        private readonly IStrategyFactory _factory;
         private readonly IDocumentoTramiteService _documentoService;
         private readonly IArchivo _archivoService;
         private readonly IHistorialEstados _historialService;
         private readonly ITarea _tareaService;
-        private readonly ITramiteCreateStrategy<CrearTramiteDTO, CambioTitularDTO> _strategy;
+        private readonly IStrategyFactory _strategyFactory;
 
-        public CambioTitularController(IArchivo archivoService, IHistorialEstados historialService, IStrategyFactory factory,
-        IDocumentoTramiteService documentoService, ITarea tareaService, ITramiteCreateStrategy<CrearTramiteDTO, CambioTitularDTO> strategy)
+
+        public CambioTitularController(IArchivo archivoService,
+        IHistorialEstados historialService,
+        IStrategyFactory strategyFactory,
+        IDocumentoTramiteService documentoService,
+         ITarea tareaService)
         {
             _archivoService = archivoService;
             _historialService = historialService;
-            _factory = factory;
+            _strategyFactory = strategyFactory;
             _documentoService = documentoService;
             _tareaService = tareaService;
-            _strategy = strategy;
         }
 
         [HttpPost]
@@ -41,10 +43,10 @@ namespace CemSys3.Controllers
         {
             int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
 
-            ITramiteStrategy strategy = _factory.GetStrategy((int)TipoTramiteEnum.CambioTitular);
+            ITramiteStrategy strategy = _strategyFactory.GetStrategy((int)TipoTramiteEnum.CambioTitular);
 
-           
-            if(viewModel.Personas == null || viewModel.Personas.Count == 0)
+
+            if (viewModel.Personas == null || viewModel.Personas.Count == 0)
             {
                 TempData.SetSweetAlert(new SweetAlertDTO
                 {
@@ -53,7 +55,7 @@ namespace CemSys3.Controllers
                     Tipo = "warning"
                 });
 
-                return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId} );
+                return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId });
             }
 
             GeneraStrategyDTO dto = new GeneraStrategyDTO
@@ -85,11 +87,13 @@ namespace CemSys3.Controllers
 
         [HttpPost]
         [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> IniciarCambioTitular(int concesionId)
+        public async Task<IActionResult> IniciarTramite(int concesionId, int tipoTramiteId)
         {
             try
             {
                 int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
+
+                var strategy = _strategyFactory.GetCreateStrategy(tipoTramiteId);
 
                 CrearTramiteDTO dto = new CrearTramiteDTO
                 {
@@ -97,9 +101,9 @@ namespace CemSys3.Controllers
                     UsuarioId = usuarioId,
                 };
 
-                int tramiteId = await _strategy.CrearAsync(dto);
+                int tramiteId = await strategy.CrearAsync(dto);
 
-                return RedirectToAction("Detalle", new { tramiteId = tramiteId });
+                return RedirectToAction("Detalle", new { tramiteId });
             }
             catch (Exception ex)
             {
@@ -112,7 +116,6 @@ namespace CemSys3.Controllers
 
                 return RedirectToAction("Index", "TramiteConcesion", new { tramiteId = concesionId });
             }
-
         }
 
         [HttpGet]
@@ -124,7 +127,17 @@ namespace CemSys3.Controllers
 
             try
             {
-                vm.Dto = await _strategy.ObtenerAsync(tramiteId);
+                var strategy = _strategyFactory.GetCreateStrategy((int)TipoTramiteEnum.CambioTitular);
+
+                if (strategy is ITramiteCreateStrategy<CambioTitularDTO> typedStrategy)
+                {
+                    vm.Dto = await typedStrategy.ObtenerAsync(tramiteId);
+                }
+                else
+                {
+                    throw new Exception("Strategy incorrecta para obtener datos");
+                }
+
                 vm.TipoTramiteId = vm.Dto.TipoTramiteId;
                 vm.TramiteId = vm.Dto.TramiteId;
                 vm.concesionId = vm.Dto.ConcesionId;
@@ -132,6 +145,7 @@ namespace CemSys3.Controllers
                 vm.Historial = await _historialService.GetAllById(vm.TramiteId);
                 vm.Documentos = await _documentoService.ObtenerPorTramiteAsync(vm.TramiteId);
                 vm.Tareas = await _tareaService.GetAllByTramite(tramiteId);
+
                 return View("CambioTitular", vm);
             }
             catch (Exception ex)
@@ -139,13 +153,14 @@ namespace CemSys3.Controllers
                 TempData.SetSweetAlert(new SweetAlertDTO
                 {
                     Titulo = "Error",
-                    Mensaje = "Ocurrio un error al cargar los datos. " + ex.Message,
+                    Mensaje = "Ocurrió un error al cargar los datos. " + ex.Message,
                     Tipo = "error"
                 });
 
-                return RedirectToAction("Index", "TramiteConcesion", new { tramiteId = vm.Dto.ConcesionId });
+                return RedirectToAction("Index", "TramiteConcesion");
             }
         }
-
     }
+
+    
 }

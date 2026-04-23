@@ -97,23 +97,8 @@ builder.Services.AddScoped<IRequisitos, RequisitosService>();
 // =========================
 //cambio de titular
 builder.Services.AddScoped<CambioTitularStrategy>();
-
-builder.Services.AddScoped<ITramiteStrategy>(sp =>
-    sp.GetRequiredService<CambioTitularStrategy>());
-
-builder.Services.AddScoped<
-    ITramiteCreateStrategy<CrearTramiteDTO, CambioTitularDTO>>(sp =>
-    sp.GetRequiredService<CambioTitularStrategy>());
-
-//aceptacion de titular
 builder.Services.AddScoped<AceptacionTitularStrategy>();
 
-builder.Services.AddScoped<ITramiteStrategy>(sp =>
-    sp.GetRequiredService<AceptacionTitularStrategy>());
-
-builder.Services.AddScoped<
-    ITramiteCreateStrategy<CrearTramiteDTO, CambioTitularDTO>>(sp =>
-    sp.GetRequiredService<AceptacionTitularStrategy>());
 
 // =========================
 // FACTORY

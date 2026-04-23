@@ -21,7 +21,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CemSys3.Business.TramiteConcesion
 {
     public class CambioTitularStrategy : ITramiteStrategy,
-    ITramiteCreateStrategy<CrearTramiteDTO, CambioTitularDTO>
+    ITramiteCreateStrategy<CambioTitularDTO>
     {
         private readonly IPlantillaTramite _plantillaService;
         private readonly IDocumentoTramiteService _documentoService;

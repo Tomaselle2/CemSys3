@@ -36,6 +36,9 @@ namespace CemSys3.Controllers
                     case (int)TipoTramiteEnum.CambioTitular:
                         return RedirectToAction("Detalle", "CambioTitular", new { tramiteId = tramiteId});
 
+                    case (int)TipoTramiteEnum.AceptacionTitular:
+                        return RedirectToAction("Detalle", "AceptacionTitular", new { tramiteId = tramiteId });
+
                     default:
                         return Content($$"""
                 <script>
