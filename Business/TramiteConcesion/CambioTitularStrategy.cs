@@ -179,20 +179,20 @@ namespace CemSys3.Business.TramiteConcesion
                 foreach (var plantilla in plantillas)
                 {
                     var variables = new Dictionary<string, string>
-                {
-                    { "Fecha", DateTime.Now.ToLongDateString() },
-                    { "articuloTitularActual", sexoReferencia  == "masculino" ? "el" : "la"},
-                    { "sr/sraTitularActual", sexoReferencia  == "masculino" ? "Sr." : "Sra."},
-                    { "TitularesActuales", string.Join(", ", dto.TitularesActuales.Select(t => t.Apellido.ToUpper() + " " + t.Nombre.ToUpper())) },
-                    { "DniTitularActual", string.Join(", ", dto.TitularesActuales.Select(t => StringExtensions.FormatearDni(t.Dni))) },
-                    { "Parcela", ParcelaFormatter.ObtenerParcela(dto.TipoParcela, dto.NroParcela, dto.NroFila, dto.NombreSeccion.ToUpper()) },
-                    { "Difuntos", difuntosFormateados },
-                    { "articuloNuevoTitular", persona.Sexo == "masculino" ? "al" : "a la"},
-                    { "sr/sraNuevoTitular", persona.Sexo == "masculino" ? "Sr." : "Sra."},
-                    { "NuevosTitulares", nuevoTitular.Apellido.ToUpper() + " " + nuevoTitular.Nombre.ToUpper() },
-                    { "DniNuevosTitulares", StringExtensions.FormatearDni(nuevoTitular.Dni)  },
+                    {
+                        { "Fecha", DateTime.Now.ToLongDateString() },
+                        { "articuloTitularActual", sexoReferencia  == "masculino" ? "el" : "la"},
+                        { "sr/sraTitularActual", sexoReferencia  == "masculino" ? "Sr." : "Sra."},
+                        { "TitularesActuales", string.Join(", ", dto.TitularesActuales.Select(t => t.Apellido.ToUpper() + " " + t.Nombre.ToUpper())) },
+                        { "DniTitularActual", string.Join(", ", dto.TitularesActuales.Select(t => StringExtensions.FormatearDni(t.Dni))) },
+                        { "Parcela", ParcelaFormatter.ObtenerParcela(dto.TipoParcela, dto.NroParcela, dto.NroFila, dto.NombreSeccion.ToUpper()) },
+                        { "Difuntos", difuntosFormateados },
+                        { "articuloNuevoTitular", persona.Sexo == "masculino" ? "al" : "a la"},
+                        { "sr/sraNuevoTitular", persona.Sexo == "masculino" ? "Sr." : "Sra."},
+                        { "NuevosTitulares", nuevoTitular.Apellido.ToUpper() + " " + nuevoTitular.Nombre.ToUpper() },
+                        { "DniNuevosTitulares", StringExtensions.FormatearDni(nuevoTitular.Dni)  },
 
-                };
+                    };
 
                     await _documentoService.CrearDesdePlantillaAsync(
                         plantilla.PlantillaId,
@@ -319,7 +319,7 @@ namespace CemSys3.Business.TramiteConcesion
                 //3 generar la nota de recordatorio.
                 string descripcionNota = $"\n● El {DateTime.Now:dd/MM/yyyy} se realizó cambio de titular (trámite {tramiteId})";
                 string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
-                string titularNota = $"El nuevo titular debe ser {titularesNuevos?[0].Apellido?.ToUpper()}, {titularesNuevos?[0].Nombre?.ToUpper()}";
+                string titularNota = $"El nuevo titular debe ser {titularesNuevos?[0].Apellido?.ToUpper()}, {titularesNuevos?[0].Nombre?.ToUpper()} con DNI {titularesNuevos?[0].Dni}";
 
                 await GenerarNotaRecordatorio(descripcionNota, nombreNota, titularNota, usuarioId);
 

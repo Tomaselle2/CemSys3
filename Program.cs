@@ -90,7 +90,7 @@ builder.Services.AddScoped<IDocumentoTramiteService, DocumentoTramiteService>();
 builder.Services.AddScoped<ITemplateProcessor, TemplateProcessor>();
 builder.Services.AddScoped<ICancelarTramite, CancelarService>();
 builder.Services.AddScoped<ITareaPlantilla, TareaPlantillaService>();
-
+builder.Services.AddScoped<IRequisitos, RequisitosService>();
 
 // =========================
 // STRATEGIES

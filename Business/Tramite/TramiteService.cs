@@ -2,6 +2,7 @@
 using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
 using CemSys3.Interfaces.Tramite;
+using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +11,11 @@ namespace CemSys3.Business.Tramite
     public class TramiteService : ITramite
     {
         private readonly AppDbContext _context;
-        
-        public TramiteService(AppDbContext context)
+        private readonly IRequisitos _requisitosService;
+        public TramiteService(AppDbContext context, IRequisitos requisitos)
         {
             _context = context;
+            _requisitosService = requisitos;
         }
 
         public async Task<GenericResultDTO> ActualizarInfoAdicional(int tramiteId, string informacionAdicionalTramite)
@@ -109,15 +111,7 @@ namespace CemSys3.Business.Tramite
                 .Where(t => !tiposNoPermitidos.Contains(t.TipoTramiteId)) 
                 .ToList();
 
-            dto.Requisitos = await _context.RequisitosTramites
-                .Where(rt => rt.Activo == true)
-                .Select(rt => new RequisitosTramiteDTO
-                {
-                    Id = rt.Id,
-                    TipoTramiteId = rt.TipoTramiteId,
-                    Descripcion = rt.Descripcion ?? ""
-                })
-                .ToListAsync();
+            dto.Requisitos = await _requisitosService.GetAll(concesionId);
 
             dto.ConcesionId = concesionId;
             dto.ParcelaId = parcelaId;

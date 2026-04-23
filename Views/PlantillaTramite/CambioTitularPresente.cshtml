@@ -45,58 +45,71 @@
     <input type="hidden" asp-for="Dto.TipoTramiteId" />
     <input type="hidden" asp-for="Dto.TipoAutorizacionId" />
 
-
     <div class="mb-3">
         <label>Nombre<span class="obligatorio"> *</span></label>
         <input type="text" class="form-control shadow-sm" asp-for="Dto.Nombre" />
     </div>
 
     <textarea id="editor" asp-for="Dto.Contenido"></textarea>
-    <br />
+    <hr />
 
-    <section>
-        <h3>Tareas</h3>
-
-        <div id="tareas">
-            @for (int i = 0; i < Model.Tareas.Count(); i++)
-            {
-                <div class="d-flex gap-2 mb-2 task-row align-items-center">
-                    <input type="hidden" asp-for="Tareas[i].Id" />
-                    <input type="hidden" asp-for="Tareas[i].Eliminada" class="eliminada-flag" />
-
-                    <input type="checkbox"
-                           class="form-check-input border border-dark border-1"
-                           asp-for="Tareas[i].Estado" />
-
-                    <input class="form-control flex-grow-1"
-                           asp-for="Tareas[i].Descripcion" />
-
-                    <button type="button"
-                            title="Eliminar tarea"
-                            class="btn btn-danger btn-sm btn-eliminar"
-                            onclick="marcarEliminada(this)">
-                        ✖
-                    </button>
-
-                    <button type="button"
-                            title="Restaurar tarea"
-                            class="btn btn-warning btn-sm btn-restaurar d-none"
-                            onclick="restaurar(this)">
-                        ↩
-                    </button>
-                </div>
-            }
+    <div class="cardConcesion my-4">
+        <div class="cardConcesion-content">
+            <h3>Cambio de titular (ambos titulares presentes)</h3>
+            <textarea asp-for="Requisitos.Descripcion" rows="3" style="overflow:hidden;"
+                     class="form-control auto-resize mb-2">
+            </textarea>
         </div>
+    </div>
 
-        <button type="button"
-                id="btnAgregarTarea"
-                title="Agregar tarea"
-                class="btn btn-sm btn-outline-primary"
-                onclick="agregarTarea()">
-            <i class="bi bi-plus"></i>
-            Tarea
-        </button>
-    </section>
+    <hr/>
+
+        <div class="cardConcesion my-4">
+            <div class="cardConcesion-content">
+                <h3>Tareas</h3>
+
+                <div id="tareas">
+                    @for (int i = 0; i < Model.Tareas.Count(); i++)
+                    {
+                        <div class="d-flex gap-2 mb-2 task-row align-items-center">
+                            <input type="hidden" asp-for="Tareas[i].Id" />
+                            <input type="hidden" asp-for="Tareas[i].Eliminada" class="eliminada-flag" />
+
+                            <input type="checkbox"
+                                   class="form-check-input border border-dark border-1"
+                                   asp-for="Tareas[i].Estado" />
+
+                            <input class="form-control flex-grow-1"
+                                   asp-for="Tareas[i].Descripcion" />
+
+                            <button type="button"
+                                    title="Eliminar tarea"
+                                    class="btn btn-danger btn-sm btn-eliminar"
+                                    onclick="marcarEliminada(this)">
+                                ✖
+                            </button>
+
+                            <button type="button"
+                                    title="Restaurar tarea"
+                                    class="btn btn-warning btn-sm btn-restaurar d-none"
+                                    onclick="restaurar(this)">
+                                ↩
+                            </button>
+                        </div>
+                    }
+                </div>
+
+                
+        </div>
+            <button type="button"
+                    id="btnAgregarTarea"
+                    title="Agregar tarea"
+                    class="btn btn-sm btn-outline-primary"
+                    onclick="agregarTarea()">
+                <i class="bi bi-plus"></i>
+                Tarea
+            </button>
+    </div>
 
 
     <button type="submit" class="btn btn-primary my-3">Guardar</button>
@@ -108,6 +121,19 @@
 <script src="~/tinymce/js/tinymce/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
 
 @section Scripts {
+
+    <script>
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+
+        window.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('.auto-resize').forEach(t => autoResize(t));
+        });
+    </script>
+
     <script>
         tinymce.init({
         selector: '#editor',
@@ -134,85 +160,7 @@
            
         });
     </script>
-    <script>
 
-        function agregarTarea() {
-            const idx = document.querySelectorAll('#tareas .task-row').length;
-
-            document.getElementById('tareas').insertAdjacentHTML('beforeend', `
-                <div class="d-flex gap-2 mb-2 task-row align-items-center">
-                    <input type="hidden" name="Tareas[${idx}].Id" value="0" />
-                    <input type="hidden" name="Tareas[${idx}].Eliminada" value="false" class="eliminada-flag" />
-
-                    <input type="checkbox"
-                           class="form-check-input"
-                           name="Tareas[${idx}].Estado"
-                           value="true" />
-            
-                    <input type="hidden" name="Tareas[${idx}].Estado" value="false" />
-
-                    <input class="form-control"
-                           name="Tareas[${idx}].Descripcion" />
-
-                    <button type="button"
-                            class="btn btn-danger btn-sm btn-eliminar"
-                            onclick="marcarEliminada(this)">✖</button>
-
-                    <button type="button"
-                            class="btn btn-warning btn-sm btn-restaurar d-none"
-                            onclick="restaurar(this)">↩</button>
-                </div>
-            `);
-        }
-
-        function marcarEliminada(btn) {
-            const row = btn.closest('.task-row');
-
-            row.querySelector('.eliminada-flag').value = "true";
-            row.classList.add('eliminada');
-
-            row.querySelector('.btn-eliminar').classList.add('d-none');
-            row.querySelector('.btn-restaurar').classList.remove('d-none');
-        }
-
-        function restaurar(btn) {
-            const row = btn.closest('.task-row');
-
-            row.querySelector('.eliminada-flag').value = "false";
-            row.classList.remove('eliminada');
-
-            row.querySelector('.btn-restaurar').classList.add('d-none');
-            row.querySelector('.btn-eliminar').classList.remove('d-none');
-        }
-
-        function validarTareas() {
-            const tareas = document.querySelectorAll('#tareas .task-row');
-
-            tareas.forEach(row => {
-                const descripcion = row.querySelector('input[name$=".Descripcion"]').value.trim();
-                const eliminada = row.querySelector('.eliminada-flag').value;
-
-                if (descripcion === '' && eliminada !== "true") {
-                    row.remove();
-                }
-            });
-
-            reindexarTareas();
-            return true;
-        }
-
-        function reindexarTareas() {
-            const rows = document.querySelectorAll('#tareas .task-row');
-
-            rows.forEach((row, index) => {
-                row.querySelectorAll('input').forEach(input => {
-                    const name = input.getAttribute('name');
-                    if (name) {
-                        input.setAttribute('name', name.replace(/\[\d+\]/, `[${index}]`));
-                    }
-                });
-            });
-        }
-    </script>
+    <script src="~/js/tareabase.js"></script>
 }
 

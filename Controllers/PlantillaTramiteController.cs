@@ -7,6 +7,7 @@ using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.PlantillaTramite;
 using CemSys3.Interfaces.Tarea;
+using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.ViewModels.PlantillaTramite;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -17,11 +18,13 @@ namespace CemSys3.Controllers
     {
         private readonly IPlantillaTramite _service;
         private readonly ITareaPlantilla _tareaPlantillaService;
+        private readonly IRequisitos _requisitosService;
 
-        public PlantillaTramiteController(IPlantillaTramite service, ITareaPlantilla tareaPlantillaService)
+        public PlantillaTramiteController(IPlantillaTramite service, ITareaPlantilla tareaPlantillaService, IRequisitos requisitosService)
         {
             _service = service;
             _tareaPlantillaService = tareaPlantillaService;
+            _requisitosService = requisitosService;
         }
 
         //vista general donde aparecen todas las plantillas de trámite, con opciones para editar.
@@ -48,6 +51,8 @@ namespace CemSys3.Controllers
 
 
                 viewModel.vista = "CambioTitularPresente";
+
+                viewModel.Requisitos = await _requisitosService.GetByTipoTramiteId(viewModel.Dto.TipoTramiteId);
             }
             catch (Exception ex)
             {
@@ -59,7 +64,7 @@ namespace CemSys3.Controllers
                 };
             }
 
-            return View("CambioTitularPresente", viewModel);
+            return View(viewModel.vista, viewModel);
         }
 
         [HttpPost]
@@ -80,7 +85,6 @@ namespace CemSys3.Controllers
 
             try
             {
-                // 🔥 CKEDITOR FIX
                 viewModel.Dto.Contenido = WebUtility.HtmlDecode(viewModel.Dto.Contenido);
 
                 int plantillaId;
@@ -101,6 +105,11 @@ namespace CemSys3.Controllers
                         viewModel.Tareas
                     );
                 }
+
+                await _requisitosService.Update(
+                    viewModel.Dto.TipoTramiteId,
+                    viewModel.Requisitos.Descripcion
+                );
 
                 TempData.SetSweetAlert(new SweetAlertDTO
                 {

@@ -1,6 +1,7 @@
 ﻿using CemSys3.DTOs.PlantillaTramite;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.Tarea;
+using CemSys3.DTOs.Tramite;
 
 namespace CemSys3.ViewModels.PlantillaTramite
 {
@@ -9,6 +10,8 @@ namespace CemSys3.ViewModels.PlantillaTramite
         public PlantillaTramiteDTO Dto { get; set; } = new PlantillaTramiteDTO();
         public List<TareaDTO> Tareas { get; set; } = new List<TareaDTO>();
         public string vista { get; set; } = string.Empty;
+
+        public RequisitosTramiteDTO Requisitos { get; set; } = new RequisitosTramiteDTO();
         //manero de errores
         public SweetAlertDTO? SweetAlert { get; set; }
     }
