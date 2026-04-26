@@ -18,14 +18,14 @@
             switch (tipoParcela.ToLower())
             {
                 case "nicho":
-                    return $"Nicho {nroParcela} Secc {nombreSeccion} Fila {nroFila}";
+                    return $"NICHO {nroParcela} SECC {nombreSeccion.ToUpper()} FILA {nroFila}";
 
                 case "fosa":
-                    return $"Fosa {nroParcela} Secc {nombreSeccion}";
+                    return $"FOSA {nroParcela} SECC {nombreSeccion.ToUpper()}";
 
                 case "panteón":
                 case "panteon":
-                    return $"Lote {nroParcela} Secc {nombreSeccion} (panteón)";
+                    return $"LOTE {nroParcela} SECC {nombreSeccion.ToUpper()} (panteón)";
 
                 default:
                     return string.Empty;

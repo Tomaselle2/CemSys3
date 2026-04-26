@@ -29,6 +29,10 @@ public partial class DocumentosTramite
 
     public int? TipoAutorizacionId { get; set; }
 
+    public int? FirmanteId { get; set; }
+
+    public virtual FirmantesTramite? Firmante { get; set; }
+
     public virtual Persona? Persona { get; set; }
 
     public virtual PlantillasTramite? Plantilla { get; set; }

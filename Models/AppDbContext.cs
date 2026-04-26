@@ -41,6 +41,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<EstadosTramite> EstadosTramites { get; set; }
 
+    public virtual DbSet<FirmantesTramite> FirmantesTramites { get; set; }
+
     public virtual DbSet<HistorialEstadoTramite> HistorialEstadoTramites { get; set; }
 
     public virtual DbSet<HistorialTitularesConcesione> HistorialTitularesConcesiones { get; set; }
@@ -342,6 +344,7 @@ public partial class AppDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("fechaUltimaEdicion");
+            entity.Property(e => e.FirmanteId).HasColumnName("firmanteId");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(150)
                 .HasColumnName("nombre");
@@ -359,6 +362,10 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Visibilidad)
                 .HasDefaultValue(true)
                 .HasColumnName("visibilidad");
+
+            entity.HasOne(d => d.Firmante).WithMany(p => p.DocumentosTramites)
+                .HasForeignKey(d => d.FirmanteId)
+                .HasConstraintName("FK_DT_Firmante");
 
             entity.HasOne(d => d.Persona).WithMany(p => p.DocumentosTramites)
                 .HasForeignKey(d => d.PersonaId)
@@ -425,6 +432,38 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.TipoTramiteId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("EstadosTramites_tipoTramiteId_fk");
+        });
+
+        modelBuilder.Entity<FirmantesTramite>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Firmante__3213E83FAF6BB126");
+
+            entity.ToTable("FirmantesTramite");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.EsTitular).HasColumnName("esTitular");
+            entity.Property(e => e.FechaAlta)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaAlta");
+            entity.Property(e => e.Parentesco)
+                .HasMaxLength(50)
+                .HasColumnName("parentesco");
+            entity.Property(e => e.PersonaId).HasColumnName("personaId");
+            entity.Property(e => e.TramiteId).HasColumnName("tramiteId");
+            entity.Property(e => e.Visibilidad)
+                .HasDefaultValue(true)
+                .HasColumnName("visibilidad");
+
+            entity.HasOne(d => d.Persona).WithMany(p => p.FirmantesTramites)
+                .HasForeignKey(d => d.PersonaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_FT_Persona");
+
+            entity.HasOne(d => d.Tramite).WithMany(p => p.FirmantesTramites)
+                .HasForeignKey(d => d.TramiteId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_FT_Tramite");
         });
 
         modelBuilder.Entity<HistorialEstadoTramite>(entity =>
@@ -898,7 +937,7 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Descripcion)
-                .HasMaxLength(60)
+                .HasMaxLength(150)
                 .HasColumnName("descripcion");
             entity.Property(e => e.Estado).HasColumnName("estado");
             entity.Property(e => e.NotaId).HasColumnName("notaId");

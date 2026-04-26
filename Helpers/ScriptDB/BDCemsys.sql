@@ -561,3 +561,49 @@ CREATE TABLE AceptacionTitularidad (
 	CONSTRAINT FK_AT_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
     CONSTRAINT FK_AT_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id)
 );
+
+CREATE TABLE FirmantesTramite (
+    id INT IDENTITY PRIMARY KEY,
+    tramiteId INT NOT NULL,
+    personaId INT NOT NULL,
+
+    parentesco NVARCHAR(50) NULL, -- hijo, esposa, etc
+    esTitular BIT NOT NULL DEFAULT 0,
+
+    fechaAlta DATETIME DEFAULT GETDATE(),
+    visibilidad BIT DEFAULT 1,
+
+    CONSTRAINT FK_FT_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_FT_Persona FOREIGN KEY (personaId) REFERENCES Personas(id)
+);
+
+ALTER TABLE DocumentosTramite
+ADD firmanteId INT;
+
+ALTER TABLE DocumentosTramite
+ADD CONSTRAINT FK_DT_Firmante
+FOREIGN KEY (firmanteId) REFERENCES FirmantesTramite(id);
+
+CREATE TABLE Cremaciones (
+    tramiteId INT PRIMARY KEY,
+    parcelaOrigenId INT NOT NULL,
+	parcelaDestinoId INT NULL,
+    usuarioId INT NOT NULL,
+	difuntoId INT NOT NULL,
+    fechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+	fechaPendiente DATETIME NULL,
+    fechaFinalizacion DATETIME NULL,
+	destino NVARCHAR(150) NULL,
+    infoAdicional NVARCHAR(MAX) null,
+	concesionId int NOT null,
+	cementerioId INT NULL,
+    visibilidad BIT DEFAULT 1,
+
+    CONSTRAINT FK_CREMA_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_CREMA_concesionId FOREIGN KEY (concesionId) REFERENCES Tramites(id),
+	CONSTRAINT FK_CREMA_ParcelaOrigen FOREIGN KEY (parcelaOrigenId) REFERENCES Parcelas(id),
+	CONSTRAINT FK_CREMA_ParcelaDestino FOREIGN KEY (parcelaDestinoId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_CREMA_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id),
+	CONSTRAINT FK_CREMA_Difunto FOREIGN KEY (difuntoId) REFERENCES Personas(id),
+	CONSTRAINT FK_CREMA_Cementerio FOREIGN KEY (cementerioId) REFERENCES Cementerios(id)
+);

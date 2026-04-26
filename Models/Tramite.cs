@@ -35,6 +35,8 @@ public partial class Tramite
 
     public virtual EstadosTramite EstadoActual { get; set; } = null!;
 
+    public virtual ICollection<FirmantesTramite> FirmantesTramites { get; set; } = new List<FirmantesTramite>();
+
     public virtual ICollection<HistorialEstadoTramite> HistorialEstadoTramites { get; set; } = new List<HistorialEstadoTramite>();
 
     public virtual Introduccione? Introduccione { get; set; }
