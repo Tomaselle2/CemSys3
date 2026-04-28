@@ -99,6 +99,38 @@ namespace CemSys3.Controllers
             return View(viewModel.vista, viewModel);
         }
 
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> CremacionAutorizacion(int plantillaId)
+        {
+            PlantillaTramiteVM viewModel = new PlantillaTramiteVM();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+
+            try
+            {
+                viewModel.Dto = await _service.ObtenerPorIdAsync(plantillaId)
+                    ?? new PlantillaTramiteDTO();
+
+                viewModel.Tareas = await _tareaPlantillaService.GetAllByTipoTramite(viewModel.Dto.TipoTramiteId);
+
+
+                viewModel.vista = "CremacionAutorizacion";
+
+                viewModel.Requisitos = await _requisitosService.GetByTipoTramiteId(viewModel.Dto.TipoTramiteId);
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Error al cargar la plantilla: {ex.Message}",
+                    Tipo = "error"
+                };
+            }
+
+            return View(viewModel.vista, viewModel);
+        }
+
         [HttpPost]
         [AuthorizeRole(RolUsuario.Administrador)]
         public async Task<IActionResult> Guardar(PlantillaTramiteVM viewModel)

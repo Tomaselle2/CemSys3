@@ -33,6 +33,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Concesione> Concesiones { get; set; }
 
+    public virtual DbSet<Cremacione> Cremaciones { get; set; }
+
     public virtual DbSet<DocumentosTramite> DocumentosTramites { get; set; }
 
     public virtual DbSet<EmpresasFunebre> EmpresasFunebres { get; set; }
@@ -330,6 +332,71 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.Usuario).WithMany(p => p.Concesiones)
                 .HasForeignKey(d => d.UsuarioId)
                 .HasConstraintName("Concesiones_usuarioId_fk");
+        });
+
+        modelBuilder.Entity<Cremacione>(entity =>
+        {
+            entity.HasKey(e => e.TramiteId).HasName("PK__Cremacio__32453547EDA9D65A");
+
+            entity.Property(e => e.TramiteId)
+                .ValueGeneratedNever()
+                .HasColumnName("tramiteId");
+            entity.Property(e => e.CementerioId).HasColumnName("cementerioId");
+            entity.Property(e => e.ConcesionId).HasColumnName("concesionId");
+            entity.Property(e => e.Destino)
+                .HasMaxLength(150)
+                .HasColumnName("destino");
+            entity.Property(e => e.DifuntoId).HasColumnName("difuntoId");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaCreacion");
+            entity.Property(e => e.FechaFinalizacion)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaFinalizacion");
+            entity.Property(e => e.FechaPendiente)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaPendiente");
+            entity.Property(e => e.InfoAdicional).HasColumnName("infoAdicional");
+            entity.Property(e => e.ParcelaDestinoId).HasColumnName("parcelaDestinoId");
+            entity.Property(e => e.ParcelaOrigenId).HasColumnName("parcelaOrigenId");
+            entity.Property(e => e.UsuarioId).HasColumnName("usuarioId");
+            entity.Property(e => e.Visibilidad)
+                .HasDefaultValue(true)
+                .HasColumnName("visibilidad");
+
+            entity.HasOne(d => d.Cementerio).WithMany(p => p.Cremaciones)
+                .HasForeignKey(d => d.CementerioId)
+                .HasConstraintName("FK_CREMA_Cementerio");
+
+            entity.HasOne(d => d.Concesion).WithMany(p => p.CremacioneConcesions)
+                .HasForeignKey(d => d.ConcesionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CREMA_concesionId");
+
+            entity.HasOne(d => d.Difunto).WithMany(p => p.Cremaciones)
+                .HasForeignKey(d => d.DifuntoId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CREMA_Difunto");
+
+            entity.HasOne(d => d.ParcelaDestino).WithMany(p => p.CremacioneParcelaDestinos)
+                .HasForeignKey(d => d.ParcelaDestinoId)
+                .HasConstraintName("FK_CREMA_ParcelaDestino");
+
+            entity.HasOne(d => d.ParcelaOrigen).WithMany(p => p.CremacioneParcelaOrigens)
+                .HasForeignKey(d => d.ParcelaOrigenId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CREMA_ParcelaOrigen");
+
+            entity.HasOne(d => d.Tramite).WithOne(p => p.CremacioneTramite)
+                .HasForeignKey<Cremacione>(d => d.TramiteId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CREMA_Tramite");
+
+            entity.HasOne(d => d.Usuario).WithMany(p => p.Cremaciones)
+                .HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CREMA_Usuario");
         });
 
         modelBuilder.Entity<DocumentosTramite>(entity =>

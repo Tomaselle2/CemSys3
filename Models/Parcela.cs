@@ -33,6 +33,10 @@ public partial class Parcela
 
     public virtual ICollection<Concesione> Concesiones { get; set; } = new List<Concesione>();
 
+    public virtual ICollection<Cremacione> CremacioneParcelaDestinos { get; set; } = new List<Cremacione>();
+
+    public virtual ICollection<Cremacione> CremacioneParcelaOrigens { get; set; } = new List<Cremacione>();
+
     public virtual ICollection<Introduccione> Introducciones { get; set; } = new List<Introduccione>();
 
     public virtual ICollection<ParcelaDifunto> ParcelaDifuntos { get; set; } = new List<ParcelaDifunto>();

@@ -52,9 +52,12 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Aceptación de Titularidad")]
         AceptacionTitularidad = 2,
+
+        [Display(Name = "Cremación - Autorización")]
+        CremacionAutorizacion = 3,
     }
 
-    public enum  TipoNichoEnum
+    public enum TipoNichoEnum
     {
         [Display(Name = "Féretro")]
         Feretro = 1,

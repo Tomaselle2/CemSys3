@@ -27,6 +27,8 @@ public partial class Usuario
 
     public virtual ICollection<Concesione> Concesiones { get; set; } = new List<Concesione>();
 
+    public virtual ICollection<Cremacione> Cremaciones { get; set; } = new List<Cremacione>();
+
     public virtual ICollection<DocumentosTramite> DocumentosTramites { get; set; } = new List<DocumentosTramite>();
 
     public virtual ICollection<Introduccione> Introducciones { get; set; } = new List<Introduccione>();
