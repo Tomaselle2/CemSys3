@@ -1,7 +1,5 @@
-﻿using CemSys3.DTOs.Persona;
-using CemSys3.DTOs.PlantillaTramite;
+﻿using CemSys3.DTOs.PlantillaTramite;
 using CemSys3.DTOs.SweetAlert;
-using CemSys3.DTOs.Tarea;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;

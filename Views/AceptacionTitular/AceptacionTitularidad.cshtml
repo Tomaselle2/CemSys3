@@ -419,8 +419,7 @@ new ArchivoVM
 <script src="~/tinymce/js/tinymce/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
 @section Scripts {
 
-    <script>
-        //documentos
+    <script> //documentos
            // Pasar los datos del modelo a JavaScript
            var documentosData = @Html.Raw(Json.Serialize(Model.Documentos));
     
@@ -509,8 +508,7 @@ new ArchivoVM
            });
     </script>
 
-    <script>
-        //titulares
+    <script>//titulares
                // Variables globales
                // Inicializo titulares desde el servidor (Model.contrato.Titulares)
                const initialTitulares = @Html.Raw(titularesJson);

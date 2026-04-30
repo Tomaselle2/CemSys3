@@ -55,18 +55,6 @@
     @section Scripts {
 
         <script>
-            function autoResize(textarea) {
-                textarea.style.height = 'auto';
-                textarea.style.height = textarea.scrollHeight + 'px';
-            }
-
-
-            window.addEventListener('DOMContentLoaded', () => {
-                    document.querySelectorAll('.auto-resize').forEach(t => autoResize(t));
-            });
-        </script>
-
-        <script>
             tinymce.init({
             selector: '#editor',
             license_key: 'gpl',
@@ -92,8 +80,6 @@
            
             });
         </script>
-
-        <script src="~/js/tareabase.js"></script>
     }
 
 

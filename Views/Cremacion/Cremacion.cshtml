@@ -1,0 +1,175 @@
+﻿@using CemSys3.DTOs.Tarea
+@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.Archivo
+@using CemSys3.ViewModels.Historial
+@using CemSys3.ViewModels.TramiteConcesion
+@model CremacionVM
+
+
+@{
+    ViewData["Title"] = "Cremación";
+}
+
+@{
+    string nroConcesion = Model.Dto.NroConcesion.HasValue ? Model.Dto.NroConcesion.Value.ToString("D5") : "-----";
+    string estadoTramite = EnumHelper.GetDisplayNameByValue<EstadosCambioTitularEnum>(Model.Dto.EstadoTramiteId);
+    string tipoParcela = Model.Dto.TipoParcela ?? "N/A";
+    string nombreSeccion = Model.Dto.NombreSeccion;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+
+
+    string parcela = "";
+    if (Model.Dto.TipoParcela == "Nicho") //nicho
+    {
+        parcela = $"Nicho {Model.Dto.NroParcela.ToString()} Fila {Model.Dto.NroFila.ToString()}";
+    }
+
+    if (Model.Dto.TipoParcela == "Fosa")//fosa
+    {
+        parcela = $"Fosa {Model.Dto.NroParcela.ToString()}";
+    }
+
+    if (Model.Dto.TipoParcela == "Panteón")//panteon
+    {
+        parcela = $"Lote {Model.Dto.NroParcela.ToString()}";
+    }
+}
+
+<!-- Panel lateral derecho del historial -->
+@await Html.PartialAsync("HistorialPV/_HistorialOffcanvas",
+new HistorialOffcanvasVM
+{
+    Historial = Model.Historial,
+    EnumType = typeof(EstadosCambioTitularEnum),
+    OffcanvasId = $"offcanvasHistorial_{Model.Dto.TramiteId}",
+    Titulo = "Historial de cremación"
+})
+
+
+<h1>Cremación</h1>
+
+<!-- Panel de info general -->
+<div class="contenidoConcesion">
+    <div class="cardsConcesion-row my-4">
+        <div class="cardConcesion">
+            <div class="cardConcesion-content">
+                <span class="labelConcesion">NRO. CONCESIÓN</span>
+                <h2>@nroConcesion</h2>
+            </div>
+        </div>
+
+        <div class="cardConcesion estado-card">
+            <div class="cardConcesion-content">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="labelConcesion">ESTADO</span>
+                    <!--Btn historial-->
+                    <div>
+                        <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="offcanvas" title="Historial" data-bs-target="#offcanvasHistorial_@Model.Dto.TramiteId">
+                            <i class="bi bi-clock-history"></i>
+                        </button>
+                    </div>
+                </div>
+                <span class="badgeConcesion px-3 py-2 text-bg-info">@estadoTramite</span>
+            </div>
+        </div>
+
+        <div class="cardConcesion">
+            <div class="cardConcesion-content">
+                <span class="labelConcesion">NRO. TRÁMITE</span>
+                <h2>@Model.Dto.TramiteId</h2>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="gridConcesion">
+        <div class="cardConcesion">
+
+            <div class="cardConcesion-content">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">
+                        <i class="bi bi-pin-map-fill text-primary"></i> Parcela
+                    </h3>
+                    <a asp-action="HistorialParcela"
+                           asp-controller="Parcela"
+                           asp-route-parcelaId="@Model.Dto.ParcelaId"
+                           data-skip-loader="true"
+                           target="_blank"
+                           title="Historial parcela">
+                        <i class="bi bi-arrow-up-right-square-fill fs-2"></i>
+                    </a>
+                </div>
+                <p><strong>Tipo:</strong> @tipoParcela</p>
+                <p><strong>Sección:</strong> @nombreSeccion.ToUpper()</p>
+                <p><strong>Parcela:</strong> @parcela</p>
+            </div>
+        </div>
+    
+        @foreach (var titular in Model.Dto.TitularesActuales)
+        {
+            <div class="cardConcesion">
+                <div class="cardConcesion-content">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-person-fill text-primary"></i> Titular
+                        </h3>
+                        <a asp-action="HistorialPersona"
+                               asp-controller="Persona"
+                               asp-route-id="@titular.Id"
+                               data-skip-loader="true"
+                               target="_blank"
+                               title="Historial titular">
+                            <i class="bi bi-arrow-up-right-square-fill fs-2"></i>
+                        </a>
+                    </div>
+                    <p><strong>Nombre:</strong> @titular.Apellido?.ToUpper(), @titular.Nombre?.ToUpper()</p>
+                    <p><strong>DNI:</strong> @(!string.IsNullOrEmpty(titular.Dni) ? titular.Dni : "")</p>
+                    <p><strong>Celular:</strong> @(!string.IsNullOrEmpty(titular.Celular) ? titular.Celular : "")</p>
+                    <p><strong>E-mail:</strong> @(!string.IsNullOrEmpty(titular.CorreoElectronico) ? titular.CorreoElectronico : "")</p>
+                    <p><strong>Domicilio:</strong> @(!string.IsNullOrEmpty(titular.Domicilio) ? titular.Domicilio : "")</p>
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+
+
+<!-- Archivos-->
+@await Html.PartialAsync("ArchivoPV/_ArchivoPV",
+new ArchivoVM
+{
+    Archivos = Model.Archivos,
+    TramiteId = Model.Dto.TramiteId,
+    returnUrl = returnUrl
+})
+
+<!-- Tareas-->
+<div id="contenedorTareas">
+    @await Html.PartialAsync("Tramite/_TareaPV", new TareaPVDTO
+    {
+        Tareas = Model.Tareas,
+        TramiteId = Model.Dto.TramiteId,
+        ConcesionId = Model.Dto.ConcesionId,
+        EstadoTramiteId = Model.Dto.EstadoTramiteId,
+        TipoTramiteId = Model.TipoTramiteId,
+        returnUrl = returnUrl
+    })
+</div>
+
+
+
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
+@section Scripts {
+    <script src="~/js/tareabase.js"></script>
+    <script src="~/js/tareas-finalizar.js"></script>
+}
+
+

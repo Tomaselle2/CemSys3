@@ -22,16 +22,16 @@ namespace CemSys3.Enumerables
         [Display(Name = "Ingreso")]
         Ingreso = 1,
 
-        [Display(Name = "Autorización para cremación")]
+        [Display(Name = "Cremación")]
         Cremacion = 2,
 
-        [Display(Name = "Autorización para reducción")]
+        [Display(Name = "Reducción")]
         Reduccion = 3,
 
         [Display(Name = "Contrato de concesión")]
         ContratoConcesion = 4,
 
-        [Display(Name = "Autorización para traslado")]
+        [Display(Name = "Traslado")]
         Traslado = 5,
 
         [Display(Name = "Cambio de titular")]
@@ -40,7 +40,7 @@ namespace CemSys3.Enumerables
         [Display(Name = "Nota")]
         Nota = 7,
 
-        [Display(Name = "Aceptación de titular")]
+        [Display(Name = "Aceptación de titularidad")]
         AceptacionTitular = 8,
     }
 

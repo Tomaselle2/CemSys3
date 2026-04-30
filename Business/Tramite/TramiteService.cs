@@ -1,9 +1,11 @@
 ﻿using CemSys3.DTOs.Generics;
+using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.Models;
+using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.EntityFrameworkCore;
 
 namespace CemSys3.Business.Tramite
@@ -126,8 +128,21 @@ namespace CemSys3.Business.Tramite
                 EstadoActualId = t.EstadoActualId
             }).ToList();
 
+            //consultar el difuntos relacionados a la parcela para el tramite
+            dto.Difuntos = await _context.ParcelaDifuntos
+                .Where(p => p.ParcelaId == dto.ParcelaId && p.FechaRetiro == null)
+                .Select(p => new DifuntoContratoDTO
+                {
+                    Id = p.Difunto.Id,
+                    DNI = p.Difunto.Dni,
+                    Nombre = p.Difunto.Nombre,
+                    Apellido = p.Difunto.Apellido,
+                    FechaIngreso = p.FechaIngreso,
+                    EstadoDifuntoId = p.Difunto.EstadoDifuntoId
+                }).ToListAsync();
 
-          return dto;
+
+            return dto;
         }
 
 

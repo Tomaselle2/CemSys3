@@ -1,13 +1,9 @@
 ﻿using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Tramite;
-using CemSys3.Helpers;
-using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.PlantillaTramite;
 using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
-
 namespace CemSys3.Business.TramiteConcesion
 {
     public class RequisitosService : IRequisitos
