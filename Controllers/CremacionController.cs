@@ -1,6 +1,6 @@
-﻿using CemSys3.DTOs.SweetAlert;
+﻿using CemSys3.DTOs.PlantillaTramite;
+using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.TramitesConcesion;
-using CemSys3.DTOs.TramitesConcesion.CambioTitular;
 using CemSys3.DTOs.TramitesConcesion.Cremacion;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
@@ -129,5 +129,55 @@ namespace CemSys3.Controllers
                 return RedirectToAction("Index", "TramiteConcesion");
             }
         }
+
+       
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> GenerarAutorizaciones(CremacionVM viewModel, int firmanteId)
+        {
+            int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
+            ITramiteStrategy strategy = _strategyFactory.GetStrategy((int)TipoTramiteEnum.Cremacion);
+
+            // Buscar el firmante específico
+            var firmantes = await _firmantesService.GetAllByTramite(viewModel.TramiteId);
+            var firmante = firmantes.FirstOrDefault(f => f.Id == firmanteId);
+
+            if (firmante == null)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Advertencia",
+                    Mensaje = "Firmante no encontrado",
+                    Tipo = "warning"
+                });
+                return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId });
+            }
+
+            GeneraStrategyDTO dto = new GeneraStrategyDTO
+            {
+                TramiteId = viewModel.TramiteId,
+                UsuarioId = usuarioId,
+                Parentesco = firmante.Parentesco ?? "Titular",
+                NroParcela = viewModel.Dto.NroParcela.Value,
+                NroFila = viewModel.Dto.NroFila.Value,
+                NombreSeccion = viewModel.Dto.NombreSeccion,
+                TipoParcela = viewModel.Dto.TipoParcela,
+                Difuntos = viewModel.Dto.Difuntos,
+            };
+
+            await strategy.GenerarDocumentosAsync(dto);
+
+            TempData.SetSweetAlert(new SweetAlertDTO
+            {
+                Titulo = "Éxito",
+                Mensaje = $"Autorización generada para {firmante.Apellido}, {firmante.Nombre}",
+                Tipo = "success"
+            });
+
+            return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId });
+        }
+
+        
     }
 }

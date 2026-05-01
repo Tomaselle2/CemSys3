@@ -17,7 +17,6 @@ namespace CemSys3.DTOs.TramitesConcesion.Cremacion
         public int ConcesionId { get; set; }
 
         public List<TitularesContratoDTO> TitularesActuales { get; set; } = new();
-        public List<TitularesContratoDTO> NuevosTitulares { get; set; } = new();
 
         public List<DifuntoContratoDTO> Difuntos { get; set; } = new List<DifuntoContratoDTO>();
 

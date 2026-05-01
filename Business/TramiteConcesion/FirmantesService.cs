@@ -14,10 +14,11 @@ namespace CemSys3.Business.TramiteConcesion
             _context = context;
         }
 
-        public async Task<IEnumerable<FirmantesDTO>> GetAllByTramite(int tramiteId)
+        public async Task<List<FirmantesDTO>> GetAllByTramite(int tramiteId)
         {
-            IEnumerable<FirmantesDTO> firmantes = await _context.FirmantesTramites
+            List<FirmantesDTO> firmantes = await _context.FirmantesTramites
                .Where(f => f.TramiteId == tramiteId)
+               .Include(p => p.Persona)
                .Select(f => new FirmantesDTO
                {
                    Id = f.Id,
@@ -26,7 +27,14 @@ namespace CemSys3.Business.TramiteConcesion
                    Parentesco = f.Parentesco,
                    EsTitular = f.EsTitular,
                    FechaAlta = f.FechaAlta,
-                   Visibilidad = f.Visibilidad
+                   Visibilidad = f.Visibilidad,
+                   Dni = f.Persona.Dni,
+                   Nombre = f.Persona.Nombre,
+                   Apellido = f.Persona.Apellido,
+                   Sexo = f.Persona.Sexo,
+                   Domicilio = f.Persona.Domicilio,
+                   Celular = f.Persona.Celular,
+                   CorreoElectronico = f.Persona.Correo
                }).ToListAsync();
 
             return firmantes;
