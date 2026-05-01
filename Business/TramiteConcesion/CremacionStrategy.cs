@@ -3,7 +3,6 @@ using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.PlantillaTramite;
 using CemSys3.DTOs.Tramite;
 using CemSys3.DTOs.TramitesConcesion;
-using CemSys3.DTOs.TramitesConcesion.CambioTitular;
 using CemSys3.DTOs.TramitesConcesion.Cremacion;
 using CemSys3.Enumerables;
 using CemSys3.Interfaces.HistorialEstados;
@@ -30,6 +29,7 @@ namespace CemSys3.Business.TramiteConcesion
         private readonly ITareaPlantilla _tareaPlantilla;
         private readonly ITramite _tramiteService;
         private readonly INotas _notasService;
+        private readonly IFirmantes _firmantes;
 
         public CremacionStrategy(
             IPlantillaTramite plantillaService,
@@ -38,7 +38,9 @@ namespace CemSys3.Business.TramiteConcesion
             AppDbContext context,
             ITramite tramiteService,
             IHistorialEstados historialEstadosService,
-            ITareaPlantilla tareaPlantilla, INotas notasService)
+            ITareaPlantilla tareaPlantilla, 
+            INotas notasService,
+            IFirmantes firmantes)
         {
             _plantillaService = plantillaService;
             _documentoService = documentoService;
@@ -48,7 +50,10 @@ namespace CemSys3.Business.TramiteConcesion
             _historialEstadosService = historialEstadosService;
             _tareaPlantilla = tareaPlantilla;
             _notasService = notasService;
+            _firmantes = firmantes;
         }
+
+       
 
         public Task<int> AvanzarEstadoAsync(int tramiteId, int nuevoEstado, int usuarioId)
         {
@@ -107,7 +112,21 @@ namespace CemSys3.Business.TramiteConcesion
                 //4 - relacion de tramite con parcela
                 await _historialEstadosService.VincularTramiteAParcela(tramiteId, concesion.ParcelaId);
 
+                //5 - crear tareas para el tramite
                 await _tareaPlantilla.CrearTareasPorTramite(tramiteId, (int)TipoTramiteEnum.Cremacion);
+
+               var titulares = await _context.HistorialTitularesConcesiones
+                    .Where(h => h.ConcesionId == cremacion.ConcesionId && h.FechaFin == null)
+                    .Select(h => new TitularesContratoDTO
+                    {
+                        Id = h.Persona.Id,
+                    }).ToListAsync();
+
+                //6 - crea el firmante titular
+                foreach (var titular in titulares)
+                {
+                    await _firmantes.Add(tramiteId, titular.Id.Value, "Titular", true);
+                }
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -121,6 +140,8 @@ namespace CemSys3.Business.TramiteConcesion
             }
         }
 
+       
+
         public Task FinalizarAsync(int tramiteId, int usuarioId)
         {
             throw new NotImplementedException();
@@ -131,6 +152,7 @@ namespace CemSys3.Business.TramiteConcesion
             throw new NotImplementedException();
         }
 
+        
         public async Task<CremacionDTO> ObtenerAsync(int tramiteId)
         {
             Models.Cremacione cremacion = await _context.Cremaciones.AsNoTracking()
@@ -196,5 +218,7 @@ namespace CemSys3.Business.TramiteConcesion
 
             return dto;
         }
+
+        
     }
 }

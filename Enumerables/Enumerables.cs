@@ -339,8 +339,8 @@ namespace CemSys3.Enumerables
         [Display(Name = "Tarifaria")]
         Tarifaria,
 
-        [Display(Name = "Documentación CemSys")]
-        Documentacion,
+        [Display(Name = "Autorización")]
+        Autorizaciones,
 
         [Display(Name = "Otro tipo de archivo")]
         Otro

@@ -4,6 +4,7 @@ using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.PlantillaTramite;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.Tarea;
+using CemSys3.DTOs.TramitesConcesion;
 using CemSys3.DTOs.TramitesConcesion.Cremacion;
 
 namespace CemSys3.ViewModels.TramiteConcesion
@@ -21,6 +22,7 @@ namespace CemSys3.ViewModels.TramiteConcesion
 
         public IEnumerable<ArchivoDTO> Archivos { get; set; } = new List<ArchivoDTO>();
         public IEnumerable<HistorialEstadosDTO> Historial { get; set; } = new List<HistorialEstadosDTO>();
+        public IEnumerable<FirmantesDTO> Firmantes { get; set; } = new List<FirmantesDTO>();
         public List<TareaDTO> Tareas { get; set; } = new List<TareaDTO>();
 
 

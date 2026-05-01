@@ -22,19 +22,22 @@ namespace CemSys3.Controllers
         private readonly IHistorialEstados _historialService;
         private readonly ITarea _tareaService;
         private readonly IStrategyFactory _strategyFactory;
+        private readonly IFirmantes _firmantesService;
 
         public CremacionController(
         IArchivo archivoService,
         IHistorialEstados historialService,
         IStrategyFactory strategyFactory,
         IDocumentoTramiteService documentoService,
-         ITarea tareaService)
+        ITarea tareaService,
+        IFirmantes firmante)
         {
             _archivoService = archivoService;
             _historialService = historialService;
             _strategyFactory = strategyFactory;
             _documentoService = documentoService;
             _tareaService = tareaService;
+            _firmantesService = firmante;
         }
 
         [HttpPost]
@@ -110,6 +113,7 @@ namespace CemSys3.Controllers
                 vm.Historial = await _historialService.GetAllById(vm.TramiteId);
                 vm.Documentos = await _documentoService.ObtenerPorTramiteAsync(vm.TramiteId);
                 vm.Tareas = await _tareaService.GetAllByTramite(tramiteId);
+                vm.Firmantes = await _firmantesService.GetAllByTramite(tramiteId);
 
                 return View("Cremacion", vm);
             }

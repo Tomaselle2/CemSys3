@@ -89,6 +89,7 @@ builder.Services.AddScoped<ITemplateProcessor, TemplateProcessor>();
 builder.Services.AddScoped<ICancelarTramite, CancelarService>();
 builder.Services.AddScoped<ITareaPlantilla, TareaPlantillaService>();
 builder.Services.AddScoped<IRequisitos, RequisitosService>();
+builder.Services.AddScoped<IFirmantes, FirmantesService>();
 
 // =========================
 // STRATEGIES
