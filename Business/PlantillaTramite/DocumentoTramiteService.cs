@@ -32,15 +32,14 @@ namespace CemSys3.Business.PlantillaTramite
         int usuarioId,
         int? personaId,
         string? parentesco,
-        Dictionary<string, string> variables)
+        Dictionary<string, string> variables,
+        int? firmanteId)
         {
             var plantilla = await _context.PlantillasTramites
                 .FirstOrDefaultAsync(x => x.Id == plantillaId);
 
             if (plantilla == null)
                 throw new Exception("Plantilla no encontrada");
-
-            using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
@@ -58,20 +57,18 @@ namespace CemSys3.Business.PlantillaTramite
                     Parentesco = parentesco,
                     Version = 1,
                     FechaUltimaEdicion = DateTime.Now,
-                    Visibilidad = true
+                    Visibilidad = true,
+                    FirmanteId = firmanteId
                 };
 
                 _context.DocumentosTramites.Add(documento);
                 await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
 
                 return documento.Id;
             }
             catch
             {
-                await transaction.RollbackAsync();
                 throw;
-
             }
         }
 

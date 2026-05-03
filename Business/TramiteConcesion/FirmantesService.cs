@@ -1,4 +1,5 @@
 ﻿using CemSys3.DTOs.TramitesConcesion;
+using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
@@ -8,10 +9,12 @@ namespace CemSys3.Business.TramiteConcesion
     public class FirmantesService : IFirmantes
     {
         private readonly AppDbContext _context;
+        private readonly IPersona _personaService;
 
-        public FirmantesService(AppDbContext context)
+        public FirmantesService(AppDbContext context, IPersona personaService)
         {
             _context = context;
+            _personaService = personaService;
         }
 
         public async Task<List<FirmantesDTO>> GetAllByTramite(int tramiteId)
@@ -78,6 +81,38 @@ namespace CemSys3.Business.TramiteConcesion
             {
                 await transaction.RollbackAsync();
                 throw;
+            }
+        }
+
+        public async Task ActualizarFirmantes(List<FirmantesDTO> firmantes)
+        {
+            //busca las personas y actualiza los datos de cada una (tabla persona)
+            foreach (var firmante in firmantes)
+            {
+                var persona = await _personaService.Get(firmante.PersonaId);
+
+                if (persona != null)
+                {
+                    persona.Nombre = firmante.Nombre;
+                    persona.Apellido = firmante.Apellido;
+                    persona.Dni = firmante.Dni;
+                    persona.Sexo = firmante.Sexo;
+                    persona.Domicilio = firmante.Domicilio;
+                    persona.Celular = firmante.Celular;
+                    persona.Correo = firmante.CorreoElectronico;
+                    await _personaService.Update(persona);
+                }
+            }
+
+            //actualiza el parentesco en tabla de firmantes
+            foreach (var firmante in firmantes)
+            {
+                var firmanteTramite = await _context.FirmantesTramites.FirstOrDefaultAsync(f => f.Id == firmante.Id);
+                if (firmanteTramite != null)
+                {
+                    firmanteTramite.Parentesco = firmante.Parentesco;
+                    _context.FirmantesTramites.Update(firmanteTramite);
+                }
             }
         }
     }

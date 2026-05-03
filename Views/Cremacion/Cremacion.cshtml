@@ -163,7 +163,36 @@ new HistorialOffcanvasVM
         }
     </div>
 
+    @foreach (var difunto in Model.Dto.Difuntos)
+    {
+        <div class="cardConcesion mb-3 my-3">
+            <div class="cardConcesion-content">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">
+                        <i class="bi bi-person-fill-x text-primary"></i> Difunto
+                    </h3>
+                    <a asp-action="HistorialPersona"
+                           asp-controller="Persona"
+                           asp-route-id="@difunto.Id"
+                           data-skip-loader="true"
+                           target="_blank"
+                           title="Historial difunto">
+                        <i class="bi bi-arrow-up-right-square-fill fs-2"></i>
+                    </a>
+                </div>
+                <p><strong>Nombre:</strong> @difunto.Apellido?.ToUpper(), @difunto.Nombre?.ToUpper()</p>
+                <p><strong>DNI:</strong> @(!string.IsNullOrEmpty(difunto.DNI) ? difunto.DNI : "")</p>
+                <p><strong>Ingreso:</strong> @(!string.IsNullOrEmpty(difunto.FechaIngreso.ToString()) ? difunto.FechaIngreso?.ToString("dd/MM/yyyy HH:mm") : "")</p>
+                <p>
+                    <strong>Estado:</strong> @(EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(difunto.EstadoDifuntoId ?? 0))
+                </p>
+            </div>
+        </div>
+    }
+
 </div>
+
+
 
 
 
@@ -186,11 +215,24 @@ new HistorialOffcanvasVM
                     <div id="contenedorTitulares"></div>
 
                     <!-- Botón para agregar firmante -->
-                    <div class="text-center mt-3">
-                        <button class="btn btn-success" id="agregarContribuyenteButton" type="button">
-                            <i class="bi bi-person-plus" id="contribuyenteIcon"></i> Agregar Firmante
-                        </button>
-                    </div>
+                    @if (Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Finalizado &&
+                         Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Cancelado)
+                    {
+                        <div class="text-center mt-3">
+                            <button class="btn btn-success" id="agregarContribuyenteButton" type="button">
+                                <i class="bi bi-person-plus" id="contribuyenteIcon"></i> Agregar Firmante
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center mt-3">
+                            <button class="btn btn-success" id="agregarContribuyenteButton" disabled type="button">
+                                <i class="bi bi-person-plus" id="contribuyenteIcon"></i> Agregar Firmante
+                            </button>
+                        </div>
+                    }
+
                 </div>
             </div>
         </div>
@@ -200,32 +242,15 @@ new HistorialOffcanvasVM
     <input type="hidden" asp-for="TramiteId" />
     <input type="hidden" asp-for="Dto.NroParcela" />
     <input type="hidden" asp-for="Dto.TipoParcela" />
+    <input type="hidden" asp-for="Dto.NroConcesion" />
     <input type="hidden" asp-for="Dto.NombreSeccion" />
     <input type="hidden" asp-for="Dto.NroFila" />
-
-    @for (int i = 0; i < Model.Dto.TitularesActuales.Count; i++)
-    {
-        <input type="hidden" asp-for="Firmantes[i].PersonaId" />
-        <input type="hidden" asp-for="Firmantes[i].Dni" />
-        <input type="hidden" asp-for="Firmantes[i].Nombre" />
-        <input type="hidden" asp-for="Firmantes[i].Apellido" />
-        <input type="hidden" asp-for="Firmantes[i].Celular" />
-        <input type="hidden" asp-for="Firmantes[i].CorreoElectronico" />
-        <input type="hidden" asp-for="Firmantes[i].Domicilio" />
-        <input type="hidden" asp-for="Firmantes[i].Sexo" />
-    }
 
     @for (int i = 0; i < Model.Dto.Difuntos.Count; i++)
     {
         <input type="hidden" asp-for="Dto.Difuntos[i].Id" />
         <input type="hidden" asp-for="Dto.Difuntos[i].Nombre" />
         <input type="hidden" asp-for="Dto.Difuntos[i].Apellido" />
-    }
-
-    @if (Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Finalizado &&
-        Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Cancelado)
-    {
-        <input type="submit" class="btn btn-outline-primary" id="btnGenerarAutorizacion" value="Generar Autorización" />
     }
 </form>
 
@@ -333,6 +358,48 @@ new HistorialOffcanvasVM
 
 
 
+<!-- Visualiza para documento/autorizacion -->
+@foreach (var documento in Model.Documentos)
+{
+    string editorId = $"editor_{documento.Id}";
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5>Autorización @documento.Parentesco?.ToUpper()</h5>
+            <form asp-action="Eliminar" asp-controller="Documento" method="get" class="documento-form mb-4 js-confirm">
+                <input type="hidden" name="documentoId" value="@documento.Id" />
+                <input type="hidden" name="tramiteId" value="@documento.TramiteId" />
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                <button type="submit" class="btn btn-outline-danger">
+                    Eliminar Autorización
+                </button>
+            </form>
+        </div>
+        <form asp-action="Editar" asp-controller="Documento" method="post" class="documento-form mb-4" data-editor-id="@editorId">
+            <div class="card-body">
+                <textarea id="@editorId" name="contenidoHtml">
+                        @Html.Raw(documento.ContenidoHtml)
+                    </textarea>
+            </div>
+
+            <div class="card-footer">
+                <input type="hidden" name="id" value="@documento.Id" />
+                <input type="hidden" name="tramiteId" value="@documento.TramiteId" />
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                <button type="submit" class="btn btn-outline-primary">
+                    Actualizar Autorización
+                </button>
+            </div>
+        </form>
+    </div>
+
+}
+
+
+
+
 
 <!-- Archivos-->
 @await Html.PartialAsync("ArchivoPV/_ArchivoPV",
@@ -376,7 +443,8 @@ new ArchivoVM
             Sexo = t.Sexo,
             Celular = t.Celular,
             CorreoElectronico = t.CorreoElectronico,
-            Domicilio = t.Domicilio
+            Domicilio = t.Domicilio,
+            Parentesco = t.Parentesco
         })
         .ToList();
 
@@ -590,7 +658,7 @@ new ArchivoVM
                this.submit();
                return;
            }
-
+                  event.preventDefault();
             const btnGenerar = document.getElementById('btnGenerarAutorizacion');
 
             btnGenerar.disabled = true;
@@ -906,6 +974,7 @@ new ArchivoVM
             </div>
             <div class="p-3">
             <input type="hidden" name="Personas[${index}].PersonaId" value="${titular.id}" />
+            <input type="hidden" name="Personas[${index}].Id" value="${titular.firmanteId}" />
             <div class="form-columns-container3 mb-3">
             <div>
             <label>DNI<span class="obligatorio"> * </span></label>
@@ -957,12 +1026,47 @@ new ArchivoVM
             <input class="form-control" type="text" name="Personas[${index}].CorreoElectronico" value="${titular.correoElectronico || titular.CorreoElectronico || titular.Correo || titular.correo || titular.correoInput || titular.CorreoInput || ''}" maxlength="100" />
             </div>
             </div>
-                   <div class="text-end mt-3">
-                   <button type="button"
-                           class="btn btn-outline-primary btn-sm"
-                           onclick="generarAutorizacion(${titular.firmanteId})">
-                       <i class="bi bi-file-earmark-text"></i> Generar Autorización
-                   </button>
+                <div class="text-end mt-3">
+                       @if(Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Finalizado &&
+                            Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Cancelado)
+                           {
+                              // <button type="button"
+                              //       class="btn btn-outline-primary btn-sm"
+                              //       onclick="generarAutorizacion(${titular.firmanteId})">
+                              //         <i class="bi bi-file-earmark-text"></i> Generar Autorización
+                              // </button>
+
+                                         <div class="dropdown d-inline-block">
+                       <button class="btn btn-outline-primary btn-sm dropdown-toggle"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                               <i class="bi bi-file-earmark-text"></i> Generar
+                       </button>
+
+                       <ul class="dropdown-menu">
+                                <li>
+                                       <button type="button"
+                                            class="dropdown-item"
+                                            onclick="generarAutorizacion(${titular.firmanteId}, @((int)TipoAutorizacionEnum.CremacionAutorizacion))">
+                                               Autorización
+                                       </button>
+                                </li>
+
+                                <li>
+                                       <button type="button"
+                                            class="dropdown-item"
+                                            onclick="generarAutorizacion(${titular.firmanteId}, @((int)TipoAutorizacionEnum.CremacionLibreTransito))">
+                                               Libre tránsito
+                                       </button>
+                                </li>
+                                   </ul>
+                        </div>
+
+                           }
+
+
+                   
                </div>
             </div>
             `;
@@ -989,24 +1093,38 @@ new ArchivoVM
 
 
 
-        function generarAutorizacion(firmanteId) {
+                function generarAutorizacion(firmanteId, tipoAutorizacionId) {
+
             if (!firmanteId) {
-                AlertService.show("Error", "El firmante no está guardado correctamente", "error");
+                AlertService.show("Error", "Firmante inválido", "error");
                 return;
             }
-    
-            // Agregar el firmanteId al form y submitear
-            let hidden = document.getElementById('hiddenFirmanteId');
-            if (!hidden) {
-                hidden = document.createElement('input');
-                hidden.type = 'hidden';
-                hidden.id = 'hiddenFirmanteId';
-                hidden.name = 'firmanteId';
-                formPrincipal.appendChild(hidden);
+
+            let hiddenFirmante = document.getElementById('hiddenFirmanteId');
+
+            if (!hiddenFirmante) {
+                hiddenFirmante = document.createElement('input');
+                hiddenFirmante.type = 'hidden';
+                hiddenFirmante.name = 'firmanteId';
+                hiddenFirmante.id = 'hiddenFirmanteId';
+                formPrincipal.appendChild(hiddenFirmante);
             }
-            hidden.value = firmanteId;
-    
-            // Saltar la validación de "al menos un titular" y submitear
+
+            hiddenFirmante.value = firmanteId;
+
+
+            let hiddenTipo = document.getElementById('hiddenTipoAutorizacionId');
+
+            if (!hiddenTipo) {
+                hiddenTipo = document.createElement('input');
+                hiddenTipo.type = 'hidden';
+                hiddenTipo.name = 'tipoAutorizacionId';
+                hiddenTipo.id = 'hiddenTipoAutorizacionId';
+                formPrincipal.appendChild(hiddenTipo);
+            }
+
+            hiddenTipo.value = tipoAutorizacionId;
+
             formPrincipal.submit();
         }
 

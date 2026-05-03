@@ -134,7 +134,7 @@ namespace CemSys3.Controllers
 
         [HttpPost]
         [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> GenerarAutorizaciones(CremacionVM viewModel, int firmanteId)
+        public async Task<IActionResult> GenerarAutorizaciones(CremacionVM viewModel, int firmanteId, int tipoAutorizacionId)
         {
             int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
             ITramiteStrategy strategy = _strategyFactory.GetStrategy((int)TipoTramiteEnum.Cremacion);
@@ -164,18 +164,36 @@ namespace CemSys3.Controllers
                 NombreSeccion = viewModel.Dto.NombreSeccion,
                 TipoParcela = viewModel.Dto.TipoParcela,
                 Difuntos = viewModel.Dto.Difuntos,
+                Firmantes = viewModel.Personas,
+                TipoAutorizacionId = tipoAutorizacionId,
+                FirmanteId = firmanteId,
+                NroConcesion = viewModel.Dto.NroConcesion ?? 0
             };
 
-            await strategy.GenerarDocumentosAsync(dto);
-
-            TempData.SetSweetAlert(new SweetAlertDTO
+            try
             {
-                Titulo = "Éxito",
-                Mensaje = $"Autorización generada para {firmante.Apellido}, {firmante.Nombre}",
-                Tipo = "success"
-            });
+                await strategy.GenerarDocumentosAsync(dto);
 
-            return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId });
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = $"Autorización generada para {firmante.Apellido}, {firmante.Nombre}",
+                    Tipo = "success"
+                });
+
+                return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId });
+
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "Ocurrió un error al generar la autorización. " + ex.Message,
+                    Tipo = "error"
+                });
+                return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId });
+            }
         }
 
         

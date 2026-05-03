@@ -10,7 +10,8 @@ namespace CemSys3.Interfaces.PlantillaTramite
         int usuarioId,
         int? personaId,
         string? parentesco,
-        Dictionary<string, string> variables);
+        Dictionary<string, string> variables,
+        int? firmanteId);
 
         Task ActualizarAsync(DocumentoDTO dto);
         Task<List<DocumentoDTO>> ObtenerPorTramiteAsync(int tramiteId);

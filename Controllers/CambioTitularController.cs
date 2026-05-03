@@ -72,16 +72,31 @@ namespace CemSys3.Controllers
                 Difuntos = viewModel.Dto.Difuntos,
             };
 
-            await strategy.GenerarDocumentosAsync(dto);
-
-            TempData.SetSweetAlert(new SweetAlertDTO
+            try
             {
-                Titulo = "Éxito",
-                Mensaje = "Autorizaciones generadas correctamente",
-                Tipo = "success"
-            });
+                await strategy.GenerarDocumentosAsync(dto);
 
-            return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId });
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "Autorizaciones generadas correctamente",
+                    Tipo = "success"
+                });
+
+                return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId });
+
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "Ocurrió un error al generar los documentos. " + ex.Message,
+                    Tipo = "error"
+                });
+                return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId });
+
+            }
         }
 
 

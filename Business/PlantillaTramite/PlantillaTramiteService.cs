@@ -2,6 +2,7 @@
 using CemSys3.Interfaces.PlantillaTramite;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace CemSys3.Business.PlantillaTramite
 {
@@ -67,6 +68,21 @@ namespace CemSys3.Business.PlantillaTramite
         {
             return await _context.PlantillasTramites
              .Where(x => x.Id == id)
+             .Select(x => new PlantillaTramiteDTO
+             {
+                 PlantillaId = x.Id,
+                 Nombre = x.Nombre,
+                 Contenido = x.Contenido,
+                 TipoTramiteId = x.TipoTramiteId,
+                 TipoAutorizacionId = x.TipoAutorizacionId ?? 0
+             })
+             .FirstOrDefaultAsync();
+        }
+
+        public async Task<PlantillaTramiteDTO?> ObtenerPorTipoAutorizacionIdAsync(int tipoAutorizacionId)
+        {
+            return await _context.PlantillasTramites
+             .Where(x => x.TipoAutorizacionId == tipoAutorizacionId)
              .Select(x => new PlantillaTramiteDTO
              {
                  PlantillaId = x.Id,

@@ -9,6 +9,8 @@ namespace CemSys3.Interfaces.PlantillaTramite
         Task EliminarAsync(int id);
 
         Task<PlantillaTramiteDTO?> ObtenerPorIdAsync(int id);
+
+        Task<PlantillaTramiteDTO?> ObtenerPorTipoAutorizacionIdAsync(int tipoAutorizacionId);
         Task<List<PlantillaTramiteDTO>> ObtenerPorTipoTramiteAsync(int tipoTramiteId);
 
     }

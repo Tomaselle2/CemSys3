@@ -7,5 +7,6 @@ namespace CemSys3.Interfaces.TramitesConcesion
         Task Add(int tramiteId, int personaId, string parentesco, bool titular = false);
         Task Delete(int firmanteId);
         Task<List<FirmantesDTO>> GetAllByTramite(int tramiteId);
+        Task ActualizarFirmantes(List<FirmantesDTO> firmantes);
     }
 }

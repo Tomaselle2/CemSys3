@@ -1,10 +1,12 @@
-﻿using CemSys3.DTOs.HistorialEstado;
+﻿using AspNetCoreGeneratedDocument;
+using CemSys3.DTOs.HistorialEstado;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.PlantillaTramite;
 using CemSys3.DTOs.Tramite;
 using CemSys3.DTOs.TramitesConcesion;
 using CemSys3.DTOs.TramitesConcesion.Cremacion;
 using CemSys3.Enumerables;
+using CemSys3.Helpers;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Notas;
 using CemSys3.Interfaces.Persona;
@@ -125,7 +127,7 @@ namespace CemSys3.Business.TramiteConcesion
                 //6 - crea el firmante titular
                 foreach (var titular in titulares)
                 {
-                    await _firmantes.Add(tramiteId, titular.Id.Value, "Titular", true);
+                    await _firmantes.Add(tramiteId, titular.Id.Value, "TITULAR", true);
                 }
 
                 await _context.SaveChangesAsync();
@@ -147,9 +149,60 @@ namespace CemSys3.Business.TramiteConcesion
             throw new NotImplementedException();
         }
 
-        public Task GenerarDocumentosAsync(GeneraStrategyDTO dto)
+        public async Task GenerarDocumentosAsync(GeneraStrategyDTO dto)
         {
-            throw new NotImplementedException();
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                //actualizar los datos de los firmantes.
+                await _firmantes.ActualizarFirmantes(dto.Firmantes);
+
+
+                //busca el firmante que coincida con el firmanteId del dto.
+                FirmantesDTO firmante = dto.Firmantes.First(f => f.Id == dto.FirmanteId);
+
+                //generar el documento de solicitud de cremacion con los datos del tramite, titulares y difunto.
+
+                var plantilla = await _plantillaService.ObtenerPorTipoAutorizacionIdAsync(dto.TipoAutorizacionId); //busco la plantilla especifica
+
+                string difuntosFormateados = DifuntoFormatter.FormatearDifuntos(dto.Difuntos);
+
+                var variables = new Dictionary<string, string>
+                    {
+                        { "Fecha", DateTime.Now.ToLongDateString() },
+                        { "NombreCompletoFirmante", firmante.Apellido.ToUpper() + " " + firmante.Nombre.ToUpper() },
+                        { "DniFirmante", StringExtensions.FormatearDni(firmante.Dni)  },
+                        { "Parentesco", firmante.Parentesco.ToUpper() },
+                        { "Parcela", ParcelaFormatter.ObtenerParcela(dto.TipoParcela, dto.NroParcela, dto.NroFila, dto.NombreSeccion.ToUpper()) },
+                        { "Difuntos", difuntosFormateados },
+                        { "NroConcesion", dto.NroConcesion.ToString("D5") },
+                        //{ "AperturaNicho/Fosa", persona.Sexo == "masculino" ? "al" : "a la"},
+                        //{ "crematorio", persona.Sexo == "masculino" ? "Sr." : "Sra."},
+                        { "DomicilioFirmante", firmante.Domicilio.ToUpper() },
+
+
+                    };
+
+                await _documentoService.CrearDesdePlantillaAsync(
+                    plantilla.PlantillaId,
+                    dto.TramiteId,
+                    dto.UsuarioId,
+                    firmante.PersonaId,
+                    firmante.Parentesco,
+                    variables,
+                    firmante.Id
+                );
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception) {
+                await transaction.RollbackAsync(); 
+                throw;
+            }
+
+            
         }
 
         

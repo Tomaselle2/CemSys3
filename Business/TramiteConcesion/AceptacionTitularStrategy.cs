@@ -223,7 +223,8 @@ namespace CemSys3.Business.TramiteConcesion
                         dto.UsuarioId,
                         nuevoTitular.Id,
                         dto.Parentesco,
-                        variables
+                        variables,
+                        null
                     );
                 }
             }
