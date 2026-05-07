@@ -1,4 +1,5 @@
 ﻿using AspNetCoreGeneratedDocument;
+using CemSys3.DTOs.Cementerio;
 using CemSys3.DTOs.HistorialEstado;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.PlantillaTramite;
@@ -163,11 +164,11 @@ namespace CemSys3.Business.TramiteConcesion
                 FirmantesDTO firmante = dto.Firmantes.First(f => f.Id == dto.FirmanteId);
 
                 //generar el documento de solicitud de cremacion con los datos del tramite, titulares y difunto.
-
                 var plantilla = await _plantillaService.ObtenerPorTipoAutorizacionIdAsync(dto.TipoAutorizacionId); //busco la plantilla especifica
 
                 string difuntosFormateados = DifuntoFormatter.FormatearDifuntos(dto.Difuntos);
-
+                string NombreCementerio = await ModificarDestino(dto.CementerioId, dto.TramiteId);
+                
                 var variables = new Dictionary<string, string>
                     {
                         { "Fecha", DateTime.Now.ToLongDateString() },
@@ -177,11 +178,10 @@ namespace CemSys3.Business.TramiteConcesion
                         { "Parcela", ParcelaFormatter.ObtenerParcela(dto.TipoParcela, dto.NroParcela, dto.NroFila, dto.NombreSeccion.ToUpper()) },
                         { "Difuntos", difuntosFormateados },
                         { "NroConcesion", dto.NroConcesion.ToString("D5") },
-                        //{ "AperturaNicho/Fosa", persona.Sexo == "masculino" ? "al" : "a la"},
-                        //{ "crematorio", persona.Sexo == "masculino" ? "Sr." : "Sra."},
+                        { "AperturaNicho/Fosa", $"APERTURA DE {dto.TipoParcela.ToUpper()}"},
+                        { "crematorio", NombreCementerio},
                         { "DomicilioFirmante", firmante.Domicilio.ToUpper() },
-
-
+                        {"crematorioDestino", NombreCementerio }
                     };
 
                 await _documentoService.CrearDesdePlantillaAsync(
@@ -229,6 +229,7 @@ namespace CemSys3.Business.TramiteConcesion
             dto.NroFila = concesion.Parcela.NroFila;
             dto.NroConcesion = concesion.Concesion;
             dto.ConcesionId = concesion.TramiteId;
+            dto.CementerioId = cremacion.CementerioId ?? 0;
 
             dto.TitularesActuales = await _context.HistorialTitularesConcesiones
                     .Where(h => h.ConcesionId == cremacion.ConcesionId && h.FechaFin == null)
@@ -244,17 +245,12 @@ namespace CemSys3.Business.TramiteConcesion
                         Domicilio = h.Persona.Domicilio
                     }).ToListAsync();
 
-            //dto.NuevosTitulares = await _context.DocumentosTramites.Where(t => t.TramiteId == cremacion.TramiteId).Select(h => new TitularesContratoDTO
-            //{
-            //    Id = h.Persona.Id,
-            //    Dni = h.Persona.Dni,
-            //    Nombre = h.Persona.Nombre,
-            //    Apellido = h.Persona.Apellido,
-            //    Sexo = h.Persona.Sexo,
-            //    Celular = h.Persona.Celular,
-            //    CorreoElectronico = h.Persona.Correo,
-            //    Domicilio = h.Persona.Domicilio
-            //}).ToListAsync();
+            dto.Cementerios = await _context.Cementerios
+                .Select(c => new CementerioRequestDTO
+                {
+                    Id = c.Id,
+                    Nombre = c.Nombre
+                }).ToListAsync();
 
             //consultar el difuntos relacionados a la parcela para el tramite
             dto.Difuntos = await _context.ParcelaDifuntos
@@ -272,6 +268,22 @@ namespace CemSys3.Business.TramiteConcesion
             return dto;
         }
 
-        
+
+        private async Task<string> ModificarDestino(int cementerioId, int tramiteId)
+        {
+            //modifica el destino del difunto en la parcela, para que quede registrado el nuevo cementerio destino.
+            Models.Cementerio cementerio = await _context.Cementerios.AsNoTracking().FirstOrDefaultAsync(c => c.Id == cementerioId) ?? throw new Exception("Cementerio no encontrado");
+
+            Models.Cremacione cremacion = await _context.Cremaciones.FirstOrDefaultAsync(c => c.TramiteId == tramiteId) ?? throw new Exception("Trámite de cremación no encontrado");
+
+            cremacion.CementerioId = cementerio.Id;
+            cremacion.Destino = cementerio.Nombre.ToUpper();
+
+            _context.Cremaciones.Update(cremacion);
+            await _context.SaveChangesAsync();
+
+            return cementerio.Nombre.ToUpper();
+        }
+
     }
 }

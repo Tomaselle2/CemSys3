@@ -5,6 +5,7 @@ using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.Tarea;
 using CemSys3.DTOs.TramitesConcesion;
 using CemSys3.DTOs.TramitesConcesion.Cremacion;
+using System.ComponentModel.DataAnnotations;
 
 namespace CemSys3.ViewModels.TramiteConcesion
 {
@@ -16,6 +17,8 @@ namespace CemSys3.ViewModels.TramiteConcesion
 
         public int TipoTramiteId { get; set; }
 
+        [Required(ErrorMessage = "El destino es obligatorio.")]
+        public int DestinoCementerioId { get; set; }
         public CremacionDTO Dto { get; set; } = new();
 
         public IEnumerable<ArchivoDTO> Archivos { get; set; } = new List<ArchivoDTO>();

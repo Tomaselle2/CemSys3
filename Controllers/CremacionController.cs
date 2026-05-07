@@ -3,6 +3,7 @@ using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.TramitesConcesion;
 using CemSys3.DTOs.TramitesConcesion.Cremacion;
 using CemSys3.Enumerables;
+using CemSys3.Helpers.Enumerable;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Archivo;
@@ -114,6 +115,7 @@ namespace CemSys3.Controllers
                 vm.Documentos = await _documentoService.ObtenerPorTramiteAsync(vm.TramiteId);
                 vm.Tareas = await _tareaService.GetAllByTramite(tramiteId);
                 vm.Firmantes = await _firmantesService.GetAllByTramite(tramiteId);
+                vm.DestinoCementerioId = vm.Dto.CementerioId;
 
                 return View("Cremacion", vm);
             }
@@ -167,8 +169,10 @@ namespace CemSys3.Controllers
                 Firmantes = viewModel.Personas,
                 TipoAutorizacionId = tipoAutorizacionId,
                 FirmanteId = firmanteId,
-                NroConcesion = viewModel.Dto.NroConcesion ?? 0
+                NroConcesion = viewModel.Dto.NroConcesion ?? 0,
+                CementerioId = viewModel.DestinoCementerioId
             };
+
 
             try
             {

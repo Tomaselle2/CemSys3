@@ -64,6 +64,12 @@
     }
 </style>
 
+<!-- BTN de ir abajo -->
+<a href="#finalPagina" title="Ir abajo"
+       class="btn btn-primary position-fixed bottom-0 end-0 m-4 rounded-circle">
+    ↓
+</a>
+
 <!-- Panel lateral derecho del historial -->
 @await Html.PartialAsync("HistorialPV/_HistorialOffcanvas",
 new HistorialOffcanvasVM
@@ -197,9 +203,17 @@ new HistorialOffcanvasVM
 
 
 
-
 <!-- Formulario genera Actorizaciones -->
 <form asp-action="GenerarAutorizaciones" asp-controller="Cremacion" id="formPrincipal" method="post" class="mb-3">
+
+    <!--Destino-->
+    <div class="my-3">
+        <label for="destinoSelect" class="form-label fs-4"><b>Destino</b><span class="obligatorio"> * </span></label>
+        <select class="form-control form-select shadow-sm" asp-items="@(new SelectList(Model.Dto.Cementerios, "Id", "Nombre"))" id="destinoSelect" asp-for="DestinoCementerioId" required>
+            <option value="">Seleccione un destino</option>
+        </select>
+    </div>
+   
 
     <!-- Sección de titulares -->
     <div class="accordion" id="accordionTitulares">
@@ -423,6 +437,7 @@ new ArchivoVM
     })
 </div>
 
+<div id="finalPagina"></div>
 
 @{
     var jsonOptions = new System.Text.Json.JsonSerializerOptions
@@ -1030,11 +1045,6 @@ new ArchivoVM
                        @if(Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Finalizado &&
                             Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Cancelado)
                            {
-                              // <button type="button"
-                              //       class="btn btn-outline-primary btn-sm"
-                              //       onclick="generarAutorizacion(${titular.firmanteId})">
-                              //         <i class="bi bi-file-earmark-text"></i> Generar Autorización
-                              // </button>
 
                                          <div class="dropdown d-inline-block">
                        <button class="btn btn-outline-primary btn-sm dropdown-toggle"
@@ -1093,7 +1103,7 @@ new ArchivoVM
 
 
 
-                function generarAutorizacion(firmanteId, tipoAutorizacionId) {
+        function generarAutorizacion(firmanteId, tipoAutorizacionId) {
 
             if (!firmanteId) {
                 AlertService.show("Error", "Firmante inválido", "error");
