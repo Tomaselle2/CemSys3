@@ -27,5 +27,6 @@ namespace CemSys3.DTOs.TramitesConcesion.Cremacion
 
 
         public string? InfoAdicional { get; set; }
+        public DateTime? FechaRealizacion { get; set; }
     }
 }

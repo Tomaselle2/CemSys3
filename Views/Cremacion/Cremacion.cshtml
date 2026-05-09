@@ -13,7 +13,7 @@
 
 @{
     string nroConcesion = Model.Dto.NroConcesion.HasValue ? Model.Dto.NroConcesion.Value.ToString("D5") : "-----";
-    string estadoTramite = EnumHelper.GetDisplayNameByValue<EstadosCambioTitularEnum>(Model.Dto.EstadoTramiteId);
+    string estadoTramite = EnumHelper.GetDisplayNameByValue<EstadosTramiteEnum>(Model.Dto.EstadoTramiteId);
     string tipoParcela = Model.Dto.TipoParcela ?? "N/A";
     string nombreSeccion = Model.Dto.NombreSeccion;
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
@@ -75,7 +75,7 @@
 new HistorialOffcanvasVM
 {
     Historial = Model.Historial,
-    EnumType = typeof(EstadosCambioTitularEnum),
+    EnumType = typeof(EstadosTramiteEnum),
     OffcanvasId = $"offcanvasHistorial_{Model.Dto.TramiteId}",
     Titulo = "Historial de cremación"
 })
@@ -198,12 +198,10 @@ new HistorialOffcanvasVM
 
 </div>
 
+<hr />
 
-
-
-
-<!-- Formulario genera aUTORIZACION EN BLANCO -->
-<form asp-action="GenerarAutorizaciones" asp-controller="Cremacion" method="post" class="mb-3 my-3">
+<!-- Formulario genera AUTORIZACION EN BLANCO -->
+<form asp-action="GenerarAutorizaciones" method="post" class="mb-3 my-3">
     <input type="hidden" asp-for="concesionId" value="@Model.Dto.ConcesionId" />
     <input type="hidden" asp-for="TramiteId" />
     <input type="hidden" asp-for="Dto.NroParcela" />
@@ -224,9 +222,29 @@ new HistorialOffcanvasVM
     <input type="hidden" asp-for="EnBlanco" value="true" />
     <input type="submit" value="Generar Autorización en Blanco" class="text-end btn btn-dark" />
 </form>
+<hr />
+
+<!-- Formulario para poner fecha al tramite-->
+@if (Model.Dto.EstadoTramiteId == (int)EstadosTramiteEnum.Pendiente || Model.Dto.EstadoTramiteId == (int)EstadosTramiteEnum.Finalizado)
+{
+    <form asp-action="PonerFechaRealizacionTramite" method="post">
+        <label for="fechaRealizacion" class="form-label fs-4"><b>Fecha de realización</b></label>
+        <input type="hidden" name="tramiteId" value="@Model.Dto.TramiteId" />
+
+        <input type="datetime-local" class="form-control shadow-sm" name="fechaRealizacion" asp-for="Dto.FechaRealizacion" id="fechaRealizacion" />
+
+        @if (Model.Dto.EstadoTramiteId == (int)EstadosTramiteEnum.Pendiente)
+        {
+            <input type="submit" value="Asignar fecha" class="btn btn-primary my-3" />
+        }
+    </form>
+}
+
+<hr />
+
 
 <!-- Formulario genera Actorizaciones -->
-<form asp-action="GenerarAutorizaciones" asp-controller="Cremacion" id="formPrincipal" method="post" class="mb-3">
+<form asp-action="GenerarAutorizaciones" id="formPrincipal" method="post" class="mb-3">
 
     <!--Destino-->
     <div class="my-3">
@@ -236,6 +254,7 @@ new HistorialOffcanvasVM
         </select>
     </div>
    
+    <hr />
 
     <!-- Sección de titulares -->
     <div class="accordion" id="accordionTitulares">
@@ -473,6 +492,18 @@ new ArchivoVM
         returnUrl = returnUrl
     })
 </div>
+
+@if(Model.Dto.EstadoTramiteId == (int)EstadosTramiteEnum.Iniciado)
+{
+    <form asp-action="CambiarEstadoTramite" method="post" class="mb-3 js-confirm" 
+          data-confirm-title="Confirmar paso de estado"
+          data-confirm-message="Debe tener la fecha de realización del tramite para continuar"
+          data-confirm-icon="warning">
+        <input type="hidden" name="tramiteId" value="@Model.Dto.TramiteId" />
+        <input type="hidden" name="nuevoEstado" value="@((int)EstadosTramiteEnum.Pendiente)" />
+        <input type="submit" class="btn btn-outline-warning" value="Pendiente de realización" />
+    </form>
+}
 
 <div id="finalPagina"></div>
 

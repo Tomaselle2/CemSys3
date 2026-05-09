@@ -299,6 +299,9 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Cancelado")]
         Cancelado = 11,
+
+        [Display(Name = "Pendiente")]
+        Pendiente = 12,
     }
 
     //concepto de la tarifaria 

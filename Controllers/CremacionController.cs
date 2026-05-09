@@ -11,6 +11,7 @@ using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.PlantillaTramite;
 using CemSys3.Interfaces.Tarea;
 using CemSys3.Interfaces.TramitesConcesion;
+using CemSys3.Models;
 using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,6 +25,7 @@ namespace CemSys3.Controllers
         private readonly ITarea _tareaService;
         private readonly IStrategyFactory _strategyFactory;
         private readonly IFirmantes _firmantesService;
+        private readonly IComplementoTramite<CremacionDTO> _complementoTramite;
 
         public CremacionController(
         IArchivo archivoService,
@@ -31,7 +33,8 @@ namespace CemSys3.Controllers
         IStrategyFactory strategyFactory,
         IDocumentoTramiteService documentoService,
         ITarea tareaService,
-        IFirmantes firmante)
+        IFirmantes firmante,
+        IComplementoTramite<CremacionDTO> complementoTramite)
         {
             _archivoService = archivoService;
             _historialService = historialService;
@@ -39,6 +42,7 @@ namespace CemSys3.Controllers
             _documentoService = documentoService;
             _tareaService = tareaService;
             _firmantesService = firmante;
+            _complementoTramite = complementoTramite;
         }
 
         [HttpPost]
@@ -200,6 +204,75 @@ namespace CemSys3.Controllers
             }
         }
 
-        
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> CambiarEstadoTramite(int tramiteId, int nuevoEstado)
+        {
+            int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
+            ITramiteStrategy strategy = _strategyFactory.GetStrategy((int)TipoTramiteEnum.Cremacion);
+            try
+            {
+                await strategy.AvanzarEstadoAsync(tramiteId, nuevoEstado, usuarioId);
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "Estado del trámite actualizado correctamente",
+                    Tipo = "success"
+                });
+                return RedirectToAction("Detalle", new { tramiteId });
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "Ocurrió un error al cambiar el estado. " + ex.Message,
+                    Tipo = "error"
+                });
+                return RedirectToAction("Detalle", new { tramiteId });
+            }
+        }
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> PonerFechaRealizacionTramite(int tramiteId, DateTime fechaRealizacion)
+        {
+            var strategy = _strategyFactory.GetCreateStrategy((int)TipoTramiteEnum.Cremacion);
+            CremacionDTO dto = new CremacionDTO();
+
+            try
+            {
+                if (strategy is ITramiteCreateStrategy<CremacionDTO> typedStrategy)
+                {
+                    dto = await typedStrategy.ObtenerAsync(tramiteId);
+                }
+                else
+                {
+                    throw new Exception("Strategy incorrecta para obtener datos");
+                }
+
+                dto.FechaRealizacion = fechaRealizacion;
+
+                await _complementoTramite.UpdateValores(dto);
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "Fecha actualizada correctamente",
+                    Tipo = "success"
+                });
+                return RedirectToAction("Detalle", new { tramiteId });
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "Ocurrió un error al actualizar la fecha. " + ex.Message,
+                    Tipo = "error"
+                });
+                return RedirectToAction("Detalle", new { tramiteId });
+            }
+        }
     }
 }

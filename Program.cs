@@ -18,6 +18,7 @@ using CemSys3.Business.Tarifaria;
 using CemSys3.Business.Tramite;
 using CemSys3.Business.TramiteConcesion;
 using CemSys3.Business.Usuario;
+using CemSys3.DTOs.TramitesConcesion.Cremacion;
 using CemSys3.Helpers.PDF;
 using CemSys3.Interfaces.Archivo;
 using CemSys3.Interfaces.Cementerio;
@@ -94,10 +95,12 @@ builder.Services.AddScoped<IFirmantes, FirmantesService>();
 // =========================
 // STRATEGIES
 // =========================
-//cambio de titular
+
 builder.Services.AddScoped<CambioTitularStrategy>();
 builder.Services.AddScoped<AceptacionTitularStrategy>();
 builder.Services.AddScoped<CremacionStrategy>();
+
+builder.Services.AddScoped<IComplementoTramite<CremacionDTO>, CremacionStrategy>();
 
 
 // =========================

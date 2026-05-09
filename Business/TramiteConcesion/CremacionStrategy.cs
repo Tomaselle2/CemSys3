@@ -21,7 +21,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CemSys3.Business.TramiteConcesion
 {
     public class CremacionStrategy : ITramiteStrategy,
-    ITramiteCreateStrategy<CremacionDTO>
+    ITramiteCreateStrategy<CremacionDTO>, IComplementoTramite<CremacionDTO>
     {
 
         private readonly IPlantillaTramite _plantillaService;
@@ -58,9 +58,34 @@ namespace CemSys3.Business.TramiteConcesion
 
        
 
-        public Task<int> AvanzarEstadoAsync(int tramiteId, int nuevoEstado, int usuarioId)
+        public async Task<int> AvanzarEstadoAsync(int tramiteId, int nuevoEstado, int usuarioId)
         {
-            throw new NotImplementedException();
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                Models.Tramite tramite = await _context.Tramites.FirstOrDefaultAsync(t => t.Id == tramiteId) ?? throw new Exception("Trámite no encontrado");
+
+                tramite.EstadoActualId = nuevoEstado;
+                tramite.UsuarioId = usuarioId;
+
+                HistorialEstadosDTO historial = new HistorialEstadosDTO
+                {
+                    Fecha = tramite.FechaCreacion,
+                    TramiteId = tramiteId,
+                    EstadoTramiteId = nuevoEstado
+                };
+                await _historialEstadosService.Add(historial);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return tramite.Id;
+            }
+            catch (Exception) {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task<int> CrearAsync(CrearTramiteDTO dto)
@@ -253,6 +278,7 @@ namespace CemSys3.Business.TramiteConcesion
             dto.NroConcesion = concesion.Concesion;
             dto.ConcesionId = concesion.TramiteId;
             dto.CementerioId = cremacion.CementerioId ?? 0;
+            dto.FechaRealizacion = cremacion.FechaPendiente;
 
             dto.TitularesActuales = await _context.HistorialTitularesConcesiones
                     .Where(h => h.ConcesionId == cremacion.ConcesionId && h.FechaFin == null)
@@ -291,6 +317,27 @@ namespace CemSys3.Business.TramiteConcesion
             return dto;
         }
 
+        public async Task UpdateValores(CremacionDTO dto)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                //Modificar la fecha de realizacion del tramite(estado pendiente)
+                if (dto.FechaRealizacion.HasValue)
+                {
+                    Models.Cremacione cremacion = await _context.Cremaciones.FirstOrDefaultAsync(c => c.TramiteId == dto.TramiteId) ?? throw new Exception("Trámite de cremación no encontrado");
+                    cremacion.FechaPendiente = dto.FechaRealizacion.Value;
+                    _context.Cremaciones.Update(cremacion);
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
 
         private async Task<string> ModificarDestino(int cementerioId, int tramiteId)
         {
