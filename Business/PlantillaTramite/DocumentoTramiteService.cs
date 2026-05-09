@@ -93,7 +93,8 @@ namespace CemSys3.Business.PlantillaTramite
                 Nombre = doc.Nombre,
                 ContenidoHtml = doc.ContenidoHtml,
                 PersonaId = doc.PersonaId,
-                Parentesco = doc.Parentesco
+                Parentesco = doc.Parentesco,
+                FechaModificacion = doc.FechaUltimaEdicion
             };
         }
 
@@ -109,7 +110,8 @@ namespace CemSys3.Business.PlantillaTramite
                     Nombre = x.Nombre,
                     ContenidoHtml = x.ContenidoHtml,
                     PersonaId = x.PersonaId,
-                    Parentesco = x.Parentesco
+                    Parentesco = x.Parentesco,
+                    FechaModificacion = x.FechaUltimaEdicion
                 })
                 .ToListAsync();
         }

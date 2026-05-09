@@ -58,6 +58,9 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Cremación - Libre Transito")]
         CremacionLibreTransito = 4,
+
+        [Display(Name = "Nuevo Destino - Registro Civil")]
+        NuevoDestinoRegistroCivil = 5,
     }
 
     public enum TipoNichoEnum

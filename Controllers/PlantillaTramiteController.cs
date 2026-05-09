@@ -145,8 +145,38 @@ namespace CemSys3.Controllers
 
 
                 viewModel.vista = "CremacionLibreTransito";
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Error al cargar la plantilla: {ex.Message}",
+                    Tipo = "error"
+                };
+            }
 
-                viewModel.Requisitos = await _requisitosService.GetByTipoTramiteId(viewModel.Dto.TipoTramiteId);
+            return View(viewModel.vista, viewModel);
+        }
+
+
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> NuevoDestinoRegistroCivil(int plantillaId)
+        {
+            PlantillaTramiteVM viewModel = new PlantillaTramiteVM();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+
+            try
+            {
+                viewModel.Dto = await _service.ObtenerPorIdAsync(plantillaId)
+                    ?? new PlantillaTramiteDTO();
+
+                viewModel.Tareas = await _tareaPlantillaService.GetAllByTipoTramite(viewModel.Dto.TipoTramiteId);
+
+
+                viewModel.vista = "NuevoDestinoRegistroCivil";
             }
             catch (Exception ex)
             {

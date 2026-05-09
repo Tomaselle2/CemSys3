@@ -379,15 +379,30 @@ new HistorialOffcanvasVM
 
     <div class="card mb-3">
         <div class="card-header">
-            <h5>Autorización @documento.Parentesco?.ToUpper()</h5>
-            <form asp-action="Eliminar" asp-controller="Documento" method="get" class="documento-form mb-4 js-confirm">
-                <input type="hidden" name="documentoId" value="@documento.Id" />
-                <input type="hidden" name="tramiteId" value="@documento.TramiteId" />
-                <input type="hidden" name="returnUrl" value="@returnUrl" />
+            
+            <form asp-action="Eliminar"
+                  asp-controller="Documento"
+                  method="get"
+                  class="documento-form mb-4 js-confirm d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                <h5>Autorización @documento.Parentesco?.ToUpper()</h5>
+                <div>
+                    <input type="hidden" name="documentoId" value="@documento.Id" />
+                    <input type="hidden" name="tramiteId" value="@documento.TramiteId" />
+                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+                </div>
 
-                <button type="submit" class="btn btn-outline-danger">
-                    Eliminar Autorización
-                </button>
+                <div>
+                    <p class="mb-0">
+                        Última modificación: @documento.FechaModificacion?.ToString("dd/MM/yyyy HH:mm")
+                    </p>
+                </div>
+
+                <div>
+                    <button type="submit" class="btn btn-outline-danger">
+                        Eliminar Autorización
+                    </button>
+                </div>
+
             </form>
         </div>
         <form asp-action="Editar" asp-controller="Documento" method="post" class="documento-form mb-4" data-editor-id="@editorId">
@@ -1068,6 +1083,14 @@ new ArchivoVM
                                             class="dropdown-item"
                                             onclick="generarAutorizacion(${titular.firmanteId}, @((int)TipoAutorizacionEnum.CremacionLibreTransito))">
                                                Libre tránsito
+                                       </button>
+                                </li>
+
+                                 <li>
+                                       <button type="button"
+                                            class="dropdown-item"
+                                            onclick="generarAutorizacion(${titular.firmanteId}, @((int)TipoAutorizacionEnum.NuevoDestinoRegistroCivil))">
+                                               Nuevo Destino - Reg. Civil
                                        </button>
                                 </li>
                                    </ul>

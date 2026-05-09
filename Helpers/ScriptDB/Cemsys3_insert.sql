@@ -67,14 +67,6 @@ INSERT INTO TipoTramite (tipo) VALUES
 ('Nota'), --7
 ('Aceptación de titularidad'); --8
 
-INSERT INTO RequisitosTramite (tipoTramiteId, descripcion)
-VALUES 
-(8, '- Se necesita que esté presente el titular el nuevo titular.  - El trámite es sin costo.   - De lunes a viernes de 7:00hs a 12:30hs.'), --aceptacion de titularidad
-(2, 'Adjuntar acta de defunción si el titular está fallecido'),
-(3, 'Presentar libreta de familia'),
-(4, 'Adjuntar acta de defunción si el titular está fallecido'),
-(5, 'Adjuntar acta de defunción si el titular está fallecido'),
-(6, '- Se necesita que esté presente el titular ({TitularesActuales}) y el nuevo titular.  - El trámite es sin costo.   - De lunes a viernes de 7:00hs a 12:30hs.'); --cambio de titular
 
 
 -- INSERT para TipoParcela
@@ -612,10 +604,11 @@ null, --cierre fosa
 
 
 Insert into TipoAutorizacion (tipoTramiteId, nombre) values 
-(6, 'Cambio titular - ambos presentes'),
-(8, 'Aceptación de titularidad'),
-(2, 'Cremación - Autorización'),
-(2, 'Cremación - Libre Tránsito');
+(6, 'Cambio titular - ambos presentes'), --1
+(8, 'Aceptación de titularidad'),  --2
+(2, 'Cremación - Autorización'), --3
+(2, 'Cremación - Libre Tránsito'), --4
+(2, 'Nuevo Destino - Registro Civil'); --5
 
 insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
 (6, 'Cambio Titular - Ambos Presentes',
@@ -637,6 +630,11 @@ insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacio
 '<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <p style="text-align: center;">LIBRE TRÁNSITO - PERMISO DE TRASLADO</p>  <p style="text-align: justify;">Se autoriza al portador de la presente a trasladar los restos mortales del extinto, <strong>{Difuntos}</strong> fallecido el {fechaFallecimiento}, ubicado en <strong>{Parcela}</strong> desde el cementerio Municipal de Colonia Tirolesa hacia el {crematorioDestino} de esta misma localidad.</p>  <br><br><br>  <p class="firma-linea"> </p>  <br><br>  <p class="firma-linea"> </p>  <br><br>  <p class="firma-linea"> </p>  <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png" width="700" height="100"></figure>  </div>',
 4, 1);
 
+insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
+(2, 'Nuevo Destino - Registro Civil',
+'<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <p style="text-align: center;">LIBRE TRÁNSITO - PERMISO DE TRASLADO</p>  <p style="text-align: justify;">Se autoriza al portador de la presente a trasladar los restos mortales del extinto, <strong>{Difuntos}</strong> fallecido el {fechaFallecimiento}, ubicado en <strong>{Parcela}</strong> desde el cementerio Municipal de Colonia Tirolesa hacia el {crematorioDestino} de esta misma localidad.</p>  <br><br><br>  <p class="firma-linea"> </p>  <br><br>  <p class="firma-linea"> </p>  <br><br>  <p class="firma-linea"> </p>  <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png" width="700" height="100"></figure>  </div>',
+5, 1);
+
 
 
 insert into TareaPlantilla (Descripcion, TipoTramiteId, Visibilidad, estado) values
@@ -644,6 +642,16 @@ insert into TareaPlantilla (Descripcion, TipoTramiteId, Visibilidad, estado) val
 ('Subir autorización firmada', 6,1,0),
 ('Firmar autorización', 8,1,0),
 ('Subir autorización firmada', 8,1,0);
+
+
+INSERT INTO RequisitosTramite (tipoTramiteId, descripcion)
+VALUES 
+(8, '- Se necesita que esté presente el titular el nuevo titular.  - El trámite es sin costo.   - De lunes a viernes de 7:00hs a 12:30hs.'), --aceptacion de titularidad
+(2, 'Adjuntar acta de defunción si el titular está fallecido'),
+(3, 'Presentar libreta de familia'),
+(4, 'Adjuntar acta de defunción si el titular está fallecido'),
+(5, 'Adjuntar acta de defunción si el titular está fallecido'),
+(6, '- Se necesita que esté presente el titular ({TitularesActuales}) y el nuevo titular.  - El trámite es sin costo.   - De lunes a viernes de 7:00hs a 12:30hs.'); --cambio de titular
 
 --Job para pasar de concesion vigente a vencida 
 --BEGIN TRANSACTION;

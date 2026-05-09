@@ -34,6 +34,30 @@
 
 <hr />
 
+<div class="p-3">
+    <h4>Encabezado Registro Civil</h4>
+    <img src="~/fotos/EncabezadoRegistro.jpg?v=@DateTime.Now.Ticks" width="400" />
+</div>
+<p class="my-1">Actualizar Encabezado<span class="obligatorio"> * Debe ser imagen .jpg. (H= 140px, W= 600px)</span> </p>
+<form asp-action="SubirEncabezadoRegistro" method="post" enctype="multipart/form-data">
+    <input type="file" name="archivo" class="form-control shadow-sm mb-3" />
+    <button type="submit" class="btn btn-primary">Actualizar</button>
+</form>
+
+<hr />
+
+<div class="p-3">
+    <h4>Pie de Registro</h4>
+    <img src="~/fotos/pieRegistro.jpg?v=@DateTime.Now.Ticks" width="700" />
+</div>
+<p class="my-1">Actualizar Pie<span class="obligatorio"> * Debe ser imagen .jpg (H= 150px, W= 1024px)</span></p>
+<form asp-action="SubirPieRegistro" method="post" enctype="multipart/form-data">
+    <input type="file" name="archivo" class="form-control shadow-sm mb-3" />
+    <button type="submit" class="btn btn-primary">Actualizar</button>
+</form>
+
+<hr />
+
 <h4>Intendente actual</h4>
 <form asp-action="GuardarIntendente" method="post">
     <input type="text" class="form-control shadow-sm" asp-for="nombreIntendente" style="width:300px;" />
