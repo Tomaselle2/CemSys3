@@ -202,6 +202,28 @@ new HistorialOffcanvasVM
 
 
 
+<!-- Formulario genera aUTORIZACION EN BLANCO -->
+<form asp-action="GenerarAutorizaciones" asp-controller="Cremacion" method="post" class="mb-3 my-3">
+    <input type="hidden" asp-for="concesionId" value="@Model.Dto.ConcesionId" />
+    <input type="hidden" asp-for="TramiteId" />
+    <input type="hidden" asp-for="Dto.NroParcela" />
+    <input type="hidden" asp-for="Dto.TipoParcela" />
+    <input type="hidden" asp-for="Dto.NroConcesion" />
+    <input type="hidden" asp-for="Dto.NombreSeccion" />
+    <input type="hidden" asp-for="Dto.NroFila" />
+    <input type="hidden" asp-for="DestinoCementerioId" />
+    <input type="hidden" name="tipoAutorizacionId" value="@((int)TipoAutorizacionEnum.CremacionAutorizacion)" />
+
+    @for (int i = 0; i < Model.Dto.Difuntos.Count; i++)
+    {
+        <input type="hidden" asp-for="Dto.Difuntos[i].Id" />
+        <input type="hidden" asp-for="Dto.Difuntos[i].Nombre" />
+        <input type="hidden" asp-for="Dto.Difuntos[i].Apellido" />
+    }
+
+    <input type="hidden" asp-for="EnBlanco" value="true" />
+    <input type="submit" value="Generar Autorización en Blanco" class="text-end btn btn-dark" />
+</form>
 
 <!-- Formulario genera Actorizaciones -->
 <form asp-action="GenerarAutorizaciones" asp-controller="Cremacion" id="formPrincipal" method="post" class="mb-3">

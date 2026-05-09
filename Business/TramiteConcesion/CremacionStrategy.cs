@@ -157,41 +157,64 @@ namespace CemSys3.Business.TramiteConcesion
             try
             {
                 //actualizar los datos de los firmantes.
-                await _firmantes.ActualizarFirmantes(dto.Firmantes);
+                if(dto.Firmantes != null)
+                {
+                    await _firmantes.ActualizarFirmantes(dto.Firmantes);
+                }
 
 
                 //busca el firmante que coincida con el firmanteId del dto.
-                FirmantesDTO firmante = dto.Firmantes.First(f => f.Id == dto.FirmanteId);
+                FirmantesDTO firmante = dto.Firmantes.FirstOrDefault(f => f.Id == dto.FirmanteId) ?? new FirmantesDTO();
 
                 //generar el documento de solicitud de cremacion con los datos del tramite, titulares y difunto.
                 var plantilla = await _plantillaService.ObtenerPorTipoAutorizacionIdAsync(dto.TipoAutorizacionId); //busco la plantilla especifica
 
                 string difuntosFormateados = DifuntoFormatter.FormatearDifuntos(dto.Difuntos);
                 string NombreCementerio = await ModificarDestino(dto.CementerioId, dto.TramiteId);
-                
+
+                var nombreCompletoFirmante =
+                string.IsNullOrWhiteSpace($"{firmante?.Apellido} {firmante?.Nombre}".Trim())
+                    ? "___________________________________________"
+                    : $"{firmante?.Apellido?.ToUpper()} {firmante?.Nombre?.ToUpper()}";
+
+                            var dniFirmante =
+                                string.IsNullOrWhiteSpace(firmante?.Dni)
+                                    ? "___________________"
+                                    : StringExtensions.FormatearDni(firmante.Dni);
+
+                            var domicilioFirmante =
+                                string.IsNullOrWhiteSpace(firmante?.Domicilio)
+                                    ? "_________________________________________________________________________________________________"
+                                    : firmante.Domicilio.ToUpper();
+
+                            var parentesco =
+                               string.IsNullOrWhiteSpace(firmante?.Parentesco)
+                                   ? "___________________"
+                                   : firmante?.Parentesco?.ToUpper();
+
                 var variables = new Dictionary<string, string>
-                    {
-                        { "Fecha", DateTime.Now.ToLongDateString() },
-                        { "NombreCompletoFirmante", firmante.Apellido.ToUpper() + " " + firmante.Nombre.ToUpper() },
-                        { "DniFirmante", StringExtensions.FormatearDni(firmante.Dni)  },
-                        { "Parentesco", firmante.Parentesco.ToUpper() },
-                        { "Parcela", ParcelaFormatter.ObtenerParcela(dto.TipoParcela, dto.NroParcela, dto.NroFila, dto.NombreSeccion.ToUpper()) },
-                        { "Difuntos", difuntosFormateados },
-                        { "NroConcesion", dto.NroConcesion.ToString("D5") },
-                        { "AperturaNicho/Fosa", $"APERTURA DE {dto.TipoParcela.ToUpper()}"},
-                        { "crematorio", NombreCementerio},
-                        { "DomicilioFirmante", firmante.Domicilio.ToUpper() },
-                        {"crematorioDestino", NombreCementerio }
-                    };
+                            {
+                                { "Fecha", DateTime.Now.ToLongDateString() },
+                                { "NombreCompletoFirmante", nombreCompletoFirmante },
+                                { "DniFirmante", dniFirmante },
+                                { "Parentesco", parentesco ?? "___________________"},
+                                { "Parcela", ParcelaFormatter.ObtenerParcela(dto.TipoParcela, dto.NroParcela, dto.NroFila, dto.NombreSeccion.ToUpper()) },
+                                { "Difuntos", difuntosFormateados },
+                                { "NroConcesion", dto.NroConcesion.ToString("D5") },
+                                { "AperturaNicho/Fosa", $"APERTURA DE {dto.TipoParcela.ToUpper()}" },
+                                { "crematorio", NombreCementerio },
+                                { "DomicilioFirmante", domicilioFirmante },
+                                { "crematorioDestino", NombreCementerio }
+                            };
 
                 await _documentoService.CrearDesdePlantillaAsync(
                     plantilla.PlantillaId,
                     dto.TramiteId,
                     dto.UsuarioId,
-                    firmante.PersonaId,
-                    firmante.Parentesco,
+                    firmante?.PersonaId ?? null,
+                    firmante?.Parentesco,
                     variables,
-                    firmante.Id
+                    firmante?.Id ?? null
                 );
 
                 await _context.SaveChangesAsync();

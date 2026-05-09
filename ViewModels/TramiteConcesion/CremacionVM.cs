@@ -28,7 +28,7 @@ namespace CemSys3.ViewModels.TramiteConcesion
 
         public List<TareaDTO> Tareas { get; set; } = new List<TareaDTO>();
 
-
+        public bool EnBlanco { get; set; } = false;
         public List<DocumentoDTO> Documentos { get; set; } = new();
 
         public bool Generado => Documentos.Any();

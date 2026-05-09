@@ -145,7 +145,7 @@ namespace CemSys3.Controllers
             var firmantes = await _firmantesService.GetAllByTramite(viewModel.TramiteId);
             var firmante = firmantes.FirstOrDefault(f => f.Id == firmanteId);
 
-            if (firmante == null)
+            if (firmante == null && viewModel.EnBlanco == false)
             {
                 TempData.SetSweetAlert(new SweetAlertDTO
                 {
@@ -160,7 +160,7 @@ namespace CemSys3.Controllers
             {
                 TramiteId = viewModel.TramiteId,
                 UsuarioId = usuarioId,
-                Parentesco = firmante.Parentesco ?? "Titular",
+                Parentesco = firmante?.Parentesco ?? "Titular",
                 NroParcela = viewModel.Dto.NroParcela.Value,
                 NroFila = viewModel.Dto.NroFila.Value,
                 NombreSeccion = viewModel.Dto.NombreSeccion,
@@ -170,7 +170,7 @@ namespace CemSys3.Controllers
                 TipoAutorizacionId = tipoAutorizacionId,
                 FirmanteId = firmanteId,
                 NroConcesion = viewModel.Dto.NroConcesion ?? 0,
-                CementerioId = viewModel.DestinoCementerioId
+                CementerioId = viewModel.DestinoCementerioId != 0 ? viewModel.DestinoCementerioId : 1
             };
 
 
@@ -181,7 +181,7 @@ namespace CemSys3.Controllers
                 TempData.SetSweetAlert(new SweetAlertDTO
                 {
                     Titulo = "Éxito",
-                    Mensaje = $"Autorización generada para {firmante.Apellido}, {firmante.Nombre}",
+                    Mensaje = $"Autorización generada para {firmante?.Apellido}, {firmante?.Nombre}",
                     Tipo = "success"
                 });
 

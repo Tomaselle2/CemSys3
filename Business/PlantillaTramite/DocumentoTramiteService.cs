@@ -50,15 +50,15 @@ namespace CemSys3.Business.PlantillaTramite
                     TramiteId = tramiteId,
                     PlantillaId = plantillaId,
                     TipoAutorizacionId = plantilla.TipoAutorizacionId ?? 0,
-                    Nombre = plantilla.Nombre,
+                    Nombre = plantilla.Nombre ?? "",
                     ContenidoHtml = contenidoProcesado,
                     UsuarioId = usuarioId,
-                    PersonaId = personaId,
+                    PersonaId = personaId > 0 ? personaId : null,
                     Parentesco = parentesco,
                     Version = 1,
                     FechaUltimaEdicion = DateTime.Now,
                     Visibilidad = true,
-                    FirmanteId = firmanteId
+                    FirmanteId = firmanteId > 0 ? firmanteId : null,
                 };
 
                 _context.DocumentosTramites.Add(documento);
