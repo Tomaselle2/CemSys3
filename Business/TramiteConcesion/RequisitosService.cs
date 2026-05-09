@@ -1,9 +1,13 @@
 ﻿using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Tramite;
+using CemSys3.Enumerables;
+using CemSys3.Helpers;
 using CemSys3.Interfaces.PlantillaTramite;
 using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.Models;
+using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 namespace CemSys3.Business.TramiteConcesion
 {
     public class RequisitosService : IRequisitos
@@ -38,14 +42,50 @@ namespace CemSys3.Business.TramiteConcesion
                         Domicilio = h.Persona.Domicilio
                     }).ToListAsync();
 
+            //consultar el difuntos relacionados a la parcela para el tramite
+           IEnumerable<DifuntoContratoDTO> difuntos = await _context.ParcelaDifuntos
+                .Where(p => p.ParcelaId == concesion.ParcelaId && p.FechaRetiro == null)
+                .Select(p => new DifuntoContratoDTO
+                {
+                    Id = p.Difunto.Id,
+                    DNI = p.Difunto.Dni,
+                    Nombre = p.Difunto.Nombre,
+                    Apellido = p.Difunto.Apellido,
+                    FechaIngreso = p.FechaIngreso,
+                    EstadoDifuntoId = p.Difunto.EstadoDifuntoId
+                }).ToListAsync();
+
+            Models.PreciosTarifaria porcentajeFondo = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.PorcentajeFondoAyudaCentroSalud).FirstOrDefaultAsync() ?? throw new Exception("No se encontro el % fondo ayuda");
+            Models.PreciosTarifaria precioApertura = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.AperturaNichoConPlaca).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio de apertura");
+            Models.PreciosTarifaria precioCremacion = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.Cremacion).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio de cremacion");
+
+
             List<Models.RequisitosTramite> requisitos = await _context.RequisitosTramites
                 .Where(rt => rt.Activo == true).ToListAsync();
+
+            string difuntosFormateados = DifuntoFormatter.FormatearDifuntos(difuntos);
 
             foreach (var requisito in requisitos)
             {
                 var variables = new Dictionary<string, string>
                     {
                         { "TitularesActuales", string.Join(", ", titulares.Select(t => t.Apellido.ToUpper() + " " + t.Nombre.ToUpper())) },
+                        {
+                            "precioApertura",
+                            Math.Round(
+                                precioApertura.Precio * (1 + porcentajeFondo.Precio),
+                                2
+                            ).ToString("0.00", CultureInfo.InvariantCulture)
+                        },
+
+                        {
+                            "precioCremacion",
+                            Math.Round(
+                                precioCremacion.Precio * (1 + porcentajeFondo.Precio),
+                                2
+                            ).ToString("0.00", CultureInfo.InvariantCulture)
+                        },
+                        { "Difuntos", difuntosFormateados }
                     };
 
                 requisito.Descripcion = templateProcessor.Procesar(requisito.Descripcion ?? "", variables);
@@ -76,7 +116,10 @@ namespace CemSys3.Business.TramiteConcesion
         {
             Models.RequisitosTramite requisito = await _context.RequisitosTramites.Where(t => t.TipoTramiteId == tipoTramiteId).FirstOrDefaultAsync() ?? throw new Exception("No se encontro el requisito");
 
-            requisito.Descripcion = descripcion;
+            if (!string.IsNullOrEmpty(descripcion))
+            {
+                requisito.Descripcion = descripcion;
+            }
 
             await _context.SaveChangesAsync();
         }
