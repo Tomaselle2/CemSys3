@@ -153,7 +153,8 @@ VALUES
 ('Caducado', 4), --contrato de concesion 8
 ('Iniciado', 6),
 ('Finalizado', 6), 
-('Cancelado', 6); 
+('Cancelado', 6),
+('Pendiente', 6);
 
 --insert into EstadosTramites (estado, tipoTramiteId) values ('Iniciado', 6), ('Finalizado', 6);
 INSERT INTO Usuarios (nombre, apellido, correo, usuario, clave, rolId) values ('Tomas', 'Carreras', 'tomaselle2@gmail.com', 'Tomaselle2', 'P7eSe/VyhW8UaKMx5qghSw==.JYrOO0ZJQLp0A82FUreiYz7mWl+BpZykU1AfM1ZOpZU=', 2);

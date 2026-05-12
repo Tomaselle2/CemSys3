@@ -170,8 +170,82 @@ namespace CemSys3.Business.TramiteConcesion
 
        
 
-        public Task FinalizarAsync(int tramiteId, int usuarioId)
+        public async Task FinalizarAsync(int tramiteId, int usuarioId)
         {
+            Models.Cremacione cremacion = await _context.Cremaciones
+               .FirstOrDefaultAsync(ct => ct.TramiteId == tramiteId) ?? throw new Exception("Trámite de cremación no encontrado.");
+
+            Models.Concesione concesion = await _context.Concesiones
+                   .FirstOrDefaultAsync(c => c.TramiteId == cremacion.ConcesionId) ?? throw new Exception("Concesion no encontrada.");
+
+            Models.Tramite tramite = await _context.Tramites.FirstOrDefaultAsync(t => t.Id == tramiteId) ?? throw new Exception("Trámite no encontrado.");
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {                
+                //1- actualizar estado del tramite a finalizado
+                tramite.EstadoActualId = (int)EstadosTramiteEnum.Finalizado;
+
+                HistorialEstadosDTO historial = new HistorialEstadosDTO
+                {
+                    Fecha = DateTime.Now,
+                    TramiteId = tramiteId,
+                    EstadoTramiteId = (int)EstadosTramiteEnum.Finalizado
+                };
+                await _historialEstadosService.Add(historial);
+
+                cremacion.FechaFinalizacion = cremacion.FechaPendiente;
+
+                //consultar el difunto relacionado a la parcela para el tramite
+                Models.Persona difunto = await _context.Personas.FirstOrDefaultAsync(p => p.Id == cremacion.DifuntoId) ?? throw new Exception("Difunto no encontrado.");
+
+                //2- actualizar el estado del difunto a cremado.
+                //log en firmantes.
+                difunto.EstadoDifuntoId = (int)EstadoDifuntoEnum.Cremado;
+
+                //3- vicular firmantes y difuntos al tramite
+                List<FirmantesDTO> firmantes = await _firmantes.GetAllByTramite(tramite.Id);
+                foreach (var firmante in firmantes)
+                {
+                    await _historialEstadosService.VincularTramiteAPersona(tramiteId, firmante.PersonaId);
+
+                    //log en firmantes
+                    var persona = await _personaService.Get(firmante.PersonaId);
+                    persona.InformacionAdicional += $"\n● El {cremacion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se realizó el trámite de cremación (trámite {tramiteId}) en concesión ({concesion.Concesion?.ToString("D5")})";
+
+                }
+
+                //log en difunto
+                await _historialEstadosService.VincularTramiteAPersona(tramiteId, difunto.Id);
+                difunto.InformacionAdicional += $"\n● El {cremacion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se realizó el trámite de cremación (trámite {tramiteId}) en concesión ({concesion.Concesion?.ToString("D5")})";
+
+                //4- Log en concesion, parcela.
+                concesion.InformacionAdicional += $"\n● El {cremacion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se realizó el trámite de cremación (trámite {tramiteId})";
+
+                Models.Parcela parcela = await _context.Parcelas.FirstOrDefaultAsync(p => p.Id == concesion.ParcelaId) ?? throw new Exception("Parcela no encontrada.");
+                parcela.InformacionAdicional += $"\n● El {cremacion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se realizó el trámite de cremación (trámite {tramiteId}) en concesión ({concesion.Concesion?.ToString("D5")})";
+
+                //5- Quitar difunto en la parcela
+
+                //6- generar la nota de recordatorio.
+                //string descripcionNota = $"\n● El {DateTime.Now:dd/MM/yyyy} se realizó la aceptación de titularidad (trámite {tramiteId})";
+                //string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
+                //string titularNota = $"El nuevo titular debe ser {titularesNuevos?[0].Apellido?.ToUpper()}, {titularesNuevos?[0].Nombre?.ToUpper()} con DNI {titularesNuevos?[0].Dni}";
+
+                //cambioTitularidad.FechaFinalizacion = DateTime.Now;
+                //tramite.FechaFinalizacion = DateTime.Now;
+
+                //await GenerarNotaRecordatorio(descripcionNota, nombreNota, titularNota, usuarioId);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
             throw new NotImplementedException();
         }
 
