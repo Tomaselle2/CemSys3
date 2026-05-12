@@ -220,8 +220,8 @@ namespace CemSys3.Controllers
             dto.TipoParcela = viewModel.contrato.TipoParcela;
             dto.ParcelaId = viewModel.contrato.ParcelaId;
             dto.EstadoTramiteId = (int)EstadosConcesionEnum.Vigente;
-            dto.MensajeParcela = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizo contrato de concesión ({viewModel.contrato.NroConcesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(viewModel.CantidadAniosId.Value)}. Vencimiento {viewModel.Vencimiento}.";
-            dto.InformacionAdicional = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizo contrato de concesión ({viewModel.contrato.NroConcesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(viewModel.CantidadAniosId.Value)}. Vencimiento {viewModel.Vencimiento}.";
+            dto.MensajeParcela = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizó contrato de concesión ({viewModel.contrato.NroConcesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(viewModel.CantidadAniosId.Value)}. Vencimiento {viewModel.Vencimiento}.";
+            dto.InformacionAdicional = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizó contrato de concesión ({viewModel.contrato.NroConcesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(viewModel.CantidadAniosId.Value)}. Vencimiento {viewModel.Vencimiento}.";
 
             //pasar de TitularesDTO a PersonaDTO
             List<PersonaDTO> titulares = new List<PersonaDTO>();

@@ -1,8 +1,10 @@
 ﻿using AspNetCoreGeneratedDocument;
 using CemSys3.DTOs.Cementerio;
 using CemSys3.DTOs.HistorialEstado;
+using CemSys3.DTOs.Nota;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.PlantillaTramite;
+using CemSys3.DTOs.Tarea;
 using CemSys3.DTOs.Tramite;
 using CemSys3.DTOs.TramitesConcesion;
 using CemSys3.DTOs.TramitesConcesion.Cremacion;
@@ -180,6 +182,12 @@ namespace CemSys3.Business.TramiteConcesion
 
             Models.Tramite tramite = await _context.Tramites.FirstOrDefaultAsync(t => t.Id == tramiteId) ?? throw new Exception("Trámite no encontrado.");
 
+            if(tramite.EstadoActualId != (int)EstadosTramiteEnum.Pendiente)
+            {
+                throw new Exception("El trámite no se encuentra en estado pendiente, no puede ser finalizado.");
+            }
+
+
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
@@ -189,13 +197,14 @@ namespace CemSys3.Business.TramiteConcesion
 
                 HistorialEstadosDTO historial = new HistorialEstadosDTO
                 {
-                    Fecha = DateTime.Now,
+                    Fecha = cremacion.FechaPendiente ?? DateTime.Now,
                     TramiteId = tramiteId,
                     EstadoTramiteId = (int)EstadosTramiteEnum.Finalizado
                 };
                 await _historialEstadosService.Add(historial);
 
                 cremacion.FechaFinalizacion = cremacion.FechaPendiente;
+                tramite.FechaFinalizacion = cremacion.FechaPendiente;
 
                 //consultar el difunto relacionado a la parcela para el tramite
                 Models.Persona difunto = await _context.Personas.FirstOrDefaultAsync(p => p.Id == cremacion.DifuntoId) ?? throw new Exception("Difunto no encontrado.");
@@ -213,7 +222,7 @@ namespace CemSys3.Business.TramiteConcesion
                     //log en firmantes
                     var persona = await _personaService.Get(firmante.PersonaId);
                     persona.InformacionAdicional += $"\n● El {cremacion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se realizó el trámite de cremación (trámite {tramiteId}) en concesión ({concesion.Concesion?.ToString("D5")})";
-
+                    int personaId = await _personaService.Update(persona);
                 }
 
                 //log en difunto
@@ -227,16 +236,44 @@ namespace CemSys3.Business.TramiteConcesion
                 parcela.InformacionAdicional += $"\n● El {cremacion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se realizó el trámite de cremación (trámite {tramiteId}) en concesión ({concesion.Concesion?.ToString("D5")})";
 
                 //5- Quitar difunto en la parcela
+                Models.ParcelaDifunto parcelaDifunto = await _context.ParcelaDifuntos
+                    .FirstOrDefaultAsync(pd => pd.ParcelaId == parcela.Id && pd.DifuntoId == difunto.Id && pd.FechaRetiro == null) ?? throw new Exception("Registro de parcela-difunto no encontrado.");
 
-                //6- generar la nota de recordatorio.
-                //string descripcionNota = $"\n● El {DateTime.Now:dd/MM/yyyy} se realizó la aceptación de titularidad (trámite {tramiteId})";
-                //string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
-                //string titularNota = $"El nuevo titular debe ser {titularesNuevos?[0].Apellido?.ToUpper()}, {titularesNuevos?[0].Nombre?.ToUpper()} con DNI {titularesNuevos?[0].Dni}";
+                parcelaDifunto.FechaRetiro = cremacion.FechaPendiente;
+                parcelaDifunto.TramiteRetiroId = tramiteId;
 
-                //cambioTitularidad.FechaFinalizacion = DateTime.Now;
-                //tramite.FechaFinalizacion = DateTime.Now;
+                parcela.CantidadDifuntos -= 1;
 
-                //await GenerarNotaRecordatorio(descripcionNota, nombreNota, titularNota, usuarioId);
+                string infoConcesion = "Revisar el libro de concesión";
+                //5.1 pasos por si queda la parcela vacia.
+                if(parcela.CantidadDifuntos == 0)
+                {
+                    // cancelar la concesion.
+                    concesion.FechaFin = cremacion.FechaFinalizacion;
+                    Models.Tramite tramiteConcesion = await _context.Tramites.FirstOrDefaultAsync(t => t.Id == concesion.TramiteId) ?? throw new Exception("Trámite no encontrado.");
+
+
+                    tramiteConcesion.EstadoActualId = (int)EstadosTramiteEnum.Caducado;
+                    tramiteConcesion.FechaFinalizacion = cremacion.FechaFinalizacion;
+                    HistorialEstadosDTO historialConcesion = new HistorialEstadosDTO
+                    {
+                        Fecha = cremacion.FechaPendiente ?? DateTime.Now,
+                        TramiteId = tramiteConcesion.Id,
+                        EstadoTramiteId = (int)EstadosTramiteEnum.Caducado
+                    };
+                    await _historialEstadosService.Add(historialConcesion);
+
+                    concesion.InformacionAdicional += $"\n● La concesión ({concesion.Concesion?.ToString("D5")}) ha sido cancelada/caducada automáticamente por no tener más difuntos asociados.";
+                    infoConcesion = "La concesión debe ser cancelada/caducada por no tener más difuntos asociados.";
+                }
+
+                //6 - generar la nota de recordatorio.
+                string descripcionNota = $"\n● El {cremacion.FechaPendiente:dd/MM/yyyy HH:mm} se realizó una cremación en la concesión ({concesion.Concesion?.ToString("D5")}) (trámite {tramiteId})";
+                string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
+                string mensajeDifunto = $"{difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} marcar como cremado";
+
+
+                await GenerarNotaRecordatorio(descripcionNota, nombreNota, mensajeDifunto, usuarioId, infoConcesion);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -246,7 +283,6 @@ namespace CemSys3.Business.TramiteConcesion
                 await transaction.RollbackAsync();
                 throw;
             }
-            throw new NotImplementedException();
         }
 
         public async Task GenerarDocumentosAsync(GeneraStrategyDTO dto)
@@ -427,6 +463,28 @@ namespace CemSys3.Business.TramiteConcesion
             await _context.SaveChangesAsync();
 
             return cementerio.Nombre.ToUpper();
+        }
+
+        private async Task GenerarNotaRecordatorio(string descripcionNota, string nombreNota, string mensajeDifunto, int usuarioId, string infoConcesion)
+        {
+            NotaDTO nota = new NotaDTO();
+            nota.Nombre = nombreNota;
+            nota.TipoNotaId = (int)TipoNotaEnum.Recordatorio;
+            nota.Descripcion = descripcionNota;
+            nota.Color = "#F5DADE";
+            nota.Visibilidad = true;
+            nota.EstadoId = (int)EstadosNotaEnum.NotaPendiente;
+            nota.FechaCreacion = DateTime.Now;
+            nota.UsurioId = usuarioId;
+            nota.FechaFinRecordatorio = DateTime.Now.AddDays(10);
+            nota.Tareas = new List<TareaDTO>
+                {
+                    new() { Descripcion = mensajeDifunto, Estado = false },
+                    new() { Descripcion = infoConcesion, Estado = false },
+                };
+
+            int tramiteNotaId = await _notasService.GenerarTramiteNota(usuarioId);
+            await _notasService.GenerarNotaSinTransaccion(tramiteNotaId, nota);
         }
 
     }

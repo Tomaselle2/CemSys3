@@ -214,7 +214,7 @@ namespace CemSys3.Business.Concesion
                 string descripcionNota = $"\n● El {DateTime.Now:dd/MM/yyyy} se realizó contrato de concesión ({dto.Concesion?.ToString("D5") ?? "-----"})";
                 string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
                 string vencimiento = $"Modificar vencimiento a {concesion.Vencimiento}";
-                string titularNota = $"El titular debe ser {dto.Titulares?[0].Apellido?.ToUpper()}, {dto.Titulares?[0].Nombre?.ToUpper()}";
+                string titularNota = $"El titular debe ser {dto.Titulares?[0].Apellido?.ToUpper()}, {dto.Titulares?[0].Nombre?.ToUpper()} DNI {dto.Titulares?[0].Dni}";
                 string pago = $"Generar cuotas concesión";
 
                 await GenerarNotaRecordatorio(descripcionNota, nombreNota, vencimiento, titularNota, dto.UsuarioId ?? 0, pago);
@@ -634,20 +634,27 @@ namespace CemSys3.Business.Concesion
         }
 
 
+      
+
+
+
         private async Task ProcesarTitularesConHistorial(
-            int tramiteId,
-            List<PersonaDTO> titularesDTO,
-            Models.Concesione concesion,
-            string? mensajeContrato = null)
+    int tramiteId,
+    List<PersonaDTO> titularesDTO,
+    Models.Concesione concesion,
+    string? mensajeContrato = null)
         {
-            // 1. Titulares actuales activos
+            // Titulares actuales activos
             var titularesActuales = await _context.HistorialTitularesConcesiones
-                .Where(p => p.ConcesionId == tramiteId && p.FechaFin == null)
+                .Where(x => x.ConcesionId == tramiteId && x.FechaFin == null)
                 .ToListAsync();
 
-            var idsActuales = titularesActuales.Select(t => t.PersonaId).ToList();
+            var idsActuales = titularesActuales
+                .Where(x => x.PersonaId.HasValue)
+                .Select(x => x.PersonaId!.Value)
+                .ToHashSet();
 
-            var idsNuevos = new List<int>();
+            var idsNuevos = new HashSet<int>();
 
             if (titularesDTO == null || titularesDTO.Count == 0)
                 return;
@@ -657,7 +664,9 @@ namespace CemSys3.Business.Concesion
                 int dni = int.Parse(persona.Dni);
                 PersonaDTO personaDB;
 
-                if (await _personaService.PersonaExiste(dni, persona.Sexo ?? ""))
+                bool existe = await _personaService.PersonaExiste(dni, persona.Sexo ?? "");
+
+                if (existe)
                 {
                     personaDB = await _personaService.GetByDNISexo(dni, persona.Sexo);
 
@@ -670,12 +679,6 @@ namespace CemSys3.Business.Concesion
                     personaDB.Correo = persona.Correo;
                     personaDB.Domicilio = persona.Domicilio;
                     personaDB.CategoriaPersonaId = (int)CategoriaPersonaEnum.Titular;
-
-                    // 👉 MENSAJE SOLO SI VIENE (caso Update)
-                    if (!string.IsNullOrEmpty(mensajeContrato))
-                        personaDB.InformacionAdicional += mensajeContrato;
-
-                    await _personaService.Update(personaDB);
                 }
                 else
                 {
@@ -689,42 +692,55 @@ namespace CemSys3.Business.Concesion
                         Correo = persona.Correo,
                         Domicilio = persona.Domicilio,
                         CategoriaPersonaId = (int)CategoriaPersonaEnum.Titular,
-                        InformacionAdicional = mensajeContrato ??
-                            $"\n● El {DateTime.Now:dd/MM/yyyy} se agrega como titular en concesión ({concesion.Concesion?.ToString("D5") ?? "-----"})."
+                        InformacionAdicional = ""
                     };
 
                     personaDB.Id = await _personaService.Add(personaDB);
 
                     concesion.InformacionAdicional +=
-                        $"\n● El {DateTime.Now:dd/MM/yyyy} se agrega como titular a {personaDB.Apellido?.ToUpper()}, {personaDB.Nombre?.ToUpper()}.";
+                        $"\n● El {DateTime.Now:dd/MM/yyyy} se asigna como titular a " +
+                        $"{personaDB.Apellido?.ToUpper()}, {personaDB.Nombre?.ToUpper()}.";
                 }
 
-                idsNuevos.Add(personaDB.Id);
+                bool yaEraTitular = idsActuales.Contains(personaDB.Id);
+                bool esNuevoTitular = !yaEraTitular;
 
-                // 👉 NUEVO TITULAR REAL
-                if (!idsActuales.Contains(personaDB.Id))
+                // mensaje contrato (UNA sola vez)
+                if (!string.IsNullOrWhiteSpace(mensajeContrato))
                 {
-                    if (!string.IsNullOrEmpty(mensajeContrato))
-                        personaDB.InformacionAdicional += mensajeContrato;
-                    else
-                        personaDB.InformacionAdicional +=
-                            $"\n● El {DateTime.Now:dd/MM/yyyy} se coloca como titular en concesión ({concesion.Concesion?.ToString("D5") ?? "-----"}).";
+                    personaDB.InformacionAdicional += mensajeContrato;
+                }
 
-                    await _personaService.Update(personaDB);
+                // mensaje titular nuevo
+                if (esNuevoTitular)
+                {
+                    personaDB.InformacionAdicional +=
+                        $"\n● El {DateTime.Now:dd/MM/yyyy} se lo asigna como titular en concesión " +
+                        $"({concesion.Concesion?.ToString("D5") ?? "-----"}).";
 
                     concesion.InformacionAdicional +=
-                        $"\n● El {DateTime.Now:dd/MM/yyyy} se agrega como nuevo titular a {personaDB.Apellido?.ToUpper()}, {personaDB.Nombre?.ToUpper()}.";
+                        $"\n● El {DateTime.Now:dd/MM/yyyy} se agrega como titular a " +
+                        $"{personaDB.Apellido?.ToUpper()}, {personaDB.Nombre?.ToUpper()}.";
 
-                    await _historialEstadosService.VincularTitularAConcesion(personaDB.Id, tramiteId);
+                    await _historialEstadosService
+                        .VincularTitularAConcesion(personaDB.Id, tramiteId);
                 }
 
-                await _historialEstadosService.VincularTramiteAPersona(tramiteId, personaDB.Id);
+                // guardar persona UNA sola vez
+                await _personaService.Update(personaDB);
+
+                // vincular tramite
+                await _historialEstadosService
+                    .VincularTramiteAPersona(tramiteId, personaDB.Id);
+
+                idsNuevos.Add(personaDB.Id);
             }
 
-            // 3. Cerrar titulares que ya no están
+            // cerrar titulares removidos
             foreach (var titularActual in titularesActuales)
             {
-                if (!idsNuevos.Contains(titularActual.PersonaId.Value))
+                if (titularActual.PersonaId.HasValue &&
+                    !idsNuevos.Contains(titularActual.PersonaId.Value))
                 {
                     titularActual.FechaFin = DateTime.Now;
                 }

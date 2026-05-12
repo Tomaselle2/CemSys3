@@ -493,6 +493,7 @@ new ArchivoVM
     })
 </div>
 
+<!--Boton de pendiente-->
 @if(Model.Dto.EstadoTramiteId == (int)EstadosTramiteEnum.Iniciado)
 {
     <form asp-action="CambiarEstadoTramite" method="post" class="mb-3 js-confirm" 

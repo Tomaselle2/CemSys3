@@ -18,8 +18,6 @@ using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
-using static iText.Kernel.Pdf.Colorspace.PdfSpecialCs;
 
 namespace CemSys3.Business.Ingreso
 {
@@ -164,7 +162,7 @@ namespace CemSys3.Business.Ingreso
                 //10- se inicia el contrato de concesion en estado "Sin Contrato" solo si es nicho o fosa
 
                 bool existeConcesion = await _context.Concesiones
-                    .AnyAsync(c => c.ParcelaId == ingreso.ParcelaId && c.Visibilidad == true);
+                    .AnyAsync(c => c.ParcelaId == ingreso.ParcelaId && c.Visibilidad == true && c.FechaFin == null);
 
 
                 if (!existeConcesion && ingreso.Parcela.TipoParcelaId != (int)TipoParcelaEnum.Panteon)

@@ -1166,7 +1166,10 @@
                 valorCuotaInput.value = '';
             }
 
-            precioFinalHidden.value = getPrecioSeleccionado() || 0;
+                precioFinalHidden.value =
+        Number(getPrecioSeleccionado())
+            .toFixed(2)
+            .replace('.', ',');
             calcularValorCuota();
         });
 
@@ -1189,7 +1192,10 @@
                 valorCuotaInput.value = '';
             }
 
-            precioFinalHidden.value = getPrecioSeleccionado() || 0;
+                precioFinalHidden.value =
+        Number(getPrecioSeleccionado())
+            .toFixed(2)
+            .replace('.', ',');
             calcularValorCuota();
         });
 
@@ -1281,11 +1287,11 @@
             Array.from(select.options).forEach(option => {
                 if (!option.value) return;
 
-                const precioBase = parseFloat(option.dataset.precio);
+                const precioBase = parsePrecioString(option.dataset.precio);
                 const nuevoPrecio = calcularPrecioSegunTipo(precioBase, tipo);
 
                 // Guardar el nuevo precio para cálculos posteriores
-                option.dataset.precioFinal = nuevoPrecio;
+                option.dataset.precioFinal = Number(nuevoPrecio).toFixed(2);
 
                 // Obtener texto original (años)
                 const textoOriginal = option.textContent.split('-')[0].trim();
@@ -1297,7 +1303,10 @@
             });
 
             // actualizar precio hidden
-            precioFinalHidden.value = getPrecioSeleccionado() || 0;
+               precioFinalHidden.value =
+        Number(getPrecioSeleccionado())
+            .toFixed(2)
+            .replace('.', ',');
 
             calcularValorCuota();
         }
