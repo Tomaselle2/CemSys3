@@ -51,6 +51,16 @@ namespace CemSys3.Business.Tramite
                     result.Success = true;
                     result.Id = tramiteId;
                     break;
+
+                case (int)TipoTramiteEnum.Cremacion:
+                    Cremacione cremacion = await _context.Cremaciones.FindAsync(tramiteId) ?? throw new Exception("No se encontro la cremación");
+                    cremacion.InfoAdicional = informacionAdicionalTramite;
+                    await _context.SaveChangesAsync();
+
+                    result.Message = "Información adicional actualizada correctamente";
+                    result.Success = true;
+                    result.Id = tramiteId;
+                    break;
             }
 
             return result;

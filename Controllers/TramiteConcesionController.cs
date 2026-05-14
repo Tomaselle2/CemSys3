@@ -7,7 +7,6 @@ using CemSys3.Interfaces.Concesion;
 using CemSys3.Interfaces.PlantillaTramite;
 using CemSys3.Interfaces.Tarea;
 using CemSys3.Interfaces.Tramite;
-using CemSys3.Models;
 using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.AspNetCore.Mvc;
 

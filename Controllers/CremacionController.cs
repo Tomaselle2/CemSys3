@@ -3,7 +3,6 @@ using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.TramitesConcesion;
 using CemSys3.DTOs.TramitesConcesion.Cremacion;
 using CemSys3.Enumerables;
-using CemSys3.Helpers.Enumerable;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Archivo;
@@ -11,7 +10,6 @@ using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.PlantillaTramite;
 using CemSys3.Interfaces.Tarea;
 using CemSys3.Interfaces.TramitesConcesion;
-using CemSys3.Models;
 using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,5 +1,4 @@
-﻿using AspNetCoreGeneratedDocument;
-using CemSys3.DTOs.Cementerio;
+﻿using CemSys3.DTOs.Cementerio;
 using CemSys3.DTOs.HistorialEstado;
 using CemSys3.DTOs.Nota;
 using CemSys3.DTOs.Persona;
@@ -73,7 +72,7 @@ namespace CemSys3.Business.TramiteConcesion
 
                 HistorialEstadosDTO historial = new HistorialEstadosDTO
                 {
-                    Fecha = tramite.FechaCreacion,
+                    Fecha = DateTime.Now,
                     TramiteId = tramiteId,
                     EstadoTramiteId = nuevoEstado
                 };
@@ -185,6 +184,12 @@ namespace CemSys3.Business.TramiteConcesion
             if(tramite.EstadoActualId != (int)EstadosTramiteEnum.Pendiente)
             {
                 throw new Exception("El trámite no se encuentra en estado pendiente, no puede ser finalizado.");
+            }
+
+            if(cremacion.FechaPendiente == null)
+            {
+                throw new Exception("Debe asignar una fecha para el trámite antes de finalizar");
+
             }
 
 
@@ -413,7 +418,7 @@ namespace CemSys3.Business.TramiteConcesion
 
             //consultar el difuntos relacionados a la parcela para el tramite
             dto.Difuntos = await _context.ParcelaDifuntos
-                .Where(p => p.ParcelaId == dto.ParcelaId && p.FechaRetiro == null && p.DifuntoId == cremacion.DifuntoId)
+                .Where(p => p.DifuntoId == cremacion.DifuntoId)
                 .Select(p => new DifuntoContratoDTO
                 {
                     Id = p.Difunto.Id,
