@@ -192,6 +192,10 @@ namespace CemSys3.Business.TramiteConcesion
 
             }
 
+            if(cremacion.FechaPendiente < cremacion.FechaCreacion)
+            {
+                throw new Exception("La fecha de realización no puede ser menor a la fecha de creación del trámite.");
+            }
 
             using var transaction = await _context.Database.BeginTransactionAsync();
 
@@ -210,6 +214,10 @@ namespace CemSys3.Business.TramiteConcesion
 
                 cremacion.FechaFinalizacion = cremacion.FechaPendiente;
                 tramite.FechaFinalizacion = cremacion.FechaPendiente;
+
+
+                //vincular concesion con parcela 
+                await _historialEstadosService.VincularTramiteAParcela(tramiteId, concesion.ParcelaId);
 
                 //consultar el difunto relacionado a la parcela para el tramite
                 Models.Persona difunto = await _context.Personas.FirstOrDefaultAsync(p => p.Id == cremacion.DifuntoId) ?? throw new Exception("Difunto no encontrado.");
@@ -379,7 +387,7 @@ namespace CemSys3.Business.TramiteConcesion
                    .Include(c => c.Tramite)
                    .Include(c => c.Parcela)
                        .ThenInclude(p => p.Seccion)
-                   .FirstOrDefaultAsync(c => c.TramiteId == cremacion.ConcesionId) ?? throw new Exception("Concesion no encontrada");
+                   .FirstOrDefaultAsync(c => c.TramiteId == cremacion.ConcesionId) ?? throw new Exception("Concesión no encontrada");
 
             CremacionDTO dto = new CremacionDTO();
             dto.TramiteId = cremacion.TramiteId;
