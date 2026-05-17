@@ -46,7 +46,9 @@ export default function App() {
 
             data: {
                 label: '',
-                onChange: actualizarTextoNodo
+                backgroundColor: 'blanco',
+                onChange: actualizarTextoNodo,
+                onColorChange: actualizarColorNodo
             }
         };
 
@@ -71,6 +73,24 @@ export default function App() {
         );
     };
 
+    const actualizarColorNodo = (id, color) => {
+
+        setNodes((nds) =>
+            nds.map((node) => {
+
+                if (node.id === id) {
+
+                    node.data = {
+                        ...node.data,
+                        backgroundColor: color
+                    };
+                }
+
+                return node;
+            })
+        );
+    };
+
     useEffect(() => {
 
         fetch(`/Arbol/ObtenerDiagrama?tramiteId=${tramiteId}`)
@@ -85,7 +105,9 @@ export default function App() {
                         ...node,
                         data: {
                             ...node.data,
-                            onChange: actualizarTextoNodo
+                            backgroundColor: node.data.backgroundColor || 'blanco',
+                            onChange: actualizarTextoNodo,
+                            onColorChange: actualizarColorNodo
                         }
                     }));
 
@@ -104,7 +126,8 @@ export default function App() {
                 ...n,
                 data: {
                     ...n.data,
-                    onChange: undefined
+                    onChange: undefined,
+                    onColorChange: undefined
                 }
             })),
 
@@ -133,13 +156,60 @@ export default function App() {
     return (
         <div style={{ width: '100%', height: '700px' }}>
 
-            <button className="btn btn-primary m-2" onClick={agregarPersona}>
-                 👤 Persona
+            <button className="btn btn-info m-2" onClick={agregarPersona}>
+                👤 Persona
             </button>
 
             <button className="btn btn-success m-2" onClick={guardar}>
                 Guardar
             </button>
+
+            {/* Referencias de colores */}
+            <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginLeft: '8px',
+                padding: '4px 12px',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '20px',
+                fontSize: '14px'
+            }}>
+                <span style={{ fontWeight: '500', marginRight: '4px' }}>Colores:</span>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div style={{
+                        width: 14,
+                        height: 14,
+                        borderRadius: '50%',
+                        backgroundColor: '#ef4444',
+                        border: '1px solid #ccc'
+                    }} />
+                    <span>Fallecido</span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div style={{
+                        width: 14,
+                        height: 14,
+                        borderRadius: '50%',
+                        backgroundColor: '#3b82f6',
+                        border: '1px solid #ccc'
+                    }} />
+                    <span>Firmante</span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div style={{
+                        width: 14,
+                        height: 14,
+                        borderRadius: '50%',
+                        backgroundColor: '#e5e7eb',
+                        border: '1px solid #ccc'
+                    }} />
+                    <span>Familiar</span>
+                </div>
+            </div>
 
             <ReactFlow
                 nodes={nodes}
@@ -151,7 +221,6 @@ export default function App() {
 
                 deleteKeyCode={["Delete", "Backspace"]}
 
-                
                 connectionLineType="smoothstep"
 
                 defaultEdgeOptions={{

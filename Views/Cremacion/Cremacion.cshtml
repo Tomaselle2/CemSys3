@@ -534,7 +534,7 @@ new ArchivoVM
 {
     <form asp-action="CambiarEstadoTramite" method="post" class="mb-3 js-confirm" 
           data-confirm-title="Confirmar paso de estado"
-          data-confirm-message="Debe tener la fecha de realización del tramite para continuar"
+          data-confirm-message="Debe tener la fecha de realización del trámite para continuar"
           data-confirm-icon="warning">
         <input type="hidden" name="tramiteId" value="@Model.Dto.TramiteId" />
         <input type="hidden" name="nuevoEstado" value="@((int)EstadosTramiteEnum.Pendiente)" />

@@ -12,6 +12,7 @@ import {
 export default function PersonaNode({ data, id }) {
 
     const [texto, setTexto] = useState(data.label || "");
+    const [colorFondo, setColorFondo] = useState(data.backgroundColor || "white");
 
     const textareaRef = useRef(null);
 
@@ -43,6 +44,26 @@ export default function PersonaNode({ data, id }) {
         data.onChange(id, texto);
     };
 
+    const cambiarColor = (color) => {
+        setColorFondo(color);
+        if (data.onColorChange) {
+            data.onColorChange(id, color);
+        }
+    };
+
+    // Mapeo de colores
+    const colores = {
+        rojo: '#fee2e2',
+        celeste: '#e0f2fe',
+        blanco: '#ffffff'
+    };
+
+    const coloresCirculos = {
+        rojo: '#ef4444',
+        celeste: '#3b82f6',
+        blanco: '#e5e7eb'
+    };
+
     return (
 
         <div
@@ -62,14 +83,73 @@ export default function PersonaNode({ data, id }) {
 
             <div
                 style={{
-                    background: 'white',
+                    background: colores[colorFondo] || colorFondo,
                     border: '1px solid #999',
                     borderRadius: 12,
                     padding: 12,
                     minWidth: 240,
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                    position: 'relative'
                 }}
             >
+
+                {/* Círculos de colores */}
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        display: 'flex',
+                        gap: 6,
+                        zIndex: 10
+                    }}
+                >
+                    <div
+                        onClick={() => cambiarColor('rojo')}
+                        style={{
+                            width: 12,
+                            height: 12,
+                            borderRadius: '50%',
+                            backgroundColor: coloresCirculos.rojo,
+                            cursor: 'pointer',
+                            border: '1px solid #ccc',
+                            transition: 'transform 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                        title="Fallecido"
+                    />
+                    <div
+                        onClick={() => cambiarColor('celeste')}
+                        style={{
+                            width: 12,
+                            height: 12,
+                            borderRadius: '50%',
+                            backgroundColor: coloresCirculos.celeste,
+                            cursor: 'pointer',
+                            border: '1px solid #ccc',
+                            transition: 'transform 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                        title="Firmante"
+                    />
+                    <div
+                        onClick={() => cambiarColor('blanco')}
+                        style={{
+                            width: 12,
+                            height: 12,
+                            borderRadius: '50%',
+                            backgroundColor: coloresCirculos.blanco,
+                            cursor: 'pointer',
+                            border: '1px solid #ccc',
+                            transition: 'transform 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                        title="Familiar"
+                    />
+                </div>
 
                 <div
                     style={{

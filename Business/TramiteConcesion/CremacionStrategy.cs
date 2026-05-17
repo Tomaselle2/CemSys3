@@ -226,19 +226,19 @@ namespace CemSys3.Business.TramiteConcesion
 
                     //log en firmantes
                     var persona = await _personaService.Get(firmante.PersonaId);
-                    persona.InformacionAdicional += $"\n● El {cremacion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se realizó el trámite de cremación (trámite {tramiteId}) en concesión ({concesion.Concesion?.ToString("D5")})";
+                    persona.InformacionAdicional += $"\n● El {cremacion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se finalizó el trámite de cremación (trámite {tramiteId}) en concesión ({concesion.Concesion?.ToString("D5")})";
                     int personaId = await _personaService.Update(persona);
                 }
 
                 //log en difunto
                 await _historialEstadosService.VincularTramiteAPersona(tramiteId, difunto.Id);
-                difunto.InformacionAdicional += $"\n● El {cremacion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se realizó el trámite de cremación (trámite {tramiteId}) en concesión ({concesion.Concesion?.ToString("D5")})";
+                difunto.InformacionAdicional += $"\n● El {cremacion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se finalizó el trámite de cremación (trámite {tramiteId}) en concesión ({concesion.Concesion?.ToString("D5")})";
 
                 //4- Log en concesion, parcela.
-                concesion.InformacionAdicional += $"\n● El {cremacion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se realizó el trámite de cremación (trámite {tramiteId})";
+                concesion.InformacionAdicional += $"\n● El {cremacion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se finalizó el trámite de cremación (trámite {tramiteId})";
 
                 Models.Parcela parcela = await _context.Parcelas.FirstOrDefaultAsync(p => p.Id == concesion.ParcelaId) ?? throw new Exception("Parcela no encontrada.");
-                parcela.InformacionAdicional += $"\n● El {cremacion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se realizó el trámite de cremación (trámite {tramiteId}) en concesión ({concesion.Concesion?.ToString("D5")})";
+                parcela.InformacionAdicional += $"\n● El {cremacion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se finalizó el trámite de cremación (trámite {tramiteId}) en concesión ({concesion.Concesion?.ToString("D5")})";
 
                 //5- Quitar difunto en la parcela
                 Models.ParcelaDifunto parcelaDifunto = await _context.ParcelaDifuntos
@@ -273,7 +273,7 @@ namespace CemSys3.Business.TramiteConcesion
                 }
 
                 //6 - generar la nota de recordatorio.
-                string descripcionNota = $"\n● El {cremacion.FechaPendiente:dd/MM/yyyy HH:mm} se realizó una cremación en la concesión ({concesion.Concesion?.ToString("D5")}) (trámite {tramiteId})";
+                string descripcionNota = $"\n● El {cremacion.FechaPendiente:dd/MM/yyyy HH:mm} se finalizó una cremación en la concesión ({concesion.Concesion?.ToString("D5")}) (trámite {tramiteId})";
                 string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
                 string mensajeDifunto = $"{difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} marcar como cremado";
 
