@@ -35,6 +35,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Cremacione> Cremaciones { get; set; }
 
+    public virtual DbSet<Diagrama> Diagramas { get; set; }
+
     public virtual DbSet<DocumentosTramite> DocumentosTramites { get; set; }
 
     public virtual DbSet<EmpresasFunebre> EmpresasFunebres { get; set; }
@@ -100,6 +102,7 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<TramitesParcela> TramitesParcelas { get; set; }
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -397,6 +400,16 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.UsuarioId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_CREMA_Usuario");
+        });
+
+        modelBuilder.Entity<Diagrama>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Diagrama__3214EC07F72EF2C0");
+
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.FechaModificacion).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<DocumentosTramite>(entity =>

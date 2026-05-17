@@ -1,0 +1,21 @@
+﻿@using CemSys3.DTOs.Arbol
+@model ArbolDTO
+
+<style>
+    .bordeArbol{
+        border: 2px solid #999;
+        border-radius: 10px;
+        padding-bottom: 50px;
+    }
+</style>
+
+<div id="react-flow-root" class="bordeArbol"
+     data-tramite-id="@Model.TramiteId">
+</div>
+
+<link rel="stylesheet"
+      href="~/reactflow/app.css" />
+
+<script type="module"
+        src="~/reactflow/app.js">
+</script>

@@ -607,3 +607,11 @@ CREATE TABLE Cremaciones (
 	CONSTRAINT FK_CREMA_Difunto FOREIGN KEY (difuntoId) REFERENCES Personas(id),
 	CONSTRAINT FK_CREMA_Cementerio FOREIGN KEY (cementerioId) REFERENCES Cementerios(id)
 );
+
+CREATE TABLE Diagramas (
+    Id INT PRIMARY KEY IDENTITY,
+    TramiteId INT NOT NULL,
+    JsonDiagrama NVARCHAR(MAX) NULL,
+    FechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+    FechaModificacion DATETIME NULL
+);

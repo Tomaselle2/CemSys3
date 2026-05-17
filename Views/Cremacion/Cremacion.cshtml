@@ -1,4 +1,5 @@
-﻿@using CemSys3.DTOs.Tarea
+﻿@using CemSys3.DTOs.Arbol
+@using CemSys3.DTOs.Tarea
 @using CemSys3.Enumerables
 @using CemSys3.Helpers.Enumerable
 @using CemSys3.ViewModels.Archivo
@@ -15,7 +16,7 @@
     string nroConcesion = Model.Dto.NroConcesion.HasValue ? Model.Dto.NroConcesion.Value.ToString("D5") : "-----";
     string estadoTramite = EnumHelper.GetDisplayNameByValue<EstadosTramiteEnum>(Model.Dto.EstadoTramiteId);
     string tipoParcela = Model.Dto.TipoParcela ?? "N/A";
-    string nombreSeccion = Model.Dto.NombreSeccion;
+    string nombreSeccion = Model.Dto.NombreSeccion ?? "";
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
 
 
@@ -196,8 +197,15 @@ new HistorialOffcanvasVM
         </div>
     }
 
-</div>
 
+
+</div>
+<hr />
+@await Html.PartialAsync("Arbol/Arbol",
+new ArbolDTO
+{
+TramiteId = Model.Dto.TramiteId
+})
 <hr />
 
 <!-- Formulario genera AUTORIZACION EN BLANCO -->
@@ -574,6 +582,14 @@ new ArchivoVM
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+   
+    <script>
+        const root = document.getElementById("react-flow-root");
+
+        const tramiteId = root.dataset.tramiteId;
+
+    </script>
 
     <script>
         function autoResize(textarea) {

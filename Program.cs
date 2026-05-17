@@ -1,3 +1,4 @@
+using CemSys3.Business.Arbol;
 using CemSys3.Business.Archivo;
 using CemSys3.Business.Cementerio;
 using CemSys3.Business.ConceptoTarifaria;
@@ -20,6 +21,7 @@ using CemSys3.Business.TramiteConcesion;
 using CemSys3.Business.Usuario;
 using CemSys3.DTOs.TramitesConcesion.Cremacion;
 using CemSys3.Helpers.PDF;
+using CemSys3.Interfaces;
 using CemSys3.Interfaces.Archivo;
 using CemSys3.Interfaces.Cementerio;
 using CemSys3.Interfaces.ConceptoTarifaria;
@@ -91,6 +93,8 @@ builder.Services.AddScoped<ICancelarTramite, CancelarService>();
 builder.Services.AddScoped<ITareaPlantilla, TareaPlantillaService>();
 builder.Services.AddScoped<IRequisitos, RequisitosService>();
 builder.Services.AddScoped<IFirmantes, FirmantesService>();
+builder.Services.AddScoped<IArbol, ArbolService>();
+
 
 // =========================
 // STRATEGIES
