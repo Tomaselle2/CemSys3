@@ -36,4 +36,6 @@ public partial class Usuario
     public virtual RolesUsuario Rol { get; set; } = null!;
 
     public virtual ICollection<Tramite> Tramites { get; set; } = new List<Tramite>();
+
+    public virtual ICollection<Traslado> Traslados { get; set; } = new List<Traslado>();
 }

@@ -615,3 +615,27 @@ CREATE TABLE Diagramas (
     FechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
     FechaModificacion DATETIME NULL
 );
+
+CREATE TABLE Traslados (
+    tramiteId INT PRIMARY KEY,
+    parcelaOrigenId INT NOT NULL,
+	parcelaDestinoId INT NULL,
+    usuarioId INT NOT NULL,
+	difuntoId INT NOT NULL,
+    fechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+	fechaPendiente DATETIME NULL,
+    fechaFinalizacion DATETIME NULL,
+	destino NVARCHAR(150) NULL,
+    infoAdicional NVARCHAR(MAX) null,
+	concesionId int NOT null,
+	cementerioId INT NULL,
+    visibilidad BIT DEFAULT 1,
+
+    CONSTRAINT FK_TRASLADO_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_TRASLADO_concesionId FOREIGN KEY (concesionId) REFERENCES Tramites(id),
+	CONSTRAINT FK_TRASLADO_ParcelaOrigen FOREIGN KEY (parcelaOrigenId) REFERENCES Parcelas(id),
+	CONSTRAINT FK_TRASLADO_ParcelaDestino FOREIGN KEY (parcelaDestinoId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_TRASLADO_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id),
+	CONSTRAINT FK_TRASLADO_Difunto FOREIGN KEY (difuntoId) REFERENCES Personas(id),
+	CONSTRAINT FK_TRASLADO_Cementerio FOREIGN KEY (cementerioId) REFERENCES Cementerios(id)
+);

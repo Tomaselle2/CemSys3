@@ -63,5 +63,9 @@ public partial class Tramite
 
     public virtual ICollection<TramitesParcela> TramitesParcelas { get; set; } = new List<TramitesParcela>();
 
+    public virtual ICollection<Traslado> TrasladoConcesions { get; set; } = new List<Traslado>();
+
+    public virtual Traslado? TrasladoTramite { get; set; }
+
     public virtual Usuario Usuario { get; set; } = null!;
 }

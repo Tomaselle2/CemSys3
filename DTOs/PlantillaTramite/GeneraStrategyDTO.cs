@@ -23,5 +23,6 @@ namespace CemSys3.DTOs.PlantillaTramite
         public string NombreSeccion = string.Empty;
         public string TipoParcela = string.Empty;
         public int CementerioId;
+        public int NuevaParcelaId;
     }
 }

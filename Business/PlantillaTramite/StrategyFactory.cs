@@ -27,6 +27,9 @@ namespace CemSys3.Business.PlantillaTramite
                 (int)TipoTramiteEnum.Cremacion =>
                 _provider.GetRequiredService<CremacionStrategy>(),
 
+                (int)TipoTramiteEnum.Traslado =>
+                _provider.GetRequiredService<TrasladoStrategy>(),
+
                 _ => throw new Exception("Strategy no implementada")
             };
         }
@@ -46,6 +49,9 @@ namespace CemSys3.Business.PlantillaTramite
 
                 (int)TipoTramiteEnum.Cremacion =>
                 _provider.GetRequiredService<CremacionStrategy>(),
+
+                (int)TipoTramiteEnum.Traslado =>
+                _provider.GetRequiredService<TrasladoStrategy>(),
 
                 _ => throw new Exception("CreateStrategy no implementada")
             };

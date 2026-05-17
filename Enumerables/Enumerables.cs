@@ -61,6 +61,9 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Nuevo Destino - Registro Civil")]
         NuevoDestinoRegistroCivil = 5,
+
+        [Display(Name = "Traslado - Autorización")]
+        TrasladoAutorizacion = 6,
     }
 
     public enum TipoNichoEnum

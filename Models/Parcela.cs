@@ -50,4 +50,8 @@ public partial class Parcela
     public virtual TipoParcela? TipoParcela { get; set; }
 
     public virtual ICollection<TramitesParcela> TramitesParcelas { get; set; } = new List<TramitesParcela>();
+
+    public virtual ICollection<Traslado> TrasladoParcelaDestinos { get; set; } = new List<Traslado>();
+
+    public virtual ICollection<Traslado> TrasladoParcelaOrigens { get; set; } = new List<Traslado>();
 }

@@ -1,4 +1,6 @@
-﻿namespace CemSys3.Helpers
+﻿using CemSys3.Enumerables;
+
+namespace CemSys3.Helpers
 {
     public static class ParcelaFormatter
     {
@@ -38,6 +40,27 @@
         public static string ObtenerParcela(string tipoParcela, int nroParcela, string nombreSeccion)
         {
             return ObtenerParcela(tipoParcela, nroParcela, 0, nombreSeccion);
+        }
+
+        public static string ObtenerParcela(int tipoParcela, int nroParcela, int nroFila, string nombreSeccion)
+        {
+            if (tipoParcela == 0)
+                return string.Empty;
+
+            switch (tipoParcela)
+            {
+                case (int)TipoParcelaEnum.Nicho:
+                    return $"NICHO {nroParcela} SECC {nombreSeccion.ToUpper()} FILA {nroFila}";
+
+                case (int)TipoParcelaEnum.Fosa:
+                    return $"FOSA {nroParcela} SECC {nombreSeccion.ToUpper()}";
+
+                case (int)TipoParcelaEnum.Panteon:
+                    return $"LOTE {nroParcela} SECC {nombreSeccion.ToUpper()} (panteón)";
+
+                default:
+                    return string.Empty;
+            }
         }
     }
 }

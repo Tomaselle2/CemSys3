@@ -312,7 +312,7 @@ namespace CemSys3.Business.TramiteConcesion
 
 
                 //busca el firmante que coincida con el firmanteId del dto.
-                FirmantesDTO firmante = dto.Firmantes.FirstOrDefault(f => f.Id == dto.FirmanteId) ?? new FirmantesDTO();
+                FirmantesDTO firmante = dto.Firmantes?.FirstOrDefault(f => f.Id == dto.FirmanteId) ?? new FirmantesDTO();
 
                 //generar el documento de solicitud de cremacion con los datos del tramite, titulares y difunto.
                 var plantilla = await _plantillaService.ObtenerPorTipoAutorizacionIdAsync(dto.TipoAutorizacionId); //busco la plantilla especifica

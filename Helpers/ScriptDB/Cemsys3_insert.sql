@@ -59,10 +59,10 @@ INSERT INTO EstadosDifunto (estado) VALUES
 -- INSERT para TipoTramite
 INSERT INTO TipoTramite (tipo) VALUES 
 ('Ingreso'), --1
-('Autorización para cremación'), --2
-('Autorización para reducción'), --3
+('Cremación'), --2
+('Reducción'), --3
 ('Contrato de concesión'), --4
-('Autorización para traslado'), --5
+('Traslado'), --5
 ('Cambio de titularidad'), --6
 ('Nota'), --7
 ('Aceptación de titularidad'); --8
@@ -609,7 +609,8 @@ Insert into TipoAutorizacion (tipoTramiteId, nombre) values
 (8, 'Aceptación de titularidad'),  --2
 (2, 'Cremación - Autorización'), --3
 (2, 'Cremación - Libre Tránsito'), --4
-(2, 'Nuevo Destino - Registro Civil'); --5
+(2, 'Nuevo Destino - Registro Civil'), --5
+(5, 'Traslado - Autorización'); --6
 
 insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
 (6, 'Cambio Titular - Ambos Presentes',
@@ -636,6 +637,11 @@ insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacio
 '<div class="documento-contenido">  <figure class="image-logo"><img src="../fotos/EncabezadoRegistro.jpg?v=@DateTime.Now.Ticks" alt="Logo"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <p class="MsoNormal" style="text-align: center;" align="center"><span style="font-size: 12.0pt; line-height: 115%;">SOLICITUD – DEFUNCIONES – DESTINO DE LOS RESTOS</span></p>  <p class="MsoNormal"><span style="font-size: 12.0pt; line-height: 115%;">Al Registro Civil de Colonia Tirolesa</span></p>  <p class="MsoNormal"><span style="font-size: 12.0pt; line-height: 115%;">De mi mayor consideración</span></p>  <p class="MsoNormal" style="text-align: justify; text-indent: 127.6pt;"><span style="font-size: 12.0pt; line-height: 115%;">{NombreCompletoFirmante} D.N.I {DniFirmante}, Domicilio {DomicilioFirmante} en carácter de {Parentesco}, del extinto/a {Difuntos} fallecido el _______________ manifiesto en calidad de declaración jurada contar con interés legítimo, y, para solicitar a Ud.:</span></p>  <p class="MsoNormal" style="text-align: justify; text-indent: 127.6pt;"><span style="font-size: 12.0pt; line-height: 115%;">Deje constancia en el acta de defunción/transcripción de {Difuntos} Registrada bajo el acta ____ Tomo __ Folio ___ Año _____ Serie -<span style="mso-spacerun: yes;">  </span><span style="mso-spacerun: yes;"> </span>localidad de COLONIA TIROLESA, DPTO COLÓN, CÓRDOBA, del traslado de los restos del causante al nuevo destino, siendo éste, {crematorio}.</span></p>  <p class="MsoNormal" style="text-align: justify; text-indent: 127.6pt;"><span style="font-size: 12.0pt; line-height: 115%;">Asimismo declaro que no hay objeción alguna a este trámite por ningún otro familiar que pudiera tener el mismo derecho a disposición que quien suscribe.</span></p>  <p class="MsoNormal" style="text-align: justify; text-indent: 127.6pt;"><span style="font-size: 12.0pt; line-height: 115%;">Se releva de responsabilidad al Registro Civil de esta ciudad, en caso de que existan otras normas testamentarias o de otro tipo sobre la disposición de los restos del causante, incompatibles con la presente y que sea o no de conocimiento del solicitante.</span></p>  <p class="MsoNormal" style="text-align: justify; text-indent: 127.6pt;"><span style="font-size: 12.0pt; line-height: 115%;">Se adjunta a la presente DNI del solicitante, acta de defunción, permiso de salida del cementerio local, documentación que acredita el interés legítimo.</span></p>  <p class="MsoNormal" style="text-align: justify; text-indent: 127.6pt;"><span style="font-size: 12.0pt; line-height: 115%;">Sin otro particular, le saluda atte.-</span></p>  <br><br>  <p class="MsoNormal" style="text-indent: 127.6pt;"><span style="font-size: 12.0pt; line-height: 115%;"> </span></p>  <p class="MsoNormal" style="text-align: right; text-indent: 127.6pt;" align="right"><span style="font-size: 12.0pt; line-height: 115%;">Firma del solicitante</span></p>  <p class="MsoNormal" style="text-align: justify;"><span style="font-size: 12.0pt; line-height: 115%;">Certifico que la firma que antecede ha sido puesta en mi presencia y pertenece a {NombreCompletoFirmante} D.N.I {DniFirmante}</span></p>  <br><br><br><br><br><br><br><br><br><br><br>  <figure class="image-pie"><img src="../fotos/pieRegistro.jpg?v=@DateTime.Now.Ticks"></figure>  </div>',
 5, 1);
 
+insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
+(5, 'Traslado - Autorización',
+'<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png?v=@DateTime.Now.Ticks" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <span style="text-decoration: underline;">S                           //                          D</span><br>  <p style="text-align: justify;">Atentamente:<br>El que suscribe la presente <strong>{NombreCompletoFirmante} DNI {DniFirmante}</strong> en carácter de <strong>{Parentesco}</strong> del difunto <strong>{Difuntos}</strong> inhumado en <strong>{Parcela}</strong> <strong>({NroConcesion}),</strong> de este Cementerio Municipal; autoriza al Municipio a realizar el siguiente trámite: <strong>{AperturaNicho/Fosa}</strong> <strong>Y TRASLADO AL</strong> <strong>{crematorio} </strong>siendo el que suscribe responsable de los posibles daños que se pudieran ocasionar, fruto del trabajo realizado, (féretro, lápida, placa, etc.).<br>     Así mismo y a tales efectos declaro bajo juramento que estoy facultado para el presente requerimiento atento al vinculo expresado en la presente y que soy el único pariente legitimado, o cuento con el consentimiento de ellos. Consecuentemente haciéndome responsable exclusivo de todos los efectos que pudieran derivar de la presente.<br>A los fines de avalar los extremos indicados adjunto los siguientes comprobantes que obran en mi poder y que consisten en recibos pago mantenimiento. Como así También recibos de pago de los aranceles estipulados para dicho trámite por la ordenanza Municipal.<br>     Por cualquier eventualidad relacionada con el presente trámite fijo domicilio en <strong>{DomicilioFirmante}</strong>.</p>  <br><br>  <p class="firma-linea">FIRMA_____________________________________</p>  <br><br>  <p class="firma-linea">ACLARACIÓN_____________________________________</p>  <br><br>  <p class="firma-linea">TELÉFONO_____________________________________</p>  <br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png?v=@DateTime.Now.Ticks" width="700" height="100"></figure>  </div>',
+6, 1);
+
 
 
 insert into TareaPlantilla (Descripcion, TipoTramiteId, Visibilidad, estado) values
@@ -650,7 +656,14 @@ insert into TareaPlantilla (Descripcion, TipoTramiteId, Visibilidad, estado) val
 ('Asignar fecha al trámite', 2,1,0),
 ('Comprobar vínculo con titular', 2,1,0),
 ('Acta de defunción del fallecido', 2,1,0),
-('Generar libre tránsito', 2,1,0);
+('Generar libre tránsito', 2,1,0),
+('Firma autorización del titular', 5,1,0),
+('DNI titular', 5,1,0),
+('Abonar apertura', 5,1,0),
+('Impuestos / deuda al día', 5,1,0),
+('Asignar fecha al trámite', 5,1,0),
+('Comprobar vínculo con titular', 5,1,0),
+('Acta de defunción del fallecido', 5,1,0);
 
 
 

@@ -101,8 +101,9 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<TramitesParcela> TramitesParcelas { get; set; }
 
-    public virtual DbSet<Usuario> Usuarios { get; set; }
+    public virtual DbSet<Traslado> Traslados { get; set; }
 
+    public virtual DbSet<Usuario> Usuarios { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -1259,6 +1260,71 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.TramiteId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("TramitesParcela_tramiteId_fk");
+        });
+
+        modelBuilder.Entity<Traslado>(entity =>
+        {
+            entity.HasKey(e => e.TramiteId).HasName("PK__Traslado__324535470F673EC6");
+
+            entity.Property(e => e.TramiteId)
+                .ValueGeneratedNever()
+                .HasColumnName("tramiteId");
+            entity.Property(e => e.CementerioId).HasColumnName("cementerioId");
+            entity.Property(e => e.ConcesionId).HasColumnName("concesionId");
+            entity.Property(e => e.Destino)
+                .HasMaxLength(150)
+                .HasColumnName("destino");
+            entity.Property(e => e.DifuntoId).HasColumnName("difuntoId");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaCreacion");
+            entity.Property(e => e.FechaFinalizacion)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaFinalizacion");
+            entity.Property(e => e.FechaPendiente)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaPendiente");
+            entity.Property(e => e.InfoAdicional).HasColumnName("infoAdicional");
+            entity.Property(e => e.ParcelaDestinoId).HasColumnName("parcelaDestinoId");
+            entity.Property(e => e.ParcelaOrigenId).HasColumnName("parcelaOrigenId");
+            entity.Property(e => e.UsuarioId).HasColumnName("usuarioId");
+            entity.Property(e => e.Visibilidad)
+                .HasDefaultValue(true)
+                .HasColumnName("visibilidad");
+
+            entity.HasOne(d => d.Cementerio).WithMany(p => p.Traslados)
+                .HasForeignKey(d => d.CementerioId)
+                .HasConstraintName("FK_TRASLADO_Cementerio");
+
+            entity.HasOne(d => d.Concesion).WithMany(p => p.TrasladoConcesions)
+                .HasForeignKey(d => d.ConcesionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TRASLADO_concesionId");
+
+            entity.HasOne(d => d.Difunto).WithMany(p => p.Traslados)
+                .HasForeignKey(d => d.DifuntoId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TRASLADO_Difunto");
+
+            entity.HasOne(d => d.ParcelaDestino).WithMany(p => p.TrasladoParcelaDestinos)
+                .HasForeignKey(d => d.ParcelaDestinoId)
+                .HasConstraintName("FK_TRASLADO_ParcelaDestino");
+
+            entity.HasOne(d => d.ParcelaOrigen).WithMany(p => p.TrasladoParcelaOrigens)
+                .HasForeignKey(d => d.ParcelaOrigenId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TRASLADO_ParcelaOrigen");
+
+            entity.HasOne(d => d.Tramite).WithOne(p => p.TrasladoTramite)
+                .HasForeignKey<Traslado>(d => d.TramiteId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TRASLADO_Tramite");
+
+            entity.HasOne(d => d.Usuario).WithMany(p => p.Traslados)
+                .HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TRASLADO_Usuario");
         });
 
         modelBuilder.Entity<Usuario>(entity =>

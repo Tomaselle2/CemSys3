@@ -12,4 +12,6 @@ public partial class Cementerio
     public bool Visibilidad { get; set; }
 
     public virtual ICollection<Cremacione> Cremaciones { get; set; } = new List<Cremacione>();
+
+    public virtual ICollection<Traslado> Traslados { get; set; } = new List<Traslado>();
 }
