@@ -121,6 +121,10 @@ namespace CemSys3.Controllers
                 vm.TipoParcelaID = vm.Dto.TipoParcelaId;
                 vm.SeccionID = vm.Dto.SeccionId;
                 vm.ParcelaID = vm.Dto.NuevaParcelaId;
+                vm.TipoTrasladoId = vm.Dto.TipoTraslado.HasValue
+    ? (TipoTrasladoEnum)vm.Dto.TipoTraslado.Value
+    : TipoTrasladoEnum.Ninguno;
+                ModelState.Remove(nameof(vm.TipoTrasladoId));
 
                 return View("Traslado", vm);
             }
@@ -174,7 +178,8 @@ namespace CemSys3.Controllers
                 FirmanteId = firmanteId,
                 NroConcesion = viewModel.Dto.NroConcesion ?? 0,
                 CementerioId = viewModel.DestinoCementerioId,
-                NuevaParcelaId = viewModel.ParcelaID ?? 0
+                NuevaParcelaId = viewModel.ParcelaID ?? 0,
+                TipoTraslado = (int)viewModel.TipoTrasladoId
             };
 
 

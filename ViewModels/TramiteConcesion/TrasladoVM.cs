@@ -5,6 +5,7 @@ using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.Tarea;
 using CemSys3.DTOs.TramitesConcesion;
 using CemSys3.DTOs.TramitesConcesion.Traslado;
+using CemSys3.Enumerables;
 using System.ComponentModel.DataAnnotations;
 
 namespace CemSys3.ViewModels.TramiteConcesion
@@ -42,5 +43,7 @@ namespace CemSys3.ViewModels.TramiteConcesion
         public int? TipoParcelaID { get; set; }
         public int? SeccionID { get; set; }
         public int? ParcelaID { get; set; }
+
+        public TipoTrasladoEnum TipoTrasladoId { get; set; }
     }
 }

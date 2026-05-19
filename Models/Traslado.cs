@@ -31,6 +31,8 @@ public partial class Traslado
 
     public bool? Visibilidad { get; set; }
 
+    public int? TipoTraslado { get; set; }
+
     public virtual Cementerio? Cementerio { get; set; }
 
     public virtual Tramite Concesion { get; set; } = null!;

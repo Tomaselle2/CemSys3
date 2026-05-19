@@ -189,7 +189,7 @@ namespace CemSys3.Business.TramiteConcesion
                 var plantilla = await _plantillaService.ObtenerPorTipoAutorizacionIdAsync(dto.TipoAutorizacionId); //busco la plantilla especifica
 
                 string difuntosFormateados = DifuntoFormatter.FormatearDifuntos(dto.Difuntos);
-                string NombreCementerio = await ModificarDestino(dto.CementerioId, dto.TramiteId, dto.NuevaParcelaId);
+                string NombreCementerio = await ModificarDestino(dto.CementerioId, dto.TramiteId, dto.NuevaParcelaId, dto.TipoTraslado);
 
                 var nombreCompletoFirmante =
                 string.IsNullOrWhiteSpace($"{firmante?.Apellido} {firmante?.Nombre}".Trim())
@@ -223,7 +223,8 @@ namespace CemSys3.Business.TramiteConcesion
                                 { "AperturaNicho/Fosa", $"APERTURA DE {dto.TipoParcela.ToUpper()}" },
                                 { "NuevaUbicacionTraslado", NombreCementerio },
                                 { "DomicilioFirmante", domicilioFirmante },
-                                { "crematorioDestino", NombreCementerio }
+                                { "crematorioDestino", NombreCementerio },
+                                {"crematorio", NombreCementerio}
                             };
 
                 await _documentoService.CrearDesdePlantillaAsync(
@@ -276,7 +277,7 @@ namespace CemSys3.Business.TramiteConcesion
             dto.SeccionId = traslado.ParcelaDestino?.SeccionId ?? 0;
             dto.TipoParcelaId = traslado.ParcelaDestino?.TipoParcelaId ?? 0;
             dto.NuevaParcelaId = traslado.ParcelaDestinoId ?? 0;
-
+            dto.TipoTraslado = traslado.TipoTraslado;
 
             dto.TitularesActuales = await _context.HistorialTitularesConcesiones
                     .Where(h => h.ConcesionId == traslado.ConcesionId && h.FechaFin == null)
@@ -337,7 +338,7 @@ namespace CemSys3.Business.TramiteConcesion
             }
         }
 
-        private async Task<string> ModificarDestino(int cementerioId, int tramiteId, int parcelaNuevaId)
+        private async Task<string> ModificarDestino(int cementerioId, int tramiteId, int parcelaNuevaId, int TipoTraslado)
         {
             //modifica el destino del difunto en la parcela, para que quede registrado el nuevo cementerio destino.
             Models.Traslado traslado = await _context.Traslados.FirstOrDefaultAsync(c => c.TramiteId == tramiteId) ?? throw new Exception("Trámite de traslado no encontrado");
@@ -352,7 +353,7 @@ namespace CemSys3.Business.TramiteConcesion
                 traslado.Destino = cementerio.Nombre.ToUpper();
 
                 traslado.ParcelaDestinoId = null;
-
+                traslado.TipoTraslado = TipoTraslado;
                 DestinoNombre = cementerio.Nombre.ToUpper();
             }
 
@@ -363,6 +364,7 @@ namespace CemSys3.Business.TramiteConcesion
                 traslado.ParcelaDestinoId = parcela.Id;
                 traslado.Destino = ParcelaFormatter.ObtenerParcela(parcela.TipoParcelaId ?? 0, parcela.NroParcela, parcela.NroFila, parcela.Seccion.Nombre.ToUpper());
                 traslado.CementerioId = null;
+                traslado.TipoTraslado = TipoTraslado;
 
                 DestinoNombre = traslado.Destino;
             }

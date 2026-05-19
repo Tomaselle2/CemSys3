@@ -1288,6 +1288,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.InfoAdicional).HasColumnName("infoAdicional");
             entity.Property(e => e.ParcelaDestinoId).HasColumnName("parcelaDestinoId");
             entity.Property(e => e.ParcelaOrigenId).HasColumnName("parcelaOrigenId");
+            entity.Property(e => e.TipoTraslado).HasColumnName("tipoTraslado");
             entity.Property(e => e.UsuarioId).HasColumnName("usuarioId");
             entity.Property(e => e.Visibilidad)
                 .HasDefaultValue(true)

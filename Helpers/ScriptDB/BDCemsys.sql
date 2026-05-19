@@ -630,7 +630,7 @@ CREATE TABLE Traslados (
 	concesionId int NOT null,
 	cementerioId INT NULL,
     visibilidad BIT DEFAULT 1,
-
+	tipoTraslado INT NULL,
     CONSTRAINT FK_TRASLADO_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
     CONSTRAINT FK_TRASLADO_concesionId FOREIGN KEY (concesionId) REFERENCES Tramites(id),
 	CONSTRAINT FK_TRASLADO_ParcelaOrigen FOREIGN KEY (parcelaOrigenId) REFERENCES Parcelas(id),

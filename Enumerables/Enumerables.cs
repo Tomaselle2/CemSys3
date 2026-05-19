@@ -356,6 +356,13 @@ namespace CemSys3.Enumerables
         Otro
     }
 
+    public enum TipoTrasladoEnum
+    {
+        Ninguno = 0,
+        Externo = 1,
+        Interno = 2
+    }
+
     public class Enumerables
     {
     }

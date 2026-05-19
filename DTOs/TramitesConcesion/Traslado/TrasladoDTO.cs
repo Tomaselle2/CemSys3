@@ -19,7 +19,7 @@ namespace CemSys3.DTOs.TramitesConcesion.Traslado
         public int? NroFila { get; set; }
         public int? NroConcesion { get; set; }
         public int ConcesionId { get; set; }
-
+        public int? TipoTraslado { get; set; }
         public List<TitularesContratoDTO> TitularesActuales { get; set; } = new();
 
         public List<DifuntoContratoDTO> Difuntos { get; set; } = new List<DifuntoContratoDTO>();
