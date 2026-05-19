@@ -160,33 +160,81 @@ function setupSelectors(tipoParcelaSelect, seccionSelect, parcelaSelect,
 }
 
 
-async function cargarDatosIniciales(tipoParcelaSelect, seccionSelect, parcelaSelect,
-    urlSecciones, urlParcelas, estadoDifuntoSelect, actualizarParcelas) {
-    // Si hay tipo seleccionado, cargar secciones
-    if (tipoParcelaSelect.value) {
-        // Disparar evento para cargar secciones
-        tipoParcelaSelect.dispatchEvent(new Event('change'));
+//async function cargarDatosIniciales(tipoParcelaSelect, seccionSelect, parcelaSelect,
+//    urlSecciones, urlParcelas, estadoDifuntoSelect, actualizarParcelas) {
+//    // Si hay tipo seleccionado, cargar secciones
+//    if (tipoParcelaSelect.value) {
+//        // Disparar evento para cargar secciones
+//        tipoParcelaSelect.dispatchEvent(new Event('change'));
 
-        // Esperar un momento para que carguen las secciones
-        setTimeout(async () => {
-            // Si hay sección seleccionada, cargar parcelas
-            if (seccionSelect.value && estadoDifuntoSelect && estadoDifuntoSelect.value) {
-                await actualizarParcelas();
-            }
-        }, 100);
+//        // Esperar un momento para que carguen las secciones
+//        setTimeout(async () => {
+//            // Si hay sección seleccionada, cargar parcelas
+//            if (seccionSelect.value && estadoDifuntoSelect && estadoDifuntoSelect.value) {
+//                await actualizarParcelas();
+//            }
+//        }, 100);
+//    }
+
+//    // Restaurar valores seleccionados si existen en los data-attributes
+//    const seccionSelected = seccionSelect.getAttribute('data-selected');
+//    if (seccionSelected) {
+//        seccionSelect.value = seccionSelected;
+//        seccionSelect.removeAttribute('data-selected');
+//    }
+
+//    const parcelaSelected = parcelaSelect.getAttribute('data-selected');
+//    if (parcelaSelected) {
+//        parcelaSelect.value = parcelaSelected;
+//        parcelaSelect.removeAttribute('data-selected');
+//    }
+//}
+
+async function cargarDatosIniciales(
+    tipoParcelaSelect,
+    seccionSelect,
+    parcelaSelect,
+    urlSecciones,
+    urlParcelas,
+    estadoDifuntoSelect,
+    actualizarParcelas
+) {
+
+    // Restaurar tipo parcela
+    const tipoSelected = tipoParcelaSelect.getAttribute('data-selected');
+    if (tipoSelected) {
+        tipoParcelaSelect.value = tipoSelected;
     }
 
-    // Restaurar valores seleccionados si existen en los data-attributes
+    // Restaurar sección
     const seccionSelected = seccionSelect.getAttribute('data-selected');
-    if (seccionSelected) {
-        seccionSelect.value = seccionSelected;
-        seccionSelect.removeAttribute('data-selected');
-    }
 
+    // Restaurar parcela
     const parcelaSelected = parcelaSelect.getAttribute('data-selected');
-    if (parcelaSelected) {
-        parcelaSelect.value = parcelaSelected;
-        parcelaSelect.removeAttribute('data-selected');
+
+    // Si hay tipo, cargar secciones
+    if (tipoParcelaSelect.value) {
+
+        // cargar secciones
+        await tipoParcelaSelect.dispatchEvent(new Event('change'));
+
+        // esperar a que fetch termine
+        setTimeout(async () => {
+
+            // restaurar sección
+            if (seccionSelected) {
+                seccionSelect.value = seccionSelected;
+            }
+
+            // cargar parcelas
+            await actualizarParcelas();
+
+            // restaurar parcela
+            if (parcelaSelected) {
+                parcelaSelect.value = parcelaSelected;
+            }
+
+        }, 200);
     }
 }
 

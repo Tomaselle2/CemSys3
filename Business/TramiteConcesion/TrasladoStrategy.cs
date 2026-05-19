@@ -250,6 +250,7 @@ namespace CemSys3.Business.TramiteConcesion
         {
             Models.Traslado traslado = await _context.Traslados.AsNoTracking()
                .Include(t => t.Tramite)
+               .Include(p => p.ParcelaDestino)
                .FirstOrDefaultAsync(ct => ct.TramiteId == tramiteId) ?? throw new Exception("Trámite de traslado no encontrado.");
 
             Models.Concesione concesion = await _context.Concesiones.AsNoTracking()
@@ -271,7 +272,11 @@ namespace CemSys3.Business.TramiteConcesion
             dto.ConcesionId = concesion.TramiteId;
             dto.CementerioId = traslado.CementerioId ?? 0;
             dto.FechaRealizacion = traslado.FechaPendiente;
+
+            dto.SeccionId = traslado.ParcelaDestino?.SeccionId ?? 0;
+            dto.TipoParcelaId = traslado.ParcelaDestino?.TipoParcelaId ?? 0;
             dto.NuevaParcelaId = traslado.ParcelaDestinoId ?? 0;
+
 
             dto.TitularesActuales = await _context.HistorialTitularesConcesiones
                     .Where(h => h.ConcesionId == traslado.ConcesionId && h.FechaFin == null)

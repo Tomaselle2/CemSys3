@@ -11,7 +11,8 @@ namespace CemSys3.DTOs.TramitesConcesion.Traslado
         public int ParcelaId { get; set; }
         public string? TipoParcela { get; set; }
         public string? NombreSeccion { get; set; }
-
+        public int SeccionId { get; set; }
+        public int TipoParcelaId { get; set; }
         public int CementerioId { get; set; }
         public int NuevaParcelaId { get; set; }
         public int? NroParcela { get; set; }

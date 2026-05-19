@@ -4,6 +4,7 @@
 @using CemSys3.Helpers.Enumerable
 @using CemSys3.ViewModels.Archivo
 @using CemSys3.ViewModels.Historial
+@using CemSys3.ViewModels.Ingreso
 @using CemSys3.ViewModels.TramiteConcesion
 @model TrasladoVM
 
@@ -261,6 +262,45 @@ new ArbolDTO
             <option value="">Seleccione un destino</option>
         </select>
     </div>
+
+    <input type="hidden" id="estadoDelDifunto" value="2" />
+
+    <!-- Formulario datos de ubicacion-->
+    <div class="accordion" id="accordionUbicacion">
+        @* ID único para el acordeón principal *@
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="panelsUbicacion-headingOne">
+                <button class="accordion-button nueva-seccion" type="button" data-bs-toggle="collapse" data-bs-target="#panelsUbicacion-collapseOne" aria-expanded="false" aria-controls="panelsUbicacion-collapseOne">
+                    Ubicación
+                </button>
+            </h2>
+            <div id="panelsUbicacion-collapseOne" class="accordion-collapse collapse" aria-labelledby="panelsUbicacion-headingOne" data-bs-parent="#accordionUbicacion">
+                @* Agregado data-bs-parent y 'show' para que inicie abierto si lo deseas *@
+                <div class="accordion-body">
+                    <div class="form-box">
+                        <!--parcelas-->
+                        @await Html.PartialAsync("IngresoPV/_SelectorUbicacion",
+                        new SelectorUbicacionVM
+                        {
+                            TipoParcelaID = Model.TipoParcelaID,
+                            SeccionID = Model.SeccionID,
+                            ParcelaID = Model.ParcelaID,
+
+                            TipoParcelaName = "TipoParcelaID",
+                            SeccionName = "SeccionID",
+                            ParcelaName = "ParcelaID",
+
+                            UrlSecciones = Url.Action("ObtenerSeccionesPorTipo", "Seccion") ?? "",
+                            UrlParcelas = Url.Action("ObtenerParcelasPorSeccion", "Parcela") ?? "",
+                        })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
    
     <hr />
 
@@ -581,7 +621,7 @@ new ArchivoVM
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-
+    <script src="~/js/ubicacion-selector.js"></script>
    
     <script>
         const root = document.getElementById("react-flow-root");

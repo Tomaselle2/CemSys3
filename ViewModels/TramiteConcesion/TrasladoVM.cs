@@ -19,7 +19,7 @@ namespace CemSys3.ViewModels.TramiteConcesion
 
         public int DestinoCementerioId { get; set; }
 
-        public int NuevaParcelaId { get; set; }
+        //public int ParcelaID { get; set; } //nueva parcelaID
         public TrasladoDTO Dto { get; set; } = new();
 
         public IEnumerable<ArchivoDTO> Archivos { get; set; } = new List<ArchivoDTO>();
@@ -35,5 +35,12 @@ namespace CemSys3.ViewModels.TramiteConcesion
         public bool Generado => Documentos.Any();
 
         public SweetAlertDTO? SweetAlert { get; set; }
+
+
+
+        //elegir el nuevo destino parcela
+        public int? TipoParcelaID { get; set; }
+        public int? SeccionID { get; set; }
+        public int? ParcelaID { get; set; }
     }
 }

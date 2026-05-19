@@ -118,6 +118,9 @@ namespace CemSys3.Controllers
                 vm.Tareas = await _tareaService.GetAllByTramite(tramiteId);
                 vm.Firmantes = await _firmantesService.GetAllByTramite(tramiteId);
                 vm.DestinoCementerioId = vm.Dto.CementerioId;
+                vm.TipoParcelaID = vm.Dto.TipoParcelaId;
+                vm.SeccionID = vm.Dto.SeccionId;
+                vm.ParcelaID = vm.Dto.NuevaParcelaId;
 
                 return View("Traslado", vm);
             }
@@ -170,8 +173,8 @@ namespace CemSys3.Controllers
                 TipoAutorizacionId = tipoAutorizacionId,
                 FirmanteId = firmanteId,
                 NroConcesion = viewModel.Dto.NroConcesion ?? 0,
-                CementerioId = viewModel.DestinoCementerioId != 0 ? viewModel.DestinoCementerioId : 1,
-                NuevaParcelaId = viewModel.NuevaParcelaId
+                CementerioId = viewModel.DestinoCementerioId,
+                NuevaParcelaId = viewModel.ParcelaID ?? 0
             };
 
 
