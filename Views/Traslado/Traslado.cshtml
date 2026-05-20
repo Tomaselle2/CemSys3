@@ -219,6 +219,10 @@ new ArbolDTO
     <input type="hidden" asp-for="Dto.NombreSeccion" />
     <input type="hidden" asp-for="Dto.NroFila" />
     <input type="hidden" asp-for="DestinoCementerioId" />
+    <input type="hidden" asp-for="ParcelaID" />
+    <input type="hidden" asp-for="TipoTrasladoId" />
+
+
     <input type="hidden" name="tipoAutorizacionId" value="@((int)TipoAutorizacionEnum.TrasladoAutorizacion)" />
 
     @for (int i = 0; i < Model.Dto.Difuntos.Count; i++)

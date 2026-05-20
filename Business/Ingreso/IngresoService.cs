@@ -15,9 +15,7 @@ using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Models;
-using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace CemSys3.Business.Ingreso
 {
