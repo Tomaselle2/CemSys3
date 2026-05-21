@@ -58,6 +58,8 @@ namespace CemSys3.Business.TramiteConcesion
             Models.PreciosTarifaria porcentajeFondo = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.PorcentajeFondoAyudaCentroSalud).FirstOrDefaultAsync() ?? throw new Exception("No se encontro el % fondo ayuda");
             Models.PreciosTarifaria precioApertura = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.AperturaNichoConPlaca).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio de apertura");
             Models.PreciosTarifaria precioCremacion = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.Cremacion).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio de cremacion");
+            Models.PreciosTarifaria precioCierreNicho = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.CierreNicho).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio de cierre de nicho");
+            Models.PreciosTarifaria precioCierreFosa = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.CierreFosa).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio de cierre de fosa");
 
 
             List<Models.RequisitosTramite> requisitos = await _context.RequisitosTramites
@@ -85,7 +87,21 @@ namespace CemSys3.Business.TramiteConcesion
                                 2
                             ).ToString("0.00", CultureInfo.InvariantCulture)
                         },
-                        { "Difuntos", difuntosFormateados }
+                        { "Difuntos", difuntosFormateados },
+                        {
+                            "precioCierreNicho",
+                            Math.Round(
+                                precioCierreNicho.Precio * (1 + porcentajeFondo.Precio),
+                                2
+                            ).ToString("0.00", CultureInfo.InvariantCulture)
+                        },
+                         {
+                            "precioCierreFosa",
+                            Math.Round(
+                                precioCierreFosa.Precio * (1 + porcentajeFondo.Precio),
+                                2
+                            ).ToString("0.00", CultureInfo.InvariantCulture)
+                        }
                     };
 
                 requisito.Descripcion = templateProcessor.Procesar(requisito.Descripcion ?? "", variables);

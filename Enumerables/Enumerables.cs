@@ -323,7 +323,11 @@ namespace CemSys3.Enumerables
         ConcesionNicho = 16,
         ConcesionFosa = 17,
         PorcentajeDescuentoRenovacionConcesionAlDia = 25,
-        Cremacion = 9
+        Cremacion = 9,
+        CierreNicho = 4,
+        CierreFosa = 5,
+        PermisoParaColocarPlaca = 6,
+        PermisoRefaccion = 7,
     }
 
     public enum CategoriaArchivosEnum //cada categoria que se agrega debe ser al final siempre
