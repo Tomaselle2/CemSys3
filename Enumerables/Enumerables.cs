@@ -64,6 +64,9 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Traslado - Autorización")]
         TrasladoAutorizacion = 6,
+
+        [Display(Name = "Reducción - Autorización")]
+        ReduccionAutorizacion = 7,
     }
 
     public enum TipoNichoEnum

@@ -61,6 +61,26 @@ namespace CemSys3.Business.Tramite
                     result.Success = true;
                     result.Id = tramiteId;
                     break;
+
+                case (int)TipoTramiteEnum.Reduccion:
+                    Reduccione reduccion = await _context.Reducciones.FindAsync(tramiteId) ?? throw new Exception("No se encontro la reducción");
+                    reduccion.InfoAdicional = informacionAdicionalTramite;
+                    await _context.SaveChangesAsync();
+
+                    result.Message = "Información adicional actualizada correctamente";
+                    result.Success = true;
+                    result.Id = tramiteId;
+                    break;
+
+                case (int)TipoTramiteEnum.Traslado:
+                    Traslado traslado = await _context.Traslados.FindAsync(tramiteId) ?? throw new Exception("No se encontro el traslado");
+                    traslado.InfoAdicional = informacionAdicionalTramite;
+                    await _context.SaveChangesAsync();
+
+                    result.Message = "Información adicional actualizada correctamente";
+                    result.Success = true;
+                    result.Id = tramiteId;
+                    break;
             }
 
             return result;

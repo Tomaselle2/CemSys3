@@ -33,6 +33,8 @@ public partial class Usuario
 
     public virtual ICollection<Introduccione> Introducciones { get; set; } = new List<Introduccione>();
 
+    public virtual ICollection<Reduccione> Reducciones { get; set; } = new List<Reduccione>();
+
     public virtual RolesUsuario Rol { get; set; } = null!;
 
     public virtual ICollection<Tramite> Tramites { get; set; } = new List<Tramite>();

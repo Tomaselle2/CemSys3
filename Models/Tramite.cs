@@ -53,6 +53,10 @@ public partial class Tramite
 
     public virtual ICollection<ParcelaDifunto> ParcelaDifuntoTramiteRetiros { get; set; } = new List<ParcelaDifunto>();
 
+    public virtual ICollection<Reduccione> ReduccioneConcesions { get; set; } = new List<Reduccione>();
+
+    public virtual Reduccione? ReduccioneTramite { get; set; }
+
     public virtual ICollection<Tarea> Tareas { get; set; } = new List<Tarea>();
 
     public virtual TipoTramite TipoTramite { get; set; } = null!;

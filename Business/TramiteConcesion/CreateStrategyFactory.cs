@@ -28,6 +28,9 @@ namespace CemSys3.Business.TramiteConcesion
                 (int)TipoTramiteEnum.Traslado =>
                 _provider.GetRequiredService<TrasladoStrategy>(),
 
+                (int)TipoTramiteEnum.Reduccion =>
+                _provider.GetRequiredService<ReduccionStrategy>(),
+
                 _ => throw new Exception("CreateStrategy no implementada")
             };
         }

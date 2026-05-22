@@ -65,6 +65,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<PreciosTarifaria> PreciosTarifarias { get; set; }
 
+    public virtual DbSet<Reduccione> Reducciones { get; set; }
+
     public virtual DbSet<ReglasIngreso> ReglasIngresos { get; set; }
 
     public virtual DbSet<RequisitosTramite> RequisitosTramites { get; set; }
@@ -104,6 +106,7 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Traslado> Traslados { get; set; }
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -858,6 +861,72 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.Seccion).WithMany(p => p.PreciosTarifaria)
                 .HasForeignKey(d => d.SeccionId)
                 .HasConstraintName("PreciosTarifarias_seccionId_fk");
+        });
+
+        modelBuilder.Entity<Reduccione>(entity =>
+        {
+            entity.HasKey(e => e.TramiteId).HasName("PK__Reduccio__324535471C1112BB");
+
+            entity.Property(e => e.TramiteId)
+                .ValueGeneratedNever()
+                .HasColumnName("tramiteId");
+            entity.Property(e => e.CementerioId).HasColumnName("cementerioId");
+            entity.Property(e => e.ConcesionId).HasColumnName("concesionId");
+            entity.Property(e => e.Destino)
+                .HasMaxLength(150)
+                .HasColumnName("destino");
+            entity.Property(e => e.DifuntoId).HasColumnName("difuntoId");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaCreacion");
+            entity.Property(e => e.FechaFinalizacion)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaFinalizacion");
+            entity.Property(e => e.FechaPendiente)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaPendiente");
+            entity.Property(e => e.InfoAdicional).HasColumnName("infoAdicional");
+            entity.Property(e => e.ParcelaDestinoId).HasColumnName("parcelaDestinoId");
+            entity.Property(e => e.ParcelaOrigenId).HasColumnName("parcelaOrigenId");
+            entity.Property(e => e.TipoTraslado).HasColumnName("tipoTraslado");
+            entity.Property(e => e.UsuarioId).HasColumnName("usuarioId");
+            entity.Property(e => e.Visibilidad)
+                .HasDefaultValue(true)
+                .HasColumnName("visibilidad");
+
+            entity.HasOne(d => d.Cementerio).WithMany(p => p.Reducciones)
+                .HasForeignKey(d => d.CementerioId)
+                .HasConstraintName("FK_REDUCCION_Cementerio");
+
+            entity.HasOne(d => d.Concesion).WithMany(p => p.ReduccioneConcesions)
+                .HasForeignKey(d => d.ConcesionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_REDUCCION_concesionId");
+
+            entity.HasOne(d => d.Difunto).WithMany(p => p.Reducciones)
+                .HasForeignKey(d => d.DifuntoId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_REDUCCION_Difunto");
+
+            entity.HasOne(d => d.ParcelaDestino).WithMany(p => p.ReduccioneParcelaDestinos)
+                .HasForeignKey(d => d.ParcelaDestinoId)
+                .HasConstraintName("FK_REDUCCION_ParcelaDestino");
+
+            entity.HasOne(d => d.ParcelaOrigen).WithMany(p => p.ReduccioneParcelaOrigens)
+                .HasForeignKey(d => d.ParcelaOrigenId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_REDUCCION_ParcelaOrigen");
+
+            entity.HasOne(d => d.Tramite).WithOne(p => p.ReduccioneTramite)
+                .HasForeignKey<Reduccione>(d => d.TramiteId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_REDUCCION_Tramite");
+
+            entity.HasOne(d => d.Usuario).WithMany(p => p.Reducciones)
+                .HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_REDUCCION_Usuario");
         });
 
         modelBuilder.Entity<ReglasIngreso>(entity =>
