@@ -514,7 +514,7 @@
                 apellido: (t.apellido ?? t.Apellido ?? '') || '',
                 sexo: (t.sexo ?? t.Sexo ?? '').toLowerCase(),
                 celular: t.celular ?? t.Celular ?? '',
-                correoElectronico: t.correo ?? t.correoElectronico ?? t.CorreoElectronico ?? '',
+                correoElectronico: t.correo ?? t.Correo ?? t.correoElectronico ?? t.CorreoElectronico ?? t.correoInput ?? t.correoInput ?? '',
                 domicilio: t.domicilio ?? t.Domicilio ?? ''
             }));
 
@@ -757,7 +757,7 @@
                 nombre: nombreInput.value.trim(),
                 apellido: apellidoInput.value.trim(),
                 celular: celularInput.value.trim(),
-                correoElectronico: correoInput.value.trim(),
+                correo: correoInput.value.trim(),
                 domicilio: domicilioInput.value.trim()
             };
 
@@ -799,7 +799,7 @@
                 apellido: titular.apellido ?? titular.Apellido ?? '',
                 sexo: (titular.sexo ?? titular.Sexo ?? '').toLowerCase(),
                 celular: titular.celular ?? titular.Celular ?? '',
-                correoElectronico: titular.correo ?? titular.correoElectronico ?? titular.CorreoElectronico ?? '',
+                correoElectronico: titular.correo ?? titular.correoElectronico ?? titular.CorreoElectronico ?? titular.Correo ?? titular.CorreoInput ?? titular.correoInput ?? '',
                 domicilio: titular.domicilio ?? titular.Domicilio ?? ''
             };
 
@@ -890,7 +890,7 @@
                             </div>
                             <div>
                                 <label>Correo</label>
-                                <input class="form-control" type="text" name="contrato.Titulares[${index}].CorreoElectronico" value="${titular.correoElectronico || titular.CorreoElectronico || ''}" maxlength="100" />                            
+                                <input class="form-control" type="text" name="Personas[${index}].CorreoElectronico" value="${titular.correoElectronico || titular.CorreoElectronico || titular.Correo || titular.correo || titular.correoInput || titular.CorreoInput || ''}" maxlength="100" />
                             </div>
                         </div>
                     </div>

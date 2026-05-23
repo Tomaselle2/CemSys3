@@ -60,6 +60,7 @@ namespace CemSys3.Business.TramiteConcesion
             Models.PreciosTarifaria precioCremacion = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.Cremacion).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio de cremacion");
             Models.PreciosTarifaria precioCierreNicho = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.CierreNicho).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio de cierre de nicho");
             Models.PreciosTarifaria precioCierreFosa = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.CierreFosa).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio de cierre de fosa");
+            Models.PreciosTarifaria precioReduccion = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.Reduccion).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio de cierre de fosa");
 
 
             List<Models.RequisitosTramite> requisitos = await _context.RequisitosTramites
@@ -99,6 +100,13 @@ namespace CemSys3.Business.TramiteConcesion
                             "precioCierreFosa",
                             Math.Round(
                                 precioCierreFosa.Precio * (1 + porcentajeFondo.Precio),
+                                2
+                            ).ToString("0.00", CultureInfo.InvariantCulture)
+                        },
+                         {
+                            "precioReduccion",
+                            Math.Round(
+                                precioReduccion.Precio * (1 + porcentajeFondo.Precio),
                                 2
                             ).ToString("0.00", CultureInfo.InvariantCulture)
                         }

@@ -228,6 +228,7 @@ namespace CemSys3.Business.TramiteConcesion
                 //consultar el difunto relacionado a la parcela para el tramite
                 Models.Persona difunto = await _context.Personas.FirstOrDefaultAsync(p => p.Id == reduccion.DifuntoId) ?? throw new Exception("Difunto no encontrado.");
 
+                difunto.EstadoDifuntoId = (int)EstadoDifuntoEnum.Reducido;
 
 
                 //3- vicular firmantes y difuntos al tramite
@@ -252,14 +253,19 @@ namespace CemSys3.Business.TramiteConcesion
                 Models.Parcela parcela = await _context.Parcelas.Include(s => s.Seccion).FirstOrDefaultAsync(p => p.Id == concesion.ParcelaId) ?? throw new Exception("Parcela no encontrada.");
                 parcela.InformacionAdicional += $"\n● El {reduccion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se finalizó el trámite de reducción (trámite {tramiteId}) en concesión ({concesion.Concesion?.ToString("D5")})";
 
-                //5- Quitar difunto en la parcela actual
-                Models.ParcelaDifunto parcelaDifunto = await _context.ParcelaDifuntos
-                    .FirstOrDefaultAsync(pd => pd.ParcelaId == parcela.Id && pd.DifuntoId == difunto.Id && pd.FechaRetiro == null) ?? throw new Exception("Registro de parcela-difunto no encontrado.");
+                
 
-                parcelaDifunto.FechaRetiro = reduccion.FechaPendiente;
-                parcelaDifunto.TramiteRetiroId = tramiteId;
+                if(reduccion.TipoTraslado != (int)TipoTrasladoEnum.Ninguno) // es decir que es trasladado internamente o externo
+                {
+                    //5- Quitar difunto en la parcela actual
+                    parcela.CantidadDifuntos -= 1;
 
-                parcela.CantidadDifuntos -= 1;
+                    Models.ParcelaDifunto parcelaDifunto = await _context.ParcelaDifuntos
+                        .FirstOrDefaultAsync(pd => pd.ParcelaId == parcela.Id && pd.DifuntoId == difunto.Id && pd.FechaRetiro == null) ?? throw new Exception("Registro de parcela-difunto no encontrado.");
+
+                    parcelaDifunto.FechaRetiro = reduccion.FechaPendiente;
+                    parcelaDifunto.TramiteRetiroId = tramiteId;
+                }
 
                 string infoConcesion = "Revisar el libro de concesión";
                 //5.1 pasos por si queda la parcela vacia.

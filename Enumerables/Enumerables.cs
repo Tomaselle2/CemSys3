@@ -331,6 +331,7 @@ namespace CemSys3.Enumerables
         CierreFosa = 5,
         PermisoParaColocarPlaca = 6,
         PermisoRefaccion = 7,
+        Reduccion = 8
     }
 
     public enum CategoriaArchivosEnum //cada categoria que se agrega debe ser al final siempre
