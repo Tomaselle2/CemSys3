@@ -39,6 +39,21 @@
 
             limpiarTrasladoExterno();
         }
+
+        // =========================================
+        // TRASLADO Ninguno (Mismo Lugar)
+        // =========================================
+
+        else if (tipoSeleccionado === "Ninguno") {
+
+            bloqueExterno.style.display = 'none';
+            bloqueInterno.style.display = 'none';
+
+            destinoSelect.required = false;
+
+            limpiarTrasladoExterno();
+            limpiarUbicacionInterna();
+        }
     }
 
     radios.forEach(radio => {

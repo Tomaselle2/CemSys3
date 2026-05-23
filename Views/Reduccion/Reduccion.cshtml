@@ -303,6 +303,21 @@ new ArbolDTO
 
             </div>
 
+            <!-- Misma ubicacion -->
+            <div class="form-check">
+
+                <input class="form-check-input js-tipo-traslado"
+                       type="radio"
+                       asp-for="TipoTrasladoId"
+                       id="trasladoNinguno"
+                       value="@TipoTrasladoEnum.Ninguno" />
+
+                <label class="form-check-label" for="trasladoNinguno">
+                    Mismo lugar
+                </label>
+
+            </div>
+
         </div>
     </div>
 

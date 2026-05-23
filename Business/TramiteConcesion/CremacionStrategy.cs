@@ -267,6 +267,7 @@ namespace CemSys3.Business.TramiteConcesion
 
 
                     tramiteConcesion.EstadoActualId = (int)EstadosTramiteEnum.Caducado;
+                    concesion.Vencimiento = null;
                     tramiteConcesion.FechaFinalizacion = cremacion.FechaFinalizacion;
                     HistorialEstadosDTO historialConcesion = new HistorialEstadosDTO
                     {
