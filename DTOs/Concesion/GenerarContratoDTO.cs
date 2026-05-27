@@ -20,7 +20,6 @@ namespace CemSys3.DTOs.Concesion
         public List<PrecioTarifariaDTO> PreciosFosas { get; set; } = new List<PrecioTarifariaDTO>();
 
 
-        public string baseUrl = string.Empty;
         public string PrecioEnLetras = string.Empty;
         public string formaPago { get; set; } = string.Empty;
         public int? CuotaId { get; set; }
@@ -36,6 +35,9 @@ namespace CemSys3.DTOs.Concesion
 
         public string NombreIntendente { get; set; } = string.Empty;
         public bool EsRenovacion {  get; set; } = false;
+
+        public string LogoBase64 { get; set; } = "";
+        public string PieBase64 { get; set; } = "";
 
 
     }

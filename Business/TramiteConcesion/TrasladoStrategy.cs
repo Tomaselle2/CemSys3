@@ -311,7 +311,15 @@ namespace CemSys3.Business.TramiteConcesion
                     bool existeConcesion = await _context.Concesiones
                         .AnyAsync(c => c.ParcelaId == traslado.ParcelaDestinoId && c.Visibilidad == true && c.FechaFin == null);
 
-
+                    if (existeConcesion)
+                    {
+                        Models.Concesione concesionDestino = await _context.Concesiones
+                            .FirstOrDefaultAsync(c => c.ParcelaId == traslado.ParcelaDestinoId && c.Visibilidad == true && c.FechaFin == null) ?? throw new Exception("Concesion destino no encontrada.");
+                        concesionDestino.InformacionAdicional += $"\n● {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} viene de {ParcelaFormatter.ObtenerParcela(parcela.TipoParcelaId ?? 0, parcela.NroParcela, parcela.NroFila, parcela.Seccion.Nombre.ToUpper())} en estado {EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(difunto.EstadoDifuntoId ?? 0)}";
+                        concesionDestino.InformacionAdicional += $"\n● El {traslado.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se finalizó el trámite de traslado (trámite {tramiteId}) en concesión ({concesion.Concesion?.ToString("D5")})";
+                         await _historialEstadosService.VincularTramiteAPersona(concesionDestino.TramiteId, difunto.Id);
+                         await _historialEstadosService.VincularTramiteAParcela(traslado.TramiteId, parcelaDestino.Id);
+                    }
 
                     if (!existeConcesion && parcelaDestino.TipoParcelaId != (int)TipoParcelaEnum.Panteon)
                     {
@@ -322,7 +330,7 @@ namespace CemSys3.Business.TramiteConcesion
                         concesionNueva.EstadoTramiteId = (int)EstadosConcesionEnum.SinContrato;
                         concesionNueva.MensajeParcela += $"\n● El {traslado.FechaPendiente?.ToString("dd/MM/yyyy")} para difunto {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} se genera concesión en estado '{EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>((int)EstadosConcesionEnum.SinContrato)}'.";
                         concesionNueva.InformacionAdicional += $"\n● El {traslado.FechaPendiente?.ToString("dd/MM/yyyy")} en {ParcelaFormatter.ObtenerParcela(parcelaDestino.TipoParcelaId ?? 0, parcelaDestino.NroParcela, parcelaDestino.NroFila, parcelaDestino.Seccion.Nombre.ToUpper())} se genera concesión en estado '{EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>((int)EstadosConcesionEnum.SinContrato)}'.";
-                        concesionNueva.InformacionAdicional += $"\n● {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} viene de {ParcelaFormatter.ObtenerParcela(parcela.TipoParcelaId ?? 0, parcela.NroParcela, parcela.NroFila, parcela.Seccion.Nombre.ToUpper())}";
+                        concesionNueva.InformacionAdicional += $"\n● {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} viene de {ParcelaFormatter.ObtenerParcela(parcela.TipoParcelaId ?? 0, parcela.NroParcela, parcela.NroFila, parcela.Seccion.Nombre.ToUpper())} en estado {EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(difunto.EstadoDifuntoId ?? 0)}";
 
                         GenericResultDTO resultadoConcesion = await _concesionService.Add(concesionNueva);
                     }

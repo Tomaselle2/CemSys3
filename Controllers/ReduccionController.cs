@@ -2,7 +2,6 @@
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.TramitesConcesion;
 using CemSys3.DTOs.TramitesConcesion.Reduccion;
-using CemSys3.DTOs.TramitesConcesion.Traslado;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;

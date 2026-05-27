@@ -3,8 +3,8 @@
 @model GenerarContratoDTO
 @{
     Layout = null;
-    var imgEncabezado = $"{Model.baseUrl}/fotos/logoMuni.png?v={DateTime.Now.Ticks}";
-    var pieContrato = $"{Model.baseUrl}/fotos/pieContrato.png?v={DateTime.Now.Ticks}";
+    var imgEncabezado = Model.LogoBase64;
+    var pieContrato = Model.PieBase64;
 }
 <!DOCTYPE html>
 <html lang="es">
@@ -315,7 +315,7 @@
     <div class="documento-container">
         <div class="encabezado">
             <div class="logo-container">
-                <img src="@imgEncabezado" alt="Logo Municipalidad">
+                    <img src="@imgEncabezado" alt="Logo Muni">
             </div>
         </div>
 
