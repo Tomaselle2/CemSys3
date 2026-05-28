@@ -65,8 +65,8 @@ INSERT INTO TipoTramite (tipo) VALUES
 ('Traslado'), --5
 ('Cambio de titularidad'), --6
 ('Nota'), --7
-('Aceptación de titularidad'); --8
-
+('Aceptación de titularidad'), --8
+('Permiso de ingreso'); --9
 
 
 -- INSERT para TipoParcela
@@ -611,7 +611,8 @@ Insert into TipoAutorizacion (tipoTramiteId, nombre) values
 (2, 'Cremación - Libre Tránsito'), --4
 (2, 'Nuevo Destino - Registro Civil'), --5
 (5, 'Traslado - Autorización'), --6
-(3, 'Reducción - Autorización'); --7
+(3, 'Reducción - Autorización'), --7
+(9, 'Permiso de ingreso'); --8
 
 insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
 (6, 'Cambio Titular - Ambos Presentes',
@@ -648,13 +649,20 @@ insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacio
 '<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png?v=@DateTime.Now.Ticks" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <span style="text-decoration: underline;">S                           //                          D</span><br>  <p style="text-align: justify;">Atentamente:<br>El que suscribe la presente <strong>{NombreCompletoFirmante} DNI {DniFirmante}</strong> en carácter de <strong>{Parentesco}</strong> del difunto <strong>{Difuntos}</strong> inhumado en <strong>{Parcela}</strong> <strong>({NroConcesion}),</strong> de este Cementerio Municipal; autoriza al Municipio a realizar el siguiente trámite: <strong>{AperturaNicho/Fosa}, REDUCCIÓN </strong><strong>{NuevaUbicacionTraslado} </strong>siendo el que suscribe responsable de los posibles daños que se pudieran ocasionar, fruto del trabajo realizado, (féretro, lápida, placa, etc.).<br>     Así mismo y a tales efectos declaro bajo juramento que estoy facultado para el presente requerimiento atento al vinculo expresado en la presente y que soy el único pariente legitimado, o cuento con el consentimiento de ellos. Consecuentemente haciéndome responsable exclusivo de todos los efectos que pudieran derivar de la presente.<br>A los fines de avalar los extremos indicados adjunto los siguientes comprobantes que obran en mi poder y que consisten en recibos pago mantenimiento. Como así También recibos de pago de los aranceles estipulados para dicho trámite por la ordenanza Municipal.<br>     Por cualquier eventualidad relacionada con el presente trámite fijo domicilio en <strong>{DomicilioFirmante}</strong>.</p>  <br><br>  <p class="firma-linea">FIRMA_____________________________________</p>  <br><br>  <p class="firma-linea">ACLARACIÓN_____________________________________</p>  <br><br>  <p class="firma-linea">TELÉFONO_____________________________________</p>  <br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png?v=@DateTime.Now.Ticks" width="700" height="100"></figure>  </div>',
 7, 1);
 
+insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
+(9, 'Permiso de ingreso',
+'<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png?v=@DateTime.Now.Ticks" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <span style="text-decoration: underline;">S                           //                          D</span><br>  <p style="text-align: justify;">Atentamente:<br>El que suscribe la presente <strong>{NombreCompletoFirmante} DNI {DniFirmante}</strong> en carácter de <strong>{Parentesco}</strong> del difunto <strong>{Difuntos}</strong> inhumado en <strong>{Parcela}</strong> <strong>({NroConcesion}),</strong> de este Cementerio Municipal; autoriza al Municipio a realizar el siguiente trámite: <strong>{AperturaNicho/Fosa}, REDUCCIÓN </strong><strong>{NuevaUbicacionTraslado} </strong>siendo el que suscribe responsable de los posibles daños que se pudieran ocasionar, fruto del trabajo realizado, (féretro, lápida, placa, etc.).<br>     Así mismo y a tales efectos declaro bajo juramento que estoy facultado para el presente requerimiento atento al vinculo expresado en la presente y que soy el único pariente legitimado, o cuento con el consentimiento de ellos. Consecuentemente haciéndome responsable exclusivo de todos los efectos que pudieran derivar de la presente.<br>A los fines de avalar los extremos indicados adjunto los siguientes comprobantes que obran en mi poder y que consisten en recibos pago mantenimiento. Como así También recibos de pago de los aranceles estipulados para dicho trámite por la ordenanza Municipal.<br>     Por cualquier eventualidad relacionada con el presente trámite fijo domicilio en <strong>{DomicilioFirmante}</strong>.</p>  <br><br>  <p class="firma-linea">FIRMA_____________________________________</p>  <br><br>  <p class="firma-linea">ACLARACIÓN_____________________________________</p>  <br><br>  <p class="firma-linea">TELÉFONO_____________________________________</p>  <br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png?v=@DateTime.Now.Ticks" width="700" height="100"></figure>  </div>',
+8, 1);
+
 
 
 insert into TareaPlantilla (Descripcion, TipoTramiteId, Visibilidad, estado) values
 ('Firmar autorización', 6,1,0),
 ('Subir autorización firmada', 6,1,0),
+('DNI del titular', 6,1,0),
 ('Firmar autorización', 8,1,0),
 ('Subir autorización firmada', 8,1,0),
+('DNI del titular', 8,1,0),
 ('Firma autorización del titular', 2,1,0),
 ('DNI titular', 2,1,0),
 ('Abonar apertura', 2,1,0),
@@ -679,7 +687,10 @@ insert into TareaPlantilla (Descripcion, TipoTramiteId, Visibilidad, estado) val
 ('Comprobar vínculo con titular', 3,1,0),
 ('Acta de defunción del fallecido', 3,1,0),
 ('Abonar cierre', 3,1,0),
-('Abonar reducción', 3,1,0);
+('Abonar reducción', 3,1,0),
+('Firmar autorización', 9,1,0),
+('Subir autorización firmada', 9,1,0),
+('DNI del titular', 9,1,0);
 
 
 
@@ -689,10 +700,11 @@ INSERT INTO RequisitosTramite (tipoTramiteId, descripcion)
 VALUES 
 (8, '- Se necesita que esté presente el nuevo titular.  - El trámite es sin costo.  - De lunes a viernes de 7:00hs a 12:30hs.'), --aceptacion de titularidad
 (2, 'Para la cremación de {Difuntos} debe estar *al día con los impuestos* y *deuda*.   Debe abonar la apertura de la parcela en la municipalidad, que son *${precioApertura}* cada una.  Tiene que firmar el titular del nicho ({TitularesActuales}) y/o los familiares más cercanos al difunto.  Hay que comprobar el vínculo del fallecido con los firmantes, puede ser con libreta de familia, declaratoria de herederos o actas de nacimiento, esto depende de la relación.    La cremación tiene un costo de ${precioCremacion} por difunto, el cual lo abona en el Crematorio Parque los Álamos, aquí está incluido el traslado del cementerio municipal al crematorio.   Las autorizaciones las entrega esta oficina.'), --cremacion
-(3, 'Para la reducción de {Difuntos} debe estar *al día con los impuestos* y *deuda*.   Debe abonar la apertura de la parcela en la municipalidad, que son *${precioApertura}* cada una.  Debe abonar el cierre de nicho o fosa. Cierre de nicho *${precioCierreNicho}* y cierre de fosa *${precioCierreFosa}*  La reducción tiene un costo de *${precioReduccion}*  Tiene que firmar el titular del nicho ({TitularesActuales}) y/o los familiares más cercanos al difunto.  Hay que comprobar el vínculo del fallecido con los firmantes, puede ser con libreta de familia, declaratoria de herederos o actas de nacimiento, esto depende de la relación.   Las autorizaciones las entrega esta oficina.'),
-(4, 'Adjuntar acta de defunción si el titular está fallecido'),
-(5, 'Para el traslado de {Difuntos} debe estar *al día con los impuestos* y *deuda*.   Debe abonar la apertura de la parcela en la municipalidad, que son *${precioApertura}* cada una.  Debe abonar el cierre de nicho o fosa, depende de donde sea trasladado. Cierre de nicho *${precioCierreNicho}* y cierre de fosa *${precioCierreFosa}*  Tiene que firmar el titular del nicho ({TitularesActuales}) y/o los familiares más cercanos al difunto.  Hay que comprobar el vínculo del fallecido con los firmantes, puede ser con libreta de familia, declaratoria de herederos o actas de nacimiento, esto depende de la relación.   Las autorizaciones las entrega esta oficina.'),
-(6, '- Se necesita que esté presente el titular ({TitularesActuales}) y el nuevo titular.  - El trámite es sin costo.   - De lunes a viernes de 7:00hs a 12:30hs.'); --cambio de titular
+(3, 'Para la reducción de {Difuntos} debe estar *al día con los impuestos* y *deuda*.   Debe abonar la apertura de la parcela en la municipalidad, que son *${precioApertura}* cada una.  Debe abonar el cierre de nicho o fosa. Cierre de nicho *${precioCierreNicho}* y cierre de fosa *${precioCierreFosa}*  La reducción tiene un costo de *${precioReduccion}*  Tiene que firmar el titular del nicho ({TitularesActuales}) y/o los familiares más cercanos al difunto.  Hay que comprobar el vínculo del fallecido con los firmantes, puede ser con libreta de familia, declaratoria de herederos o actas de nacimiento, esto depende de la relación.   Las autorizaciones las entrega esta oficina.'), --reduccion
+(4, 'Contrato de concesion'),
+(5, 'Para el traslado de {Difuntos} debe estar *al día con los impuestos* y *deuda*.   Debe abonar la apertura de la parcela en la municipalidad, que son *${precioApertura}* cada una.  Debe abonar el cierre de nicho o fosa, depende de donde sea trasladado. Cierre de nicho *${precioCierreNicho}* y cierre de fosa *${precioCierreFosa}*  Tiene que firmar el titular del nicho ({TitularesActuales}) y/o los familiares más cercanos al difunto.  Hay que comprobar el vínculo del fallecido con los firmantes, puede ser con libreta de familia, declaratoria de herederos o actas de nacimiento, esto depende de la relación.   Las autorizaciones las entrega esta oficina.'), --traslado
+(6, '- Se necesita que esté presente el titular ({TitularesActuales}) y el nuevo titular.  - El trámite es sin costo.   - De lunes a viernes de 7:00hs a 12:30hs.'), --cambio de titular
+(9, '- Se necesita que esté presente el titular ({TitularesActuales})   - El trámite es sin costo.     - De lunes a viernes de 7:00hs a 12:30hs.'); --permiso de ingreso
 
 --Job para pasar de concesion vigente a vencida 
 --BEGIN TRANSACTION;

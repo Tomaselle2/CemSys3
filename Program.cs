@@ -107,6 +107,7 @@ builder.Services.AddScoped<AceptacionTitularStrategy>();
 builder.Services.AddScoped<CremacionStrategy>();
 builder.Services.AddScoped<TrasladoStrategy>();
 builder.Services.AddScoped<ReduccionStrategy>();
+builder.Services.AddScoped<PermisoIngresoStrategy>();
 
 builder.Services.AddScoped<IComplementoTramite<CremacionDTO>, CremacionStrategy>();
 builder.Services.AddScoped<IComplementoTramite<TrasladoDTO>, TrasladoStrategy>();

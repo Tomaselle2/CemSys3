@@ -48,6 +48,9 @@ namespace CemSys3.Controllers
                     case (int)TipoTramiteEnum.Reduccion:
                         return RedirectToAction("Detalle", "Reduccion", new { tramiteId = tramiteId });
 
+                    case (int)TipoTramiteEnum.PermisoIngreso:
+                        return RedirectToAction("Detalle", "PermisoIngreso", new { tramiteId = tramiteId });
+
                     default:
                         return Content($$"""
                 <script>

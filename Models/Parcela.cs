@@ -41,6 +41,8 @@ public partial class Parcela
 
     public virtual ICollection<ParcelaDifunto> ParcelaDifuntos { get; set; } = new List<ParcelaDifunto>();
 
+    public virtual ICollection<PermisosIngreso> PermisosIngresos { get; set; } = new List<PermisosIngreso>();
+
     public virtual ICollection<Reduccione> ReduccioneParcelaDestinos { get; set; } = new List<Reduccione>();
 
     public virtual ICollection<Reduccione> ReduccioneParcelaOrigens { get; set; } = new List<Reduccione>();

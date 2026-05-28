@@ -25,5 +25,7 @@ namespace CemSys3.DTOs.PlantillaTramite
         public int CementerioId;
         public int NuevaParcelaId;
         public int TipoTraslado;
+
+        public string NombreNuevoDifunto = string.Empty;
     }
 }

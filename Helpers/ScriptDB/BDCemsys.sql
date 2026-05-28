@@ -663,3 +663,22 @@ CREATE TABLE Reducciones (
 	CONSTRAINT FK_REDUCCION_Difunto FOREIGN KEY (difuntoId) REFERENCES Personas(id),
 	CONSTRAINT FK_REDUCCION_Cementerio FOREIGN KEY (cementerioId) REFERENCES Cementerios(id)
 );
+
+CREATE TABLE PermisosIngresos (
+    tramiteId INT PRIMARY KEY,
+    parcelaId INT NOT NULL,
+    usuarioId INT NOT NULL,
+
+    fechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+    fechaFinalizacion DATETIME NULL,
+
+    nombreFallecido NVARCHAR(MAX) null,
+	concesionId int null,
+
+    visibilidad BIT DEFAULT 1,
+
+    CONSTRAINT FK_PERMISO_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_PERMISO_concesionId FOREIGN KEY (concesionId) REFERENCES Tramites(id),
+	CONSTRAINT FK_PERMISO_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_PERMISO_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id)
+);

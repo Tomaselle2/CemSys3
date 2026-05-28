@@ -3,11 +3,12 @@
 @using CemSys3.Helpers.Enumerable
 @using CemSys3.ViewModels.Archivo
 @using CemSys3.ViewModels.Historial
+@using CemSys3.ViewModels.PermisoIngreso
 @using CemSys3.ViewModels.TramiteConcesion
-@model CambioTitularVM
+@model PermisoIngresoVM
 
 @{
-    ViewData["Title"] = "Cambio de Titular";
+    ViewData["Title"] = "Permiso de ingreso";
 }
 
 @{
@@ -70,10 +71,10 @@ new HistorialOffcanvasVM
     Historial = Model.Historial,
     EnumType = typeof(EstadosCambioTitularEnum),
     OffcanvasId = $"offcanvasHistorial_{Model.Dto.TramiteId}",
-    Titulo = "Historial del cambio de titular"
+    Titulo = "Historial de Permiso de ingreso"
 })
 
-<h1>Cambio de titular (ambos titulares presentes)</h1>
+<h1>Permiso de ingreso</h1>
 
 <div class="contenidoConcesion">
     <div class="cardsConcesion-row my-4">
@@ -261,7 +262,13 @@ new HistorialOffcanvasVM
 </div>
 
 <!-- Formulario genera Actorizaciones -->
-<form asp-action="GenerarAutorizaciones" asp-controller="CambioTitular" id="formPrincipal" method="post" class="mb-3">
+<form asp-action="GenerarAutorizaciones" asp-controller="PermisoIngreso" id="formPrincipal" method="post" class="mb-3">
+
+    <div>
+        <label class="form-label">Nombre del fallecido a ingresar</label>
+        <input type="text" asp-for="NombreDifunto" class="form-control shadow-sm" autocomplete="off" />
+    </div>
+
 
     <!-- Sección de titulares -->
     <div class="accordion" id="accordionTitulares">
@@ -360,20 +367,20 @@ new HistorialOffcanvasVM
             </form>
         </div>
         <form asp-action="Editar" asp-controller="Documento" method="post" class="documento-form mb-4" data-editor-id="@editorId">
-                <div class="card-body">
-                    <textarea id="@editorId" name="contenidoHtml">
+            <div class="card-body">
+                <textarea id="@editorId" name="contenidoHtml">
                         @Html.Raw(documento.ContenidoHtml)
                     </textarea>
-                </div>
+            </div>
 
-                <div class="card-footer">
-                    <input type="hidden" name="id" value="@documento.Id" />
-                    <input type="hidden" name="tramiteId" value="@documento.TramiteId" />
-                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+            <div class="card-footer">
+                <input type="hidden" name="id" value="@documento.Id" />
+                <input type="hidden" name="tramiteId" value="@documento.TramiteId" />
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
 
-                    <button type="submit" class="btn btn-outline-primary">
-                        Actualizar Autorización
-                    </button>
+                <button type="submit" class="btn btn-outline-primary">
+                    Actualizar Autorización
+                </button>
             </div>
         </form>
     </div>
@@ -446,94 +453,95 @@ new ArchivoVM
 <script src="~/tinymce/js/tinymce/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
 @section Scripts {
 
-    <script> //documentos
-    // Pasar los datos del modelo a JavaScript
-    var documentosData = @Html.Raw(Json.Serialize(Model.Documentos));
+    <script>
+        //documentos
+           // Pasar los datos del modelo a JavaScript
+           var documentosData = @Html.Raw(Json.Serialize(Model.Documentos));
     
-    document.addEventListener('DOMContentLoaded', function () {
+           document.addEventListener('DOMContentLoaded', function () {
     
-        const tinyConfig = {
-            license_key: 'gpl',
-            language: 'es_MX',
-            menu: {
-                file: { title: 'Archivo', items: 'restoredraft | preview | importword exportpdf exportword | print | deleteallconversations' },
-                edit: { title: 'Editar', items: 'undo redo | cut copy paste pastetext | selectall | searchreplace' },
-                view: { title: 'Ver', items: 'code suggestededits revisionhistory | visualaid visualchars visualblocks | spellchecker | preview fullscreen | showcomments' },
-                insert: { title: 'Insertar', items: 'image link media addcomment pageembed codesample inserttable | math | charmap emoticons hr | pagebreak nonbreaking anchor tableofcontents | insertdatetime' },
-                format: { title: 'Formato', items: 'bold italic underline strikethrough superscript subscript codeformat | styles blocks fontfamily fontsize align lineheight | forecolor backcolor | language | removeformat' },
-                tools: { title: 'Herramientas', items: 'spellchecker spellcheckerlanguage | a11ycheck code wordcount' },
-                table: { title: 'Tabla', items: 'inserttable | cell row column | advtablesort | tableprops deletetable' }
-            },
-            toolbar: 'undo redo | styles forecolor | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | image | code',
-            statusbar: false,
-            plugins: 'image code autoresize',
-            autoresize_bottom_margin: 20,
-            autoresize_min_height: 200,
-            autoresize_max_height: 800,
-            autoresize_overflow_padding: 10,
+               const tinyConfig = {
+                   license_key: 'gpl',
+                   language: 'es_MX',
+                   menu: {
+                       file: { title: 'Archivo', items: 'restoredraft | preview | importword exportpdf exportword | print | deleteallconversations' },
+                       edit: { title: 'Editar', items: 'undo redo | cut copy paste pastetext | selectall | searchreplace' },
+                       view: { title: 'Ver', items: 'code suggestededits revisionhistory | visualaid visualchars visualblocks | spellchecker | preview fullscreen | showcomments' },
+                       insert: { title: 'Insertar', items: 'image link media addcomment pageembed codesample inserttable | math | charmap emoticons hr | pagebreak nonbreaking anchor tableofcontents | insertdatetime' },
+                       format: { title: 'Formato', items: 'bold italic underline strikethrough superscript subscript codeformat | styles blocks fontfamily fontsize align lineheight | forecolor backcolor | language | removeformat' },
+                       tools: { title: 'Herramientas', items: 'spellchecker spellcheckerlanguage | a11ycheck code wordcount' },
+                       table: { title: 'Tabla', items: 'inserttable | cell row column | advtablesort | tableprops deletetable' }
+                   },
+                   toolbar: 'undo redo | styles forecolor | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | image | code',
+                   statusbar: false,
+                   plugins: 'image code autoresize',
+                   autoresize_bottom_margin: 20,
+                   autoresize_min_height: 200,
+                   autoresize_max_height: 800,
+                   autoresize_overflow_padding: 10,
 
-        };
+               };
 
-        function inicializarEditor(elementId, formElement) {
-            const textarea = document.querySelector('#' + elementId);
-            if (!textarea) {
-                console.error('No se encontró el textarea:', elementId);
-                return;
-            }
+               function inicializarEditor(elementId, formElement) {
+                   const textarea = document.querySelector('#' + elementId);
+                   if (!textarea) {
+                       console.error('No se encontró el textarea:', elementId);
+                       return;
+                   }
 
-            tinymce.init({
-                ...tinyConfig,
-                selector: '#' + elementId,
-                auto_focus: false,
-                setup: function (editor) {
-                    editor.on('init', function () {
-                        // Guardar el scroll actual para evitar el salto
-                        const scrollX = window.scrollX;
-                        const scrollY = window.scrollY;
+                   tinymce.init({
+                       ...tinyConfig,
+                       selector: '#' + elementId,
+                       auto_focus: false,
+                       setup: function (editor) {
+                           editor.on('init', function () {
+                               // Guardar el scroll actual para evitar el salto
+                               const scrollX = window.scrollX;
+                               const scrollY = window.scrollY;
 
-                        setTimeout(() => {
-                                editor.getBody().blur();
-                            // Restaurar scroll por si TinyMCE hizo scroll al foco
-                            window.scrollTo(scrollX, scrollY);
-                            document.activeElement?.blur();
-                        }, 50);
-                    });
+                               setTimeout(() => {
+                                       editor.getBody().blur();
+                                   // Restaurar scroll por si TinyMCE hizo scroll al foco
+                                   window.scrollTo(scrollX, scrollY);
+                                   document.activeElement?.blur();
+                               }, 50);
+                           });
 
-                    if (formElement) {
-                        formElement.addEventListener('submit', function () {
-                            editor.save();
-                        });
-                    }
-                }
-            }).catch(error => {
-                console.error('Error inicializando editor ' + elementId, error);
-            });
-        }
+                           if (formElement) {
+                               formElement.addEventListener('submit', function () {
+                                   editor.save();
+                               });
+                           }
+                       }
+                   }).catch(error => {
+                       console.error('Error inicializando editor ' + elementId, error);
+                   });
+               }
+
     
-        
-        // Verificar si hay documentos
-        if (documentosData && documentosData.length > 0) {
-            documentosData.forEach(function(documento) {
-                var editorId = 'editor_' + documento.id;
-                var formElement = document.querySelector('form[data-editor-id="' + editorId + '"]');
-                setTimeout(function() {
-                    inicializarEditor(editorId, formElement);
-                }, 100);
-            });
-        } else {
-            console.log('No hay documentos para inicializar');
-        }
+               // Verificar si hay documentos
+               if (documentosData && documentosData.length > 0) {
+                   documentosData.forEach(function(documento) {
+                       var editorId = 'editor_' + documento.id;
+                       var formElement = document.querySelector('form[data-editor-id="' + editorId + '"]');
+                       setTimeout(function() {
+                           inicializarEditor(editorId, formElement);
+                       }, 100);
+                   });
+               } else {
+                   console.log('No hay documentos para inicializar');
+               }
     
-        window.addEventListener('beforeunload', function () {
-            if (typeof tinymce !== 'undefined' && tinymce.editors) {
-                var editors = tinymce.editors;
-                for (var i = 0; i < editors.length; i++) {
-                    tinymce.remove(editors[i]);
-                }
-            }
-        });
-    });
-</script>
+               window.addEventListener('beforeunload', function () {
+                   if (typeof tinymce !== 'undefined' && tinymce.editors) {
+                       var editors = tinymce.editors;
+                       for (var i = 0; i < editors.length; i++) {
+                           tinymce.remove(editors[i]);
+                       }
+                   }
+               });
+           });
+    </script>
 
     <script>
         //titulares
@@ -1012,27 +1020,27 @@ new ArchivoVM
         </div>
         <div class="text-end mt-3">
         @if (Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Finalizado &&
-                            Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Cancelado)
+                                                Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Cancelado)
         {
 
-                    <div class="dropdown d-inline-block">
-                                <button class="btn btn-outline-primary btn-sm dropdown-toggle"
+                        <div class="dropdown d-inline-block">
+                                        <button class="btn btn-outline-primary btn-sm dropdown-toggle"
                         type="button"
                         data-bs-toggle="dropdown"
                         aria-expanded="false">
-                                            <i class="bi bi-file-earmark-text"></i> Generar
-                                </button>
+                                                        <i class="bi bi-file-earmark-text"></i> Generar
+                                        </button>
 
-                                <ul class="dropdown-menu">
-                                            <li>
-                                                        <button type="button"
+                                        <ul class="dropdown-menu">
+                                                        <li>
+                                                                        <button type="button"
                                 class="dropdown-item"
-                                onclick="generarAutorizacion(${titular.firmanteId}, @((int)TipoAutorizacionEnum.Cambio_Titular_Ambos_Presentes))">
-                                                                    Autorización
-                                                        </button>
-                                            </li>
-                                </ul>
-                    </div>
+                                onclick="generarAutorizacion(${titular.firmanteId}, @((int)TipoAutorizacionEnum.PermisoIngreso))">
+                                                                                        Autorización
+                                                                        </button>
+                                                        </li>
+                                        </ul>
+                        </div>
 
         }
 
@@ -1147,5 +1155,5 @@ new ArchivoVM
 
     </script>
     <script src="~/js/tareabase.js"></script>
-     <script src="~/js/tareas-finalizar.js"></script>
+    <script src="~/js/tareas-finalizar.js"></script>
 }

@@ -59,6 +59,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<ParcelaDifunto> ParcelaDifuntos { get; set; }
 
+    public virtual DbSet<PermisosIngreso> PermisosIngresos { get; set; }
+
     public virtual DbSet<Persona> Personas { get; set; }
 
     public virtual DbSet<PlantillasTramite> PlantillasTramites { get; set; }
@@ -106,7 +108,6 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Traslado> Traslados { get; set; }
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -753,6 +754,48 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.TramiteRetiro).WithMany(p => p.ParcelaDifuntoTramiteRetiros)
                 .HasForeignKey(d => d.TramiteRetiroId)
                 .HasConstraintName("ParcelaDifuntos_tramiteRetiroId_fk");
+        });
+
+        modelBuilder.Entity<PermisosIngreso>(entity =>
+        {
+            entity.HasKey(e => e.TramiteId).HasName("PK__Permisos__32453547D216CDCC");
+
+            entity.Property(e => e.TramiteId)
+                .ValueGeneratedNever()
+                .HasColumnName("tramiteId");
+            entity.Property(e => e.ConcesionId).HasColumnName("concesionId");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaCreacion");
+            entity.Property(e => e.FechaFinalizacion)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaFinalizacion");
+            entity.Property(e => e.NombreFallecido).HasColumnName("nombreFallecido");
+            entity.Property(e => e.ParcelaId).HasColumnName("parcelaId");
+            entity.Property(e => e.UsuarioId).HasColumnName("usuarioId");
+            entity.Property(e => e.Visibilidad)
+                .HasDefaultValue(true)
+                .HasColumnName("visibilidad");
+
+            entity.HasOne(d => d.Concesion).WithMany(p => p.PermisosIngresoConcesions)
+                .HasForeignKey(d => d.ConcesionId)
+                .HasConstraintName("FK_PERMISO_concesionId");
+
+            entity.HasOne(d => d.Parcela).WithMany(p => p.PermisosIngresos)
+                .HasForeignKey(d => d.ParcelaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PERMISO_Parcela");
+
+            entity.HasOne(d => d.Tramite).WithOne(p => p.PermisosIngresoTramite)
+                .HasForeignKey<PermisosIngreso>(d => d.TramiteId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PERMISO_Tramite");
+
+            entity.HasOne(d => d.Usuario).WithMany(p => p.PermisosIngresos)
+                .HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PERMISO_Usuario");
         });
 
         modelBuilder.Entity<Persona>(entity =>

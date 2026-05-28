@@ -31,6 +31,9 @@ namespace CemSys3.Business.TramiteConcesion
                 (int)TipoTramiteEnum.Reduccion =>
                 _provider.GetRequiredService<ReduccionStrategy>(),
 
+                (int)TipoTramiteEnum.PermisoIngreso =>
+                _provider.GetRequiredService<PermisoIngresoStrategy>(),
+
                 _ => throw new Exception("CreateStrategy no implementada")
             };
         }

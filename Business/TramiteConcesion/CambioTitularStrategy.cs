@@ -16,7 +16,6 @@ using CemSys3.Interfaces.Tarea;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.Models;
-using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.EntityFrameworkCore;
 
 namespace CemSys3.Business.TramiteConcesion
