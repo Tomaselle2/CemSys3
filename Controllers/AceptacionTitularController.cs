@@ -22,6 +22,8 @@ namespace CemSys3.Controllers
         private readonly IHistorialEstados _historialService;
         private readonly ITarea _tareaService;
         private readonly IStrategyFactory _strategyFactory;
+        private readonly IFirmantes _firmantesService;
+
 
 
         public AceptacionTitularController(
@@ -29,6 +31,7 @@ namespace CemSys3.Controllers
         IHistorialEstados historialService,
         IStrategyFactory strategyFactory,
         IDocumentoTramiteService documentoService,
+        IFirmantes firmante,
          ITarea tareaService)
         {
             _archivoService = archivoService;
@@ -36,33 +39,37 @@ namespace CemSys3.Controllers
             _strategyFactory = strategyFactory;
             _documentoService = documentoService;
             _tareaService = tareaService;
+            _firmantesService = firmante;
         }
 
         [HttpPost]
         [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> GenerarAutorizaciones(CambioTitularVM viewModel)
+        public async Task<IActionResult> GenerarAutorizaciones(CambioTitularVM viewModel, int firmanteId, int tipoAutorizacionId)
         {
             int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
 
             ITramiteStrategy strategy = _strategyFactory.GetStrategy((int)TipoTramiteEnum.AceptacionTitular);
 
 
-            if (viewModel.Personas == null || viewModel.Personas.Count == 0)
+            // Buscar el firmante específico
+            var firmantes = await _firmantesService.GetAllByTramite(viewModel.TramiteId);
+            var firmante = firmantes.FirstOrDefault(f => f.Id == firmanteId);
+
+            if (firmante == null)
             {
                 TempData.SetSweetAlert(new SweetAlertDTO
                 {
                     Titulo = "Advertencia",
-                    Mensaje = "Seleccione un nuevo titular",
+                    Mensaje = "Firmante no encontrado",
                     Tipo = "warning"
                 });
-
                 return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId });
             }
 
             GeneraStrategyDTO dto = new GeneraStrategyDTO
             {
                 TramiteId = viewModel.TramiteId,
-                NuevosTitulares = viewModel.Personas,
+                //NuevosTitulares = viewModel.Personas,
                 TitularesActuales = viewModel.Dto.TitularesActuales,
                 UsuarioId = usuarioId,
                 Parentesco = "Titular",
@@ -71,6 +78,9 @@ namespace CemSys3.Controllers
                 NombreSeccion = viewModel.Dto.NombreSeccion,
                 TipoParcela = viewModel.Dto.TipoParcela,
                 Difuntos = viewModel.Dto.Difuntos,
+                Firmantes = viewModel.Personas,
+                TipoAutorizacionId = tipoAutorizacionId,
+                FirmanteId = firmanteId,
             };
 
             try
@@ -160,6 +170,7 @@ namespace CemSys3.Controllers
                 vm.Historial = await _historialService.GetAllById(vm.TramiteId);
                 vm.Documentos = await _documentoService.ObtenerPorTramiteAsync(vm.TramiteId);
                 vm.Tareas = await _tareaService.GetAllByTramite(tramiteId);
+                vm.Firmantes = await _firmantesService.GetAllByTramite(tramiteId);
 
                 return View("AceptacionTitularidad", vm);
             }

@@ -31,6 +31,7 @@ namespace CemSys3.Business.TramiteConcesion
         private readonly ITareaPlantilla _tareaPlantilla;
         private readonly ITramite _tramiteService;
         private readonly INotas _notasService;
+        private readonly IFirmantes _firmantes;
 
         public AceptacionTitularStrategy(
             IPlantillaTramite plantillaService,
@@ -38,6 +39,7 @@ namespace CemSys3.Business.TramiteConcesion
             IPersona personaService,
             AppDbContext context,
             ITramite tramiteService,
+            IFirmantes firmantes,
             IHistorialEstados historialEstadosService,
             ITareaPlantilla tareaPlantilla, INotas notasService)
         {
@@ -49,6 +51,7 @@ namespace CemSys3.Business.TramiteConcesion
             _historialEstadosService = historialEstadosService;
             _tareaPlantilla = tareaPlantilla;
             _notasService = notasService;
+            _firmantes = firmantes;
         }
 
         public Task<int> AvanzarEstadoAsync(int tramiteId, int nuevoEstado, int usuarioId)
@@ -186,26 +189,39 @@ namespace CemSys3.Business.TramiteConcesion
 
         public async Task GenerarDocumentosAsync(GeneraStrategyDTO dto)
         {
-            var plantillas = await _plantillaService
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var plantillas = await _plantillaService
                 .ObtenerPorTipoTramiteAsync((int)TipoTramiteEnum.AceptacionTitular);
 
-            foreach (var nuevoTitular in dto.NuevosTitulares)
-            {
-                PersonaDTO persona = await _personaService.Get(nuevoTitular.Id.Value);
-
-                persona.Nombre = nuevoTitular.Nombre;
-                persona.Apellido = nuevoTitular.Apellido;
-                persona.Domicilio = nuevoTitular.Domicilio;
-                persona.Celular = nuevoTitular.Celular;
-                persona.Correo = nuevoTitular.CorreoElectronico;
-
-                int personaId = await _personaService.Update(persona);
-
-                string difuntosFormateados = DifuntoFormatter.FormatearDifuntos(dto.Difuntos);
-
-                foreach (var plantilla in plantillas)
+                //actualizar los datos de los firmantes.
+                if (dto.Firmantes != null)
                 {
-                    var variables = new Dictionary<string, string>
+                    await _firmantes.ActualizarFirmantes(dto.Firmantes);
+                }
+
+                //busca el firmante que coincida con el firmanteId del dto.
+                FirmantesDTO firmante = dto.Firmantes?.FirstOrDefault(f => f.Id == dto.FirmanteId) ?? new FirmantesDTO();
+
+                foreach (var nuevoTitular in dto.Firmantes)
+                {
+                    PersonaDTO persona = await _personaService.Get(nuevoTitular.PersonaId);
+
+                    persona.Nombre = nuevoTitular.Nombre;
+                    persona.Apellido = nuevoTitular.Apellido;
+                    persona.Domicilio = nuevoTitular.Domicilio;
+                    persona.Celular = nuevoTitular.Celular;
+                    persona.Correo = nuevoTitular.CorreoElectronico;
+
+                    int personaId = await _personaService.Update(persona);
+
+                    string difuntosFormateados = DifuntoFormatter.FormatearDifuntos(dto.Difuntos);
+
+                    foreach (var plantilla in plantillas)
+                    {
+                        var variables = new Dictionary<string, string>
                     {
                         { "Fecha", DateTime.Now.ToLongDateString() },
                         { "Parcela", ParcelaFormatter.ObtenerParcela(dto.TipoParcela, dto.NroParcela, dto.NroFila, dto.NombreSeccion.ToUpper()) },
@@ -217,17 +233,27 @@ namespace CemSys3.Business.TramiteConcesion
 
                     };
 
-                    await _documentoService.CrearDesdePlantillaAsync(
-                        plantilla.PlantillaId,
-                        dto.TramiteId,
-                        dto.UsuarioId,
-                        nuevoTitular.Id,
-                        dto.Parentesco,
-                        variables,
-                        null
-                    );
+                        await _documentoService.CrearDesdePlantillaAsync(
+                            plantilla.PlantillaId,
+                            dto.TramiteId,
+                            dto.UsuarioId,
+                            firmante?.PersonaId ?? null,
+                            firmante?.Parentesco,
+                            variables,
+                            firmante?.Id ?? null
+                        );
+                    }
                 }
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
             }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+
         }
 
         public async Task<CambioTitularDTO> ObtenerAsync(int tramiteId)

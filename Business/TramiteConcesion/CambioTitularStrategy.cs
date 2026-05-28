@@ -31,6 +31,7 @@ namespace CemSys3.Business.TramiteConcesion
         private readonly ITareaPlantilla _tareaPlantilla;
         private readonly ITramite _tramiteService;
         private readonly INotas _notasService;
+        private readonly IFirmantes _firmantes;
 
 
         public CambioTitularStrategy(
@@ -38,7 +39,7 @@ namespace CemSys3.Business.TramiteConcesion
             IDocumentoTramiteService documentoService,
             IPersona personaService,
             AppDbContext context,
-            ITramite tramiteService, 
+            ITramite tramiteService, IFirmantes firmantes,
             IHistorialEstados historialEstadosService,
             ITareaPlantilla tareaPlantilla, INotas notasService)
         {
@@ -50,6 +51,7 @@ namespace CemSys3.Business.TramiteConcesion
             _historialEstadosService = historialEstadosService;
             _tareaPlantilla = tareaPlantilla;
             _notasService = notasService;
+            _firmantes = firmantes;
         }
 
        
@@ -132,9 +134,18 @@ namespace CemSys3.Business.TramiteConcesion
             var plantillas = await _plantillaService
                 .ObtenerPorTipoTramiteAsync((int)TipoTramiteEnum.CambioTitular);
 
-            foreach (var nuevoTitular in dto.NuevosTitulares)
+            //actualizar los datos de los firmantes.
+            if (dto.Firmantes != null)
             {
-                PersonaDTO persona = await _personaService.Get(nuevoTitular.Id.Value);
+                await _firmantes.ActualizarFirmantes(dto.Firmantes);
+            }
+
+            //busca el firmante que coincida con el firmanteId del dto.
+            FirmantesDTO firmante = dto.Firmantes?.FirstOrDefault(f => f.Id == dto.FirmanteId) ?? new FirmantesDTO();
+
+            foreach (var nuevoTitular in dto.Firmantes)
+            {
+                PersonaDTO persona = await _personaService.Get(nuevoTitular.PersonaId);
 
                 persona.Nombre = nuevoTitular.Nombre;
                 persona.Apellido = nuevoTitular.Apellido;
@@ -168,14 +179,14 @@ namespace CemSys3.Business.TramiteConcesion
                     };
 
                     await _documentoService.CrearDesdePlantillaAsync(
-                        plantilla.PlantillaId,
-                        dto.TramiteId,
-                        dto.UsuarioId,
-                        nuevoTitular.Id,
-                        dto.Parentesco,
-                        variables,
-                        null
-                    );
+                            plantilla.PlantillaId,
+                            dto.TramiteId,
+                            dto.UsuarioId,
+                            firmante?.PersonaId ?? null,
+                            firmante?.Parentesco,
+                            variables,
+                            firmante?.Id ?? null
+                        );
                 }
             }
         }

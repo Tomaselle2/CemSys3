@@ -163,12 +163,13 @@ new HistorialOffcanvasVM
 </div>
 
 
-<!-- Modal contribuyente-->
+
+<!-- Modal Firmantes nuevos-->
 <div class="modal fade" id="TitularModal" tabindex="-1" aria-labelledby="titularModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="titularModalLabel">Buscar/Registrar Titular</h5>
+                <h5 class="modal-title" id="titularModalLabel">Buscar/Registrar Firmante</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -204,6 +205,10 @@ new HistorialOffcanvasVM
                                 <input class="form-control" type="text" id="apellidoInput" maxlength="60" minlength="2" />
                                 <div class="invalid-feedback">El apellido es obligatorio</div>
                             </div>
+                            <div class="col-md-6">
+                                <label for="parentescoInput">Parentesco</label>
+                                <input class="form-control" type="text" id="parentescoInput" maxlength="60" />
+                            </div>
                         </div>
                         <div class="row mt-3">
                             <div class="col-md-6">
@@ -236,7 +241,6 @@ new HistorialOffcanvasVM
     </div>
 </div>
 
-
 <!-- Modal Confirmación Quitar contribuyente -->
 <div class="modal fade" id="confirmarEliminarModal" tabindex="-1" aria-labelledby="confirmarEliminarModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -264,20 +268,33 @@ new HistorialOffcanvasVM
         <div class="accordion-item">
             <h2 class="accordion-header" id="panelsStayOpen-headingTitulares">
                 <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-target="#panelsStayOpen-collapseTitulares" aria-expanded="true" aria-controls="panelsStayOpen-collapseTitulares">
-                    Nuevo Titular (<span id="contadorTitulares">0</span>)
+                    Firmantes (<span id="contadorTitulares">0</span>)
                 </button>
             </h2>
             <div id="panelsStayOpen-collapseTitulares" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingTitulares">
                 <div class="mb-3 p-3">
-                    <!-- Contenedor para titulares (aquí se renderizarán los inputs) -->
+                    <!-- Contenedor para firmantes (aquí se renderizarán los inputs) -->
                     <div id="contenedorTitulares"></div>
 
-                    <!-- Botón para agregar titular -->
-                    <div class="text-center mt-3">
-                        <button class="btn btn-success" id="agregarContribuyenteButton" type="button">
-                            <i class="bi bi-person-plus" id="contribuyenteIcon"></i> Agregar Titular
-                        </button>
-                    </div>
+                    <!-- Botón para agregar firmante -->
+                    @if (Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Finalizado &&
+                         Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Cancelado)
+                    {
+                        <div class="text-center mt-3">
+                            <button class="btn btn-success" id="agregarContribuyenteButton" type="button">
+                                <i class="bi bi-person-plus" id="contribuyenteIcon"></i> Agregar Firmante
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center mt-3">
+                            <button class="btn btn-success" id="agregarContribuyenteButton" disabled type="button">
+                                <i class="bi bi-person-plus" id="contribuyenteIcon"></i> Agregar Firmante
+                            </button>
+                        </div>
+                    }
+
                 </div>
             </div>
         </div>
@@ -287,20 +304,9 @@ new HistorialOffcanvasVM
     <input type="hidden" asp-for="TramiteId" />
     <input type="hidden" asp-for="Dto.NroParcela" />
     <input type="hidden" asp-for="Dto.TipoParcela" />
+    <input type="hidden" asp-for="Dto.NroConcesion" />
     <input type="hidden" asp-for="Dto.NombreSeccion" />
     <input type="hidden" asp-for="Dto.NroFila" />
-
-    @for (int i = 0; i < Model.Dto.TitularesActuales.Count; i++)
-    {
-        <input type="hidden" asp-for="Dto.TitularesActuales[i].Id" />
-        <input type="hidden" asp-for="Dto.TitularesActuales[i].Dni" />
-        <input type="hidden" asp-for="Dto.TitularesActuales[i].Nombre" />
-        <input type="hidden" asp-for="Dto.TitularesActuales[i].Apellido" />
-        <input type="hidden" asp-for="Dto.TitularesActuales[i].Celular" />
-        <input type="hidden" asp-for="Dto.TitularesActuales[i].CorreoElectronico" />
-        <input type="hidden" asp-for="Dto.TitularesActuales[i].Domicilio" />
-        <input type="hidden" asp-for="Dto.TitularesActuales[i].Sexo" />
-    }
 
     @for (int i = 0; i < Model.Dto.Difuntos.Count; i++)
     {
@@ -309,10 +315,15 @@ new HistorialOffcanvasVM
         <input type="hidden" asp-for="Dto.Difuntos[i].Apellido" />
     }
 
-    @if (Model.Dto.EstadoTramiteId != (int)EstadosCambioTitularEnum.Finalizado &&
-        Model.Dto.EstadoTramiteId != (int)EstadosCambioTitularEnum.Cancelado)
+    @for (int i = 0; i < Model.Dto.TitularesActuales.Count; i++)
     {
-        <input type="submit" class="btn btn-outline-primary" id="btnGenerarAutorizacion" value="Generar Autorización" />
+        <input type="hidden" asp-for="Dto.TitularesActuales[i].Id" />
+        <input type="hidden" asp-for="Dto.TitularesActuales[i].Nombre" />
+        <input type="hidden" asp-for="Dto.TitularesActuales[i].Apellido" />
+        <input type="hidden" asp-for="Dto.TitularesActuales[i].Sexo" />
+        <input type="hidden" asp-for="Dto.TitularesActuales[i].Dni" />
+
+
     }
 </form>
 
@@ -410,23 +421,25 @@ new ArchivoVM
         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
     };
 
-    var titularesProjection = Model.Dto.NuevosTitulares?
+    var titularesProjection = Model.Firmantes?
         .Select(t => new
         {
-            Id = t.Id,
+            FirmanteId = t.Id,
+            Id = t.PersonaId,
             Dni = t.Dni,
             Nombre = t.Nombre,
             Apellido = t.Apellido,
             Sexo = t.Sexo,
             Celular = t.Celular,
             CorreoElectronico = t.CorreoElectronico,
-            Domicilio = t.Domicilio
+            Domicilio = t.Domicilio,
+            Parentesco = t.Parentesco
         })
         .ToList();
 
     // Cast a object? para que el ?? compare objetos y devuelva un array vacío si es null
     var titularesJson = System.Text.Json.JsonSerializer.Serialize((object?)titularesProjection ?? System.Array.Empty<object>(), jsonOptions);
- }
+}
 
 
 
@@ -522,7 +535,8 @@ new ArchivoVM
     });
 </script>
 
-    <script> //titulares
+    <script>
+        //titulares
         // Variables globales
         // Inicializo titulares desde el servidor (Model.contrato.Titulares)
         const initialTitulares = @Html.Raw(titularesJson);
@@ -543,6 +557,7 @@ new ArchivoVM
         const nombreInput = document.getElementById('nombreInput');
         const apellidoInput = document.getElementById('apellidoInput');
         const celularInput = document.getElementById('celularInput');
+        const parentescoInput = document.getElementById('parentescoInput');
         const correoInput = document.getElementById('correoInput');
         const domicilioInput = document.getElementById('domicilioInput');
         const camposAdicionales = document.getElementById('camposAdicionales');
@@ -557,14 +572,16 @@ new ArchivoVM
         if (!initialTitulares || !Array.isArray(initialTitulares) || initialTitulares.length === 0) return;
 
         titulares = initialTitulares.map(t => ({
-        id: t.id ?? t.Id ?? Date.now(),
+        firmanteId: t.firmanteId ?? t.FirmanteId ?? null, // <-- nuevo
+        id:t.id ?? t.Id ?? t.personaId ?? t.PersonaId ?? null,
         dni: normalizarDni(t.dni ?? t.Dni ?? t.DNI),
         nombre: (t.nombre ?? t.Nombre ?? '') || '',
         apellido: (t.apellido ?? t.Apellido ?? '') || '',
         sexo: (t.sexo ?? t.Sexo ?? '').toLowerCase(),
         celular: t.celular ?? t.Celular ?? '',
         correoElectronico: t.correo ?? t.Correo ?? t.correoElectronico ?? t.CorreoElectronico ?? t.correoInput ?? t.correoInput ?? '',
-        domicilio: t.domicilio ?? t.Domicilio ?? ''
+        domicilio: t.domicilio ?? t.Domicilio ?? '',
+        parentesco: t.parentesco ?? t.Parentesco ?? ''
         }));
 
 
@@ -618,6 +635,14 @@ new ArchivoVM
         // Validar formulario principal antes de enviar
         formPrincipal.addEventListener('submit', async function(event) {
         event.preventDefault();
+
+        // Si tiene firmanteId seteado, es submit de "Generar Autorización" → no validar titulares
+        const firmanteIdHidden = document.getElementById('hiddenFirmanteId');
+        if (firmanteIdHidden && firmanteIdHidden.value) {
+        this.submit();
+        return;
+        }
+        event.preventDefault();
         const btnGenerar = document.getElementById('btnGenerarAutorizacion');
 
         btnGenerar.disabled = true;
@@ -635,7 +660,7 @@ new ArchivoVM
         // Validar que haya al menos un titular
         if (titulares.length === 0) {
         valido = false;
-        AlertService.show("Verificar", "Debe agregar al menos un titular", "warning");
+        AlertService.show("Verificar", "Debe agregar al menos un firmante", "warning");
         btnGenerar.disabled = false;
         btnGenerar.value = "Generar autorización";
         }
@@ -678,7 +703,7 @@ new ArchivoVM
         const dniNorm = normalizarDni(dniInput.value);
         if (titulares.some(t => normalizarDni(t.dni ?? t.Dni) === dniNorm)) {
         dniInput.classList.add('is-invalid');
-        mostrarError('Ya existe un titular con este DNI');
+        mostrarError('Ya existe un firmante con este DNI');
         return false;
         }
 
@@ -722,19 +747,18 @@ new ArchivoVM
         })
         .then(response => response.json())
         .then(data => {
-        console.log('Respuesta servidor:', data);
         mostrarCargando(false);
         if (data.success) {
         if (data.contribuyente) {
-        // Asegurar que el titular tenga un ID único
         data.contribuyente.id = data.contribuyente.id || Date.now();
-        agregarTitular(data.contribuyente);
-        $('#TitularModal').modal('hide');
+        // Agregar parentesco desde el input
+        data.contribuyente.parentesco = parentescoInput?.value?.trim() || '';
+        guardarFirmanteEnBD(data.contribuyente);  // <-- cambia agregarTitular por esto
         } else {
         cambiarAModoRegistrar();
         }
         } else {
-        mostrarError(data.message || 'Error al buscar titular');
+        mostrarError(data.message || 'Error al buscar firmante');
         }
         })
         .catch(error => {
@@ -755,7 +779,8 @@ new ArchivoVM
         apellido: apellidoInput.value.trim(),
         celular: celularInput.value.trim(),
         correo: correoInput.value.trim(),
-        domicilio: domicilioInput.value.trim()
+        domicilio: domicilioInput.value.trim(),
+        parentesco: parentescoInput?.value?.trim() || ''
         };
 
         fetch('/Persona/RegistrarContribuyenteContrato', {
@@ -770,12 +795,11 @@ new ArchivoVM
         .then(data => {
         mostrarCargando(false);
         if (data.success) {
-        // Asegurar que el titular tenga un ID único
         data.contribuyente.id = data.contribuyente.id || Date.now();
-        agregarTitular(data.contribuyente);
-        $('#TitularModal').modal('hide');
+        data.contribuyente.parentesco = parentescoInput.value.trim();
+        guardarFirmanteEnBD(data.contribuyente);  // <-- cambia agregarTitular por esto
         } else {
-        mostrarError(data.message || 'Error al registrar titular');
+        mostrarError(data.message || 'Error al registrar firmante');
         }
         })
         .catch(error => {
@@ -787,21 +811,63 @@ new ArchivoVM
 
 
 
+        //guardar el firmante en la BD
+        async function guardarFirmanteEnBD(contribuyente) {
+        mostrarCargando(true);
+        try {
+        const tramiteId = document.querySelector('input[name="TramiteId"]').value;
+        const token = $('input[name="__RequestVerificationToken"]').val();
+
+        const response = await fetch('/Persona/AgregarFirmante', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        'RequestVerificationToken': token
+        },
+        body: JSON.stringify({
+        tramiteId: parseInt(tramiteId),
+        personaId: contribuyente.id,
+        parentesco: contribuyente.parentesco ?? ''
+        })
+        });
+
+        const data = await response.json();
+        mostrarCargando(false);
+
+        if (data.success) {
+        contribuyente.firmanteId = data.firmanteId; // Id real de la tabla firmantes
+        agregarTitular(contribuyente);
+        $('#TitularModal').modal('hide');
+        } else {
+        mostrarError(data.message || 'Error al guardar firmante');
+        }
+        } catch (error) {
+        mostrarCargando(false);
+        mostrarError('Error de conexión al guardar firmante');
+        }
+        }
+
+
+
+
+
         // Funciones principales - Titulares (se mantienen, solo renderizar cambia nombres)
         function agregarTitular(titular) {
         const tNorm = {
-        id: titular.id ?? titular.Id ?? Date.now(),
+        firmanteId: titular.firmanteId ?? null,
+        id: titular.Id ?? titular.id  ?? titular.personaId ?? titular.PersonaId ?? null,
         dni: normalizarDni(titular.dni ?? titular.Dni ?? titular.DNI),
         nombre: titular.nombre ?? titular.Nombre ?? '',
         apellido: titular.apellido ?? titular.Apellido ?? '',
         sexo: (titular.sexo ?? titular.Sexo ?? '').toLowerCase(),
         celular: titular.celular ?? titular.Celular ?? '',
         correoElectronico: titular.correo ?? titular.correoElectronico ?? titular.CorreoElectronico ?? titular.Correo ?? titular.CorreoInput ?? titular.correoInput ?? '',
-        domicilio: titular.domicilio ?? titular.Domicilio ?? ''
+        domicilio: titular.domicilio ?? titular.Domicilio ?? '',
+        parentesco: titular.parentesco ?? titular.Parentesco ?? ''
         };
 
         if (titulares.some(t => normalizarDni(t.dni ?? t.Dni) === tNorm.dni)) {
-        mostrarError('Ya existe un titular con este DNI');
+        mostrarError('Ya existe un firmante con este DNI');
         return;
         }
 
@@ -819,12 +885,55 @@ new ArchivoVM
 
 
 
-        document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
-        if (titularAEliminar !== null) {
+        document.getElementById('btnConfirmarEliminar').addEventListener('click', async function () {
+        if (titularAEliminar === null) return;
+
+        const titular = titulares.find(t => t.id === titularAEliminar);
+        console.log('Titular a eliminar:', titular);
+        if (!titular) return;
+
+        const btnConfirmar = this;
+        btnConfirmar.disabled = true;
+        btnConfirmar.textContent = 'Eliminando...';
+
+        try {
+        // Si tiene firmanteId, está en BD y hay que eliminarlo del servidor
+        if (titular.firmanteId) {
+        const token = $('input[name="__RequestVerificationToken"]').val();
+        const response = await fetch('/Persona/EliminarFirmante', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        'RequestVerificationToken': token
+        },
+        body: JSON.stringify({ firmanteId: titular.firmanteId })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+        AlertService.show("Éxito", "Firmante eliminado correctamente", "success");
+
         titulares = titulares.filter(t => t.id !== titularAEliminar);
         renderizarTitulares();
         actualizarContador();
+        } else {
+        AlertService.show("Error", data.message || "No se pudo eliminar el firmante", "error");
+        }
+        }
+
+        // Quitar del array local y re-renderizar
+        titulares = titulares.filter(t => t.id !== titularAEliminar);
+        renderizarTitulares();
+        actualizarContador();
+
+        } catch (error) {
+        console.error('Error:', error);
+        AlertService.show("Error", "Error de conexión al eliminar el firmante", "error");
+        } finally {
         titularAEliminar = null;
+        btnConfirmar.disabled = false;
+        btnConfirmar.textContent = 'Quitar';
         $('#confirmarEliminarModal').modal('hide');
         }
         });
@@ -838,16 +947,18 @@ new ArchivoVM
         console.log(titular)
         const titularDiv = document.createElement('div');
         titularDiv.className = 'titular-item';
+
         // Nombres de inputs con prefijo 'contrato.Titulares[...]' para bind a Model.contrato.Titulares
         titularDiv.innerHTML = `
         <div class="titular-header">
-        <span class="titular-number">Titular ${index + 1}</span>
+        <span class="titular-number">Firmante ${index + 1}</span>
         <button type="button" class="btn btn-danger btn-sm btn-eliminar" onclick="eliminarTitular(${titular.id})">
         <i class="bi bi-trash"></i> Quitar
         </button>
         </div>
         <div class="p-3">
-        <input type="hidden" name="Personas[${index}].Id" value="${titular.id}" />
+        <input type="hidden" name="Personas[${index}].PersonaId" value="${titular.id}" />
+        <input type="hidden" name="Personas[${index}].Id" value="${titular.firmanteId}" />
         <div class="form-columns-container3 mb-3">
         <div>
         <label>DNI<span class="obligatorio"> * </span></label>
@@ -865,11 +976,20 @@ new ArchivoVM
         <div class="invalid-feedback">El apellido es obligatorio</div>
         </div>
         </div>
+
+        <div class="form-columns-container3">
         <div class="mb-3">
         <label>Domicilio<span class="obligatorio"> * </span></label>
         <input class="form-control" type="text" name="Personas[${index}].Domicilio" value="${titular.domicilio}" maxlength="100" required />
         <div class="invalid-feedback">El domicilio es obligatorio</div>
         </div>
+        <div class="mb-3">
+        <label>Parentesco</label>
+        <input class="form-control" type="text" name="Personas[${index}].Parentesco" value="${titular.parentesco || titular.Parentesco}" maxlength="100" />
+        </div>
+        </div>
+
+        
         <div class="form-columns-container3">
         <div>
         <label>Sexo<span class="obligatorio"> * </span></label>
@@ -889,6 +1009,35 @@ new ArchivoVM
         <label>Correo</label>
         <input class="form-control" type="text" name="Personas[${index}].CorreoElectronico" value="${titular.correoElectronico || titular.CorreoElectronico || titular.Correo || titular.correo || titular.correoInput || titular.CorreoInput || ''}" maxlength="100" />
         </div>
+        </div>
+        <div class="text-end mt-3">
+        @if (Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Finalizado &&
+                            Model.Dto.EstadoTramiteId != (int)EstadosTramiteEnum.Cancelado)
+        {
+
+                    <div class="dropdown d-inline-block">
+                                <button class="btn btn-outline-primary btn-sm dropdown-toggle"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                                            <i class="bi bi-file-earmark-text"></i> Generar
+                                </button>
+
+                                <ul class="dropdown-menu">
+                                            <li>
+                                                        <button type="button"
+                                class="dropdown-item"
+                                onclick="generarAutorizacion(${titular.firmanteId}, @((int)TipoAutorizacionEnum.Cambio_Titular_Ambos_Presentes))">
+                                                                    Autorización
+                                                        </button>
+                                            </li>
+                                </ul>
+                    </div>
+
+        }
+
+
+                   
         </div>
         </div>
         `;
@@ -911,6 +1060,43 @@ new ArchivoVM
         nombreInput.setAttribute('required', '');
         apellidoInput.setAttribute('required', '');
         domicilioInput.setAttribute('required', '');
+        }
+
+
+
+        function generarAutorizacion(firmanteId, tipoAutorizacionId) {
+
+        if (!firmanteId) {
+        AlertService.show("Error", "Firmante inválido", "error");
+        return;
+        }
+
+        let hiddenFirmante = document.getElementById('hiddenFirmanteId');
+
+        if (!hiddenFirmante) {
+        hiddenFirmante = document.createElement('input');
+        hiddenFirmante.type = 'hidden';
+        hiddenFirmante.name = 'firmanteId';
+        hiddenFirmante.id = 'hiddenFirmanteId';
+        formPrincipal.appendChild(hiddenFirmante);
+        }
+
+        hiddenFirmante.value = firmanteId;
+
+
+        let hiddenTipo = document.getElementById('hiddenTipoAutorizacionId');
+
+        if (!hiddenTipo) {
+        hiddenTipo = document.createElement('input');
+        hiddenTipo.type = 'hidden';
+        hiddenTipo.name = 'tipoAutorizacionId';
+        hiddenTipo.id = 'hiddenTipoAutorizacionId';
+        formPrincipal.appendChild(hiddenTipo);
+        }
+
+        hiddenTipo.value = tipoAutorizacionId;
+
+        formPrincipal.submit();
         }
 
 
@@ -960,7 +1146,6 @@ new ArchivoVM
         }
 
     </script>
-
     <script src="~/js/tareabase.js"></script>
      <script src="~/js/tareas-finalizar.js"></script>
 }
