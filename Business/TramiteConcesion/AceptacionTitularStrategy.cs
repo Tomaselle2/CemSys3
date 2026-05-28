@@ -134,19 +134,19 @@ namespace CemSys3.Business.TramiteConcesion
                    .FirstOrDefaultAsync(c => c.TramiteId == cambioTitularidad.ConcesionId) ?? throw new Exception("Concesion no encontrada.");
 
             Models.Tramite tramite = await _context.Tramites.FirstOrDefaultAsync(t => t.Id == tramiteId) ?? throw new Exception("Trámite no encontrado.");
+            
+            cambioTitularidad.FechaFinalizacion = DateTime.Now;
+            tramite.FechaFinalizacion = DateTime.Now;
 
+            List<FirmantesDTO> firmantes = await _firmantes.GetAllByTramite(tramite.Id);
 
             List<PersonaDTO> titularesNuevos = new();
 
-            List<TitularesContratoDTO> nuevosTitulares = await _context.DocumentosTramites.Where(t => t.TramiteId == cambioTitularidad.TramiteId).Select(h => new TitularesContratoDTO
-            {
-                Id = h.Persona.Id,
-            }).ToListAsync();
 
-            foreach (var titular in nuevosTitulares)
+            foreach (var titular in firmantes)
             {
-                titularesNuevos.Add(await _personaService.Get(titular.Id.Value));
-                await _historialEstadosService.VincularTramiteAPersona(tramiteId, titular.Id.Value);
+                titularesNuevos.Add(await _personaService.Get(titular.PersonaId));
+                await _historialEstadosService.VincularTramiteAPersona(tramiteId, titular.PersonaId);
             }
 
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -172,9 +172,7 @@ namespace CemSys3.Business.TramiteConcesion
                 string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
                 string titularNota = $"El nuevo titular debe ser {titularesNuevos?[0].Apellido?.ToUpper()}, {titularesNuevos?[0].Nombre?.ToUpper()} con DNI {titularesNuevos?[0].Dni}";
 
-                cambioTitularidad.FechaFinalizacion = DateTime.Now;
-                tramite.FechaFinalizacion = DateTime.Now;
-
+               
                 await GenerarNotaRecordatorio(descripcionNota, nombreNota, titularNota, usuarioId);
 
                 await _context.SaveChangesAsync();
