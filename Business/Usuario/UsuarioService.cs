@@ -5,6 +5,7 @@ using CemSys3.Interfaces.Usuario;
 using CemSys3.Models;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.Metrics;
 using System.Security.Cryptography;
 
@@ -100,13 +101,43 @@ namespace CemSys3.Business.Usuario
             var usuarioExistente = await _contex.Usuarios.FindAsync(dto.Id); //busco el usuario por id
 
             //actualizo los datos del usuario
-            usuarioExistente.Nombre = dto.NombreEmpleado.Trim();
-            usuarioExistente.Apellido = dto.ApellidoEmpleado.Trim();
-            usuarioExistente.Correo = dto.Correo.Trim();
-            usuarioExistente.Usuario1 = dto.NombreUsuario.Trim();
-            usuarioExistente.RolId = dto.IdRol;
+            usuarioExistente?.Nombre = dto.NombreEmpleado.Trim();
+            usuarioExistente?.Apellido = dto.ApellidoEmpleado.Trim();
+            usuarioExistente?.Correo = dto.Correo.Trim();
+            usuarioExistente?.Usuario1 = dto.NombreUsuario.Trim();
+            usuarioExistente?.RolId = dto.IdRol;
 
-            _contex.Usuarios.Update(usuarioExistente);
+            if(usuarioExistente != null)
+            {
+                _contex.Usuarios.Update(usuarioExistente);
+            }
+
+            await _contex.SaveChangesAsync();
+        }
+
+        public async Task ModificarContrasenia(int idUsuario, string nuevaPass, string antiguaPass)
+        {
+            Models.Usuario usuarioExistente = await _contex.Usuarios.FindAsync(idUsuario) ?? throw new ValidationException("Usuario no encontrado.");
+
+            if (string.IsNullOrEmpty(nuevaPass))
+                throw new ValidationException("La contraseña nueva no puede estar vacía.");
+
+            if (string.IsNullOrEmpty(antiguaPass))
+                throw new ValidationException("La contraseña actual no puede estar vacía.");
+
+            if (!VerificarPassword(antiguaPass, usuarioExistente.Clave))
+                throw new ValidationException("La contraseña actual es incorrecta");
+
+            if (!IsPasswordStrong(nuevaPass))
+            {
+                throw new ValidationException("La contraseña debe tener al menos 6 caracteres, una mayúscula, un número y un símbolo.");
+            }
+
+            if (nuevaPass.Equals(antiguaPass))
+                throw new ValidationException("La contraseña nueva debe ser diferente de la anterior");
+
+            usuarioExistente.Clave = HashPassword(nuevaPass);
+
             await _contex.SaveChangesAsync();
         }
 
@@ -190,6 +221,15 @@ namespace CemSys3.Business.Usuario
             }
 
             return result;
+        }
+
+        private bool IsPasswordStrong(string password)
+        {
+            return !string.IsNullOrEmpty(password) &&
+                   password.Length >= 6 &&
+                   password.Any(char.IsUpper) &&
+                   password.Any(char.IsDigit) &&
+                   password.Any(ch => !char.IsLetterOrDigit(ch) && !char.IsWhiteSpace(ch));
         }
     }
 }

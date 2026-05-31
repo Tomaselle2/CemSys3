@@ -15,6 +15,7 @@ namespace CemSys3.Interfaces.Usuario
         Task<UsuarioRequestDTO> GetUserById(int Id); //obtiene un usuario por el id
         Task Delete(int Id); //elimina un usuario
         Task<IEnumerable<UsuarioRequestDTO>> GetAll(); //obtiene todos los usuarios
+        Task ModificarContrasenia(int idUsuario, string nuevaPass, string antiguaPass);
 
     }
 }
