@@ -1,0 +1,159 @@
+﻿@using CemSys3.DTOs.Paginacion
+@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.Parcela
+@using CemSys3.ViewModels.Persona
+@model PersonasVM
+
+@{
+    ViewData["Title"] = "Personas";
+}
+
+<div class="page-header-container">
+    <h1 class="title-page">Personas</h1>
+</div>
+
+<!-- Tabla -->
+<div class="accordion" id="accordionPanelsStayOpenExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                Busqueda
+            </button>
+        </h2>
+
+        <div class="d-flex justify-content-start p-2">
+            <form method="get"
+                  asp-action="Index"
+                  asp-controller="Persona"
+                  class="d-flex align-items-center gap-2">
+
+                @* Mantener contexto *@
+                <input type="hidden" name="pagina" value="1" />
+                <input type="hidden" name="porPagina" value="@Model.Paginacion.RegistrosPorPagina" />
+
+
+                <div class="form-columns-container3">
+
+                    <div>
+                        <label for="dni">DNI</label>
+                        <input class="form-control" id="dniInput" value="@(Model.Dni == 0 ? "" : Model.Dni.ToString())" name="dni" type="text" asp-for="Dni" pattern="[0-9]+" oninput="this.value = this.value.replace(/[^0-9]/g, '')" autocomplete="off" />
+                    </div>
+
+                    <div>
+                        <label for="nombreDifunto">Nombre</label>
+                        <input class="form-control" id="nombreInput" name="nombre" type="text" asp-for="Nombre" maxlength="60" minlength="2" autocomplete="off" />
+                    </div>
+
+                    <div>
+                        <label for="apellidoDifunto">Apellido</label>
+                        <input class="form-control" id="apellidoInput" name="apellido" type="text" asp-for="Apellido" maxlength="60" minlength="2" autocomplete="off" />
+                    </div>
+                </div>
+
+                <div class="text-center mt-3">
+                    <button type="submit" class="btn btn-success me-2" id="btnBuscar">Buscar</button>
+                    <a asp-action="Index" asp-controller="Persona" class="btn btn-primary" id="btnLimpiar">Limpiar filtros</a>
+                </div>
+            </form>
+
+            
+
+        </div>
+
+
+
+        
+       
+
+
+        
+    </div>
+</div>
+
+<!-- Tabla -->
+<div class="accordion" id="accordionPanelsStayOpenExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                Resultados
+            </button>
+        </h2>
+        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            @* cuerpo del acordion *@
+            @if (Model.Personas.Count() != 0)
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>DNI</th>
+                                    <th>Apellido</th>
+                                    <th>Nombre</th>
+                                    <th>Sexo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var opc in Model.Personas)
+                                {
+                                    <tr>
+                                        <td>@(opc.Dni == string.Empty || opc.Dni == null ? "--------" : opc.Dni)</td>
+                                        <td>@opc.Apellido?.ToUpper()</td>
+                                        <td>@opc.Nombre?.ToUpper()</td>
+                                        <td>@opc.Sexo</td>
+
+                                        <td>
+                                            <form asp-action="HistorialPersona" method="get" style="display: inline-block;" target="_blank">
+                                                <input type="hidden" name="id" value="@opc.Id" />
+                                                <button type="submit" class="btn btn-secondary btn-sm" title="Historial">
+                                                    <i class="bi bi-clock-history"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                @if (Model.Paginacion.TotalPaginas > 0)
+                {
+                    @await Html.PartialAsync("_Paginador", new PaginacionDTO
+                    {
+                        PaginaActual = Model.Paginacion.PaginaActual,
+                        TotalPaginas = Model.Paginacion.TotalPaginas,
+                        TotalRegistros = Model.Paginacion.TotalRegistros,
+                        RegistrosPorPagina = Model.Paginacion.RegistrosPorPagina,
+                        Accion = "Index",
+                        Controlador = "Persona",
+                        Parametros = Model.Paginacion.Parametros
+                    })
+                }
+
+            }
+            else
+            {
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    Realice una búsqueda para ver los resultados.
+                </div>
+            }
+            @* Fin cuerpo del acordeon *@
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+

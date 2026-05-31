@@ -1,4 +1,5 @@
-﻿using CemSys3.DTOs.Persona;
+﻿using CemSys3.DTOs.Paginacion;
+using CemSys3.DTOs.Persona;
 
 namespace CemSys3.Interfaces.Persona
 {
@@ -10,5 +11,11 @@ namespace CemSys3.Interfaces.Persona
         Task<PersonaDTO> Get(int id);
         Task<int> Update(PersonaDTO dto);
         Task<HistorialPersonaDTO> HistorialPersona (int id);
+
+        Task<PaginadoResponse<PersonaDTO>> GetAllFiltro(int dni = 0,
+            string nombre = "",
+            string apellido = "",
+            int pagina = 1,
+            int porPagina = 10);
     }
 }

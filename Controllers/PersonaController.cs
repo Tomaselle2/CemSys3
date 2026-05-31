@@ -1,4 +1,5 @@
 ﻿using CemSys3.Business.TramiteConcesion;
+using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
@@ -6,10 +7,8 @@ using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.TramitesConcesion;
-using CemSys3.Models;
 using CemSys3.ViewModels.Persona;
 using Microsoft.AspNetCore.Mvc;
-using static CemSys3.Controllers.CremacionController;
 
 namespace CemSys3.Controllers
 {
@@ -22,6 +21,54 @@ namespace CemSys3.Controllers
         {
             _personaService = persona;
             _firmantesService = firmante;
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> Index(int dni = 0,
+            string nombre = "",
+            string apellido = "",
+            int pagina = 1,
+            int porPagina = 10)
+        {
+            PersonasVM viewModel = new PersonasVM();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+            try
+            {
+                PaginadoResponse<PersonaDTO> resultado = await _personaService.GetAllFiltro(dni, nombre, apellido, pagina, porPagina);
+                viewModel.Personas = resultado.Items;
+                viewModel.Paginacion = resultado.Paginacion;
+                viewModel.Paginacion.Parametros = new Dictionary<string, string>();
+                viewModel.Paginacion.Parametros.Add("dni", dni.ToString());
+                viewModel.Paginacion.Parametros.Add("nombre", nombre);
+                viewModel.Paginacion.Parametros.Add("apellido", apellido);
+                viewModel.Paginacion.Parametros.Add("porPagina", porPagina.ToString());
+
+                viewModel.Dni = dni == 0 ? null : dni;
+                viewModel.Nombre = nombre;
+                viewModel.Apellido = apellido;
+
+                if (viewModel.Personas.Count() == 0)
+                {
+                    viewModel.SweetAlert = new SweetAlertDTO
+                    {
+                        Titulo = "Advertencia",
+                        Mensaje = $"No se encontraron resultados",
+                        Tipo = "warning"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al cargar las personas: {ex.Message}",
+                    Tipo = "error"
+                };
+            }
+
+            return View(viewModel);
         }
 
         [HttpGet]

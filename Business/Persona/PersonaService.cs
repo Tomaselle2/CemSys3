@@ -1,9 +1,11 @@
-﻿using CemSys3.DTOs.Persona;
+﻿using CemSys3.DTOs.Paginacion;
+using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace CemSys3.Business.Persona
 {
@@ -79,6 +81,62 @@ namespace CemSys3.Business.Persona
                 CategoriaPersonaId = persona.CategoriaPersonaId,
                 FechaIngreso = fechaIngreso
             };
+        }
+
+        public async Task<PaginadoResponse<PersonaDTO>> GetAllFiltro(
+            int dni = 0,
+            string nombre = "",
+            string apellido = "",
+            int pagina = 1,
+            int porPagina = 10)
+        {
+            PaginadoResponse<PersonaDTO> resultado = new();
+
+            IQueryable<Models.Persona> query = _context.Personas.AsNoTracking();
+
+            // Aplicar filtros solo si el usuario ingresó datos
+            if (dni > 0)
+            {
+                query = query.Where(p => p.Dni == dni.ToString("D8"));
+            }
+
+            if (!string.IsNullOrWhiteSpace(nombre)) 
+            {
+                query = query.Where(p => p.Nombre.Contains(nombre));
+            }
+
+            if (!string.IsNullOrWhiteSpace(apellido))
+            {
+                query = query.Where(p => p.Apellido.Contains(apellido));
+            }
+
+            // Total de registros filtrados
+            var total = await query.CountAsync();
+
+            resultado.Paginacion.TotalPaginas = (int)Math.Ceiling(total / (double)porPagina);
+            resultado.Paginacion.PaginaActual = Math.Max(1, pagina);
+            resultado.Paginacion.RegistrosPorPagina = porPagina;
+            resultado.Paginacion.Accion = "Index";
+            resultado.Paginacion.Controlador = "Persona";
+            resultado.Paginacion.TotalRegistros = total;
+
+            resultado.Items = await query.AsNoTracking()
+                .OrderBy(p => p.Apellido)
+                .ThenBy(p => p.Nombre)
+                .Skip((resultado.Paginacion.PaginaActual - 1) * porPagina)
+                .Take(porPagina)
+                .Select(p => new PersonaDTO
+                {
+                    Id = p.Id,
+                    Nombre = p.Nombre,
+                    Apellido = p.Apellido,
+                    Dni = p.Dni,
+                    Sexo = p.Sexo,
+                    Visibilidad = p.Visibilidad
+                })
+                .ToListAsync();
+
+            return resultado;
         }
 
         public async Task<PersonaDTO> GetByDNISexo(int dni, string sexo)
