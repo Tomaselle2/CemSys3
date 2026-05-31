@@ -11,6 +11,7 @@
     string requisitosTraslado = string.Empty;
     string requisitosReduccion = string.Empty;
     string requisitosPermisoIngreso = string.Empty;
+    string requisitosPermisoRefaccion = string.Empty;
 
 
     foreach (var requisito in Model.Dto.Requisitos)
@@ -32,6 +33,9 @@
 
         if (requisito.TipoTramiteId == (int)TipoTramiteEnum.PermisoIngreso)
             requisitosPermisoIngreso = requisito.Descripcion;
+
+        if (requisito.TipoTramiteId == (int)TipoTramiteEnum.PermisoRefaccion)
+            requisitosPermisoRefaccion = requisito.Descripcion;
     }
 
     string nroConcesion = Model.InfoGeneral.NroConcesion.HasValue ? Model.InfoGeneral.NroConcesion.Value.ToString("D5") : "-----";
@@ -218,6 +222,27 @@
                 <form asp-action="IniciarTramite" asp-controller="PermisoIngreso" method="post">
                     <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
                     <input type="hidden" name="tipoTramiteId" value="@((int)TipoTramiteEnum.PermisoIngreso)" />
+                    <input type="submit" value="Iniciar trámite" class="btn btn-success" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- tramites Permiso de refaccion-->
+<div class="cardConcesion my-4">
+    <div class="cardConcesion-content">
+        <h3>Permiso de refacción</h3>
+        <textarea class="form-control mb-2" rows="3">@requisitosPermisoRefaccion</textarea>
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3">
+            <div>
+                <button class="btn btn-outline-primary btn-copiar-texto">Copiar</button>
+            </div>
+
+            <div class="text-end">
+                <form asp-action="IniciarTramite" asp-controller="PermisoRefaccion" method="post">
+                    <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
+                    <input type="hidden" name="tipoTramiteId" value="@((int)TipoTramiteEnum.PermisoRefaccion)" />
                     <input type="submit" value="Iniciar trámite" class="btn btn-success" />
                 </form>
             </div>

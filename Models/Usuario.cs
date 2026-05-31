@@ -35,6 +35,8 @@ public partial class Usuario
 
     public virtual ICollection<PermisosIngreso> PermisosIngresos { get; set; } = new List<PermisosIngreso>();
 
+    public virtual ICollection<PermisosRefaccione> PermisosRefacciones { get; set; } = new List<PermisosRefaccione>();
+
     public virtual ICollection<Reduccione> Reducciones { get; set; } = new List<Reduccione>();
 
     public virtual RolesUsuario Rol { get; set; } = null!;

@@ -70,8 +70,8 @@ namespace CemSys3.Business.PlantillaTramite
              .Select(x => new PlantillaTramiteDTO
              {
                  PlantillaId = x.Id,
-                 Nombre = x.Nombre,
-                 Contenido = x.Contenido,
+                 Nombre = x.Nombre ?? "",
+                 Contenido = x.Contenido ?? "",
                  TipoTramiteId = x.TipoTramiteId,
                  TipoAutorizacionId = x.TipoAutorizacionId ?? 0
              })
@@ -85,8 +85,8 @@ namespace CemSys3.Business.PlantillaTramite
              .Select(x => new PlantillaTramiteDTO
              {
                  PlantillaId = x.Id,
-                 Nombre = x.Nombre,
-                 Contenido = x.Contenido,
+                 Nombre = x.Nombre ?? "",
+                 Contenido = x.Contenido ?? "",
                  TipoTramiteId = x.TipoTramiteId,
                  TipoAutorizacionId = x.TipoAutorizacionId ?? 0
              })
@@ -102,8 +102,8 @@ namespace CemSys3.Business.PlantillaTramite
                     PlantillaId = x.Id,
                     TipoTramiteId = x.TipoTramiteId,
                     TipoAutorizacionId = x.TipoAutorizacionId ?? 0,
-                    Nombre = x.Nombre,
-                    Contenido = x.Contenido
+                    Nombre = x.Nombre ?? "",
+                    Contenido = x.Contenido ?? ""
                 })
                 .ToListAsync();
         }

@@ -54,13 +54,16 @@ namespace CemSys3.Business.TramiteConcesion
                     FechaIngreso = p.FechaIngreso,
                     EstadoDifuntoId = p.Difunto.EstadoDifuntoId
                 }).ToListAsync();
+            Models.PreciosTarifaria montoMinimoFondo = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.MontoMinimoFondo).FirstOrDefaultAsync() ?? throw new Exception("No se encontro el montoMinimoFondo");
 
             Models.PreciosTarifaria porcentajeFondo = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.PorcentajeFondoAyudaCentroSalud).FirstOrDefaultAsync() ?? throw new Exception("No se encontro el % fondo ayuda");
             Models.PreciosTarifaria precioApertura = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.AperturaNichoConPlaca).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio de apertura");
             Models.PreciosTarifaria precioCremacion = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.Cremacion).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio de cremacion");
             Models.PreciosTarifaria precioCierreNicho = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.CierreNicho).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio de cierre de nicho");
-            Models.PreciosTarifaria precioCierreFosa = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.CierreFosa).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio de cierre de fosa");
-            Models.PreciosTarifaria precioReduccion = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.Reduccion).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio de cierre de fosa");
+            Models.PreciosTarifaria precioCierreFosa = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.CierreFosa).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio");
+            Models.PreciosTarifaria precioReduccion = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.Reduccion).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio");
+            Models.PreciosTarifaria precioPermisoColocarPlaca = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.PermisoParaColocarPlaca).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio");
+            Models.PreciosTarifaria precioPermisoRefaccion = await _context.PreciosTarifarias.Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.PermisoRefaccion).FirstOrDefaultAsync() ?? throw new Exception("No se encontro precio");
 
 
             List<Models.RequisitosTramite> requisitos = await _context.RequisitosTramites
@@ -76,7 +79,11 @@ namespace CemSys3.Business.TramiteConcesion
                         {
                             "precioApertura",
                             Math.Round(
-                                precioApertura.Precio * (1 + porcentajeFondo.Precio),
+                                CalcularPrecioConFondo(
+                                    precioApertura.Precio,
+                                    porcentajeFondo.Precio,
+                                    montoMinimoFondo.Precio
+                                ),
                                 2
                             ).ToString("0.00", CultureInfo.InvariantCulture)
                         },
@@ -84,7 +91,11 @@ namespace CemSys3.Business.TramiteConcesion
                         {
                             "precioCremacion",
                             Math.Round(
-                                precioCremacion.Precio * (1 + porcentajeFondo.Precio),
+                               CalcularPrecioConFondo(
+                                    precioCremacion.Precio,
+                                    porcentajeFondo.Precio,
+                                    montoMinimoFondo.Precio
+                                ),
                                 2
                             ).ToString("0.00", CultureInfo.InvariantCulture)
                         },
@@ -92,21 +103,55 @@ namespace CemSys3.Business.TramiteConcesion
                         {
                             "precioCierreNicho",
                             Math.Round(
-                                precioCierreNicho.Precio * (1 + porcentajeFondo.Precio),
+                                CalcularPrecioConFondo(
+                                    precioCierreNicho.Precio,
+                                    porcentajeFondo.Precio,
+                                    montoMinimoFondo.Precio
+                                ),
                                 2
                             ).ToString("0.00", CultureInfo.InvariantCulture)
                         },
                          {
                             "precioCierreFosa",
                             Math.Round(
-                                precioCierreFosa.Precio * (1 + porcentajeFondo.Precio),
+                                CalcularPrecioConFondo(
+                                    precioCierreFosa.Precio,
+                                    porcentajeFondo.Precio,
+                                    montoMinimoFondo.Precio
+                                ),
                                 2
                             ).ToString("0.00", CultureInfo.InvariantCulture)
                         },
                          {
                             "precioReduccion",
                             Math.Round(
-                                precioReduccion.Precio * (1 + porcentajeFondo.Precio),
+                                CalcularPrecioConFondo(
+                                    precioReduccion.Precio,
+                                    porcentajeFondo.Precio,
+                                    montoMinimoFondo.Precio
+                                ),
+                                2
+                            ).ToString("0.00", CultureInfo.InvariantCulture)
+                        },
+                         {
+                            "precioPermisoRefaccion",
+                            Math.Round(
+                                CalcularPrecioConFondo(
+                                    precioPermisoRefaccion.Precio,
+                                    porcentajeFondo.Precio,
+                                    montoMinimoFondo.Precio
+                                ),
+                                2
+                            ).ToString("0.00", CultureInfo.InvariantCulture)
+                        },
+                         {
+                            "precioPermisoColocarPlaca",
+                            Math.Round(
+                                CalcularPrecioConFondo(
+                                    precioPermisoColocarPlaca.Precio,
+                                    porcentajeFondo.Precio,
+                                    montoMinimoFondo.Precio
+                                ),
                                 2
                             ).ToString("0.00", CultureInfo.InvariantCulture)
                         }
@@ -146,6 +191,21 @@ namespace CemSys3.Business.TramiteConcesion
             }
 
             await _context.SaveChangesAsync();
+        }
+
+        private decimal CalcularPrecioConFondo(
+            decimal precioBase,
+            decimal porcentajeFondo,
+            decimal montoMinimoFondo)
+        {
+            decimal importeFondo = precioBase * porcentajeFondo;
+
+            if (importeFondo < montoMinimoFondo)
+            {
+                importeFondo = montoMinimoFondo;
+            }
+
+            return precioBase + importeFondo;
         }
     }
 }

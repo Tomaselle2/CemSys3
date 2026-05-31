@@ -36,6 +36,9 @@ namespace CemSys3.Business.PlantillaTramite
                 (int)TipoTramiteEnum.PermisoIngreso =>
                 _provider.GetRequiredService<PermisoIngresoStrategy>(),
 
+                (int)TipoTramiteEnum.PermisoRefaccion =>
+                _provider.GetRequiredService<PermisoRefaccionStrategy>(),
+
                 _ => throw new Exception("Strategy no implementada")
             };
         }
@@ -64,6 +67,9 @@ namespace CemSys3.Business.PlantillaTramite
 
                 (int)TipoTramiteEnum.PermisoIngreso =>
                _provider.GetRequiredService<PermisoIngresoStrategy>(),
+
+                (int)TipoTramiteEnum.PermisoRefaccion =>
+                 _provider.GetRequiredService<PermisoRefaccionStrategy>(),
 
                 _ => throw new Exception("CreateStrategy no implementada")
             };

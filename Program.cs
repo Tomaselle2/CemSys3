@@ -20,6 +20,7 @@ using CemSys3.Business.Tramite;
 using CemSys3.Business.TramiteConcesion;
 using CemSys3.Business.Usuario;
 using CemSys3.DTOs.TramitesConcesion.Cremacion;
+using CemSys3.DTOs.TramitesConcesion.PermisoRefaccion;
 using CemSys3.DTOs.TramitesConcesion.Reduccion;
 using CemSys3.DTOs.TramitesConcesion.Traslado;
 using CemSys3.Helpers.PDF;
@@ -108,10 +109,12 @@ builder.Services.AddScoped<CremacionStrategy>();
 builder.Services.AddScoped<TrasladoStrategy>();
 builder.Services.AddScoped<ReduccionStrategy>();
 builder.Services.AddScoped<PermisoIngresoStrategy>();
+builder.Services.AddScoped<PermisoRefaccionStrategy>();
 
 builder.Services.AddScoped<IComplementoTramite<CremacionDTO>, CremacionStrategy>();
 builder.Services.AddScoped<IComplementoTramite<TrasladoDTO>, TrasladoStrategy>();
 builder.Services.AddScoped<IComplementoTramite<ReduccionDTO>, ReduccionStrategy>();
+builder.Services.AddScoped<IComplementoTramite<PermisoRefaccionDTO>, PermisoRefaccionStrategy>();
 
 
 // =========================

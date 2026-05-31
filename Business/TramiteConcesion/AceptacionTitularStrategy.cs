@@ -135,24 +135,26 @@ namespace CemSys3.Business.TramiteConcesion
 
             Models.Tramite tramite = await _context.Tramites.FirstOrDefaultAsync(t => t.Id == tramiteId) ?? throw new Exception("Trámite no encontrado.");
             
-            cambioTitularidad.FechaFinalizacion = DateTime.Now;
-            tramite.FechaFinalizacion = DateTime.Now;
-
-            List<FirmantesDTO> firmantes = await _firmantes.GetAllByTramite(tramite.Id);
-
-            List<PersonaDTO> titularesNuevos = new();
-
-
-            foreach (var titular in firmantes)
-            {
-                titularesNuevos.Add(await _personaService.Get(titular.PersonaId));
-                await _historialEstadosService.VincularTramiteAPersona(tramiteId, titular.PersonaId);
-            }
+           
 
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
+                cambioTitularidad.FechaFinalizacion = DateTime.Now;
+                tramite.FechaFinalizacion = DateTime.Now;
+
+                List<FirmantesDTO> firmantes = await _firmantes.GetAllByTramite(tramite.Id);
+
+                List<PersonaDTO> titularesNuevos = new();
+
+
+                foreach (var titular in firmantes)
+                {
+                    titularesNuevos.Add(await _personaService.Get(titular.PersonaId));
+                    await _historialEstadosService.VincularTramiteAPersona(tramiteId, titular.PersonaId);
+                }
+
                 //1-modificar los titulares de la concesion (agregar nuevos y cerrar los que ya no están)
                 await ProcesarTitularesConHistorial(cambioTitularidad.ConcesionId.Value, titularesNuevos, concesion, null);
 

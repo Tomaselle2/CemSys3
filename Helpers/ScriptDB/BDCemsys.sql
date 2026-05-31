@@ -682,3 +682,22 @@ CREATE TABLE PermisosIngresos (
 	CONSTRAINT FK_PERMISO_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
     CONSTRAINT FK_PERMISO_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id)
 );
+
+CREATE TABLE PermisosRefacciones (
+    tramiteId INT PRIMARY KEY,
+    parcelaId INT NOT NULL,
+    usuarioId INT NOT NULL,
+
+    fechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+    fechaFinalizacion DATETIME NULL,
+	fechaPendiente DATETIME NULL,
+
+	concesionId int null,
+
+    visibilidad BIT DEFAULT 1,
+
+    CONSTRAINT FK_PERMISOREFACCION_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_PERMISOREFACCION_concesionId FOREIGN KEY (concesionId) REFERENCES Tramites(id),
+	CONSTRAINT FK_PERMISOREFACCION_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_PERMISOREFACCION_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id)
+);

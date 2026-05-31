@@ -45,6 +45,9 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Permiso de ingreso")]
         PermisoIngreso = 9,
+
+        [Display(Name = "Permiso de refacción")]
+        PermisoRefaccion = 10,
     }
 
 
@@ -71,8 +74,11 @@ namespace CemSys3.Enumerables
         [Display(Name = "Reducción - Autorización")]
         ReduccionAutorizacion = 7,
 
-        [Display(Name = "PermisoIngreso")]
+        [Display(Name = "Permiso de nuevo ingreso")]
         PermisoIngreso = 8,
+
+        [Display(Name = "Permiso de refacción")]
+        PermisoRefaccion = 9,
     }
 
     public enum TipoNichoEnum

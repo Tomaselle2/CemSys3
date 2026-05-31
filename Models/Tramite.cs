@@ -57,6 +57,10 @@ public partial class Tramite
 
     public virtual PermisosIngreso? PermisosIngresoTramite { get; set; }
 
+    public virtual ICollection<PermisosRefaccione> PermisosRefaccioneConcesions { get; set; } = new List<PermisosRefaccione>();
+
+    public virtual PermisosRefaccione? PermisosRefaccioneTramite { get; set; }
+
     public virtual ICollection<Reduccione> ReduccioneConcesions { get; set; } = new List<Reduccione>();
 
     public virtual Reduccione? ReduccioneTramite { get; set; }

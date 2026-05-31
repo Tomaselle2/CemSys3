@@ -43,6 +43,8 @@ public partial class Parcela
 
     public virtual ICollection<PermisosIngreso> PermisosIngresos { get; set; } = new List<PermisosIngreso>();
 
+    public virtual ICollection<PermisosRefaccione> PermisosRefacciones { get; set; } = new List<PermisosRefaccione>();
+
     public virtual ICollection<Reduccione> ReduccioneParcelaDestinos { get; set; } = new List<Reduccione>();
 
     public virtual ICollection<Reduccione> ReduccioneParcelaOrigens { get; set; } = new List<Reduccione>();
