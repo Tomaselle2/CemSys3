@@ -5,7 +5,6 @@ using CemSys3.Helpers;
 using CemSys3.Interfaces.PlantillaTramite;
 using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.Models;
-using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 namespace CemSys3.Business.TramiteConcesion

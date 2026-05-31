@@ -8,7 +8,6 @@ using CemSys3.DTOs.Tarea;
 using CemSys3.DTOs.Tramite;
 using CemSys3.DTOs.TramitesConcesion;
 using CemSys3.DTOs.TramitesConcesion.PermisoRefaccion;
-using CemSys3.DTOs.TramitesConcesion.Reduccion;
 using CemSys3.Enumerables;
 using CemSys3.Helpers;
 using CemSys3.Interfaces.Concesion;
