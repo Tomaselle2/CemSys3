@@ -17,5 +17,6 @@ namespace CemSys3.Interfaces.Usuario
         Task<IEnumerable<UsuarioRequestDTO>> GetAll(); //obtiene todos los usuarios
         Task ModificarContrasenia(int idUsuario, string nuevaPass, string antiguaPass);
 
+        Task ResetearContrasenia(int idUsuario);
     }
 }

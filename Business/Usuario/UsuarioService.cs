@@ -231,5 +231,18 @@ namespace CemSys3.Business.Usuario
                    password.Any(char.IsDigit) &&
                    password.Any(ch => !char.IsLetterOrDigit(ch) && !char.IsWhiteSpace(ch));
         }
+
+        public async Task ResetearContrasenia(int idUsuario)
+        {
+            var usuarioExistente = await _contex.Usuarios.FindAsync(idUsuario); //busco el usuario por id
+
+            if (usuarioExistente == null)
+            {
+                throw new ValidationException("Usuario no encontrado.");
+            }
+
+            usuarioExistente.Clave = HashPassword("1234"); // contraseña por defecto
+            await _contex.SaveChangesAsync();
+        }
     }
 }

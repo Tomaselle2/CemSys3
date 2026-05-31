@@ -119,6 +119,18 @@
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>
+
+                                            <form asp-action="Resetear" method="post" style="display: inline-block;" id="formularioResetear" class="js-confirm"
+                                                  data-confirm-title="Confirmar reseteo"
+                                                  data-confirm-message="¿Está seguro de resetear la contraseña del usuario @opc.NombreEmpleado @opc.ApellidoEmpleado?"
+                                                  data-confirm-icon="warning">
+
+                                                <input type="hidden" asp-for="Id" name="Id" value="@opc.Id" />
+
+                                                <button type="submit" class="btn btn-danger btn-sm btn-lista" title="Resetear contraseña">
+                                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 }

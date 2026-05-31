@@ -338,5 +338,37 @@ namespace CemSys3.Controllers
             return RedirectToAction("CambiarContraseniaUsuario", new { usuarioId = model.Id });
 
         }
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> Resetear(int Id)
+        {
+            try
+            {
+                await _usuarioService.ResetearContrasenia(Id);
+
+                TempData.SetSweetAlert(
+                    new SweetAlertDTO
+                    {
+                        Titulo = "Éxito",
+                        Mensaje = "Contraseña reseteada correctamente",
+                        Tipo = "success"
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(
+                    new SweetAlertDTO
+                    {
+                        Titulo = "Error",
+                        Mensaje = "No se pudo resetear la contraseña: " + ex.Message,
+                        Tipo = "error"
+                    }
+                );
+            }
+
+            return RedirectToAction("AdminUsers");
+        }
     }
 }
