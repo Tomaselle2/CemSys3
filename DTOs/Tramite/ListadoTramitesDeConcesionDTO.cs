@@ -1,4 +1,5 @@
 ﻿using AspNetCoreGeneratedDocument;
+using CemSys3.DTOs.Persona;
 
 namespace CemSys3.DTOs.Tramite
 {
@@ -9,5 +10,8 @@ namespace CemSys3.DTOs.Tramite
         public IEnumerable<RequisitosTramiteDTO> Requisitos { get; set; } = new List<RequisitosTramiteDTO>();
 
         public IEnumerable<TramiteDTO> TramitesIniciados { get; set; } = new List<TramiteDTO>();
+
+        public List<DifuntoContratoDTO> Difuntos { get; set; } = new List<DifuntoContratoDTO>();
+
     }
 }

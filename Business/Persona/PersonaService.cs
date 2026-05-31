@@ -4,8 +4,6 @@ using CemSys3.Enumerables;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
-using Microsoft.Playwright;
 
 namespace CemSys3.Business.Persona
 {

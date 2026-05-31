@@ -27,13 +27,27 @@ public partial class Parcela
 
     public int? TipoParcelaId { get; set; }
 
+    public virtual ICollection<AceptacionTitularidad> AceptacionTitularidads { get; set; } = new List<AceptacionTitularidad>();
+
     public virtual ICollection<CambiosTitularidad> CambiosTitularidads { get; set; } = new List<CambiosTitularidad>();
 
     public virtual ICollection<Concesione> Concesiones { get; set; } = new List<Concesione>();
 
+    public virtual ICollection<Cremacione> CremacioneParcelaDestinos { get; set; } = new List<Cremacione>();
+
+    public virtual ICollection<Cremacione> CremacioneParcelaOrigens { get; set; } = new List<Cremacione>();
+
     public virtual ICollection<Introduccione> Introducciones { get; set; } = new List<Introduccione>();
 
     public virtual ICollection<ParcelaDifunto> ParcelaDifuntos { get; set; } = new List<ParcelaDifunto>();
+
+    public virtual ICollection<PermisosIngreso> PermisosIngresos { get; set; } = new List<PermisosIngreso>();
+
+    public virtual ICollection<PermisosRefaccione> PermisosRefacciones { get; set; } = new List<PermisosRefaccione>();
+
+    public virtual ICollection<Reduccione> ReduccioneParcelaDestinos { get; set; } = new List<Reduccione>();
+
+    public virtual ICollection<Reduccione> ReduccioneParcelaOrigens { get; set; } = new List<Reduccione>();
 
     public virtual Seccione Seccion { get; set; } = null!;
 
@@ -44,4 +58,8 @@ public partial class Parcela
     public virtual TipoParcela? TipoParcela { get; set; }
 
     public virtual ICollection<TramitesParcela> TramitesParcelas { get; set; } = new List<TramitesParcela>();
+
+    public virtual ICollection<Traslado> TrasladoParcelaDestinos { get; set; } = new List<Traslado>();
+
+    public virtual ICollection<Traslado> TrasladoParcelaOrigens { get; set; } = new List<Traslado>();
 }

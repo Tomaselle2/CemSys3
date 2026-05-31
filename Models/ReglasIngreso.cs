@@ -7,6 +7,8 @@ public partial class ReglasIngreso
 {
     public int Id { get; set; }
 
+    public string NombreRegla { get; set; } = null!;
+
     public int TipoParcelaId { get; set; }
 
     public int EstadoDifuntoId { get; set; }
@@ -34,8 +36,6 @@ public partial class ReglasIngreso
     public int? MontoMinimoFondoId { get; set; }
 
     public bool Visibilidad { get; set; }
-
-    public string NombreRegla { get; set; } = null!;
 
     public int? CierreNicho { get; set; }
 

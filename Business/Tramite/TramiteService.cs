@@ -1,8 +1,11 @@
 ﻿using CemSys3.DTOs.Generics;
+using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
 using CemSys3.Interfaces.Tramite;
+using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.Models;
+using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.EntityFrameworkCore;
 
 namespace CemSys3.Business.Tramite
@@ -10,10 +13,11 @@ namespace CemSys3.Business.Tramite
     public class TramiteService : ITramite
     {
         private readonly AppDbContext _context;
-        
-        public TramiteService(AppDbContext context)
+        private readonly IRequisitos _requisitosService;
+        public TramiteService(AppDbContext context, IRequisitos requisitos)
         {
             _context = context;
+            _requisitosService = requisitos;
         }
 
         public async Task<GenericResultDTO> ActualizarInfoAdicional(int tramiteId, string informacionAdicionalTramite)
@@ -41,6 +45,36 @@ namespace CemSys3.Business.Tramite
                 case (int)TipoTramiteEnum.ContratoConcesion:
                     Concesione concesion = await _context.Concesiones.FindAsync(tramiteId) ?? throw new Exception("No se encontro la concesión");
                     concesion.InformacionAdicional = informacionAdicionalTramite;
+                    await _context.SaveChangesAsync();
+
+                    result.Message = "Información adicional actualizada correctamente";
+                    result.Success = true;
+                    result.Id = tramiteId;
+                    break;
+
+                case (int)TipoTramiteEnum.Cremacion:
+                    Cremacione cremacion = await _context.Cremaciones.FindAsync(tramiteId) ?? throw new Exception("No se encontro la cremación");
+                    cremacion.InfoAdicional = informacionAdicionalTramite;
+                    await _context.SaveChangesAsync();
+
+                    result.Message = "Información adicional actualizada correctamente";
+                    result.Success = true;
+                    result.Id = tramiteId;
+                    break;
+
+                case (int)TipoTramiteEnum.Reduccion:
+                    Reduccione reduccion = await _context.Reducciones.FindAsync(tramiteId) ?? throw new Exception("No se encontro la reducción");
+                    reduccion.InfoAdicional = informacionAdicionalTramite;
+                    await _context.SaveChangesAsync();
+
+                    result.Message = "Información adicional actualizada correctamente";
+                    result.Success = true;
+                    result.Id = tramiteId;
+                    break;
+
+                case (int)TipoTramiteEnum.Traslado:
+                    Traslado traslado = await _context.Traslados.FindAsync(tramiteId) ?? throw new Exception("No se encontro el traslado");
+                    traslado.InfoAdicional = informacionAdicionalTramite;
                     await _context.SaveChangesAsync();
 
                     result.Message = "Información adicional actualizada correctamente";
@@ -98,7 +132,7 @@ namespace CemSys3.Business.Tramite
                 .Select(tp => tp.ParcelaId)
                 .FirstOrDefaultAsync();
 
-            IEnumerable<Models.Tramite> tramites = await _context.TramitesParcelas
+            IEnumerable<Models.Tramite> tramites = await _context.TramitesParcelas.OrderByDescending(d=>d.FechaRegistro)
                 .Where(tp => tp.ParcelaId == parcelaId)
                 .Select(tp => tp.Tramite)
                 .ToListAsync();
@@ -109,15 +143,7 @@ namespace CemSys3.Business.Tramite
                 .Where(t => !tiposNoPermitidos.Contains(t.TipoTramiteId)) 
                 .ToList();
 
-            dto.Requisitos = await _context.RequisitosTramites
-                .Where(rt => rt.Activo == true)
-                .Select(rt => new RequisitosTramiteDTO
-                {
-                    Id = rt.Id,
-                    TipoTramiteId = rt.TipoTramiteId,
-                    Descripcion = rt.Descripcion ?? ""
-                })
-                .ToListAsync();
+            dto.Requisitos = await _requisitosService.GetAll(concesionId);
 
             dto.ConcesionId = concesionId;
             dto.ParcelaId = parcelaId;
@@ -132,9 +158,24 @@ namespace CemSys3.Business.Tramite
                 EstadoActualId = t.EstadoActualId
             }).ToList();
 
+            //consultar el difuntos relacionados a la parcela para el tramite
+            dto.Difuntos = await _context.ParcelaDifuntos
+                .Where(p => p.ParcelaId == dto.ParcelaId && p.FechaRetiro == null)
+                .Select(p => new DifuntoContratoDTO
+                {
+                    Id = p.Difunto.Id,
+                    DNI = p.Difunto.Dni,
+                    Nombre = p.Difunto.Nombre,
+                    Apellido = p.Difunto.Apellido,
+                    FechaIngreso = p.FechaIngreso,
+                    EstadoDifuntoId = p.Difunto.EstadoDifuntoId
+                }).ToListAsync();
 
-          return dto;
+
+            return dto;
         }
+
+
 
         public async Task Update(TramiteDTO dto)
         {
@@ -150,5 +191,7 @@ namespace CemSys3.Business.Tramite
             int? maxId = await _context.Tramites.MaxAsync(t => (int?)t.Id);
             return (maxId ?? 0) + 1;
         }
+
+
     }
 }

@@ -12,5 +12,6 @@ namespace CemSys3.Interfaces.Tramite
         Task<GenericResultDTO> ActualizarInfoAdicional(int tramiteId, string informacionAdicionalTramite);
 
         Task<ListadoTramitesDeConcesionDTO> GetListadoTramitesDeConcesion(int concesionId); //get
+
     }
 }

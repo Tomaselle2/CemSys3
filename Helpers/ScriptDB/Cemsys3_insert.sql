@@ -59,28 +59,25 @@ INSERT INTO EstadosDifunto (estado) VALUES
 -- INSERT para TipoTramite
 INSERT INTO TipoTramite (tipo) VALUES 
 ('Ingreso'), --1
-('Autorización para cremación'), --2
-('Autorización para reducción'), --3
+('Cremación'), --2
+('Reducción'), --3
 ('Contrato de concesión'), --4
-('Autorización para traslado'), --5
+('Traslado'), --5
 ('Cambio de titularidad'), --6
-('Nota'); --7
-
-INSERT INTO RequisitosTramite (tipoTramiteId, descripcion)
-VALUES 
-(1, 'Debe presentarse el {titular} con DNI'),
-(2, 'Adjuntar acta de defunción si el titular está fallecido'),
-(3, 'Presentar libreta de familia'),
-(4, 'Adjuntar acta de defunción si el titular está fallecido'),
-(5, 'Adjuntar acta de defunción si el titular está fallecido'),
-(6, 'Adjuntar acta de defunción si el titular está fallecido');
-
+('Nota'), --7
+('Aceptación de titularidad'), --8
+('Permiso de ingreso'), --9
+('Permiso de refacción'); --10
 
 -- INSERT para TipoParcela
 INSERT INTO TipoParcela (tipo) VALUES 
 ('Nicho'),
 ('Fosa'),
 ('Panteón');
+
+INSERT INTO Cementerios (nombre, visibilidad) VALUES
+('CREMATORIO PARQUE LOS ÁLAMOS', 1),
+('CEMENTERIO PARQUE LOS ÁLAMOS', 2);
 
 -- INSERT para TipoPanteon
 INSERT INTO TipoPanteon (tipo) VALUES 
@@ -158,10 +155,11 @@ VALUES
 ('Vigente', 4), --contrato de concesion 6
 ('Vencido', 4), --contrato de concesion 7
 ('Caducado', 4), --contrato de concesion 8
-('Iniciado', 6), --cambio de titularidad 9
-('Finalizado', 6); --cambio de titularidad 10
+('Iniciado', 6),
+('Finalizado', 6), 
+('Cancelado', 6),
+('Pendiente', 6);
 
---select * from EstadosTramites
 --insert into EstadosTramites (estado, tipoTramiteId) values ('Iniciado', 6), ('Finalizado', 6);
 INSERT INTO Usuarios (nombre, apellido, correo, usuario, clave, rolId) values ('Tomas', 'Carreras', 'tomaselle2@gmail.com', 'Tomaselle2', 'P7eSe/VyhW8UaKMx5qghSw==.JYrOO0ZJQLp0A82FUreiYz7mWl+BpZykU1AfM1ZOpZU=', 2);
 
@@ -610,7 +608,116 @@ null, --cierre fosa
 1);-- visibilidad
 
 
+Insert into TipoAutorizacion (tipoTramiteId, nombre) values 
+(6, 'Cambio titular - ambos presentes'), --1
+(8, 'Aceptación de titularidad'),  --2
+(2, 'Cremación - Autorización'), --3
+(2, 'Cremación - Libre Tránsito'), --4
+(2, 'Nuevo Destino - Registro Civil'), --5
+(5, 'Traslado - Autorización'), --6
+(3, 'Reducción - Autorización'), --7
+(9, 'Permiso de ingreso'), --8
+(10, 'Permiso de refacción'); --9
 
+insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
+(6, 'Cambio Titular - Ambos Presentes',
+'<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png?v=@DateTime.Now.Ticks" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <p style="text-align: justify;"> </p>  <p style="text-align: justify;">Se deja constancia de que {articuloTitularActual} {sr/sraTitularActual} <strong>{TitularesActuales} DNI {DniTitularActual}, </strong>quien suscribiera el contrato de concesión real de uso sobre <strong>{Parcela} </strong>el cual está ocupado por <strong>{Difuntos},</strong> sito en el cementerio Municipal de Colonia Tirolesa cede {articuloNuevoTitular} {sr/sraNuevoTitular} <strong>{NuevosTitulares} DNI {DniNuevosTitulares}. </strong>La concesión del bien mencionado supra de común entre las partes presentes.<br> </p>  <br><br><br><br><br><br><br><br>  <p class="firma-linea">FIRMA_____________________________________                 DNI___________________________________</p>  <br><br><br>  <p class="firma-linea">FIRMA_____________________________________                 DNI___________________________________</p>  <br><br><br><br><br><br><br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png?v=@DateTime.Now.Ticks" width="700" height="100"></figure>  </div>',
+1, 1); 
+
+insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
+(8, 'Aceptación de titularidad',
+'<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png?v=@DateTime.Now.Ticks" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <p style="text-align: justify;"> </p>  <p style="text-align: justify;">Se deja constancia de que {articuloNuevoTitular} {sr/sraNuevoTitular} <strong>{NuevosTitulares} DNI {DniNuevosTitulares},</strong><strong> </strong>toma posesión de la titularidad del siguiente <strong>{Parcela} </strong>el cual está ocupado por <strong>{Difuntos} </strong>de este cementerio municipal,<strong> </strong>a causa del fallecimiento del titular anterior. <br> </p>  <br><br><br><br><br><br><br><br>  <p class="firma-linea">FIRMA_____________________________________                </p>  <br><br><br>  <p class="firma-linea">DNI________________________________________</p>  </div>  <p><br><br><br></p>  <div class="documento-contenido">TELÉFONO________________________________________<br><br><br><br><br><br><br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png?v=@DateTime.Now.Ticks" width="700" height="100"></figure>  </div>',
+2, 1);
+
+insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
+(2, 'Cremación - Autorización',
+'<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png?v=@DateTime.Now.Ticks" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <span style="text-decoration: underline;">S                           //                          D</span><br>  <p style="text-align: justify;">Atentamente:<br>El que suscribe la presente <strong>{NombreCompletoFirmante} DNI {DniFirmante}</strong> en carácter de <strong>{Parentesco}</strong> del difunto <strong>{Difuntos}</strong> inhumado en <strong>{Parcela}</strong> <strong>({NroConcesion}),</strong> de este Cementerio Municipal; autoriza al Municipio a realizar el siguiente trámite: <strong>{AperturaNicho/Fosa}</strong> <strong>Y TRASLADO AL</strong> <strong>{crematorio} </strong>siendo el que suscribe responsable de los posibles daños que se pudieran ocasionar, fruto del trabajo realizado, (féretro, lápida, placa, etc.).<br>     Así mismo y a tales efectos declaro bajo juramento que estoy facultado para el presente requerimiento atento al vinculo expresado en la presente y que soy el único pariente legitimado, o cuento con el consentimiento de ellos. Consecuentemente haciéndome responsable exclusivo de todos los efectos que pudieran derivar de la presente.<br>A los fines de avalar los extremos indicados adjunto los siguientes comprobantes que obran en mi poder y que consisten en recibos pago mantenimiento. Como así También recibos de pago de los aranceles estipulados para dicho trámite por la ordenanza Municipal.<br>     Por cualquier eventualidad relacionada con el presente trámite fijo domicilio en <strong>{DomicilioFirmante}</strong>.</p>  <br><br>  <p class="firma-linea">FIRMA_____________________________________</p>  <br><br>  <p class="firma-linea">ACLARACIÓN_____________________________________</p>  <br><br>  <p class="firma-linea">TELÉFONO_____________________________________</p>  <br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png?v=@DateTime.Now.Ticks" width="700" height="100"></figure>  </div>',
+3, 1);
+
+insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
+(2, 'Libre Tránsito',
+'<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png?v=@DateTime.Now.Ticks" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <p style="text-align: center;">LIBRE TRÁNSITO - PERMISO DE TRASLADO</p>  <p style="text-align: justify;">Se autoriza al portador de la presente a trasladar los restos mortales del extinto, <strong>{Difuntos}</strong> fallecido el ________________, ubicado en <strong>{Parcela}</strong> desde el cementerio Municipal de Colonia Tirolesa hacia el {crematorioDestino} de esta misma localidad.</p>  <br><br>Los restos serán trasladados en automóvil particular, propiedad de _____________________________________________ DNI ____________________________ dominio _____________ marca ______________ modelo ____________________.<br>  <p class="firma-linea"> </p>  <br><br>  <p class="firma-linea"> </p>  <br><br>  <p class="firma-linea"> </p>  <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png?v=@DateTime.Now.Ticks" width="700" height="100"></figure>  </div>',
+4, 1);
+
+insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
+(2, 'Nuevo Destino - Registro Civil',
+'<div class="documento-contenido">  <figure class="image-logo"><img src="../fotos/EncabezadoRegistro.jpg?v=@DateTime.Now.Ticks" alt="Logo"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <p class="MsoNormal" style="text-align: center;" align="center"><span style="font-size: 12.0pt; line-height: 115%;">SOLICITUD – DEFUNCIONES – DESTINO DE LOS RESTOS</span></p>  <p class="MsoNormal"><span style="font-size: 12.0pt; line-height: 115%;">Al Registro Civil de Colonia Tirolesa</span></p>  <p class="MsoNormal"><span style="font-size: 12.0pt; line-height: 115%;">De mi mayor consideración</span></p>  <p class="MsoNormal" style="text-align: justify; text-indent: 127.6pt;"><span style="font-size: 12.0pt; line-height: 115%;">{NombreCompletoFirmante} D.N.I {DniFirmante}, Domicilio {DomicilioFirmante} en carácter de {Parentesco}, del extinto/a {Difuntos} fallecido el _______________ manifiesto en calidad de declaración jurada contar con interés legítimo, y, para solicitar a Ud.:</span></p>  <p class="MsoNormal" style="text-align: justify; text-indent: 127.6pt;"><span style="font-size: 12.0pt; line-height: 115%;">Deje constancia en el acta de defunción/transcripción de {Difuntos} Registrada bajo el acta ____ Tomo __ Folio ___ Año _____ Serie -<span style="mso-spacerun: yes;">  </span><span style="mso-spacerun: yes;"> </span>localidad de COLONIA TIROLESA, DPTO COLÓN, CÓRDOBA, del traslado de los restos del causante al nuevo destino, siendo éste, {crematorio}.</span></p>  <p class="MsoNormal" style="text-align: justify; text-indent: 127.6pt;"><span style="font-size: 12.0pt; line-height: 115%;">Asimismo declaro que no hay objeción alguna a este trámite por ningún otro familiar que pudiera tener el mismo derecho a disposición que quien suscribe.</span></p>  <p class="MsoNormal" style="text-align: justify; text-indent: 127.6pt;"><span style="font-size: 12.0pt; line-height: 115%;">Se releva de responsabilidad al Registro Civil de esta ciudad, en caso de que existan otras normas testamentarias o de otro tipo sobre la disposición de los restos del causante, incompatibles con la presente y que sea o no de conocimiento del solicitante.</span></p>  <p class="MsoNormal" style="text-align: justify; text-indent: 127.6pt;"><span style="font-size: 12.0pt; line-height: 115%;">Se adjunta a la presente DNI del solicitante, acta de defunción, permiso de salida del cementerio local, documentación que acredita el interés legítimo.</span></p>  <p class="MsoNormal" style="text-align: justify; text-indent: 127.6pt;"><span style="font-size: 12.0pt; line-height: 115%;">Sin otro particular, le saluda atte.-</span></p>  <br><br>  <p class="MsoNormal" style="text-indent: 127.6pt;"><span style="font-size: 12.0pt; line-height: 115%;"> </span></p>  <p class="MsoNormal" style="text-align: right; text-indent: 127.6pt;" align="right"><span style="font-size: 12.0pt; line-height: 115%;">Firma del solicitante</span></p>  <p class="MsoNormal" style="text-align: justify;"><span style="font-size: 12.0pt; line-height: 115%;">Certifico que la firma que antecede ha sido puesta en mi presencia y pertenece a {NombreCompletoFirmante} D.N.I {DniFirmante}</span></p>  <br><br><br><br><br><br><br><br><br><br><br>  <figure class="image-pie"><img src="../fotos/pieRegistro.jpg?v=@DateTime.Now.Ticks"></figure>  </div>',
+5, 1);
+
+insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
+(5, 'Traslado - Autorización',
+'<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png?v=@DateTime.Now.Ticks" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <span style="text-decoration: underline;">S                           //                          D</span><br>  <p style="text-align: justify;">Atentamente:<br>El que suscribe la presente <strong>{NombreCompletoFirmante} DNI {DniFirmante}</strong> en carácter de <strong>{Parentesco}</strong> del difunto <strong>{Difuntos}</strong> inhumado en <strong>{Parcela}</strong> <strong>({NroConcesion}),</strong> de este Cementerio Municipal; autoriza al Municipio a realizar el siguiente trámite: <strong>{AperturaNicho/Fosa}</strong> <strong>Y TRASLADO A</strong> <strong>{NuevaUbicacionTraslado} </strong>siendo el que suscribe responsable de los posibles daños que se pudieran ocasionar, fruto del trabajo realizado, (féretro, lápida, placa, etc.).<br>     Así mismo y a tales efectos declaro bajo juramento que estoy facultado para el presente requerimiento atento al vinculo expresado en la presente y que soy el único pariente legitimado, o cuento con el consentimiento de ellos. Consecuentemente haciéndome responsable exclusivo de todos los efectos que pudieran derivar de la presente.<br>A los fines de avalar los extremos indicados adjunto los siguientes comprobantes que obran en mi poder y que consisten en recibos pago mantenimiento. Como así También recibos de pago de los aranceles estipulados para dicho trámite por la ordenanza Municipal.<br>     Por cualquier eventualidad relacionada con el presente trámite fijo domicilio en <strong>{DomicilioFirmante}</strong>.</p>  <br><br>  <p class="firma-linea">FIRMA_____________________________________</p>  <br><br>  <p class="firma-linea">ACLARACIÓN_____________________________________</p>  <br><br>  <p class="firma-linea">TELÉFONO_____________________________________</p>  <br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png?v=@DateTime.Now.Ticks" width="700" height="100"></figure>  </div>',
+6, 1);
+
+insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
+(3, 'Reducción - Autorización',
+'<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png?v=@DateTime.Now.Ticks" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <span style="text-decoration: underline;">S                           //                          D</span><br>  <p style="text-align: justify;">Atentamente:<br>El que suscribe la presente <strong>{NombreCompletoFirmante} DNI {DniFirmante}</strong> en carácter de <strong>{Parentesco}</strong> del difunto <strong>{Difuntos}</strong> inhumado en <strong>{Parcela}</strong> <strong>({NroConcesion}),</strong> de este Cementerio Municipal; autoriza al Municipio a realizar el siguiente trámite: <strong>{AperturaNicho/Fosa}, REDUCCIÓN </strong><strong>{NuevaUbicacionTraslado} </strong>siendo el que suscribe responsable de los posibles daños que se pudieran ocasionar, fruto del trabajo realizado, (féretro, lápida, placa, etc.).<br>     Así mismo y a tales efectos declaro bajo juramento que estoy facultado para el presente requerimiento atento al vinculo expresado en la presente y que soy el único pariente legitimado, o cuento con el consentimiento de ellos. Consecuentemente haciéndome responsable exclusivo de todos los efectos que pudieran derivar de la presente.<br>A los fines de avalar los extremos indicados adjunto los siguientes comprobantes que obran en mi poder y que consisten en recibos pago mantenimiento. Como así También recibos de pago de los aranceles estipulados para dicho trámite por la ordenanza Municipal.<br>     Por cualquier eventualidad relacionada con el presente trámite fijo domicilio en <strong>{DomicilioFirmante}</strong>.</p>  <br><br>  <p class="firma-linea">FIRMA_____________________________________</p>  <br><br>  <p class="firma-linea">ACLARACIÓN_____________________________________</p>  <br><br>  <p class="firma-linea">TELÉFONO_____________________________________</p>  <br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png?v=@DateTime.Now.Ticks" width="700" height="100"></figure>  </div>',
+7, 1);
+
+insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
+(9, 'Permiso de ingreso',
+'<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png?v=@DateTime.Now.Ticks" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <span style="text-decoration: underline;">S                           //                          D</span><br>  <p style="text-align: justify;">Atentamente:<br>El que suscribe la presente <strong>{NombreCompletoFirmante} DNI {DniFirmante}</strong> en carácter de <strong>{Parentesco}</strong> de <strong>{Parcela}</strong> <strong>({NroConcesion}),</strong> de este Cementerio Municipal; autoriza al Municipio a realizar el siguiente trámite: <strong>{AperturaNicho/Fosa} E INGRESO DE </strong><strong>{NombreNuevoDifunto} </strong>siendo el que suscribe responsable de los posibles daños que se pudieran ocasionar, fruto del trabajo realizado, (féretro, lápida, placa, etc.).<br>     Así mismo y a tales efectos declaro bajo juramento que estoy facultado para el presente requerimiento atento al vinculo expresado en la presente y que soy el único pariente legitimado, o cuento con el consentimiento de ellos. Consecuentemente haciéndome responsable exclusivo de todos los efectos que pudieran derivar de la presente.<br>A los fines de avalar los extremos indicados adjunto los siguientes comprobantes que obran en mi poder y que consisten en recibos pago mantenimiento. Como así También recibos de pago de los aranceles estipulados para dicho trámite por la ordenanza Municipal.<br>     Por cualquier eventualidad relacionada con el presente trámite fijo domicilio en <strong>{DomicilioFirmante}</strong>.</p>  <br><br>  <p class="firma-linea">FIRMA_____________________________________</p>  <br><br>  <p class="firma-linea">ACLARACIÓN_____________________________________</p>  <br><br>  <p class="firma-linea">TELÉFONO_____________________________________</p>  <br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png?v=@DateTime.Now.Ticks" width="700" height="100"></figure>  </div>',
+8, 1);
+
+insert into PlantillasTramite (tipoTramiteId, nombre, contenido, tipoAutorizacionId, activo) values 
+(10, 'Permiso de refacción',
+'<div class="documento-contenido">  <figure class="image-logo"><img style="aspect-ratio: 600/140;" src="../fotos/logoMuni.png?v=@DateTime.Now.Ticks" alt="Logo" width="310" height="90"></figure>  <p style="text-align: right;">Colonia Tirolesa, {Fecha}</p>  <span style="text-decoration: underline;">S                           //                          D</span><br>  <p style="text-align: justify;">Atentamente:<br>Por medio de la presente se autoriza al señor ___________________________________________ DNI _______________________ (RESPONSABLE DE OBRA) y albañiles ______________________________________ DNI _________________________ a realizar tareas de refacción en <strong>{Parcela} ({NroConcesion}) </strong>que se encuentra como<strong> {Parentesco}</strong> <strong>{NombreCompletoFirmante} DNI {DniFirmante}</strong> de este cementerio municipal.</p>  <br><br>  <p class="firma-linea">FIRMA_____________________________________</p>  <br><br>  <p class="firma-linea">ACLARACIÓN_____________________________________</p>  <br><br>  <p class="firma-linea">TELÉFONO_____________________________________</p>  <br><br><br><br><br><br><br><br>  <figure class="image-pie"><img style="aspect-ratio: 1024/150;" src="../fotos/pieContrato.png?v=@DateTime.Now.Ticks" width="700" height="100"></figure>  </div>',
+9, 1);
+
+
+insert into TareaPlantilla (Descripcion, TipoTramiteId, Visibilidad, estado) values
+('Firmar autorización', 6,1,0),
+('Subir autorización firmada', 6,1,0),
+('DNI del titular', 6,1,0),
+('Firmar autorización', 8,1,0),
+('Subir autorización firmada', 8,1,0),
+('DNI del titular', 8,1,0),
+('Firma autorización del titular', 2,1,0),
+('DNI titular', 2,1,0),
+('Abonar apertura', 2,1,0),
+('Impuestos / deuda al día', 2,1,0),
+('Asignar fecha al trámite', 2,1,0),
+('Comprobar vínculo con titular', 2,1,0),
+('Acta de defunción del fallecido', 2,1,0),
+('Generar libre tránsito', 2,1,0),
+('Firma autorización del titular', 5,1,0),
+('DNI titular', 5,1,0),
+('Abonar apertura', 5,1,0),
+('Impuestos / deuda al día', 5,1,0),
+('Asignar fecha al trámite', 5,1,0),
+('Comprobar vínculo con titular', 5,1,0),
+('Acta de defunción del fallecido', 5,1,0),
+('Abonar cierre', 5,1,0),
+('Firma autorización del titular', 3,1,0),
+('DNI titular', 3,1,0),
+('Abonar apertura', 3,1,0),
+('Impuestos / deuda al día', 3,1,0),
+('Asignar fecha al trámite', 3,1,0),
+('Comprobar vínculo con titular', 3,1,0),
+('Acta de defunción del fallecido', 3,1,0),
+('Abonar cierre', 3,1,0),
+('Abonar reducción', 3,1,0),
+('Firmar autorización', 9,1,0),
+('Subir autorización firmada', 9,1,0),
+('DNI del titular', 9,1,0),
+('Firmar autorización', 10,1,0),
+('Subir autorización firmada', 10,1,0),
+('Subir DNI de los obreros', 10,1,0),
+('Abonar permiso de refacción', 10,1,0);
+
+
+
+
+INSERT INTO RequisitosTramite (tipoTramiteId, descripcion)
+VALUES 
+(8, '- Se necesita que esté presente el nuevo titular.  - El trámite es sin costo.  - De lunes a viernes de 7:00hs a 12:30hs.'), --aceptacion de titularidad
+(2, 'Para la cremación de {Difuntos} debe estar *al día con los impuestos* y *deuda*.   Debe abonar la apertura de la parcela en la municipalidad, que son *${precioApertura}* cada una.  Tiene que firmar el titular del nicho ({TitularesActuales}) y/o los familiares más cercanos al difunto.  Hay que comprobar el vínculo del fallecido con los firmantes, puede ser con libreta de familia, declaratoria de herederos o actas de nacimiento, esto depende de la relación.    La cremación tiene un costo de ${precioCremacion} por difunto, el cual lo abona en el Crematorio Parque los Álamos, aquí está incluido el traslado del cementerio municipal al crematorio.   Las autorizaciones las entrega esta oficina.'), --cremacion
+(3, 'Para la reducción de {Difuntos} debe estar *al día con los impuestos* y *deuda*.   Debe abonar la apertura de la parcela en la municipalidad, que son *${precioApertura}* cada una.  Debe abonar el cierre de nicho o fosa. Cierre de nicho *${precioCierreNicho}* y cierre de fosa *${precioCierreFosa}*  La reducción tiene un costo de *${precioReduccion}*  Tiene que firmar el titular del nicho ({TitularesActuales}) y/o los familiares más cercanos al difunto.  Hay que comprobar el vínculo del fallecido con los firmantes, puede ser con libreta de familia, declaratoria de herederos o actas de nacimiento, esto depende de la relación.   Las autorizaciones las entrega esta oficina.'), --reduccion
+(4, 'Contrato de concesion'),
+(5, 'Para el traslado de {Difuntos} debe estar *al día con los impuestos* y *deuda*.   Debe abonar la apertura de la parcela en la municipalidad, que son *${precioApertura}* cada una.  Debe abonar el cierre de nicho o fosa, depende de donde sea trasladado. Cierre de nicho *${precioCierreNicho}* y cierre de fosa *${precioCierreFosa}*  Tiene que firmar el titular del nicho ({TitularesActuales}) y/o los familiares más cercanos al difunto.  Hay que comprobar el vínculo del fallecido con los firmantes, puede ser con libreta de familia, declaratoria de herederos o actas de nacimiento, esto depende de la relación.   Las autorizaciones las entrega esta oficina.'), --traslado
+(6, '- Se necesita que esté presente el titular ({TitularesActuales}) y el nuevo titular.  - El trámite es sin costo.   - De lunes a viernes de 7:00hs a 12:30hs.'), --cambio de titular
+(9, '- Se necesita que esté presente el titular ({TitularesActuales})   - El trámite es sin costo.     - De lunes a viernes de 7:00hs a 12:30hs.'), --permiso de ingreso
+(10, '- Se necesita que esté presente el titular ({TitularesActuales})    - El permiso de refacción tiene un costo de ${precioPermisoRefaccion}      - El permiso para colocar placa tiene un costo de ${precioPermisoColocarPlaca}       - Fotocopia DNI de los obreros   - De lunes a viernes de 7:00hs a 12:30hs.'); --permiso de refaccion
 
 --Job para pasar de concesion vigente a vencida 
 --BEGIN TRANSACTION;

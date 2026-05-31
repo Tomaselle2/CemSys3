@@ -1,10 +1,8 @@
-﻿using AspNetCoreGeneratedDocument;
-using CemSys3.DTOs.Concesion;
+﻿using CemSys3.DTOs.Concesion;
 using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.HistorialEstado;
 using CemSys3.DTOs.Ingreso;
 using CemSys3.DTOs.Paginacion;
-using CemSys3.DTOs.Parcela;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
@@ -18,8 +16,6 @@ using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
-using static iText.Kernel.Pdf.Colorspace.PdfSpecialCs;
 
 namespace CemSys3.Business.Ingreso
 {
@@ -164,7 +160,7 @@ namespace CemSys3.Business.Ingreso
                 //10- se inicia el contrato de concesion en estado "Sin Contrato" solo si es nicho o fosa
 
                 bool existeConcesion = await _context.Concesiones
-                    .AnyAsync(c => c.ParcelaId == ingreso.ParcelaId && c.Visibilidad == true);
+                    .AnyAsync(c => c.ParcelaId == ingreso.ParcelaId && c.Visibilidad == true && c.FechaFin == null);
 
 
                 if (!existeConcesion && ingreso.Parcela.TipoParcelaId != (int)TipoParcelaEnum.Panteon)
@@ -190,7 +186,13 @@ namespace CemSys3.Business.Ingreso
                     concesion.EstadoTramiteId = (int)EstadosConcesionEnum.Vigente;
                     GenericResultDTO resultadoConcesion = await _concesionService.Add(concesion);
                 }
-                
+
+                Models.Concesione concesionBD = await _context.Concesiones
+                   .FirstOrDefaultAsync(c => c.ParcelaId == ingreso.ParcelaId && c.FechaFin == null) ?? throw new Exception("Concesion no encontrada.");
+
+                concesionBD.InformacionAdicional += $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se registra el ingreso del difunto {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} en estado {EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(dto.EstadoDifuntoId)}.";
+                await _historialEstadosService.VincularTramiteAPersona(concesionBD.TramiteId, difuntoId);
+
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();

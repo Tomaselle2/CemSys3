@@ -16,6 +16,8 @@
 
         public bool Eliminada { get; set; }
 
+        public int TareaPlantillaId { get; set; }
+        public int TipoTramiteId { get; set; }
 
     }
 }

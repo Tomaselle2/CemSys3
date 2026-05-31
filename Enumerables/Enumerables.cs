@@ -22,16 +22,16 @@ namespace CemSys3.Enumerables
         [Display(Name = "Ingreso")]
         Ingreso = 1,
 
-        [Display(Name = "Autorización para cremación")]
+        [Display(Name = "Cremación")]
         Cremacion = 2,
 
-        [Display(Name = "Autorización para reducción")]
+        [Display(Name = "Reducción")]
         Reduccion = 3,
 
         [Display(Name = "Contrato de concesión")]
         ContratoConcesion = 4,
 
-        [Display(Name = "Autorización para traslado")]
+        [Display(Name = "Traslado")]
         Traslado = 5,
 
         [Display(Name = "Cambio de titular")]
@@ -39,27 +39,49 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Nota")]
         Nota = 7,
+
+        [Display(Name = "Aceptación de titularidad")]
+        AceptacionTitular = 8,
+
+        [Display(Name = "Permiso de ingreso")]
+        PermisoIngreso = 9,
+
+        [Display(Name = "Permiso de refacción")]
+        PermisoRefaccion = 10,
     }
 
-    public enum TipoEscenarioPlantillaCambioTirularEnum
-    {
-        [Display(Name = "Ambos titulares estan presentes")]
-        Presente = 1,
 
-        [Display(Name = "El titular actual se encuentra fallecido")]
-        Fallecido = 2,
-    }
-
-    public enum PlantillasTramitesEnum
+    public enum TipoAutorizacionEnum
     {
         [Display(Name = "Cambio Titular - Presente")]
         Cambio_Titular_Ambos_Presentes = 1,
 
-        [Display(Name = "Cambio Titular - Fallecido")]
-        CambioTipo2 = 2,
+        [Display(Name = "Aceptación de Titularidad")]
+        AceptacionTitularidad = 2,
+
+        [Display(Name = "Cremación - Autorización")]
+        CremacionAutorizacion = 3,
+
+        [Display(Name = "Cremación - Libre Transito")]
+        CremacionLibreTransito = 4,
+
+        [Display(Name = "Nuevo Destino - Registro Civil")]
+        NuevoDestinoRegistroCivil = 5,
+
+        [Display(Name = "Traslado - Autorización")]
+        TrasladoAutorizacion = 6,
+
+        [Display(Name = "Reducción - Autorización")]
+        ReduccionAutorizacion = 7,
+
+        [Display(Name = "Permiso de nuevo ingreso")]
+        PermisoIngreso = 8,
+
+        [Display(Name = "Permiso de refacción")]
+        PermisoRefaccion = 9,
     }
 
-    public enum  TipoNichoEnum
+    public enum TipoNichoEnum
     {
         [Display(Name = "Féretro")]
         Feretro = 1,
@@ -260,6 +282,9 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Finalizado")]
         Finalizado = 10,
+
+        [Display(Name = "Cancelado")]
+        Cancelado = 11,
     }
 
 
@@ -289,6 +314,12 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Finalizado")]
         Finalizado = 10,
+
+        [Display(Name = "Cancelado")]
+        Cancelado = 11,
+
+        [Display(Name = "Pendiente")]
+        Pendiente = 12,
     }
 
     //concepto de la tarifaria 
@@ -306,7 +337,13 @@ namespace CemSys3.Enumerables
         PorcentajeIntroduccionUrnaDerechoOficina = 24,
         ConcesionNicho = 16,
         ConcesionFosa = 17,
-        PorcentajeDescuentoRenovacionConcesionAlDia = 25
+        PorcentajeDescuentoRenovacionConcesionAlDia = 25,
+        Cremacion = 9,
+        CierreNicho = 4,
+        CierreFosa = 5,
+        PermisoParaColocarPlaca = 6,
+        PermisoRefaccion = 7,
+        Reduccion = 8
     }
 
     public enum CategoriaArchivosEnum //cada categoria que se agrega debe ser al final siempre
@@ -332,11 +369,18 @@ namespace CemSys3.Enumerables
         [Display(Name = "Tarifaria")]
         Tarifaria,
 
-        [Display(Name = "Documentación CemSys")]
-        Documentacion,
+        [Display(Name = "Autorización")]
+        Autorizaciones,
 
         [Display(Name = "Otro tipo de archivo")]
         Otro
+    }
+
+    public enum TipoTrasladoEnum
+    {
+        Ninguno = 0,
+        Externo = 1,
+        Interno = 2
     }
 
     public class Enumerables

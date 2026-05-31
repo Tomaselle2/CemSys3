@@ -19,9 +19,9 @@ public partial class Introduccione
 
     public int DifuntoId { get; set; }
 
-    public string? InformacionAdicional { get; set; }
-
     public int EstadoDifuntoId { get; set; }
+
+    public string? InformacionAdicional { get; set; }
 
     public virtual Persona Difunto { get; set; } = null!;
 

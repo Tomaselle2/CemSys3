@@ -1,6 +1,7 @@
 ﻿@using CemSys3.ViewModels.Concesion
 @using CemSys3.Enumerables
 @using CemSys3.Helpers.Enumerable
+@using System.Globalization
 @model GenerarContratoVM
 @{
     ViewData["Title"] = "Generar Contrato Concesión";
@@ -513,7 +514,7 @@
                 apellido: (t.apellido ?? t.Apellido ?? '') || '',
                 sexo: (t.sexo ?? t.Sexo ?? '').toLowerCase(),
                 celular: t.celular ?? t.Celular ?? '',
-                correoElectronico: t.correo ?? t.correoElectronico ?? t.CorreoElectronico ?? '',
+                correoElectronico: t.correo ?? t.Correo ?? t.correoElectronico ?? t.CorreoElectronico ?? t.correoInput ?? t.correoInput ?? '',
                 domicilio: t.domicilio ?? t.Domicilio ?? ''
             }));
 
@@ -756,7 +757,7 @@
                 nombre: nombreInput.value.trim(),
                 apellido: apellidoInput.value.trim(),
                 celular: celularInput.value.trim(),
-                correoElectronico: correoInput.value.trim(),
+                correo: correoInput.value.trim(),
                 domicilio: domicilioInput.value.trim()
             };
 
@@ -798,7 +799,7 @@
                 apellido: titular.apellido ?? titular.Apellido ?? '',
                 sexo: (titular.sexo ?? titular.Sexo ?? '').toLowerCase(),
                 celular: titular.celular ?? titular.Celular ?? '',
-                correoElectronico: titular.correo ?? titular.correoElectronico ?? titular.CorreoElectronico ?? '',
+                correoElectronico: titular.correo ?? titular.correoElectronico ?? titular.CorreoElectronico ?? titular.Correo ?? titular.CorreoInput ?? titular.correoInput ?? '',
                 domicilio: titular.domicilio ?? titular.Domicilio ?? ''
             };
 
@@ -889,7 +890,7 @@
                             </div>
                             <div>
                                 <label>Correo</label>
-                                <input class="form-control" type="text" name="contrato.Titulares[${index}].CorreoElectronico" value="${titular.correoElectronico || titular.CorreoElectronico || ''}" maxlength="100" />                            
+                                <input class="form-control" type="text" name="Personas[${index}].CorreoElectronico" value="${titular.correoElectronico || titular.CorreoElectronico || titular.Correo || titular.correo || titular.correoInput || titular.CorreoInput || ''}" maxlength="100" />
                             </div>
                         </div>
                     </div>
@@ -1165,7 +1166,10 @@
                 valorCuotaInput.value = '';
             }
 
-            precioFinalHidden.value = getPrecioSeleccionado() || 0;
+                precioFinalHidden.value =
+        Number(getPrecioSeleccionado())
+            .toFixed(2)
+            .replace('.', ',');
             calcularValorCuota();
         });
 
@@ -1188,7 +1192,10 @@
                 valorCuotaInput.value = '';
             }
 
-            precioFinalHidden.value = getPrecioSeleccionado() || 0;
+                precioFinalHidden.value =
+        Number(getPrecioSeleccionado())
+            .toFixed(2)
+            .replace('.', ',');
             calcularValorCuota();
         });
 
@@ -1253,9 +1260,9 @@
 
 
         function calcularPrecioSegunTipo(precioBase, tipo) {
-            const fondo = @Model.contrato.PorcentajeFondoAyudaCentroSalud;
-            const aumento = @Model.contrato.PorcentajeAumentoConcesionesOtrasLocalidades;
-            const descuento = @Model.contrato.PorcentajeDescuentoRenovacionConcesionAlDia;
+            const fondo = @Model.contrato.PorcentajeFondoAyudaCentroSalud.ToString(CultureInfo.InvariantCulture);
+            const aumento = @Model.contrato.PorcentajeAumentoConcesionesOtrasLocalidades.ToString(CultureInfo.InvariantCulture);;
+            const descuento = @Model.contrato.PorcentajeDescuentoRenovacionConcesionAlDia.ToString(CultureInfo.InvariantCulture);;
 
             switch (tipo) {
                 case 'regular':
@@ -1280,11 +1287,11 @@
             Array.from(select.options).forEach(option => {
                 if (!option.value) return;
 
-                const precioBase = parseFloat(option.dataset.precio);
+                const precioBase = parsePrecioString(option.dataset.precio);
                 const nuevoPrecio = calcularPrecioSegunTipo(precioBase, tipo);
 
                 // Guardar el nuevo precio para cálculos posteriores
-                option.dataset.precioFinal = nuevoPrecio;
+                option.dataset.precioFinal = Number(nuevoPrecio).toFixed(2);
 
                 // Obtener texto original (años)
                 const textoOriginal = option.textContent.split('-')[0].trim();
@@ -1296,7 +1303,10 @@
             });
 
             // actualizar precio hidden
-            precioFinalHidden.value = getPrecioSeleccionado() || 0;
+               precioFinalHidden.value =
+        Number(getPrecioSeleccionado())
+            .toFixed(2)
+            .replace('.', ',');
 
             calcularValorCuota();
         }

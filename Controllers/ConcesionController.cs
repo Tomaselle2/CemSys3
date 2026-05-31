@@ -149,7 +149,6 @@ namespace CemSys3.Controllers
                 NroConcesion = viewModel.contrato.NroConcesion,
                 Difuntos = viewModel.contrato.Difuntos,
                 Titulares = viewModel.contrato.Titulares,
-                baseUrl = $"{Request.Scheme}://{Request.Host}",
                 PrecioEnLetras = NumeroALetras.ConvertirALetras(viewModel.PrecioFinal),
                 formaPago = viewModel.FormaDePago ?? "",
                 CuotaId = viewModel.CantidadCuotaSeleccionada,
@@ -158,7 +157,9 @@ namespace CemSys3.Controllers
                 CantidadAniosId = viewModel.CantidadAniosId.Value,
                 Vencimiento = viewModel.Vencimiento.Value,
                 fechaGeneracion = DateTime.Now,
-                EsRenovacion = viewModel.contrato.EsRenovacion
+                EsRenovacion = viewModel.contrato.EsRenovacion,
+                LogoBase64 = ObtenerImagenBase64("logoMuni.png"),
+                PieBase64 = ObtenerImagenBase64("pieContrato.png")
             };
 
             var ruta = Path.Combine(_env.WebRootPath, "config", "intendente.txt");
@@ -220,8 +221,8 @@ namespace CemSys3.Controllers
             dto.TipoParcela = viewModel.contrato.TipoParcela;
             dto.ParcelaId = viewModel.contrato.ParcelaId;
             dto.EstadoTramiteId = (int)EstadosConcesionEnum.Vigente;
-            dto.MensajeParcela = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizo contrato de concesión ({viewModel.contrato.NroConcesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(viewModel.CantidadAniosId.Value)}. Vencimiento {viewModel.Vencimiento}.";
-            dto.InformacionAdicional = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizo contrato de concesión ({viewModel.contrato.NroConcesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(viewModel.CantidadAniosId.Value)}. Vencimiento {viewModel.Vencimiento}.";
+            dto.MensajeParcela = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizó contrato de concesión ({viewModel.contrato.NroConcesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(viewModel.CantidadAniosId.Value)}. Vencimiento {viewModel.Vencimiento}.";
+            dto.InformacionAdicional = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizó contrato de concesión ({viewModel.contrato.NroConcesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(viewModel.CantidadAniosId.Value)}. Vencimiento {viewModel.Vencimiento}.";
 
             //pasar de TitularesDTO a PersonaDTO
             List<PersonaDTO> titulares = new List<PersonaDTO>();
@@ -529,6 +530,31 @@ namespace CemSys3.Controllers
                 });
 
             return pdfBytes;
+        }
+
+        private string ObtenerImagenBase64(string archivo)
+        {
+            var ruta = Path.Combine(_env.WebRootPath, "fotos", archivo);
+
+            if (!System.IO.File.Exists(ruta))
+                return "";
+
+            var bytes = System.IO.File.ReadAllBytes(ruta);
+
+            var base64 = Convert.ToBase64String(bytes);
+
+            var extension = Path.GetExtension(ruta).ToLower();
+
+            var mime = extension switch
+            {
+                ".png" => "image/png",
+                ".jpg" => "image/jpeg",
+                ".jpeg" => "image/jpeg",
+                ".svg" => "image/svg+xml",
+                _ => "application/octet-stream"
+            };
+
+            return $"data:{mime};base64,{base64}";
         }
     }
 }

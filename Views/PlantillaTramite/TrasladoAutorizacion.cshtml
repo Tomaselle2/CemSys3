@@ -1,0 +1,164 @@
+﻿@using CemSys3.ViewModels.PlantillaTramite
+@model PlantillaTramiteVM
+
+@{
+    ViewData["Title"] = "Traslado - Autorización";
+}
+<style>
+    .eliminada {
+        opacity: 0.4;
+        text-decoration: line-through;
+        pointer-events: none;
+    }
+
+        .eliminada .btn-restaurar {
+            pointer-events: auto;
+        }
+</style>
+<div class="page-header-container">
+    <a asp-action="IndexPlantillas" asp-controller="PlantillaTramite" class="btn btn-secondary m-3" title="Configuración"><i class="bi bi-arrow-left"></i></a>
+    <h1 class="title-page">Traslado - Autorización</h1>
+</div>
+
+<div>
+    <strong>Variables disponibles:</strong>
+    <ul>
+        <li>{Fecha}</li>
+        <li>{NombreCompletoFirmante}</li>
+        <li>{DniFirmante}</li>
+        <li>{Parentesco}</li>
+        <li>{Parcela}</li>
+        <li>{Difuntos}</li>
+        <li>{NroConcesion}</li>
+        <li>{AperturaNicho/Fosa}</li>
+        <li>{NuevaUbicacionTraslado}</li>
+        <li>{DomicilioFirmante}</li>
+    </ul>
+</div>
+
+<form asp-action="Guardar" asp-controller="PlantillaTramite" method="post">
+    <input type="hidden" asp-for="vista" />
+    <input type="hidden" asp-for="Dto.PlantillaId" />
+    <input type="hidden" asp-for="Dto.TipoTramiteId" />
+    <input type="hidden" asp-for="Dto.TipoAutorizacionId" />
+
+    <div class="mb-3">
+        <label>Nombre<span class="obligatorio"> *</span></label>
+        <input type="text" class="form-control shadow-sm" asp-for="Dto.Nombre" />
+    </div>
+
+    <textarea id="editor" asp-for="Dto.Contenido"></textarea>
+    <hr />
+
+    <div class="cardConcesion my-4">
+        <div class="cardConcesion-content">
+            <h3>Traslado</h3>
+            <textarea asp-for="Requisitos.Descripcion" rows="3" style="overflow:hidden;"
+                          class="form-control auto-resize mb-2">
+            </textarea>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="cardConcesion my-4">
+            <div class="cardConcesion-content">
+                <h3>Tareas</h3>
+
+                <div id="tareas">
+                    @for (int i = 0; i < Model.Tareas.Count(); i++)
+                    {
+                        <div class="d-flex gap-2 mb-2 task-row align-items-center">
+                            <input type="hidden" asp-for="Tareas[i].Id" />
+                            <input type="hidden" asp-for="Tareas[i].Eliminada" class="eliminada-flag" />
+
+                            <input type="checkbox"
+                                   class="form-check-input border border-dark border-1"
+                                   asp-for="Tareas[i].Estado" />
+
+                            <input class="form-control flex-grow-1"
+                                   asp-for="Tareas[i].Descripcion" />
+
+                            <button type="button"
+                                    title="Eliminar tarea"
+                                    class="btn btn-danger btn-sm btn-eliminar"
+                                    onclick="marcarEliminada(this)">
+                                ✖
+                            </button>
+
+                            <button type="button"
+                                    title="Restaurar tarea"
+                                    class="btn btn-warning btn-sm btn-restaurar d-none"
+                                    onclick="restaurar(this)">
+                                ↩
+                            </button>
+                        </div>
+                    }
+                </div>
+
+                
+            </div>
+            <button type="button"
+                    id="btnAgregarTarea"
+                    title="Agregar tarea"
+                    class="btn btn-sm btn-outline-primary"
+                    onclick="agregarTarea()">
+                <i class="bi bi-plus"></i>
+                Tarea
+            </button>
+        </div>
+
+
+        <button type="submit" class="btn btn-primary my-3">Guardar</button>
+    </form>
+
+
+    <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
+    <script src="~/tinymce/js/tinymce/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
+
+    @section Scripts {
+
+        <script>
+            function autoResize(textarea) {
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 'px';
+            }
+
+
+            window.addEventListener('DOMContentLoaded', () => {
+                    document.querySelectorAll('.auto-resize').forEach(t => autoResize(t));
+            });
+        </script>
+
+        <script>
+            tinymce.init({
+            selector: '#editor',
+            license_key: 'gpl',
+            language: 'es_MX',
+            menu: {
+              file: { title: 'File', items: 'restoredraft | preview | importword exportpdf exportword | print | deleteallconversations' },
+              edit: { title: 'Edit', items: 'undo redo | cut copy paste pastetext | selectall | searchreplace' },
+              view: { title: 'View', items: 'code suggestededits revisionhistory | visualaid visualchars visualblocks | spellchecker | preview fullscreen | showcomments' },
+              insert: { title: 'Insert', items: 'image link media addcomment pageembed codesample inserttable | math | charmap emoticons hr | pagebreak nonbreaking anchor tableofcontents | insertdatetime' },
+              format: { title: 'Format', items: 'bold italic underline strikethrough superscript subscript codeformat | styles blocks fontfamily fontsize align lineheight | forecolor backcolor | language | removeformat' },
+              tools: { title: 'Tools', items: 'spellchecker spellcheckerlanguage | a11ycheck code wordcount' },
+              table: { title: 'Table', items: 'inserttable | cell row column | advtablesort | tableprops deletetable' }
+            },
+            toolbar: 'undo redo | styles forecolor | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | image | code',
+            statusbar: false,
+            plugins: 'image code autoresize',
+
+            // Configuración de autoresize
+                    autoresize_bottom_margin: 20,      // Margen inferior en píxeles
+                    autoresize_min_height: 200,         // Altura mínima (evita que se encoja demasiado)
+                    autoresize_max_height: 800,         // Altura máxima (opcional, evita que crezca infinitamente)
+                    autoresize_overflow_padding: 10,    // Padding adicional
+           
+            });
+        </script>
+
+        <script src="~/js/tareabase.js"></script>
+    }
+
+

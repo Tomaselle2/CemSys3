@@ -1,22 +1,27 @@
-﻿using CemSys3.DTOs.Persona;
+﻿using CemSys3.Business.TramiteConcesion;
+using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Persona;
+using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.Models;
 using CemSys3.ViewModels.Persona;
 using Microsoft.AspNetCore.Mvc;
+using static CemSys3.Controllers.CremacionController;
 
 namespace CemSys3.Controllers
 {
     public class PersonaController : Controller
     {
         private readonly IPersona _personaService;
+        private readonly IFirmantes _firmantesService;
 
-        public PersonaController(IPersona persona)
+        public PersonaController(IPersona persona, IFirmantes firmante)
         {
             _personaService = persona;
+            _firmantesService = firmante;
         }
 
         [HttpGet]
@@ -183,6 +188,60 @@ namespace CemSys3.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+
+
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> EliminarFirmante([FromBody] EliminarFirmanteDTO dto)
+        {
+            try
+            {
+                await _firmantesService.Delete(dto.FirmanteId);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> AgregarFirmante([FromBody] AgregarFirmanteRequest request)
+        {
+            try
+            {
+                await _firmantesService.Add(request.TramiteId, request.PersonaId, request.Parentesco);
+
+                // Retornar el firmante recién creado para tener su Id real
+                var firmantes = await _firmantesService.GetAllByTramite(request.TramiteId);
+                var nuevo = firmantes.FirstOrDefault(f => f.PersonaId == request.PersonaId);
+
+                return Json(new { success = true, firmanteId = nuevo?.Id });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        public class AgregarFirmanteRequest
+        {
+            public int TramiteId { get; set; }
+            public int PersonaId { get; set; }
+            public string Parentesco { get; set; } = "";
+        }
+
+        public class EliminarFirmanteDTO
+        {
+            public int FirmanteId { get; set; }
+        }
+
+
+
         // Clase para los requests AJAX
         public class RegistrarContribuyenteRequestContrato
         {

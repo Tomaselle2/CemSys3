@@ -1,3 +1,4 @@
+using CemSys3.Business.Arbol;
 using CemSys3.Business.Archivo;
 using CemSys3.Business.Cementerio;
 using CemSys3.Business.ConceptoTarifaria;
@@ -18,7 +19,12 @@ using CemSys3.Business.Tarifaria;
 using CemSys3.Business.Tramite;
 using CemSys3.Business.TramiteConcesion;
 using CemSys3.Business.Usuario;
+using CemSys3.DTOs.TramitesConcesion.Cremacion;
+using CemSys3.DTOs.TramitesConcesion.PermisoRefaccion;
+using CemSys3.DTOs.TramitesConcesion.Reduccion;
+using CemSys3.DTOs.TramitesConcesion.Traslado;
 using CemSys3.Helpers.PDF;
+using CemSys3.Interfaces;
 using CemSys3.Interfaces.Archivo;
 using CemSys3.Interfaces.Cementerio;
 using CemSys3.Interfaces.ConceptoTarifaria;
@@ -37,7 +43,7 @@ using CemSys3.Interfaces.Seccion;
 using CemSys3.Interfaces.Tarea;
 using CemSys3.Interfaces.Tarifaria;
 using CemSys3.Interfaces.Tramite;
-using CemSys3.Interfaces.TramiteConcesion;
+using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.Interfaces.Usuario;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
@@ -84,6 +90,38 @@ builder.Services.AddScoped<INotificaciones, NotificacionService>();
 builder.Services.AddScoped<IViewRenderService, ViewRenderService>();
 builder.Services.AddScoped<IDeudaConcesion, DeudaConcesionService>();
 builder.Services.AddScoped<IPlantillaTramite, PlantillaTramiteService>();
+builder.Services.AddScoped<IDocumentoTramiteService, DocumentoTramiteService>();
+builder.Services.AddScoped<ITemplateProcessor, TemplateProcessor>();
+builder.Services.AddScoped<ICancelarTramite, CancelarService>();
+builder.Services.AddScoped<ITareaPlantilla, TareaPlantillaService>();
+builder.Services.AddScoped<IRequisitos, RequisitosService>();
+builder.Services.AddScoped<IFirmantes, FirmantesService>();
+builder.Services.AddScoped<IArbol, ArbolService>();
+
+
+// =========================
+// STRATEGIES
+// =========================
+
+builder.Services.AddScoped<CambioTitularStrategy>();
+builder.Services.AddScoped<AceptacionTitularStrategy>();
+builder.Services.AddScoped<CremacionStrategy>();
+builder.Services.AddScoped<TrasladoStrategy>();
+builder.Services.AddScoped<ReduccionStrategy>();
+builder.Services.AddScoped<PermisoIngresoStrategy>();
+builder.Services.AddScoped<PermisoRefaccionStrategy>();
+
+builder.Services.AddScoped<IComplementoTramite<CremacionDTO>, CremacionStrategy>();
+builder.Services.AddScoped<IComplementoTramite<TrasladoDTO>, TrasladoStrategy>();
+builder.Services.AddScoped<IComplementoTramite<ReduccionDTO>, ReduccionStrategy>();
+builder.Services.AddScoped<IComplementoTramite<PermisoRefaccionDTO>, PermisoRefaccionStrategy>();
+
+
+// =========================
+// FACTORY
+// =========================
+builder.Services.AddScoped<IStrategyFactory, StrategyFactory>();
+
 
 
 builder.Services.AddSingleton<IBrowser>(sp =>

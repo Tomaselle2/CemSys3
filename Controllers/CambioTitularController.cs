@@ -1,15 +1,16 @@
-﻿using CemSys3.Business.PlantillaTramite;
+﻿using CemSys3.Business.TramiteConcesion;
 using CemSys3.DTOs.PlantillaTramite;
 using CemSys3.DTOs.SweetAlert;
-using CemSys3.DTOs.TramiteConcesion;
+using CemSys3.DTOs.TramitesConcesion;
+using CemSys3.DTOs.TramitesConcesion.CambioTitular;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Archivo;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.PlantillaTramite;
-using CemSys3.Interfaces.TramiteConcesion;
-using CemSys3.Models;
+using CemSys3.Interfaces.Tarea;
+using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,58 +18,117 @@ namespace CemSys3.Controllers
 {
     public class CambioTitularController : Controller
     {
-        private readonly IPlantillaTramite _planillasService;
-        private readonly ICambioTitular _cambioTitular;
+        private readonly IDocumentoTramiteService _documentoService;
         private readonly IArchivo _archivoService;
         private readonly IHistorialEstados _historialService;
+        private readonly ITarea _tareaService;
+        private readonly IStrategyFactory _strategyFactory;
+        private readonly IFirmantes _firmantesService;
 
-        public CambioTitularController(IPlantillaTramite planillasService, ICambioTitular cambioTitular, IArchivo archivoService, IHistorialEstados historialService)
+
+        public CambioTitularController(IArchivo archivoService,
+        IHistorialEstados historialService,
+        IStrategyFactory strategyFactory,
+        IDocumentoTramiteService documentoService,
+         ITarea tareaService,
+         IFirmantes firmante)
         {
-            _planillasService = planillasService;
-            _cambioTitular = cambioTitular;
             _archivoService = archivoService;
             _historialService = historialService;
+            _strategyFactory = strategyFactory;
+            _documentoService = documentoService;
+            _tareaService = tareaService;
+            _firmantesService = firmante;
         }
 
-        [HttpGet]
+        [HttpPost]
         [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> CambioTitular(
-            int? cambioTitularId,
-            int? concesionId)
+        public async Task<IActionResult> GenerarAutorizaciones(CambioTitularVM viewModel, int firmanteId, int tipoAutorizacionId)
         {
-            CambioTitularVM viewModel = new CambioTitularVM();
-            viewModel.SweetAlert = TempData.GetSweetAlert();
+            int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
+
+            ITramiteStrategy strategy = _strategyFactory.GetStrategy((int)TipoTramiteEnum.CambioTitular);
+
+
+            // Buscar el firmante específico
+            var firmantes = await _firmantesService.GetAllByTramite(viewModel.TramiteId);
+            var firmante = firmantes.FirstOrDefault(f => f.Id == firmanteId);
+
+            if (firmante == null)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Advertencia",
+                    Mensaje = "Firmante no encontrado",
+                    Tipo = "warning"
+                });
+                return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId });
+            }
+
+
+            GeneraStrategyDTO dto = new GeneraStrategyDTO
+            {
+                TramiteId = viewModel.TramiteId,
+                TitularesActuales = viewModel.Dto.TitularesActuales,
+                UsuarioId = usuarioId,
+                Parentesco = "Titular",
+                NroParcela = viewModel.Dto.NroParcela.Value,
+                NroFila = viewModel.Dto.NroFila.Value,
+                NombreSeccion = viewModel.Dto.NombreSeccion,
+                TipoParcela = viewModel.Dto.TipoParcela,
+                Difuntos = viewModel.Dto.Difuntos,
+                Firmantes = viewModel.Personas,
+                TipoAutorizacionId = tipoAutorizacionId,
+                FirmanteId = firmanteId,
+            };
 
             try
             {
-                viewModel.PlantillaTramite = await _planillasService.Get((int)PlantillasTramitesEnum.Cambio_Titular_Ambos_Presentes);
+                await strategy.GenerarDocumentosAsync(dto);
 
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "Autorizaciones generadas correctamente",
+                    Tipo = "success"
+                });
+
+                return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId });
+
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "Ocurrió un error al generar los documentos. " + ex.Message,
+                    Tipo = "error"
+                });
+                return RedirectToAction("Detalle", new { tramiteId = viewModel.TramiteId });
+
+            }
+        }
+
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> IniciarTramite(int concesionId, int tipoTramiteId)
+        {
+            try
+            {
                 int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
 
-                if (cambioTitularId.HasValue && concesionId.HasValue)
-                {
-                    //CONTINUAR trámite existente
-                    viewModel.Dto = await _cambioTitular.Get(cambioTitularId.Value, concesionId.Value);
-                    viewModel.Archivos = await _archivoService.GetAllByTramiteId(cambioTitularId.Value);
-                    viewModel.Historial = await _historialService.GetAllById(cambioTitularId.Value);
-                    viewModel.Plantillas = await _planillasService.GetByTipoTramite((int)TipoTramiteEnum.CambioTitular);
-                }
-                else if (concesionId.HasValue)
-                {
-                    //INICIAR nuevo trámite
-                    CambioTitularDTO Dto = await _cambioTitular.AddCambioTitular(concesionId.Value, usuarioId);
-                    return RedirectToAction("CambioTitular", new
-                    {
-                        cambioTitularId = Dto.TramiteId, // o el id correcto
-                        concesionId = concesionId.Value
-                    });
-                }
-                else
-                {
-                    throw new Exception("Parámetros inválidos.");
-                }
+                var strategy = _strategyFactory.GetCreateStrategy(tipoTramiteId);
 
-                return View(viewModel);
+                CrearTramiteDTO dto = new CrearTramiteDTO
+                {
+                    TramiteConcesionId = concesionId,
+                    UsuarioId = usuarioId,
+                };
+
+                int tramiteId = await strategy.CrearAsync(dto);
+
+                return RedirectToAction("Detalle", new { tramiteId });
             }
             catch (Exception ex)
             {
@@ -78,61 +138,55 @@ namespace CemSys3.Controllers
                     Mensaje = ex.Message,
                     Tipo = "error"
                 });
+
                 return RedirectToAction("Index", "TramiteConcesion", new { tramiteId = concesionId });
             }
         }
 
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> Detalle(int tramiteId)
+        {
+            var vm = new CambioTitularVM();
+            vm.SweetAlert = TempData.GetSweetAlert();
 
-        //[HttpPost]
-        //[AuthorizeRole(RolUsuario.Empleado)]
-        //public async Task<IActionResult> GenerarPlantilla([FromBody] PlantillaRequestDTO request)
-        //{
-        //    var plantilla = await _planillasService.Get(request.PlantillaId);
+            try
+            {
+                var strategy = _strategyFactory.GetCreateStrategy((int)TipoTramiteEnum.CambioTitular);
 
-        //    var builder = _factory.Get(request.TipoTramite);
+                if (strategy is ITramiteCreateStrategy<CambioTitularDTO> typedStrategy)
+                {
+                    vm.Dto = await typedStrategy.ObtenerAsync(tramiteId);
+                }
+                else
+                {
+                    throw new Exception("Strategy incorrecta para obtener datos");
+                }
 
-        //    var variables = builder.Build(request.Data);
+                vm.TipoTramiteId = vm.Dto.TipoTramiteId;
+                vm.TramiteId = vm.Dto.TramiteId;
+                vm.concesionId = vm.Dto.ConcesionId;
+                vm.Archivos = await _archivoService.GetAllByTramiteId(vm.TramiteId);
+                vm.Historial = await _historialService.GetAllById(vm.TramiteId);
+                vm.Documentos = await _documentoService.ObtenerPorTramiteAsync(vm.TramiteId);
+                vm.Tareas = await _tareaService.GetAllByTramite(tramiteId);
+                vm.Firmantes = await _firmantesService.GetAllByTramite(tramiteId);
 
-        //    var html = _planillasService.Render(plantilla.Contenido, variables);
+                return View("CambioTitular", vm);
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "Ocurrió un error al cargar los datos. " + ex.Message,
+                    Tipo = "error"
+                });
 
-        //    return Json(new
-        //    {
-        //        success = true,
-        //        contenido = html
-        //    });
-        //}
-
-        //[HttpPost]
-        //public IActionResult GenerarPlantilla([FromBody] GenerarPlantillaRequest request)
-        //{
-        //    try
-        //    {
-        //        var builder = _factory.Get(request.TipoTramite);
-        //        var contenido = builder.Build(request.Data, request.PlantillaId);
-
-        //        return Json(new
-        //        {
-        //            success = true,
-        //            contenido = contenido
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new
-        //        {
-        //            success = false,
-        //            message = ex.Message
-        //        });
-        //    }
-        //}
-
-
+                return RedirectToAction("Index", "TramiteConcesion");
+            }
+        }
     }
 
-    //public class GenerarPlantillaRequest
-    //{
-    //    public int PlantillaId { get; set; }
-    //    public string TipoTramite { get; set; }
-    //    public object Data { get; set; }
-    //}
+    
 }

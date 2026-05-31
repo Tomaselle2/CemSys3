@@ -21,15 +21,27 @@ public partial class Usuario
 
     public int RolId { get; set; }
 
+    public virtual ICollection<AceptacionTitularidad> AceptacionTitularidads { get; set; } = new List<AceptacionTitularidad>();
+
     public virtual ICollection<CambiosTitularidad> CambiosTitularidads { get; set; } = new List<CambiosTitularidad>();
 
     public virtual ICollection<Concesione> Concesiones { get; set; } = new List<Concesione>();
+
+    public virtual ICollection<Cremacione> Cremaciones { get; set; } = new List<Cremacione>();
 
     public virtual ICollection<DocumentosTramite> DocumentosTramites { get; set; } = new List<DocumentosTramite>();
 
     public virtual ICollection<Introduccione> Introducciones { get; set; } = new List<Introduccione>();
 
+    public virtual ICollection<PermisosIngreso> PermisosIngresos { get; set; } = new List<PermisosIngreso>();
+
+    public virtual ICollection<PermisosRefaccione> PermisosRefacciones { get; set; } = new List<PermisosRefaccione>();
+
+    public virtual ICollection<Reduccione> Reducciones { get; set; } = new List<Reduccione>();
+
     public virtual RolesUsuario Rol { get; set; } = null!;
 
     public virtual ICollection<Tramite> Tramites { get; set; } = new List<Tramite>();
+
+    public virtual ICollection<Traslado> Traslados { get; set; } = new List<Traslado>();
 }

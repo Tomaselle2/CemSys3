@@ -179,7 +179,7 @@ namespace CemSys3.Business.HistorialEstadoService
 
             // 🔹 4. Orden final
             return resultado
-                .OrderBy(t => t.FechaCreacion)
+                .OrderByDescending(t => t.FechaCreacion)
                 .ToList();
         }
     }

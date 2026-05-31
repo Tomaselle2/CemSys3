@@ -1,0 +1,54 @@
+﻿@model string
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Documento PDF</title>
+    <style>
+            body {
+                font-family: "Inter", "Arial", sans-serif;
+                font-size: 17px;
+                margin: 0;
+                line-height: 1.2;
+            }
+        
+            .header {
+                text-align: center;
+            }
+        
+            /* Estilos para imágenes en PDF */
+            .image-logo {
+                text-align: center;
+                width: 250px;
+                height: auto;
+                display: block;
+                margin: 0 auto;
+            }
+
+            .image-pie{
+                text-align: center;
+                width: 700px;
+                height: auto;
+                display: block;
+            }
+        
+            /* Asegurar que las imágenes no se corten */
+            .documento-contenido {
+                width: 100%;
+                overflow-x: visible;
+            }
+        
+            /* Estilos para firmas y líneas */
+            .firma-linea {
+                font-size: 14px;
+                color: #000;
+            }
+    </style>
+</head>
+<body>
+    <div class="documento-contenido">
+        @Html.Raw(Model)
+    </div>
+</body>
+</html>

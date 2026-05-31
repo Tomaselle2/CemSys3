@@ -141,6 +141,108 @@ namespace CemSys3.Controllers
 
         [HttpPost]
         [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> SubirPieRegistro(IFormFile archivo)
+        {
+            if (archivo == null || archivo?.Length == 0)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Advertencia",
+                    Mensaje = "Debe seleccionar una imagen",
+                    Tipo = "warning"
+                });
+
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                if (archivo != null && archivo.Length > 0)
+                {
+                    var ruta = Path.Combine(_env.WebRootPath, "fotos", "pieRegistro.jpg");
+
+                    using (var stream = new FileStream(ruta, FileMode.Create))
+                    {
+                        await archivo.CopyToAsync(stream);
+                    }
+                }
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "La imagen se ha subido correctamente",
+                    Tipo = "success"
+                });
+
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "La imagen no se ha subido." + ex.Message,
+                    Tipo = "error"
+                });
+            }
+
+
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> SubirEncabezadoRegistro(IFormFile archivo)
+        {
+            if (archivo == null || archivo?.Length == 0)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Advertencia",
+                    Mensaje = "Debe seleccionar una imagen",
+                    Tipo = "warning"
+                });
+
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                if (archivo != null && archivo.Length > 0)
+                {
+                    var ruta = Path.Combine(_env.WebRootPath, "fotos", "EncabezadoRegistro.jpg");
+
+                    using (var stream = new FileStream(ruta, FileMode.Create))
+                    {
+                        await archivo.CopyToAsync(stream);
+                    }
+                }
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "La imagen se ha subido correctamente",
+                    Tipo = "success"
+                });
+
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "La imagen no se ha subido." + ex.Message,
+                    Tipo = "error"
+                });
+            }
+
+
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Administrador)]
         public IActionResult GuardarIntendente(ImagenesVM viewModel)
         {
             if (string.IsNullOrEmpty(viewModel.nombreIntendente))

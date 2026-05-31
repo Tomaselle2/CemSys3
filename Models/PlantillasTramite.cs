@@ -13,15 +13,15 @@ public partial class PlantillasTramite
 
     public string? Contenido { get; set; }
 
-    public int? TipoEscenario { get; set; }
+    public int? TipoAutorizacionId { get; set; }
 
     public bool? Activo { get; set; }
 
     public DateTime? FechaModificacion { get; set; }
 
-    public int? Codigo { get; set; }
-
     public virtual ICollection<DocumentosTramite> DocumentosTramites { get; set; } = new List<DocumentosTramite>();
+
+    public virtual TipoAutorizacion? TipoAutorizacion { get; set; }
 
     public virtual TipoTramite TipoTramite { get; set; } = null!;
 }

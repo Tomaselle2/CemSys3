@@ -256,18 +256,28 @@ CREATE TABLE [dbo].[PreciosTarifarias] (
     CONSTRAINT [PreciosTarifarias_seccionId_fk] FOREIGN KEY([seccionId]) REFERENCES [dbo].[Secciones]([id])
 );
 
+CREATE TABLE TareaPlantilla (
+    Id INT IDENTITY PRIMARY KEY,
+    Descripcion NVARCHAR(150) NOT NULL,
+    TipoTramiteId INT NOT NULL,
+	estado bit not null,
+    Visibilidad BIT NOT NULL DEFAULT 1,
+	CONSTRAINT [TareaPlantilla_TipoTramiteId_fk] FOREIGN KEY(TipoTramiteId) REFERENCES TipoTramite(id)
+);
+
 CREATE TABLE [dbo].[Tareas] (
     [id] int NOT NULL IDENTITY(1,1),
     [estado] bit NOT NULL,
-    [descripcion] nvarchar(60) NOT NULL,
+    [descripcion] nvarchar(150) NOT NULL,
     [notaId] int,
     [tramiteId] int,
 	[visibilidad] bit not null default 1,
+	TareaPlantillaId INT NULL,
     PRIMARY KEY ([id]),
     CONSTRAINT [Tareas_notaId_fk] FOREIGN KEY([notaId]) REFERENCES [dbo].[Notas]([tramiteId]),
-    CONSTRAINT [Tareas_tramiteId_fk] FOREIGN KEY([tramiteId]) REFERENCES [dbo].[Tramites]([id])
+    CONSTRAINT [Tareas_tramiteId_fk] FOREIGN KEY([tramiteId]) REFERENCES [dbo].[Tramites]([id]),
+	CONSTRAINT FK_Tareas_TareaPlantilla FOREIGN KEY (TareaPlantillaId) REFERENCES TareaPlantilla(Id)
 );
-
 
 -- Tablas con dependencias de tercer nivel
 CREATE TABLE [dbo].[Archivos] (
@@ -471,24 +481,33 @@ CREATE TABLE CambiosTitularidad (
     fechaFinalizacion DATETIME NULL,
 
     infoAdicional NVARCHAR(MAX) null,
+	concesionId int null,
 
     visibilidad BIT DEFAULT 1,
 
     CONSTRAINT FK_CT_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
-    CONSTRAINT FK_CT_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_CT_concesionId FOREIGN KEY (concesionId) REFERENCES Tramites(id),
+	CONSTRAINT FK_CT_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
     CONSTRAINT FK_CT_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id)
+);
+
+CREATE TABLE TipoAutorizacion (
+    id INT IDENTITY PRIMARY KEY,
+    tipoTramiteId INT NOT NULL,
+    nombre NVARCHAR(100),
+
+    CONSTRAINT FK_PA_TipoTramite FOREIGN KEY (tipoTramiteId) REFERENCES TipoTramite(id)
 );
 
 CREATE TABLE PlantillasTramite (
     id INT IDENTITY PRIMARY KEY,
     tipoTramiteId INT NOT NULL,
-
     nombre NVARCHAR(100),
     contenido NVARCHAR(MAX), -- HTML con variables
-	int codigo null,
+	tipoAutorizacionId int null,
     activo BIT DEFAULT 1,
     fechaModificacion DATETIME DEFAULT GETDATE(),
-
+	CONSTRAINT FK_PA_TipoAutorizacion FOREIGN KEY (tipoAutorizacionId) REFERENCES TipoAutorizacion(id),
     CONSTRAINT FK_PT_TipoTramite FOREIGN KEY (tipoTramiteId) REFERENCES TipoTramite(id)
 );
 
@@ -502,11 +521,16 @@ CREATE TABLE DocumentosTramite (
     fechaUltimaEdicion DATETIME DEFAULT GETDATE(),
     usuarioId INT NOT NULL,        -- quién lo editó por última vez
     visibilidad BIT DEFAULT 1,
-
+	personaId int null,
+	tipoAutorizacionId INT not null,
+	parentesco nvarchar(50) null,
     CONSTRAINT FK_DT_Tramite   FOREIGN KEY (tramiteId)  REFERENCES Tramites(id),
     CONSTRAINT FK_DT_Plantilla FOREIGN KEY (plantillaId) REFERENCES PlantillasTramite(id),
-    CONSTRAINT FK_DT_Usuario   FOREIGN KEY (usuarioId)   REFERENCES Usuarios(id)
+    CONSTRAINT FK_DT_Usuario   FOREIGN KEY (usuarioId)   REFERENCES Usuarios(id),
+	CONSTRAINT FK_DT_Persona   FOREIGN KEY (personaId)   REFERENCES Personas(id),
+	CONSTRAINT FK_DT_tipoAutorizacion   FOREIGN KEY (tipoAutorizacionId) REFERENCES TipoAutorizacion(id)
 );
+
 
 CREATE TABLE RequisitosTramite (
     id INT IDENTITY PRIMARY KEY,
@@ -517,4 +541,163 @@ CREATE TABLE RequisitosTramite (
 
     CONSTRAINT FK_RT_TipoTramite 
         FOREIGN KEY (tipoTramiteId) REFERENCES TipoTramite(id)
+);
+
+CREATE TABLE AceptacionTitularidad (
+    tramiteId INT PRIMARY KEY,
+    parcelaId INT NOT NULL,
+    usuarioId INT NOT NULL,
+
+    fechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+    fechaFinalizacion DATETIME NULL,
+
+    infoAdicional NVARCHAR(MAX) null,
+	concesionId int null,
+
+    visibilidad BIT DEFAULT 1,
+
+    CONSTRAINT FK_AT_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_AT_concesionId FOREIGN KEY (concesionId) REFERENCES Tramites(id),
+	CONSTRAINT FK_AT_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_AT_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id)
+);
+
+CREATE TABLE FirmantesTramite (
+    id INT IDENTITY PRIMARY KEY,
+    tramiteId INT NOT NULL,
+    personaId INT NOT NULL,
+
+    parentesco NVARCHAR(50) NULL, -- hijo, esposa, etc
+    esTitular BIT NOT NULL DEFAULT 0,
+
+    fechaAlta DATETIME DEFAULT GETDATE(),
+    visibilidad BIT DEFAULT 1,
+
+    CONSTRAINT FK_FT_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_FT_Persona FOREIGN KEY (personaId) REFERENCES Personas(id)
+);
+
+ALTER TABLE DocumentosTramite
+ADD firmanteId INT;
+
+ALTER TABLE DocumentosTramite
+ADD CONSTRAINT FK_DT_Firmante
+FOREIGN KEY (firmanteId) REFERENCES FirmantesTramite(id);
+
+CREATE TABLE Cremaciones (
+    tramiteId INT PRIMARY KEY,
+    parcelaOrigenId INT NOT NULL,
+	parcelaDestinoId INT NULL,
+    usuarioId INT NOT NULL,
+	difuntoId INT NOT NULL,
+    fechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+	fechaPendiente DATETIME NULL,
+    fechaFinalizacion DATETIME NULL,
+	destino NVARCHAR(150) NULL,
+    infoAdicional NVARCHAR(MAX) null,
+	concesionId int NOT null,
+	cementerioId INT NULL,
+    visibilidad BIT DEFAULT 1,
+
+    CONSTRAINT FK_CREMA_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_CREMA_concesionId FOREIGN KEY (concesionId) REFERENCES Tramites(id),
+	CONSTRAINT FK_CREMA_ParcelaOrigen FOREIGN KEY (parcelaOrigenId) REFERENCES Parcelas(id),
+	CONSTRAINT FK_CREMA_ParcelaDestino FOREIGN KEY (parcelaDestinoId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_CREMA_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id),
+	CONSTRAINT FK_CREMA_Difunto FOREIGN KEY (difuntoId) REFERENCES Personas(id),
+	CONSTRAINT FK_CREMA_Cementerio FOREIGN KEY (cementerioId) REFERENCES Cementerios(id)
+);
+
+CREATE TABLE Diagramas (
+    Id INT PRIMARY KEY IDENTITY,
+    TramiteId INT NOT NULL,
+    JsonDiagrama NVARCHAR(MAX) NULL,
+    FechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+    FechaModificacion DATETIME NULL
+);
+
+CREATE TABLE Traslados (
+    tramiteId INT PRIMARY KEY,
+    parcelaOrigenId INT NOT NULL,
+	parcelaDestinoId INT NULL,
+    usuarioId INT NOT NULL,
+	difuntoId INT NOT NULL,
+    fechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+	fechaPendiente DATETIME NULL,
+    fechaFinalizacion DATETIME NULL,
+	destino NVARCHAR(150) NULL,
+    infoAdicional NVARCHAR(MAX) null,
+	concesionId int NOT null,
+	cementerioId INT NULL,
+    visibilidad BIT DEFAULT 1,
+	tipoTraslado INT NULL,
+    CONSTRAINT FK_TRASLADO_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_TRASLADO_concesionId FOREIGN KEY (concesionId) REFERENCES Tramites(id),
+	CONSTRAINT FK_TRASLADO_ParcelaOrigen FOREIGN KEY (parcelaOrigenId) REFERENCES Parcelas(id),
+	CONSTRAINT FK_TRASLADO_ParcelaDestino FOREIGN KEY (parcelaDestinoId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_TRASLADO_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id),
+	CONSTRAINT FK_TRASLADO_Difunto FOREIGN KEY (difuntoId) REFERENCES Personas(id),
+	CONSTRAINT FK_TRASLADO_Cementerio FOREIGN KEY (cementerioId) REFERENCES Cementerios(id)
+);
+
+CREATE TABLE Reducciones (
+    tramiteId INT PRIMARY KEY,
+    parcelaOrigenId INT NOT NULL,
+	parcelaDestinoId INT NULL,
+    usuarioId INT NOT NULL,
+	difuntoId INT NOT NULL,
+    fechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+	fechaPendiente DATETIME NULL,
+    fechaFinalizacion DATETIME NULL,
+	destino NVARCHAR(150) NULL,
+    infoAdicional NVARCHAR(MAX) null,
+	concesionId int NOT null,
+	cementerioId INT NULL,
+    visibilidad BIT DEFAULT 1,
+	tipoTraslado INT NULL,
+    CONSTRAINT FK_REDUCCION_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_REDUCCION_concesionId FOREIGN KEY (concesionId) REFERENCES Tramites(id),
+	CONSTRAINT FK_REDUCCION_ParcelaOrigen FOREIGN KEY (parcelaOrigenId) REFERENCES Parcelas(id),
+	CONSTRAINT FK_REDUCCION_ParcelaDestino FOREIGN KEY (parcelaDestinoId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_REDUCCION_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id),
+	CONSTRAINT FK_REDUCCION_Difunto FOREIGN KEY (difuntoId) REFERENCES Personas(id),
+	CONSTRAINT FK_REDUCCION_Cementerio FOREIGN KEY (cementerioId) REFERENCES Cementerios(id)
+);
+
+CREATE TABLE PermisosIngresos (
+    tramiteId INT PRIMARY KEY,
+    parcelaId INT NOT NULL,
+    usuarioId INT NOT NULL,
+
+    fechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+    fechaFinalizacion DATETIME NULL,
+
+    nombreFallecido NVARCHAR(MAX) null,
+	concesionId int null,
+
+    visibilidad BIT DEFAULT 1,
+
+    CONSTRAINT FK_PERMISO_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_PERMISO_concesionId FOREIGN KEY (concesionId) REFERENCES Tramites(id),
+	CONSTRAINT FK_PERMISO_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_PERMISO_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id)
+);
+
+CREATE TABLE PermisosRefacciones (
+    tramiteId INT PRIMARY KEY,
+    parcelaId INT NOT NULL,
+    usuarioId INT NOT NULL,
+
+    fechaCreacion DATETIME NOT NULL DEFAULT GETDATE(),
+    fechaFinalizacion DATETIME NULL,
+	fechaPendiente DATETIME NULL,
+
+	concesionId int null,
+
+    visibilidad BIT DEFAULT 1,
+
+    CONSTRAINT FK_PERMISOREFACCION_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_PERMISOREFACCION_concesionId FOREIGN KEY (concesionId) REFERENCES Tramites(id),
+	CONSTRAINT FK_PERMISOREFACCION_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_PERMISOREFACCION_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id)
 );

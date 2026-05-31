@@ -1,18 +1,168 @@
-﻿@using CemSys3.ViewModels.TramiteConcesion
+﻿@using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.TramiteConcesion
 @using CemSys3.Enumerables
 @model ListadoTramitesVM
 @{
     ViewData["Title"] = "Trámites de concesión";
 
     string requisitosCambioTitularidad = string.Empty;
+    string requisitosAceptacionTitularidad = string.Empty;
+    string requisitosCremacion = string.Empty;
+    string requisitosTraslado = string.Empty;
+    string requisitosReduccion = string.Empty;
+    string requisitosPermisoIngreso = string.Empty;
+    string requisitosPermisoRefaccion = string.Empty;
+
 
     foreach (var requisito in Model.Dto.Requisitos)
     {
         if (requisito.TipoTramiteId == (int)TipoTramiteEnum.CambioTitular)
             requisitosCambioTitularidad = requisito.Descripcion;
+
+        if (requisito.TipoTramiteId == (int)TipoTramiteEnum.AceptacionTitular)
+            requisitosAceptacionTitularidad = requisito.Descripcion;
+
+        if (requisito.TipoTramiteId == (int)TipoTramiteEnum.Cremacion)
+            requisitosCremacion = requisito.Descripcion;
+
+        if (requisito.TipoTramiteId == (int)TipoTramiteEnum.Traslado)
+            requisitosTraslado = requisito.Descripcion;
+
+        if (requisito.TipoTramiteId == (int)TipoTramiteEnum.Reduccion)
+            requisitosReduccion = requisito.Descripcion;
+
+        if (requisito.TipoTramiteId == (int)TipoTramiteEnum.PermisoIngreso)
+            requisitosPermisoIngreso = requisito.Descripcion;
+
+        if (requisito.TipoTramiteId == (int)TipoTramiteEnum.PermisoRefaccion)
+            requisitosPermisoRefaccion = requisito.Descripcion;
     }
+
+    string nroConcesion = Model.InfoGeneral.NroConcesion.HasValue ? Model.InfoGeneral.NroConcesion.Value.ToString("D5") : "-----";
+    string estadoTramite = EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(Model.InfoGeneral.EstadoTramiteId);
+    string claseEstado = Enum.GetName(typeof(EstadosConcesionEnum), Model.InfoGeneral.EstadoTramiteId); string fechaVencimiento = Model.InfoGeneral.Vencimiento != null ? Model.InfoGeneral.Vencimiento.Value.ToString("dd/MM/yyyy") : "--/--/----";
 }
 
+<div class="contenidoConcesion">
+
+    <div class="cardsConcesion-row my-4">
+        <div class="cardConcesion">
+            <div class="cardConcesion-content">
+                <span class="labelConcesion">NRO. CONCESIÓN</span>
+                <h2>@nroConcesion</h2>
+            </div>
+        </div>
+
+        <div class="cardConcesion estado-card">
+            <div class="cardConcesion-content">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="labelConcesion">ESTADO</span>
+                </div>
+                <span class="badgeConcesion @claseEstado px-3 py-2">@estadoTramite</span>
+
+                @if (Model.InfoGeneral.EstadoTramiteId == (int)EstadosConcesionEnum.SinContrato)
+                {
+                    <div class="btn-container">
+                        <form asp-action="GenerarContrato" asp-controller="Concesion" method="get" class="mt-2">
+                            <input type="hidden" name="idTramite" value="@Model.InfoGeneral.TramiteId" />
+                            <button type="submit" class="btn btn-danger btn-sm">Generar contrato</button>
+                        </form>
+                    </div>
+                }
+
+                @if (Model.InfoGeneral.EstadoTramiteId == (int)EstadosConcesionEnum.Vencido)
+                {
+                    <div class="btn-container">
+                        <form asp-action="GenerarContrato" asp-controller="Concesion" method="get" class="mt-2">
+                            <input type="hidden" name="idTramite" value="@Model.InfoGeneral.TramiteId" />
+                            <button type="submit" class="btn btn-danger btn-sm">Renovar contrato</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="cardConcesion">
+            <div class="cardConcesion-content">
+                <span class="labelConcesion">VENCIMIENTO</span>
+                <h2>@fechaVencimiento</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@{
+    var tramitesActivos = Model.Dto.TramitesIniciados
+        .Where(t => t.EstadoActualId != (int)EstadosTramiteEnum.Cancelado &&
+                    t.EstadoActualId != (int)EstadosTramiteEnum.Finalizado)
+        .ToList();
+}
+<!-- Tabla de historial de tramites -->
+<div class="accordion" id="accordionPanelsStayOpenExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                Trámites iniciados
+            </button>
+        </h2>
+        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            @* cuerpo del acordion *@
+            @if (tramitesActivos.Any())
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Trámite</th>
+                                    <th>Fecha inicio</th>
+                                    <th>Tipo de Trámite</th>
+                                    <th>Estado</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var opc in tramitesActivos)
+                                {
+                                    string tipoTramiteDisplay = EnumHelper.GetDisplayNameByValue<TipoTramiteEnum>(opc.TipoTramiteId);
+                                    string estadoTramiteDisplay = EnumHelper.GetDisplayNameByValue<EstadosTramiteEnum>(opc.EstadoActualId);
+
+                                   
+                                    <tr>
+                                        <td>@opc.Id</td>
+                                        <td>@(opc.FechaCreacion.ToString("dd/MM/yyyy HH:mm"))</td>
+                                        <td>@tipoTramiteDisplay</td>
+                                        <td>@estadoTramiteDisplay</td>
+                                        <td>
+                                            <form asp-action="IrATramite" asp-controller="Tramite" target="_blank" method="get" style="display: inline-block;" data-skip-loader="true">
+                                                <input type="hidden" name="tramiteId" value="@opc.Id" />
+                                                <button type="submit" class="btn btn-secondary btn-sm" title="Ir al trámite">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    No hay trámites iniciados.
+                </div>
+            }
+            @* Fin cuerpo del acordeon *@
+        </div>
+    </div>
+</div>
+
+<!-- tramites cambio de titular-->
 <div class="cardConcesion my-4">
     <div class="cardConcesion-content">
         <h3>Cambio de titular (ambos titulares presentes)</h3>
@@ -20,42 +170,271 @@
 
         <div class="d-flex flex-wrap justify-content-between align-items-center mt-3">
             <div>
-                <button class="btn btn-outline-primary">Copiar</button>
+                <button class="btn btn-outline-primary btn-copiar-texto">Copiar</button>
             </div>
 
             <div class="text-end">
-                @{
-                    var tramiteEnProceso = Model.Dto.TramitesIniciados
-                        .FirstOrDefault(t => t.TipoTramiteId == (int)TipoTramiteEnum.CambioTitular &&
-                                             t.EstadoActualId != (int)EstadosCambioTitularEnum.Finalizado);
-                }
-                @if (tramiteEnProceso != null)
-                {
-                    <p class="obligatorio mb-2">Existe un trámite en proceso</p>
-                    <form asp-action="CambioTitular" asp-controller="CambioTitular" method="get" class="d-inline">
-                        <input type="hidden" name="cambioTitularId" value="@tramiteEnProceso.Id" />
-                        <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
-                        <input type="submit" value="Continuar trámite" class="btn btn-warning" />
-                    </form>
-                }
-                else
-                {
-                    <form asp-action="CambioTitular" asp-controller="CambioTitular" method="get">
-                        <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
-                        <input type="submit" value="Iniciar trámite" class="btn btn-success" />
-                    </form>
-                }
+
+                <form asp-action="IniciarTramite" asp-controller="CambioTitular" method="post">
+                    <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
+                    <input type="hidden" name="tipoTramiteId" value="@((int)TipoTramiteEnum.CambioTitular)" />
+                    <input type="submit" value="Iniciar trámite" class="btn btn-success" />
+                </form>
             </div>
         </div>
     </div>
 </div>
 
-<!--Aqui van a ir mas tramites-->
+<!-- tramites aceptacion de titular-->
+<div class="cardConcesion my-4">
+    <div class="cardConcesion-content">
+        <h3>Aceptación de Titularidad</h3>
+        <textarea class="form-control mb-2" rows="3">@requisitosAceptacionTitularidad</textarea>
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3">
+            <div>
+                <button class="btn btn-outline-primary btn-copiar-texto">Copiar</button>
+            </div>
+
+            <div class="text-end">
+                <form asp-action="IniciarTramite" asp-controller="AceptacionTitular" method="post">
+                    <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
+                    <input type="hidden" name="tipoTramiteId" value="@((int)TipoTramiteEnum.AceptacionTitular)" />
+                    <input type="submit" value="Iniciar trámite" class="btn btn-success" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- tramites Permiso de ingreso-->
+<div class="cardConcesion my-4">
+    <div class="cardConcesion-content">
+        <h3>Permiso para nuevo ingreso</h3>
+        <textarea class="form-control mb-2" rows="3">@requisitosPermisoIngreso</textarea>
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3">
+            <div>
+                <button class="btn btn-outline-primary btn-copiar-texto">Copiar</button>
+            </div>
+
+            <div class="text-end">
+                <form asp-action="IniciarTramite" asp-controller="PermisoIngreso" method="post">
+                    <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
+                    <input type="hidden" name="tipoTramiteId" value="@((int)TipoTramiteEnum.PermisoIngreso)" />
+                    <input type="submit" value="Iniciar trámite" class="btn btn-success" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- tramites Permiso de refaccion-->
+<div class="cardConcesion my-4">
+    <div class="cardConcesion-content">
+        <h3>Permiso de refacción</h3>
+        <textarea class="form-control mb-2" rows="3">@requisitosPermisoRefaccion</textarea>
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3">
+            <div>
+                <button class="btn btn-outline-primary btn-copiar-texto">Copiar</button>
+            </div>
+
+            <div class="text-end">
+                <form asp-action="IniciarTramite" asp-controller="PermisoRefaccion" method="post">
+                    <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
+                    <input type="hidden" name="tipoTramiteId" value="@((int)TipoTramiteEnum.PermisoRefaccion)" />
+                    <input type="submit" value="Iniciar trámite" class="btn btn-success" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- tramites cremacion-->
+<div class="cardConcesion my-4">
+    <div class="cardConcesion-content">
+        <h3>Cremación</h3>
+        <textarea class="form-control mb-2" rows="3">@requisitosCremacion</textarea>
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3">
+            <div>
+                <button class="btn btn-outline-primary btn-copiar-texto">Copiar</button>
+            </div>
+
+            <div class="text-end">
+                <form asp-action="IniciarTramite" asp-controller="Cremacion" method="post" id="formCremacion">
+                    <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
+                    <input type="hidden" name="tipoTramiteId" value="@((int)TipoTramiteEnum.Cremacion)" />
+                    
+                    @if (Model.Dto.Difuntos != null && Model.Dto.Difuntos.Any())
+                    {
+                        <div class="mb-2">
+                            <select name="difuntoId" class="form-select form-select-sm" required>
+                                <option value="">Seleccione un difunto...</option>
+                                @foreach (var difunto in Model.Dto.Difuntos)
+                                {
+                                    <option value="@difunto.Id">
+                                        @difunto.Apellido?.ToUpper(), @difunto.Nombre?.ToUpper()
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning alert-sm mb-2" role="alert">
+                            <small>No hay difuntos registrados en esta concesión.</small>
+                        </div>
+                    }
+                    
+                    <input type="submit" value="Iniciar trámite" class="btn btn-success"
+                    @(Model.Dto.Difuntos == null || !Model.Dto.Difuntos.Any() ? "disabled" : "") />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- tramites traslado-->
+<div class="cardConcesion my-4">
+    <div class="cardConcesion-content">
+        <h3>Traslado</h3>
+        <textarea class="form-control mb-2" rows="3">@requisitosTraslado</textarea>
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3">
+            <div>
+                <button class="btn btn-outline-primary btn-copiar-texto">Copiar</button>
+            </div>
+
+            <div class="text-end">
+                <form asp-action="IniciarTramite" asp-controller="Traslado" method="post" id="formTraslado">
+                    <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
+                    <input type="hidden" name="tipoTramiteId" value="@((int)TipoTramiteEnum.Traslado)" />
+                    
+                    @if (Model.Dto.Difuntos != null && Model.Dto.Difuntos.Any())
+                    {
+                        <div class="mb-2">
+                            <select name="difuntoId" class="form-select form-select-sm" required>
+                                <option value="">Seleccione un difunto...</option>
+                                @foreach (var difunto in Model.Dto.Difuntos)
+                                {
+                                    <option value="@difunto.Id">
+                                        @difunto.Apellido?.ToUpper(), @difunto.Nombre?.ToUpper()
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning alert-sm mb-2" role="alert">
+                            <small>No hay difuntos registrados en esta concesión.</small>
+                        </div>
+                    }
+                    
+                    <input type="submit" value="Iniciar trámite" class="btn btn-success"
+                    @(Model.Dto.Difuntos == null || !Model.Dto.Difuntos.Any() ? "disabled" : "") />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- tramites Reduccion-->
+<div class="cardConcesion my-4">
+    <div class="cardConcesion-content">
+        <h3>Reducción</h3>
+        <textarea class="form-control mb-2" rows="3">@requisitosReduccion</textarea>
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3">
+            <div>
+                <button class="btn btn-outline-primary btn-copiar-texto">Copiar</button>
+            </div>
+
+            <div class="text-end">
+                <form asp-action="IniciarTramite" asp-controller="Reduccion" method="post" id="formReduccion">
+                    <input type="hidden" name="concesionId" value="@Model.Dto.ConcesionId" />
+                    <input type="hidden" name="tipoTramiteId" value="@((int)TipoTramiteEnum.Reduccion)" />
+                    
+                    @if (Model.Dto.Difuntos != null && Model.Dto.Difuntos.Any())
+                    {
+                        <div class="mb-2">
+                            <select name="difuntoId" class="form-select form-select-sm" required>
+                                <option value="">Seleccione un difunto...</option>
+                                @foreach (var difunto in Model.Dto.Difuntos)
+                                {
+                                    <option value="@difunto.Id">
+                                        @difunto.Apellido?.ToUpper(), @difunto.Nombre?.ToUpper()
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning alert-sm mb-2" role="alert">
+                            <small>No hay difuntos registrados en esta concesión.</small>
+                        </div>
+                    }
+                    
+                    <input type="submit" value="Iniciar trámite" class="btn btn-success"
+                    @(Model.Dto.Difuntos == null || !Model.Dto.Difuntos.Any() ? "disabled" : "") />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 
 @* Renderizamos el manejador pasándole el DTO del modelo *@
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
 
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
 
+            // Ajusta altura automática
+            function autoResize(textarea) {
+                textarea.style.height = "auto";
+                textarea.style.overflowY = "hidden";
+                textarea.style.height = textarea.scrollHeight + "px";
+            }
+
+            // Aplicar a todos los textareas existentes
+            const textareas = document.querySelectorAll("textarea");
+
+            textareas.forEach(textarea => {
+                autoResize(textarea);
+
+                // Si cambia el contenido manualmente
+                textarea.addEventListener("input", function () {
+                    autoResize(this);
+                });
+            });
+
+            // Botones copiar texto
+            document.querySelectorAll('.btn-copiar-texto').forEach(button => {
+                button.addEventListener('click', function () {
+                    const textarea = this.closest('.cardConcesion-content').querySelector('textarea');
+
+                    if (textarea) {
+                        textarea.select();
+                        document.execCommand('copy');
+
+                        const originalText = this.innerText;
+                        this.innerText = '¡Copiado!';
+
+                        setTimeout(() => {
+                            this.innerText = originalText;
+                        }, 2000);
+                    }
+                });
+            });
+
+        });
+    </script>
+}
 
 
     

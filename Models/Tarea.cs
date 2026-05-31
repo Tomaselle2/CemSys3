@@ -17,7 +17,11 @@ public partial class Tarea
 
     public bool Visibilidad { get; set; }
 
+    public int? TareaPlantillaId { get; set; }
+
     public virtual Nota? Nota { get; set; }
+
+    public virtual TareaPlantilla? TareaPlantilla { get; set; }
 
     public virtual Tramite? Tramite { get; set; }
 }
