@@ -12,7 +12,10 @@ namespace CemSys3.Interfaces.Concesion
         Task<PaginadoResponse<TablaConcesionDTO>> GellAllPaginado(
             int filtroEstado = 0,
             int pagina = 1,
-            int porPagina = 10);
+            int porPagina = 10,
+            string nombre = "",
+            string apellido = "",
+            int concesion = 0);
 
         public Task<GenerarContratoDTO> SolicitarDatosParaGenerarContrato(int idTramite);
 

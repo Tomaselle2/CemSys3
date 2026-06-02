@@ -5,7 +5,6 @@ using CemSys3.Enumerables;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace CemSys3.Business.Persona
 {

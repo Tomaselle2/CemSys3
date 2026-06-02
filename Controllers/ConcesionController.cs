@@ -44,13 +44,16 @@ namespace CemSys3.Controllers
 
         //tabla general de concesiones, con paginacion y filtro por estado
         [HttpGet]
-        [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> TablaGeneral(int filtroEstado = 0, int pagina = 1, int porPagina = 10)
+        [AuthorizeRole(RolUsuario.Empleado)] 
+        public async Task<IActionResult> TablaGeneral(int filtroEstado = 0, string nombre = "",
+            string apellido = "", int concesion = 0, int pagina = 1, int porPagina = 10)
         {
             TablaGeneralVM viewModel = new TablaGeneralVM();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+
             try
             {
-                PaginadoResponse<TablaConcesionDTO> resultado = await _concesionService.GellAllPaginado(filtroEstado, pagina, porPagina);
+                PaginadoResponse<TablaConcesionDTO> resultado = await _concesionService.GellAllPaginado(filtroEstado, pagina, porPagina, nombre, apellido, concesion);
                 viewModel.Listado = resultado.Items;
                 viewModel.Paginacion = resultado.Paginacion;
 
@@ -58,6 +61,23 @@ namespace CemSys3.Controllers
 
                 viewModel.Paginacion.Parametros.Add("filtroEstado", filtroEstado.ToString());
                 viewModel.Paginacion.Parametros.Add("porPagina", porPagina.ToString());
+                viewModel.Paginacion.Parametros.Add("nombre", nombre);
+                viewModel.Paginacion.Parametros.Add("apellido", apellido);
+                viewModel.Paginacion.Parametros.Add("concesion", concesion.ToString("D5"));
+
+                viewModel.Concesion = concesion;
+                viewModel.Nombre = nombre;
+                viewModel.Apellido = apellido;
+
+                if (viewModel.Listado.Count() == 0)
+                {
+                    viewModel.SweetAlert = new SweetAlertDTO
+                    {
+                        Titulo = "Advertencia",
+                        Mensaje = "No se encontraton resultados",
+                        Tipo = "warning"
+                    };
+                }
             }
             catch (Exception ex)
             {
@@ -69,7 +89,6 @@ namespace CemSys3.Controllers
                 };
             }
 
-            viewModel.SweetAlert = TempData.GetSweetAlert();
             return View(viewModel);
         }
 

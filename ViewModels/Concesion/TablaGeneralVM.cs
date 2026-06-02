@@ -6,6 +6,9 @@ namespace CemSys3.ViewModels.Concesion
 {
     public class TablaGeneralVM
     {
+        public string? Nombre { get; set; }
+        public string? Apellido { get; set; }
+        public int? Concesion { get; set; }
 
         public IEnumerable<TablaConcesionDTO> Listado = new List<TablaConcesionDTO>();
 

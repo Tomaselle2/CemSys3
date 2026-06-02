@@ -20,6 +20,49 @@
                 Tabla General
             </button>
         </h2>
+        <div>
+            <form asp-action="TablaGeneral" method="get">
+                <div class="form-columns-container3">
+                    <div>
+                        <label for="concesion">Concesión</label>
+                        <input class="form-control"
+                               id="concesionInput"
+                               name="concesion"
+                               value="@(Model.Concesion == 0 ? "" : Model.Concesion?.ToString("D5"))" />
+                    </div>
+
+                    <div>
+                        <label for="nombreDifunto">Nombre</label>
+                        <input class="form-control" id="nombreInput" name="nombre" type="text" asp-for="Nombre" maxlength="60" minlength="2" autocomplete="off" />
+                    </div>
+
+                    <div>
+                        <label for="apellidoDifunto">Apellido</label>
+                        <input class="form-control" id="apellidoInput" name="apellido" type="text" asp-for="Apellido" maxlength="60" minlength="2" autocomplete="off" />
+                    </div>
+                </div>
+                <div>
+                    @{
+                        int filtroSeleccionado = 0;
+                        if (Model.Paginacion.Parametros != null && Model.Paginacion.Parametros.ContainsKey("filtroEstado"))
+                        {
+                            int.TryParse(Model.Paginacion.Parametros["filtroEstado"], out filtroSeleccionado);
+                        }
+                    }
+                    <label class="form-label">Estado</label>
+                    <select name="filtroEstado"
+                            class="form-select shadow-sm form-select-sm"
+                            style="width: 160px"
+                            asp-items="EnumHelper.GetSelectListItems<EstadosConcesionEnum>(filtroSeleccionado)"
+                            @* onchange="this.form.submit()" *@>
+                    </select>
+                </div>
+
+                <input type="submit" class="btn btn-primary" value="Filtrar" />
+                <a asp-action="TablaGeneral" asp-controller="Concesion" class="btn btn-primary" id="btnLimpiar">Limpiar filtros</a>
+            </form>
+            
+        </div>
         <div id="panelsStayOpen-collapseConcesiones" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingConcesiones">
             @if (Model.Listado != null && Model.Listado.Count() > 0)
             {

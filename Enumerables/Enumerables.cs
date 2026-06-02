@@ -261,6 +261,9 @@ namespace CemSys3.Enumerables
     //estados de tramites de concesion
     public enum EstadosConcesionEnum
     {
+        [Display(Name = "Todos")]
+        Todos = 0,
+
         [Display(Name = "Sin contrato")]
         SinContrato = 5,
 

@@ -235,46 +235,90 @@ namespace CemSys3.Business.Concesion
                 throw;
             }
         }
-        public async Task<PaginadoResponse<TablaConcesionDTO>> GellAllPaginado(int filtroEstado = 0, int pagina = 1, int porPagina = 10)
+
+
+
+        public async Task<PaginadoResponse<TablaConcesionDTO>> GellAllPaginado(
+    int filtroEstado = 0,
+    int pagina = 1,
+    int porPagina = 10,
+    string nombre = "",
+    string apellido = "",
+    int concesion = 0)
         {
             PaginadoResponse<TablaConcesionDTO> resultado = new PaginadoResponse<TablaConcesionDTO>();
 
-            var query = _context.Concesiones.Where(v => v.Visibilidad == true).AsQueryable();
+            var query = _context.Concesiones
+                .Where(v => v.Visibilidad.HasValue)
+                .AsQueryable();
 
-            // Filtro por estado del tramite
+            // Filtro por estado
             switch (filtroEstado)
             {
-                case 5: //sin contrato
+                case 5:
                     query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.SinContrato);
                     break;
-                case 6: //vigente
+
+                case 6:
                     query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.Vigente);
                     break;
-                case 7://vencido
+
+                case 7:
                     query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.Vencido);
                     break;
-                case 8://caducado
+
+                case 8:
                     query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.Caducado);
-                    break;
-                case 0: //todos
-                default:
-                    // No aplicar filtro
                     break;
             }
 
+            // Filtro por número de concesión
+            if (concesion > 0)
+            {
+                query = query.Where(c => c.Concesion == concesion);
+            }
 
-            // Total de registros
+            // Filtro por nombre/apellido de titulares o difuntos
+            if (!string.IsNullOrWhiteSpace(nombre) || !string.IsNullOrWhiteSpace(apellido))
+            {
+                query = query.Where(c =>
+
+                    // Titulares actuales
+                    c.HistorialTitularesConcesiones.Any(h =>
+                        h.FechaFin == null &&
+                        (string.IsNullOrWhiteSpace(nombre) ||
+                            h.Persona.Nombre.Contains(nombre)) &&
+                        (string.IsNullOrWhiteSpace(apellido) ||
+                            h.Persona.Apellido.Contains(apellido)))
+
+                    ||
+
+                    // Difuntos actuales de la parcela
+                    c.Parcela.ParcelaDifuntos.Any(pd =>
+                        pd.FechaRetiro == null &&
+                        (string.IsNullOrWhiteSpace(nombre) ||
+                            pd.Difunto.Nombre.Contains(nombre)) &&
+                        (string.IsNullOrWhiteSpace(apellido) ||
+                            pd.Difunto.Apellido.Contains(apellido)))
+                );
+            }
+
+            // Total registros
             var total = await query.CountAsync();
 
-            // Paginación
-            resultado.Paginacion.TotalPaginas = (int)Math.Ceiling(total / (double)porPagina);
-            resultado.Paginacion.PaginaActual = Math.Max(1, Math.Min(pagina, resultado.Paginacion.TotalPaginas));
+            resultado.Paginacion.TotalPaginas =
+                (int)Math.Ceiling(total / (double)porPagina);
+
+            resultado.Paginacion.PaginaActual =
+                Math.Max(1, Math.Min(pagina,
+                    Math.Max(1, resultado.Paginacion.TotalPaginas)));
+
             resultado.Paginacion.RegistrosPorPagina = porPagina;
             resultado.Paginacion.Accion = "TablaGeneral";
             resultado.Paginacion.Controlador = "Concesion";
             resultado.Paginacion.TotalRegistros = total;
 
-            //solo traigo las concesiones paginadas
+            // Concesiones de la página actual
             var concesionesPagina = await query
                 .OrderByDescending(c => c.TramiteId)
                 .Skip((resultado.Paginacion.PaginaActual - 1) * porPagina)
@@ -294,13 +338,19 @@ namespace CemSys3.Business.Concesion
                 })
                 .ToListAsync();
 
-            //obtengo los Ids de las concesiones que traigo
-            List<int> tramiteIds = concesionesPagina.Select(c => c.TramiteId).ToList();
-            List<int> parcelaIds = concesionesPagina.Select(c => c.ParcelaId).ToList();
+            var tramiteIds = concesionesPagina
+                .Select(c => c.TramiteId)
+                .ToList();
 
-            //Traer Titulares en una sola consulta
+            var parcelaIds = concesionesPagina
+                .Select(c => c.ParcelaId)
+                .ToList();
+
+            // Todos los titulares actuales
             var titulares = await _context.HistorialTitularesConcesiones
-                .Where(h => tramiteIds.Contains(h.ConcesionId ?? 0) && h.FechaFin == null)
+                .Where(h =>
+                    tramiteIds.Contains(h.ConcesionId ?? 0) &&
+                    h.FechaFin == null)
                 .Select(h => new
                 {
                     h.ConcesionId,
@@ -308,13 +358,16 @@ namespace CemSys3.Business.Concesion
                     {
                         Id = h.Persona.Id,
                         Nombre = h.Persona.Nombre ?? "",
-                        Apellido = h.Persona.Apellido ?? "",
+                        Apellido = h.Persona.Apellido ?? ""
                     }
-                }).ToListAsync();
+                })
+                .ToListAsync();
 
-            //Traer Difuntos en una sola consulta
+            // Todos los difuntos actuales
             var difuntos = await _context.ParcelaDifuntos
-                .Where(p => parcelaIds.Contains(p.ParcelaId) && p.FechaRetiro == null)
+                .Where(p =>
+                    parcelaIds.Contains(p.ParcelaId) &&
+                    p.FechaRetiro == null)
                 .Select(p => new
                 {
                     p.ParcelaId,
@@ -322,36 +375,43 @@ namespace CemSys3.Business.Concesion
                     {
                         Id = p.Difunto.Id,
                         Nombre = p.Difunto.Nombre ?? "",
-                        Apellido = p.Difunto.Apellido ?? "",
+                        Apellido = p.Difunto.Apellido ?? ""
                     }
-                }).ToListAsync();
+                })
+                .ToListAsync();
 
-            resultado.Items = concesionesPagina.Select(c => new TablaConcesionDTO
-            {
-                TramiteId = c.TramiteId,
-                Concesion = c.Concesion,
-                Visibilidad = c.Visibilidad,
-                TipoParcelaId = c.TipoParcelaId,
-                Vencimiento = c.Vencimiento,
-                EstadoTramiteId = c.EstadoActualId,
-                NombreSeccion = c.NombreSeccion,
-                NroParcela = c.NroParcela,
-                NroFila = c.NroFila,
+            resultado.Items = concesionesPagina
+                .Select(c => new TablaConcesionDTO
+                {
+                    TramiteId = c.TramiteId,
+                    Concesion = c.Concesion,
+                    Visibilidad = c.Visibilidad,
+                    TipoParcelaId = c.TipoParcelaId,
+                    Vencimiento = c.Vencimiento,
+                    EstadoTramiteId = c.EstadoActualId,
+                    NombreSeccion = c.NombreSeccion,
+                    NroParcela = c.NroParcela,
+                    NroFila = c.NroFila,
 
-                Titulares = titulares
-                    .Where(t => t.ConcesionId == c.TramiteId)
-                    .Select(t => t.Persona)
-                    .ToList(),
+                    // TODOS los titulares
+                    Titulares = titulares
+                        .Where(t => t.ConcesionId == c.TramiteId)
+                        .Select(t => t.Persona)
+                        .ToList(),
 
-                Difuntos = difuntos
-                    .Where(d => d.ParcelaId == c.ParcelaId)
-                    .Select(d => d.Persona)
-                    .ToList()
-
-            }).ToList();
+                    // TODOS los difuntos
+                    Difuntos = difuntos
+                        .Where(d => d.ParcelaId == c.ParcelaId)
+                        .Select(d => d.Persona)
+                        .ToList()
+                })
+                .ToList();
 
             return resultado;
         }
+
+
+
 
         public async Task<GenerarContratoDTO> SolicitarDatosParaGenerarContrato(int idTramite)
         {
