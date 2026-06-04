@@ -238,6 +238,180 @@ namespace CemSys3.Business.Concesion
 
 
 
+        //    public async Task<PaginadoResponse<TablaConcesionDTO>> GellAllPaginado(
+        //int filtroEstado = 0,
+        //int pagina = 1,
+        //int porPagina = 10,
+        //string nombre = "",
+        //string apellido = "",
+        //int concesion = 0)
+        //    {
+        //        PaginadoResponse<TablaConcesionDTO> resultado = new PaginadoResponse<TablaConcesionDTO>();
+
+        //        var query = _context.Concesiones
+        //            .Where(v => v.Visibilidad.HasValue)
+        //            .AsQueryable();
+
+        //        // Filtro por estado
+        //        switch (filtroEstado)
+        //        {
+        //            case 5:
+        //                query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.SinContrato);
+        //                break;
+
+        //            case 6:
+        //                query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.Vigente);
+        //                break;
+
+        //            case 7:
+        //                query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.Vencido);
+        //                break;
+
+        //            case 8:
+        //                query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.Caducado);
+        //                break;
+        //        }
+
+        //        // Filtro por número de concesión
+        //        if (concesion > 0)
+        //        {
+        //            query = query.Where(c => c.Concesion == concesion);
+        //        }
+
+        //        // Filtro por nombre/apellido de titulares o difuntos
+        //        if (!string.IsNullOrWhiteSpace(nombre) || !string.IsNullOrWhiteSpace(apellido))
+        //        {
+        //            query = query.Where(c =>
+
+        //                // Titulares actuales
+        //                c.HistorialTitularesConcesiones.Any(h =>
+        //                    h.FechaFin == null &&
+        //                    (string.IsNullOrWhiteSpace(nombre) ||
+        //                        h.Persona.Nombre.Contains(nombre)) &&
+        //                    (string.IsNullOrWhiteSpace(apellido) ||
+        //                        h.Persona.Apellido.Contains(apellido)))
+
+        //                ||
+
+        //                // Difuntos actuales de la parcela
+        //                c.Parcela.ParcelaDifuntos.Any(pd =>
+        //                    pd.FechaRetiro == null &&
+        //                    (string.IsNullOrWhiteSpace(nombre) ||
+        //                        pd.Difunto.Nombre.Contains(nombre)) &&
+        //                    (string.IsNullOrWhiteSpace(apellido) ||
+        //                        pd.Difunto.Apellido.Contains(apellido)))
+        //            );
+        //        }
+
+        //        // Total registros
+        //        var total = await query.CountAsync();
+
+        //        resultado.Paginacion.TotalPaginas =
+        //            (int)Math.Ceiling(total / (double)porPagina);
+
+        //        resultado.Paginacion.PaginaActual =
+        //            Math.Max(1, Math.Min(pagina,
+        //                Math.Max(1, resultado.Paginacion.TotalPaginas)));
+
+        //        resultado.Paginacion.RegistrosPorPagina = porPagina;
+        //        resultado.Paginacion.Accion = "TablaGeneral";
+        //        resultado.Paginacion.Controlador = "Concesion";
+        //        resultado.Paginacion.TotalRegistros = total;
+
+        //        // Concesiones de la página actual
+        //        var concesionesPagina = await query
+        //            .OrderByDescending(c => c.TramiteId)
+        //            .Skip((resultado.Paginacion.PaginaActual - 1) * porPagina)
+        //            .Take(porPagina)
+        //            .Select(c => new
+        //            {
+        //                c.TramiteId,
+        //                c.Concesion,
+        //                c.Visibilidad,
+        //                c.ParcelaId,
+        //                c.Vencimiento,
+        //                c.Tramite.EstadoActualId,
+        //                TipoParcelaId = c.Parcela.TipoParcelaId,
+        //                NombreSeccion = c.Parcela.Seccion.Nombre,
+        //                c.Parcela.NroParcela,
+        //                c.Parcela.NroFila
+        //            })
+        //            .ToListAsync();
+
+        //        var tramiteIds = concesionesPagina
+        //            .Select(c => c.TramiteId)
+        //            .ToList();
+
+        //        var parcelaIds = concesionesPagina
+        //            .Select(c => c.ParcelaId)
+        //            .ToList();
+
+        //        // Todos los titulares actuales
+        //        var titulares = await _context.HistorialTitularesConcesiones
+        //            .Where(h =>
+        //                tramiteIds.Contains(h.ConcesionId ?? 0) &&
+        //                h.FechaFin == null)
+        //            .Select(h => new
+        //            {
+        //                h.ConcesionId,
+        //                Persona = new PersonaTablaGeneral
+        //                {
+        //                    Id = h.Persona.Id,
+        //                    Nombre = h.Persona.Nombre ?? "",
+        //                    Apellido = h.Persona.Apellido ?? ""
+        //                }
+        //            })
+        //            .ToListAsync();
+
+        //        // Todos los difuntos actuales
+        //        var difuntos = await _context.ParcelaDifuntos
+        //            .Where(p =>
+        //                parcelaIds.Contains(p.ParcelaId) &&
+        //                p.FechaRetiro == null)
+        //            .Select(p => new
+        //            {
+        //                p.ParcelaId,
+        //                Persona = new PersonaTablaGeneral
+        //                {
+        //                    Id = p.Difunto.Id,
+        //                    Nombre = p.Difunto.Nombre ?? "",
+        //                    Apellido = p.Difunto.Apellido ?? ""
+        //                }
+        //            })
+        //            .ToListAsync();
+
+        //        resultado.Items = concesionesPagina
+        //            .Select(c => new TablaConcesionDTO
+        //            {
+        //                TramiteId = c.TramiteId,
+        //                Concesion = c.Concesion,
+        //                Visibilidad = c.Visibilidad,
+        //                TipoParcelaId = c.TipoParcelaId,
+        //                Vencimiento = c.Vencimiento,
+        //                EstadoTramiteId = c.EstadoActualId,
+        //                NombreSeccion = c.NombreSeccion,
+        //                NroParcela = c.NroParcela,
+        //                NroFila = c.NroFila,
+
+        //                // TODOS los titulares
+        //                Titulares = titulares
+        //                    .Where(t => t.ConcesionId == c.TramiteId)
+        //                    .Select(t => t.Persona)
+        //                    .ToList(),
+
+        //                // TODOS los difuntos
+        //                Difuntos = difuntos
+        //                    .Where(d => d.ParcelaId == c.ParcelaId)
+        //                    .Select(d => d.Persona)
+        //                    .ToList()
+        //            })
+        //            .ToList();
+
+        //        return resultado;
+        //    }
+
+
+
         public async Task<PaginadoResponse<TablaConcesionDTO>> GellAllPaginado(
     int filtroEstado = 0,
     int pagina = 1,
@@ -252,73 +426,40 @@ namespace CemSys3.Business.Concesion
                 .Where(v => v.Visibilidad.HasValue)
                 .AsQueryable();
 
-            // Filtro por estado
             switch (filtroEstado)
             {
-                case 5:
-                    query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.SinContrato);
-                    break;
-
-                case 6:
-                    query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.Vigente);
-                    break;
-
-                case 7:
-                    query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.Vencido);
-                    break;
-
-                case 8:
-                    query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.Caducado);
-                    break;
+                case 5: query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.SinContrato); break;
+                case 6: query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.Vigente); break;
+                case 7: query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.Vencido); break;
+                case 8: query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.Caducado); break;
             }
 
-            // Filtro por número de concesión
             if (concesion > 0)
-            {
                 query = query.Where(c => c.Concesion == concesion);
-            }
 
-            // Filtro por nombre/apellido de titulares o difuntos
             if (!string.IsNullOrWhiteSpace(nombre) || !string.IsNullOrWhiteSpace(apellido))
             {
                 query = query.Where(c =>
-
-                    // Titulares actuales
                     c.HistorialTitularesConcesiones.Any(h =>
                         h.FechaFin == null &&
-                        (string.IsNullOrWhiteSpace(nombre) ||
-                            h.Persona.Nombre.Contains(nombre)) &&
-                        (string.IsNullOrWhiteSpace(apellido) ||
-                            h.Persona.Apellido.Contains(apellido)))
-
+                        (string.IsNullOrWhiteSpace(nombre) || h.Persona.Nombre.Contains(nombre)) &&
+                        (string.IsNullOrWhiteSpace(apellido) || h.Persona.Apellido.Contains(apellido)))
                     ||
-
-                    // Difuntos actuales de la parcela
                     c.Parcela.ParcelaDifuntos.Any(pd =>
                         pd.FechaRetiro == null &&
-                        (string.IsNullOrWhiteSpace(nombre) ||
-                            pd.Difunto.Nombre.Contains(nombre)) &&
-                        (string.IsNullOrWhiteSpace(apellido) ||
-                            pd.Difunto.Apellido.Contains(apellido)))
+                        (string.IsNullOrWhiteSpace(nombre) || pd.Difunto.Nombre.Contains(nombre)) &&
+                        (string.IsNullOrWhiteSpace(apellido) || pd.Difunto.Apellido.Contains(apellido)))
                 );
             }
 
-            // Total registros
             var total = await query.CountAsync();
-
-            resultado.Paginacion.TotalPaginas =
-                (int)Math.Ceiling(total / (double)porPagina);
-
-            resultado.Paginacion.PaginaActual =
-                Math.Max(1, Math.Min(pagina,
-                    Math.Max(1, resultado.Paginacion.TotalPaginas)));
-
+            resultado.Paginacion.TotalPaginas = (int)Math.Ceiling(total / (double)porPagina);
+            resultado.Paginacion.PaginaActual = Math.Max(1, Math.Min(pagina, Math.Max(1, resultado.Paginacion.TotalPaginas)));
             resultado.Paginacion.RegistrosPorPagina = porPagina;
             resultado.Paginacion.Accion = "TablaGeneral";
             resultado.Paginacion.Controlador = "Concesion";
             resultado.Paginacion.TotalRegistros = total;
 
-            // Concesiones de la página actual
             var concesionesPagina = await query
                 .OrderByDescending(c => c.TramiteId)
                 .Skip((resultado.Paginacion.PaginaActual - 1) * porPagina)
@@ -338,19 +479,12 @@ namespace CemSys3.Business.Concesion
                 })
                 .ToListAsync();
 
-            var tramiteIds = concesionesPagina
-                .Select(c => c.TramiteId)
-                .ToList();
+            var tramiteIds = concesionesPagina.Select(c => c.TramiteId).ToList();
+            var parcelaIds = concesionesPagina.Select(c => c.ParcelaId).ToList();
 
-            var parcelaIds = concesionesPagina
-                .Select(c => c.ParcelaId)
-                .ToList();
-
-            // Todos los titulares actuales
+            // Titulares actuales de cada concesión
             var titulares = await _context.HistorialTitularesConcesiones
-                .Where(h =>
-                    tramiteIds.Contains(h.ConcesionId ?? 0) &&
-                    h.FechaFin == null)
+                .Where(h => tramiteIds.Contains(h.ConcesionId ?? 0) && h.FechaFin == null)
                 .Select(h => new
                 {
                     h.ConcesionId,
@@ -363,54 +497,84 @@ namespace CemSys3.Business.Concesion
                 })
                 .ToListAsync();
 
-            // Todos los difuntos actuales
-            var difuntos = await _context.ParcelaDifuntos
-                .Where(p =>
-                    parcelaIds.Contains(p.ParcelaId) &&
-                    p.FechaRetiro == null)
-                .Select(p => new
+            // Todos los ParcelaDifuntos de las parcelas en pantalla
+            var todosDifuntos = await _context.ParcelaDifuntos
+                .Where(pd => parcelaIds.Contains(pd.ParcelaId))
+                .Select(pd => new
                 {
-                    p.ParcelaId,
+                    pd.ParcelaId,
+                    pd.TramiteIngresoId,
                     Persona = new PersonaTablaGeneral
                     {
-                        Id = p.Difunto.Id,
-                        Nombre = p.Difunto.Nombre ?? "",
-                        Apellido = p.Difunto.Apellido ?? ""
+                        Id = pd.Difunto.Id,
+                        Nombre = pd.Difunto.Nombre ?? "",
+                        Apellido = pd.Difunto.Apellido ?? ""
                     }
                 })
                 .ToListAsync();
 
+            // Todas las concesiones de esas parcelas (no solo la página actual),
+            // necesarias para calcular el rango de TramiteId de cada concesión
+            var todasConcesionesPorParcela = await _context.Concesiones
+                .Where(c => parcelaIds.Contains(c.ParcelaId) && c.Visibilidad.HasValue)
+                .Select(c => new { c.TramiteId, c.ParcelaId })
+                .ToListAsync();
+
+            // Agrupar por parcela ordenado cronológicamente
+            var concesionesPorParcela = todasConcesionesPorParcela
+                .GroupBy(c => c.ParcelaId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderBy(c => c.TramiteId).Select(c => c.TramiteId).ToList()
+                );
+
             resultado.Items = concesionesPagina
-                .Select(c => new TablaConcesionDTO
+                .Select(c =>
                 {
-                    TramiteId = c.TramiteId,
-                    Concesion = c.Concesion,
-                    Visibilidad = c.Visibilidad,
-                    TipoParcelaId = c.TipoParcelaId,
-                    Vencimiento = c.Vencimiento,
-                    EstadoTramiteId = c.EstadoActualId,
-                    NombreSeccion = c.NombreSeccion,
-                    NroParcela = c.NroParcela,
-                    NroFila = c.NroFila,
+                    // Buscar el rango de TramiteId que corresponde a esta concesión
+                    var idsEnParcela = concesionesPorParcela.ContainsKey(c.ParcelaId)
+                        ? concesionesPorParcela[c.ParcelaId]
+                        : new List<int>();
 
-                    // TODOS los titulares
-                    Titulares = titulares
-                        .Where(t => t.ConcesionId == c.TramiteId)
-                        .Select(t => t.Persona)
-                        .ToList(),
+                    int posicion = idsEnParcela.IndexOf(c.TramiteId);
 
-                    // TODOS los difuntos
-                    Difuntos = difuntos
-                        .Where(d => d.ParcelaId == c.ParcelaId)
-                        .Select(d => d.Persona)
-                        .ToList()
+                    // Ingreso válido: TramiteIngresoId >= TramiteId de esta concesión
+                    // y < TramiteId de la siguiente concesión (si existe)
+                    int tramiteIdFin = (posicion >= 0 && posicion < idsEnParcela.Count - 1)
+                        ? idsEnParcela[posicion + 1]
+                        : int.MaxValue;
+
+                    var difuntosDeConcesion = todosDifuntos
+                        .Where(pd =>
+                            pd.ParcelaId == c.ParcelaId &&
+                            pd.TramiteIngresoId.HasValue &&
+                            pd.TramiteIngresoId.Value >= c.TramiteId &&
+                            pd.TramiteIngresoId.Value < tramiteIdFin)
+                        .Select(pd => pd.Persona)
+                        .ToList();
+
+                    return new TablaConcesionDTO
+                    {
+                        TramiteId = c.TramiteId,
+                        Concesion = c.Concesion,
+                        Visibilidad = c.Visibilidad,
+                        TipoParcelaId = c.TipoParcelaId,
+                        Vencimiento = c.Vencimiento,
+                        EstadoTramiteId = c.EstadoActualId,
+                        NombreSeccion = c.NombreSeccion,
+                        NroParcela = c.NroParcela,
+                        NroFila = c.NroFila,
+                        Titulares = titulares
+                            .Where(t => t.ConcesionId == c.TramiteId)
+                            .Select(t => t.Persona)
+                            .ToList(),
+                        Difuntos = difuntosDeConcesion
+                    };
                 })
                 .ToList();
 
             return resultado;
         }
-
-
 
 
         public async Task<GenerarContratoDTO> SolicitarDatosParaGenerarContrato(int idTramite)

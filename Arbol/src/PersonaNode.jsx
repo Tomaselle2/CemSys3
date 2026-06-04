@@ -164,7 +164,7 @@ export default function PersonaNode({ data, id }) {
                             fontSize: 28
                         }}
                     >
-                        👤
+                        <i class="bi bi-person-fill"></i>
                     </div>
 
                     <textarea
