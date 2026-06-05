@@ -185,6 +185,19 @@ namespace CemSys3.Controllers
                 }
             }
 
+            if (viewModel.TipoParcelaID == 0 || viewModel.TipoParcelaID == null)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Verificar",
+                    Mensaje = "Hay datos incompletos",
+                    Tipo = "warning"
+                };
+
+                await CargarListasIngreso(viewModel, viewModel.NotaIngreso.Id);
+                return View("Index", viewModel);
+            }
+
             try
             {
                 bool personaExiste = false;

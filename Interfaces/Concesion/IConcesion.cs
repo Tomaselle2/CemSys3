@@ -15,7 +15,10 @@ namespace CemSys3.Interfaces.Concesion
             int porPagina = 10,
             string nombre = "",
             string apellido = "",
-            int concesion = 0);
+            int concesion = 0,
+            int? tipoParcelaID = null,
+            int? seccionID = null, 
+            int? parcelaID = null);
 
         public Task<GenerarContratoDTO> SolicitarDatosParaGenerarContrato(int idTramite);
 

@@ -13,7 +13,7 @@
                 id="tipoParcelaSelect"
                 name="@Model.TipoParcelaName"
                 data-selected="@Model.TipoParcelaID"
-                required>
+                >
             <option value="">--Elija una opción--</option>
             @foreach (var item in EnumHelper.GetSelectListItems<TipoParcelaEnum>())
             {
@@ -37,7 +37,7 @@
                 name="@Model.SeccionName"
                 data-selected="@Model.SeccionID"
                 disabled
-                required>
+                >
             <option value="">--Elija una opción--</option>
         </select>
         <span asp-validation-for="SeccionID" class="text-danger"></span>
@@ -50,7 +50,7 @@
                 name="@Model.ParcelaName"
                 data-selected="@Model.ParcelaID"
                 disabled
-                required>
+                >
             <option value="">--Elija una opción--</option>
         </select>
         <span asp-validation-for="ParcelaID" class="text-danger"></span>

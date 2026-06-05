@@ -10,6 +10,11 @@ namespace CemSys3.ViewModels.Concesion
         public string? Apellido { get; set; }
         public int? Concesion { get; set; }
 
+        public int? TipoParcelaID { get; set; }
+        public int? SeccionID { get; set; }
+        public int? ParcelaID { get; set; }
+
+
         public IEnumerable<TablaConcesionDTO> Listado = new List<TablaConcesionDTO>();
 
         //manero de errores

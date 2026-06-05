@@ -2,6 +2,7 @@
 @using CemSys3.Enumerables
 @using CemSys3.Helpers.Enumerable
 @using CemSys3.ViewModels.Concesion
+@using CemSys3.ViewModels.Ingreso
 @model TablaGeneralVM
 
 @{
@@ -22,6 +23,10 @@
         </h2>
         <div>
             <form asp-action="TablaGeneral" method="get">
+
+                <input type="hidden" id="estadoDelDifunto" value="2" />
+               
+
                 <div class="form-columns-container3">
                     <div>
                         <label for="concesion">Concesión</label>
@@ -57,6 +62,30 @@
                             @* onchange="this.form.submit()" *@>
                     </select>
                 </div>
+
+
+
+                <div class="form-box">
+
+                    @await Html.PartialAsync("IngresoPV/_SelectorUbicacion",
+                    new SelectorUbicacionVM
+                    {
+                        TipoParcelaID = Model.TipoParcelaID,
+                        SeccionID = Model.SeccionID,
+                        ParcelaID = Model.ParcelaID,
+
+                        TipoParcelaName = "TipoParcelaID",
+                        SeccionName = "SeccionID",
+                        ParcelaName = "ParcelaID",
+                        UrlSecciones = Url.Action("ObtenerSeccionesPorTipo", "Seccion") ?? "",
+                        UrlParcelas = Url.Action("ObtenerParcelasPorSeccion", "Parcela") ?? "",
+                    })
+
+                </div>
+
+                <input type="hidden" id="tipoParcelaID" name="tipoParcelaID" asp-for="TipoParcelaID" />
+                <input type="hidden" id="seccionID" name="seccionID" asp-for="SeccionID" />
+                <input type="hidden" id="parcelaID" name="parcelaID" asp-for="ParcelaID" />
 
                 <input type="submit" class="btn btn-primary" value="Filtrar" />
                 <a asp-action="TablaGeneral" asp-controller="Concesion" class="btn btn-primary" id="btnLimpiar">Limpiar filtros</a>
@@ -158,3 +187,10 @@
 
 @* Renderizamos el manejador pasándole el DTO del modelo *@
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src="~/js/ubicacion-selector.js"></script>
+
+}
