@@ -39,39 +39,90 @@ namespace CemSys3.Business.HistorialEstadoService
             }).ToListAsync();
         }
 
+        //public async Task VincularTramiteAPersona(int tramiteId, int personaId)
+        //{
+        //    bool existe = await _context.TramitePersonas
+        //        .AnyAsync(tp => tp.TramiteId == tramiteId
+        //                    && tp.PersonaId == personaId);
+
+        //    if (!existe)
+        //    {
+        //        TramitePersona tramitePersona = new TramitePersona
+        //        {
+        //            TramiteId = tramiteId,
+        //            PersonaId = personaId,
+        //            FechaRegistro = DateTime.Now
+        //        };
+
+        //        _context.TramitePersonas.Add(tramitePersona);
+        //    }
+        //}
+
         public async Task VincularTramiteAPersona(int tramiteId, int personaId)
         {
-            bool existe = await _context.TramitePersonas
-                .AnyAsync(tp => tp.TramiteId == tramiteId
-                            && tp.PersonaId == personaId);
+            bool existeEnMemoria = _context.ChangeTracker
+                .Entries<TramitePersona>()
+                .Any(x =>
+                    x.Entity.TramiteId == tramiteId &&
+                    x.Entity.PersonaId == personaId);
 
-            if (!existe)
+            if (existeEnMemoria)
+                return;
+
+            bool existeEnBd = await _context.TramitePersonas
+                .AnyAsync(tp =>
+                    tp.TramiteId == tramiteId &&
+                    tp.PersonaId == personaId);
+
+            if (existeEnBd)
+                return;
+
+            _context.TramitePersonas.Add(new TramitePersona
             {
-                TramitePersona tramitePersona = new TramitePersona
-                {
-                    TramiteId = tramiteId,
-                    PersonaId = personaId,
-                    FechaRegistro = DateTime.Now
-                };
-
-                _context.TramitePersonas.Add(tramitePersona);
-            }
+                TramiteId = tramiteId,
+                PersonaId = personaId,
+                FechaRegistro = DateTime.Now
+            });
         }
+
+        //public async Task VincularTramiteAParcela(int tramiteId, int parcelaId)
+        //{
+        //    bool existe = await _context.TramitesParcelas
+        //        .AnyAsync(x => x.TramiteId == tramiteId && x.ParcelaId == parcelaId);
+
+        //    if (!existe)
+        //    {
+        //        _context.TramitesParcelas.Add(new TramitesParcela
+        //        {
+        //            TramiteId = tramiteId,
+        //            ParcelaId = parcelaId,
+        //            FechaRegistro = DateTime.Now
+        //        });
+        //    }
+        //}
 
         public async Task VincularTramiteAParcela(int tramiteId, int parcelaId)
         {
-            bool existe = await _context.TramitesParcelas
-                .AnyAsync(x => x.TramiteId == tramiteId && x.ParcelaId == parcelaId);
+            bool existeEnMemoria = _context.TramitesParcelas.Local
+                .Any(x => x.TramiteId == tramiteId &&
+                          x.ParcelaId == parcelaId);
 
-            if (!existe)
+            if (existeEnMemoria)
+                return;
+
+            bool existeEnBd = await _context.TramitesParcelas
+                .AnyAsync(x => x.TramiteId == tramiteId &&
+                               x.ParcelaId == parcelaId);
+
+            if (existeEnBd)
+                return;
+
+            await _context.TramitesParcelas.AddAsync(new TramitesParcela
             {
-                _context.TramitesParcelas.Add(new TramitesParcela
-                {
-                    TramiteId = tramiteId,
-                    ParcelaId = parcelaId,
-                    FechaRegistro = DateTime.Now
-                });
-            }
+                TramiteId = tramiteId,
+                ParcelaId = parcelaId,
+                FechaRegistro = DateTime.Now
+            });
         }
 
         public async Task VincularTitularAConcesion(int personaId, int tramiteId)

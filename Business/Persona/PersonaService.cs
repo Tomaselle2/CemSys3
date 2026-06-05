@@ -250,7 +250,12 @@ namespace CemSys3.Business.Persona
             
             persona.Nombre = dto.Nombre?.Trim();
             persona.Apellido = dto.Apellido?.Trim();
-            persona.Dni = dto.Dni?.ToString();
+
+            if (!string.IsNullOrEmpty(dto.Dni))
+            {
+                persona.Dni = dto.Dni.PadLeft(8, '0');
+            }
+
             if (dto.FechaNacimiento.HasValue)
             {
                 persona.FechaNacimiento = dto.FechaNacimiento.Value;

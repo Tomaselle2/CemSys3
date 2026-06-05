@@ -11,9 +11,9 @@ public partial class TareaPlantilla
 
     public int TipoTramiteId { get; set; }
 
-    public bool Visibilidad { get; set; }
-
     public bool Estado { get; set; }
+
+    public bool Visibilidad { get; set; }
 
     public virtual ICollection<Tarea> Tareas { get; set; } = new List<Tarea>();
 

@@ -31,6 +31,8 @@ public partial class Concesione
 
     public int? UsuarioId { get; set; }
 
+    public int? TramiteRetiroId { get; set; }
+
     public virtual AnioConcesion? CantidadAnios { get; set; }
 
     public virtual CantidadCuota? Cuota { get; set; }
@@ -40,6 +42,8 @@ public partial class Concesione
     public virtual Parcela Parcela { get; set; } = null!;
 
     public virtual Tramite Tramite { get; set; } = null!;
+
+    public virtual Tramite? TramiteRetiro { get; set; }
 
     public virtual Usuario? Usuario { get; set; }
 }

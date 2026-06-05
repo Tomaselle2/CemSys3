@@ -267,6 +267,8 @@ namespace CemSys3.Business.TramiteConcesion
                 {
                     // cancelar la concesion.
                     concesion.FechaFin = traslado.FechaFinalizacion;
+                    concesion.TramiteRetiroId = tramiteId;
+
                     Models.Tramite tramiteConcesion = await _context.Tramites.FirstOrDefaultAsync(t => t.Id == concesion.TramiteId) ?? throw new Exception("Trámite no encontrado.");
 
 

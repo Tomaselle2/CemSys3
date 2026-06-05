@@ -89,7 +89,7 @@ namespace CemSys3.Business.PlantillaTramite
             {
                 Id = doc.Id,
                 TramiteId = doc.TramiteId,
-                TipoAutorizacionId = doc.TipoAutorizacionId ?? 0,
+                TipoAutorizacionId = doc.TipoAutorizacionId,
                 Nombre = doc.Nombre,
                 ContenidoHtml = doc.ContenidoHtml,
                 PersonaId = doc.PersonaId,
@@ -106,7 +106,7 @@ namespace CemSys3.Business.PlantillaTramite
                 {
                     Id = x.Id,
                     TramiteId = x.TramiteId,
-                    TipoAutorizacionId = x.TipoAutorizacionId ?? 0,
+                    TipoAutorizacionId = x.TipoAutorizacionId,
                     Nombre = x.Nombre,
                     ContenidoHtml = x.ContenidoHtml,
                     PersonaId = x.PersonaId,

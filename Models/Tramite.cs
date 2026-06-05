@@ -29,7 +29,9 @@ public partial class Tramite
 
     public virtual CambiosTitularidad? CambiosTitularidadTramite { get; set; }
 
-    public virtual Concesione? Concesione { get; set; }
+    public virtual Concesione? ConcesioneTramite { get; set; }
+
+    public virtual ICollection<Concesione> ConcesioneTramiteRetiros { get; set; } = new List<Concesione>();
 
     public virtual ICollection<Cremacione> CremacioneConcesions { get; set; } = new List<Cremacione>();
 

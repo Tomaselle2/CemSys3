@@ -380,6 +380,13 @@ CREATE TABLE [dbo].[Concesiones] (
     CONSTRAINT [Concesiones_usuarioId_fk] FOREIGN KEY([usuarioId]) REFERENCES [dbo].[Usuarios]([id])
 );
 
+ALTER TABLE Concesiones 
+ADD TramiteRetiroId INT NULL;
+
+ALTER TABLE Concesiones
+ADD CONSTRAINT FK_Concesiones_TramiteRetiro 
+FOREIGN KEY (TramiteRetiroId) REFERENCES Tramites(id);
+
 CREATE TABLE [dbo].[HistorialTitularesConcesiones] (
     [id] int NOT NULL IDENTITY(1,1),
     [concesionId] int,

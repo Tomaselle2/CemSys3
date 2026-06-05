@@ -412,6 +412,9 @@ namespace CemSys3.Business.Concesion
 
 
 
+        //version de abajo vale mas
+
+
         public async Task<PaginadoResponse<TablaConcesionDTO>> GellAllPaginado(
     int filtroEstado = 0,
     int pagina = 1,
@@ -440,15 +443,18 @@ namespace CemSys3.Business.Concesion
             if (!string.IsNullOrWhiteSpace(nombre) || !string.IsNullOrWhiteSpace(apellido))
             {
                 query = query.Where(c =>
+                    // Buscar en titulares actuales
                     c.HistorialTitularesConcesiones.Any(h =>
                         h.FechaFin == null &&
                         (string.IsNullOrWhiteSpace(nombre) || h.Persona.Nombre.Contains(nombre)) &&
                         (string.IsNullOrWhiteSpace(apellido) || h.Persona.Apellido.Contains(apellido)))
                     ||
-                    c.Parcela.ParcelaDifuntos.Any(pd =>
+                    // Buscar en difuntos solo si la concesión está activa
+                    (c.FechaFin == null &&
+                     c.Parcela.ParcelaDifuntos.Any(pd =>
                         pd.FechaRetiro == null &&
                         (string.IsNullOrWhiteSpace(nombre) || pd.Difunto.Nombre.Contains(nombre)) &&
-                        (string.IsNullOrWhiteSpace(apellido) || pd.Difunto.Apellido.Contains(apellido)))
+                        (string.IsNullOrWhiteSpace(apellido) || pd.Difunto.Apellido.Contains(apellido))))
                 );
             }
 
@@ -471,6 +477,9 @@ namespace CemSys3.Business.Concesion
                     c.Visibilidad,
                     c.ParcelaId,
                     c.Vencimiento,
+                    c.FechaInicio,
+                    c.FechaFin,
+                    c.TramiteRetiroId,  // ← nueva columna
                     c.Tramite.EstadoActualId,
                     TipoParcelaId = c.Parcela.TipoParcelaId,
                     NombreSeccion = c.Parcela.Seccion.Nombre,
@@ -482,7 +491,6 @@ namespace CemSys3.Business.Concesion
             var tramiteIds = concesionesPagina.Select(c => c.TramiteId).ToList();
             var parcelaIds = concesionesPagina.Select(c => c.ParcelaId).ToList();
 
-            // Titulares actuales de cada concesión
             var titulares = await _context.HistorialTitularesConcesiones
                 .Where(h => tramiteIds.Contains(h.ConcesionId ?? 0) && h.FechaFin == null)
                 .Select(h => new
@@ -497,13 +505,12 @@ namespace CemSys3.Business.Concesion
                 })
                 .ToListAsync();
 
-            // Todos los ParcelaDifuntos de las parcelas en pantalla
+            // Difuntos actuales de la parcela (FechaRetiro == null), sin importar estado de concesión
             var todosDifuntos = await _context.ParcelaDifuntos
-                .Where(pd => parcelaIds.Contains(pd.ParcelaId))
+                .Where(pd => parcelaIds.Contains(pd.ParcelaId) && pd.FechaRetiro == null)
                 .Select(pd => new
                 {
                     pd.ParcelaId,
-                    pd.TramiteIngresoId,
                     Persona = new PersonaTablaGeneral
                     {
                         Id = pd.Difunto.Id,
@@ -513,43 +520,12 @@ namespace CemSys3.Business.Concesion
                 })
                 .ToListAsync();
 
-            // Todas las concesiones de esas parcelas (no solo la página actual),
-            // necesarias para calcular el rango de TramiteId de cada concesión
-            var todasConcesionesPorParcela = await _context.Concesiones
-                .Where(c => parcelaIds.Contains(c.ParcelaId) && c.Visibilidad.HasValue)
-                .Select(c => new { c.TramiteId, c.ParcelaId })
-                .ToListAsync();
-
-            // Agrupar por parcela ordenado cronológicamente
-            var concesionesPorParcela = todasConcesionesPorParcela
-                .GroupBy(c => c.ParcelaId)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.OrderBy(c => c.TramiteId).Select(c => c.TramiteId).ToList()
-                );
-
             resultado.Items = concesionesPagina
                 .Select(c =>
                 {
-                    // Buscar el rango de TramiteId que corresponde a esta concesión
-                    var idsEnParcela = concesionesPorParcela.ContainsKey(c.ParcelaId)
-                        ? concesionesPorParcela[c.ParcelaId]
-                        : new List<int>();
-
-                    int posicion = idsEnParcela.IndexOf(c.TramiteId);
-
-                    // Ingreso válido: TramiteIngresoId >= TramiteId de esta concesión
-                    // y < TramiteId de la siguiente concesión (si existe)
-                    int tramiteIdFin = (posicion >= 0 && posicion < idsEnParcela.Count - 1)
-                        ? idsEnParcela[posicion + 1]
-                        : int.MaxValue;
-
                     var difuntosDeConcesion = todosDifuntos
-                        .Where(pd =>
-                            pd.ParcelaId == c.ParcelaId &&
-                            pd.TramiteIngresoId.HasValue &&
-                            pd.TramiteIngresoId.Value >= c.TramiteId &&
-                            pd.TramiteIngresoId.Value < tramiteIdFin)
+                        .Where(pd => pd.ParcelaId == c.ParcelaId && 
+                        c.FechaFin == null)  // solo mostrar difuntos si la concesión está activa
                         .Select(pd => pd.Persona)
                         .ToList();
 
@@ -576,6 +552,8 @@ namespace CemSys3.Business.Concesion
             return resultado;
         }
 
+        private static DateTime TruncarASegundos(DateTime dt) =>
+    new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
 
         public async Task<GenerarContratoDTO> SolicitarDatosParaGenerarContrato(int idTramite)
         {
@@ -691,18 +669,26 @@ namespace CemSys3.Business.Concesion
             dto.Vencimiento = concesion.Vencimiento;
             dto.InfoAdicional = concesion.InformacionAdicional ?? "";
 
-            //consultar los difuntos relacionados a la parcela
-            dto.Difuntos = await _context.ParcelaDifuntos
-                .Where(p => p.ParcelaId == dto.ParcelaId && p.FechaRetiro == null)
-                .Select(p => new DifuntoContratoDTO
-                {
-                    Id = p.Difunto.Id,
-                    DNI = p.Difunto.Dni,
-                    Nombre = p.Difunto.Nombre,
-                    Apellido = p.Difunto.Apellido,
-                    FechaIngreso = p.FechaIngreso,
-                    EstadoDifuntoId = p.Difunto.EstadoDifuntoId
-                }).ToListAsync();
+            // Solo mostrar difuntos actuales si la concesión está activa
+            if (concesion.FechaFin == null)
+            {
+                dto.Difuntos = await _context.ParcelaDifuntos
+                    .Where(p => p.ParcelaId == dto.ParcelaId && p.FechaRetiro == null)
+                    .Select(p => new DifuntoContratoDTO
+                    {
+                        Id = p.Difunto.Id,
+                        DNI = p.Difunto.Dni,
+                        Nombre = p.Difunto.Nombre,
+                        Apellido = p.Difunto.Apellido,
+                        FechaIngreso = p.FechaIngreso,
+                        EstadoDifuntoId = p.Difunto.EstadoDifuntoId
+                    }).ToListAsync();
+            }
+            else
+            {
+                // Concesión caducada: parcela vacía, no hay difuntos que mostrar
+                dto.Difuntos = new List<DifuntoContratoDTO>();
+            }
 
             //Traer Titulares en una sola consulta
             dto.Titulares = await _context.HistorialTitularesConcesiones
@@ -995,6 +981,6 @@ namespace CemSys3.Business.Concesion
             await _notasService.GenerarNotaSinTransaccion(tramiteNotaId, nota);
         }
 
-        
+  
     }
 }
