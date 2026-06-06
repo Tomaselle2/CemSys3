@@ -103,7 +103,7 @@ namespace CemSys3.Business.Notas
             PaginadoResponse<NotaDTO> resultado = new PaginadoResponse<NotaDTO>();
 
             // Filtro por estado de la nota
-            var query = _context.Notas.Include(t => t.Tramite).Where(n => n.Tramite.EstadoActualId == estadoId);
+            var query = _context.Notas.Include(t => t.Tramite).Where(n => n.Tramite.EstadoActualId == estadoId).AsNoTracking();
 
             if (query != null)
             {

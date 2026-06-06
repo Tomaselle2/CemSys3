@@ -46,14 +46,14 @@ namespace CemSys3.Controllers
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)] 
         public async Task<IActionResult> TablaGeneral(int filtroEstado = 0, string nombre = "",
-            string apellido = "", int concesion = 0, int? tipoParcelaID = null, int? seccionID = null, int? parcelaID = null, int pagina = 1, int porPagina = 10)
+            string apellido = "", int concesion = 0, int? tipoParcelaID = null, int? seccionID = null, int? parcelaID = null, DateOnly? fechaDesde = null, DateOnly? fechaHasta = null, int pagina = 1, int porPagina = 10)
         {
             TablaGeneralVM viewModel = new TablaGeneralVM();
             viewModel.SweetAlert = TempData.GetSweetAlert();
 
             try
             {
-                PaginadoResponse<TablaConcesionDTO> resultado = await _concesionService.GellAllPaginado(filtroEstado, pagina, porPagina, nombre, apellido, concesion, tipoParcelaID, seccionID, parcelaID);
+                PaginadoResponse<TablaConcesionDTO> resultado = await _concesionService.GellAllPaginado(filtroEstado, pagina, porPagina, nombre, apellido, concesion, tipoParcelaID, seccionID, parcelaID, fechaDesde, fechaHasta);
                 viewModel.Listado = resultado.Items;
                 viewModel.Paginacion = resultado.Paginacion;
 
@@ -67,6 +67,8 @@ namespace CemSys3.Controllers
                 viewModel.Paginacion.Parametros.Add("tipoParcelaID", viewModel.TipoParcelaID?.ToString() ?? "");
                 viewModel.Paginacion.Parametros.Add("seccionID", viewModel.SeccionID?.ToString() ?? "");
                 viewModel.Paginacion.Parametros.Add("parcelaID", viewModel.ParcelaID?.ToString() ?? "");
+                viewModel.Paginacion.Parametros.Add("fechaDesde", fechaDesde?.ToString("yyyy-MM-dd") ?? "");
+                viewModel.Paginacion.Parametros.Add("fechaHasta", fechaHasta?.ToString("yyyy-MM-dd") ?? "");
 
                 viewModel.Concesion = concesion;
                 viewModel.Nombre = nombre;
@@ -74,6 +76,8 @@ namespace CemSys3.Controllers
                 viewModel.TipoParcelaID = tipoParcelaID;
                 viewModel.SeccionID = seccionID;
                 viewModel.ParcelaID = parcelaID;
+                viewModel.FechaDesde = fechaDesde;
+                viewModel.FechaHasta = fechaHasta;
 
                 if (viewModel.Listado.Count() == 0)
                 {

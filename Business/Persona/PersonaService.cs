@@ -131,7 +131,8 @@ namespace CemSys3.Business.Persona
                     Apellido = p.Apellido,
                     Dni = p.Dni,
                     Sexo = p.Sexo,
-                    Visibilidad = p.Visibilidad
+                    Visibilidad = p.Visibilidad,
+                    CategoriaPersonaId = p.CategoriaPersonaId
                 })
                 .ToListAsync();
 

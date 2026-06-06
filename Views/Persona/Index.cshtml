@@ -92,6 +92,7 @@
                                     <th>Apellido</th>
                                     <th>Nombre</th>
                                     <th>Sexo</th>
+                                    <th>Condición</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -103,7 +104,7 @@
                                         <td>@opc.Apellido?.ToUpper()</td>
                                         <td>@opc.Nombre?.ToUpper()</td>
                                         <td>@opc.Sexo</td>
-
+                                        <td>@(opc.CategoriaPersonaId == (int)CategoriaPersonaEnum.Fallecido ? "Fallecido" : "")</td>
                                         <td>
                                             <form asp-action="HistorialPersona" method="get" style="display: inline-block;" target="_blank">
                                                 <input type="hidden" name="id" value="@opc.Id" />

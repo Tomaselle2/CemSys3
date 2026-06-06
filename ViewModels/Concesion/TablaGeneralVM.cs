@@ -14,6 +14,9 @@ namespace CemSys3.ViewModels.Concesion
         public int? SeccionID { get; set; }
         public int? ParcelaID { get; set; }
 
+        public DateOnly? FechaDesde { get; set; }
+        public DateOnly? FechaHasta { get; set; }
+
 
         public IEnumerable<TablaConcesionDTO> Listado = new List<TablaConcesionDTO>();
 

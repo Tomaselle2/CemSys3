@@ -246,13 +246,15 @@ namespace CemSys3.Business.Concesion
     int concesion = 0,
     int? tipoParcelaID = null,
     int? seccionID = null,
-    int? parcelaID = null)
+    int? parcelaID = null,
+    DateOnly? fechaDesde = null,
+    DateOnly? fechaHasta = null)
         {
             PaginadoResponse<TablaConcesionDTO> resultado = new PaginadoResponse<TablaConcesionDTO>();
 
             var query = _context.Concesiones
                 .Where(v => v.Visibilidad.HasValue)
-                .AsQueryable();
+                .AsQueryable().AsNoTracking();
 
             switch (filtroEstado)
             {
@@ -264,6 +266,18 @@ namespace CemSys3.Business.Concesion
 
             if (concesion > 0)
                 query = query.Where(c => c.Concesion == concesion);
+
+            // Aplicar filtros de fecha si existen
+            if (fechaDesde.HasValue)
+            {
+                query = query.Where(x => x.Vencimiento >= fechaDesde);
+            }
+
+            if (fechaHasta.HasValue)
+            {
+                // Añadir un día para incluir todo el día hasta
+                query = query.Where(x => x.Vencimiento < fechaHasta.Value.AddDays(1));
+            }
 
             // Nuevos filtros de parcela (se ignoran si son null)
             if (tipoParcelaID.HasValue)

@@ -18,7 +18,9 @@ namespace CemSys3.Interfaces.Concesion
             int concesion = 0,
             int? tipoParcelaID = null,
             int? seccionID = null, 
-            int? parcelaID = null);
+            int? parcelaID = null,
+            DateOnly? fechaDesde = null, 
+            DateOnly? fechaHasta = null);
 
         public Task<GenerarContratoDTO> SolicitarDatosParaGenerarContrato(int idTramite);
 

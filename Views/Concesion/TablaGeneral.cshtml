@@ -17,78 +17,182 @@
 <div class="accordion" id="accordionConcesiones">
     <div class="accordion-item">
         <h2 class="accordion-header" id="panelsStayOpen-headingConcesiones">
-            <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-target="#panelsStayOpen-collapseConcesiones" aria-expanded="true" aria-controls="panelsStayOpen-collapseConcesiones">
-                Tabla General
+            <button class="accordion-button nueva-seccion acordeon-fijo">
+                <i class="bi bi-table me-2"></i>
+                Tabla General de Concesiones
             </button>
         </h2>
         <div>
             <form asp-action="TablaGeneral" method="get">
 
                 <input type="hidden" id="estadoDelDifunto" value="2" />
-               
 
-                <div class="form-columns-container3">
-                    <div>
-                        <label for="concesion">Concesión</label>
-                        <input class="form-control"
-                               id="concesionInput"
-                               name="concesion"
-                               value="@(Model.Concesion == 0 ? "" : Model.Concesion?.ToString("D5"))" />
-                    </div>
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
 
-                    <div>
-                        <label for="nombreDifunto">Nombre</label>
-                        <input class="form-control" id="nombreInput" name="nombre" type="text" asp-for="Nombre" maxlength="60" minlength="2" autocomplete="off" />
-                    </div>
+                        <h5 class="card-title mb-4">
+                            <i class="bi bi-funnel"></i> Filtros de búsqueda
+                        </h5>
 
-                    <div>
-                        <label for="apellidoDifunto">Apellido</label>
-                        <input class="form-control" id="apellidoInput" name="apellido" type="text" asp-for="Apellido" maxlength="60" minlength="2" autocomplete="off" />
-                    </div>
-                </div>
-                <div>
-                    @{
-                        int filtroSeleccionado = 0;
-                        if (Model.Paginacion.Parametros != null && Model.Paginacion.Parametros.ContainsKey("filtroEstado"))
-                        {
-                            int.TryParse(Model.Paginacion.Parametros["filtroEstado"], out filtroSeleccionado);
+                        <!-- Concesión - Nombre - Apellido -->
+                        <div class="row g-3 mb-3">
+
+                            <div class="col-md-4">
+                                <label for="concesionInput" class="form-label fw-semibold">
+                                    Nro. Concesión
+                                </label>
+                                <input class="form-control"
+                                       id="concesionInput"
+                                       name="concesion"
+                                       value="@(Model.Concesion == 0 ? "" : Model.Concesion?.ToString("D5"))" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="nombreInput" class="form-label fw-semibold">
+                                    Nombre
+                                </label>
+                                <input class="form-control"
+                                       id="nombreInput"
+                                       name="nombre"
+                                       type="text"
+                                       asp-for="Nombre"
+                                       maxlength="60"
+                                       minlength="2"
+                                       autocomplete="off" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="apellidoInput" class="form-label fw-semibold">
+                                    Apellido
+                                </label>
+                                <input class="form-control"
+                                       id="apellidoInput"
+                                       name="apellido"
+                                       type="text"
+                                       asp-for="Apellido"
+                                       maxlength="60"
+                                       minlength="2"
+                                       autocomplete="off" />
+                            </div>
+
+                        </div>
+
+                        @{
+                            int filtroSeleccionado = 0;
+
+                            if (Model.Paginacion.Parametros != null &&
+                                Model.Paginacion.Parametros.ContainsKey("filtroEstado"))
+                            {
+                                int.TryParse(
+                                    Model.Paginacion.Parametros["filtroEstado"],
+                                    out filtroSeleccionado
+                                );
+                            }
                         }
-                    }
-                    <label class="form-label">Estado</label>
-                    <select name="filtroEstado"
-                            class="form-select shadow-sm form-select-sm"
-                            style="width: 160px"
-                            asp-items="EnumHelper.GetSelectListItems<EstadosConcesionEnum>(filtroSeleccionado)"
-                            @* onchange="this.form.submit()" *@>
-                    </select>
+
+                        <!-- Estado -->
+                        <div class="row g-3 mb-4">
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">
+                                    Estado
+                                </label>
+
+                                <select name="filtroEstado"
+                                        class="form-select"
+                                        asp-items="EnumHelper.GetSelectListItems<EstadosConcesionEnum>(filtroSeleccionado)">
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <!-- Ubicación -->
+                        <div class="mb-4">
+
+                            @await Html.PartialAsync(
+                            "IngresoPV/_SelectorUbicacion",
+                            new SelectorUbicacionVM
+                            {
+                                TipoParcelaID = Model.TipoParcelaID,
+                                SeccionID = Model.SeccionID,
+                                ParcelaID = Model.ParcelaID,
+
+                                TipoParcelaName = "TipoParcelaID",
+                                SeccionName = "SeccionID",
+                                ParcelaName = "ParcelaID",
+
+                                UrlSecciones = Url.Action("ObtenerSeccionesPorTipo", "Seccion") ?? "",
+                                UrlParcelas = Url.Action("ObtenerParcelasPorSeccion", "Parcela") ?? "",
+                            })
+
+                        </div>
+
+                        <!-- Fechas -->
+                        <div class="row g-3 mb-4">
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">
+                                    Vencimiento Desde
+                                </label>
+
+                                <input type="date"
+                                       class="form-control"
+                                       asp-for="FechaDesde"
+                                       name="fechaDesde" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">
+                                    Vencimiento Hasta
+                                </label>
+
+                                <input type="date"
+                                       class="form-control"
+                                       asp-for="FechaHasta"
+                                       name="fechaHasta" />
+                            </div>
+
+                        </div>
+
+                        <!-- Hidden -->
+                        <input type="hidden"
+                               id="tipoParcelaID"
+                               name="tipoParcelaID"
+                               asp-for="TipoParcelaID" />
+
+                        <input type="hidden"
+                               id="seccionID"
+                               name="seccionID"
+                               asp-for="SeccionID" />
+
+                        <input type="hidden"
+                               id="parcelaID"
+                               name="parcelaID"
+                               asp-for="ParcelaID" />
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-end gap-2">
+
+                            <a asp-action="TablaGeneral"
+                                   asp-controller="Concesion"
+                                   class="btn btn-outline-secondary">
+
+                                <i class="bi bi-eraser"></i>
+                                Limpiar filtros
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+
+                                <i class="bi bi-search"></i>
+                                Buscar
+                            </button>
+
+                        </div>
+
+                    </div>
                 </div>
 
-
-
-                <div class="form-box">
-
-                    @await Html.PartialAsync("IngresoPV/_SelectorUbicacion",
-                    new SelectorUbicacionVM
-                    {
-                        TipoParcelaID = Model.TipoParcelaID,
-                        SeccionID = Model.SeccionID,
-                        ParcelaID = Model.ParcelaID,
-
-                        TipoParcelaName = "TipoParcelaID",
-                        SeccionName = "SeccionID",
-                        ParcelaName = "ParcelaID",
-                        UrlSecciones = Url.Action("ObtenerSeccionesPorTipo", "Seccion") ?? "",
-                        UrlParcelas = Url.Action("ObtenerParcelasPorSeccion", "Parcela") ?? "",
-                    })
-
-                </div>
-
-                <input type="hidden" id="tipoParcelaID" name="tipoParcelaID" asp-for="TipoParcelaID" />
-                <input type="hidden" id="seccionID" name="seccionID" asp-for="SeccionID" />
-                <input type="hidden" id="parcelaID" name="parcelaID" asp-for="ParcelaID" />
-
-                <input type="submit" class="btn btn-primary" value="Filtrar" />
-                <a asp-action="TablaGeneral" asp-controller="Concesion" class="btn btn-primary" id="btnLimpiar">Limpiar filtros</a>
             </form>
             
         </div>
@@ -97,7 +201,7 @@
             {
                 <div class="card shadow-sm">
                     <div class="card-body p-0 table-responsive">
-                        <table class="table table-hover mb-0 table-bordered">
+                        <table class="table table-hover table-striped align-middle mb-0 table-bordered">
                             <thead class="table-light">
                                 <tr>
                                     <th>Concesión</th>
@@ -129,7 +233,29 @@
                                         parcela = $"Lote {opc.NroParcela.ToString()}";
                                     }
 
-                                    <tr>
+                                    string colorFila = string.Empty;
+
+                                    DateOnly hoy = DateOnly.FromDateTime(DateTime.Today);
+
+                                    if (opc.EstadoTramiteId == (int)EstadosConcesionEnum.Vencido)
+                                    {
+                                        colorFila = "table-danger";
+                                    }
+                                    else if (opc.Vencimiento.HasValue)
+                                    {
+                                        DateOnly vencimiento = opc.Vencimiento.Value;
+
+                                        if (vencimiento.Year == hoy.Year && vencimiento >= hoy)
+                                        {
+                                            colorFila = "table-warning";
+                                        }
+                                    }
+                                    else if (opc.EstadoTramiteId == (int)EstadosConcesionEnum.Caducado)
+                                    {
+                                        colorFila = "table-dark";
+                                    }
+
+                                    <tr class="@colorFila">
                                         <td>@(opc.Concesion != null ? opc.Concesion.Value.ToString("D5") : "---")</td>
                                         <td>
                                             @(opc.Difuntos != null && opc.Difuntos.Any()
