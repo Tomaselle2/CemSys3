@@ -49,7 +49,7 @@ namespace CemSys3.Controllers
         //vista muestra el listado de ingresos
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> ListadoIngresos(DateOnly? fechaDesde, DateOnly? fechaHasta, int filtro = 0, int pagina = 1, int porPagina = 10)
+        public async Task<IActionResult> ListadoIngresos(DateOnly? fechaDesde, DateOnly? fechaHasta, int? tipoParcelaID = null, int? seccionID = null, int? parcelaID = null, int filtro = 0, int pagina = 1, int porPagina = 10)
         {
             ListadoIngresosVM viewModel = new ListadoIngresosVM();
             viewModel.SweetAlert = TempData.GetSweetAlert();
@@ -71,7 +71,7 @@ namespace CemSys3.Controllers
 
             try
             {
-                PaginadoResponse<ListadoIngresosDTO> resultado = await _ingresoService.GetAllPaginadoIngresos(fechaDesde, fechaHasta, pagina, porPagina, filtro);
+                PaginadoResponse<ListadoIngresosDTO> resultado = await _ingresoService.GetAllPaginadoIngresos(fechaDesde, fechaHasta, pagina, porPagina, filtro, tipoParcelaID, seccionID, parcelaID);
                 viewModel.Ingresos = resultado.Items;
                 viewModel.Paginacion = resultado.Paginacion;
 
@@ -81,6 +81,25 @@ namespace CemSys3.Controllers
                 viewModel.Paginacion.Parametros.Add("fechaHasta", fechaHasta?.ToString("yyyy-MM-dd") ?? "");
                 viewModel.Paginacion.Parametros.Add("porPagina", porPagina.ToString());
                 viewModel.Paginacion.Parametros.Add("filtro", filtro.ToString());
+                viewModel.Paginacion.Parametros.Add("tipoParcelaID", viewModel.TipoParcelaID?.ToString() ?? "");
+                viewModel.Paginacion.Parametros.Add("seccionID", viewModel.SeccionID?.ToString() ?? "");
+                viewModel.Paginacion.Parametros.Add("parcelaID", viewModel.ParcelaID?.ToString() ?? "");
+
+                viewModel.FechaDesde = fechaDesde;
+                viewModel.FechaHasta = fechaHasta;
+                viewModel.TipoParcelaID = tipoParcelaID;
+                viewModel.SeccionID = seccionID;
+                viewModel.ParcelaID = parcelaID;
+
+                if (viewModel.Ingresos.Count() == 0)
+                {
+                    viewModel.SweetAlert = new SweetAlertDTO
+                    {
+                        Titulo = "Advertencia",
+                        Mensaje = "No se encontraton resultados",
+                        Tipo = "warning"
+                    };
+                }
             }
             catch (Exception ex)
             {

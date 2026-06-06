@@ -291,11 +291,14 @@ namespace CemSys3.Business.Ingreso
             return ingreso;
         }
 
-        public async Task<PaginadoResponse<ListadoIngresosDTO>> GetAllPaginadoIngresos(DateOnly? fechaDesde, DateOnly? fechaHasta, int pagina = 1, int porPagina = 10, int filtro = 0)
+        public async Task<PaginadoResponse<ListadoIngresosDTO>> GetAllPaginadoIngresos(DateOnly? fechaDesde, DateOnly? fechaHasta, int pagina = 1, int porPagina = 10, int filtro = 0,
+            int? tipoParcelaID = null,
+    int? seccionID = null,
+    int? parcelaID = null)
         {
             PaginadoResponse<ListadoIngresosDTO> resultado = new PaginadoResponse<ListadoIngresosDTO>();
 
-            var query = _context.Introducciones.Include(d=> d.Difunto).Include(t=> t.Tramite).Include(p => p.Parcela).AsQueryable();
+            var query = _context.Introducciones.Include(d=> d.Difunto).Include(t=> t.Tramite).Include(p => p.Parcela).AsQueryable().AsNoTracking();
 
             // Filtro por estado del tramite
             switch (filtro)
@@ -312,6 +315,15 @@ namespace CemSys3.Business.Ingreso
                     break;
             }
 
+            // Nuevos filtros de parcela (se ignoran si son null)
+            if (tipoParcelaID.HasValue)
+                query = query.Where(c => c.Parcela.TipoParcelaId == tipoParcelaID.Value);
+
+            if (seccionID.HasValue)
+                query = query.Where(c => c.Parcela.SeccionId == seccionID.Value);
+
+            if (parcelaID.HasValue)
+                query = query.Where(c => c.ParcelaId == parcelaID.Value);
 
 
             // Aplicar filtros de fecha si existen

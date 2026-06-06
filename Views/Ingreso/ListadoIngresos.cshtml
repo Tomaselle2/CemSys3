@@ -23,12 +23,12 @@
             @* cuerpo del acordion *@
             <div class="accordion-body">
                 <form asp-action="ListadoIngresos" method="get">
-
+                    <input type="hidden" id="estadoDelDifunto" value="2" />
                     @* Mantener contexto *@
                     <input type="hidden" name="pagina" value="1" />
                     <input type="hidden" name="porPagina" value="@Model.Paginacion.RegistrosPorPagina" />
 
-                    <div class="d-flex justify-content-center align-items-end gap-4 p-3 flex-wrap">
+                    <div class="d-flex justify-content-center align-items-end gap-4 flex-wrap">
 
                         <div>
                             <label class="form-label fw-semibold">Desde</label>
@@ -36,7 +36,7 @@
                                    class="form-control shadow-sm"
                                    name="fechaDesde"
                                    style="width: 200px;"
-                                   value="@(Model.Paginacion.Parametros.TryGetValue("fechaDesde", out var fd) ? fd : "")" />
+                                   asp-for="FechaDesde" />
                         </div>
 
                         <div>
@@ -45,7 +45,28 @@
                                    class="form-control shadow-sm"
                                    name="fechaHasta"
                                    style="width: 200px;"
-                                   value="@(Model.Paginacion.Parametros.TryGetValue("fechaHasta", out var fh) ? fh : "")" />
+                                   asp-for="FechaHasta" />
+                        </div>
+
+                        <!-- Ubicación -->
+                        <div>
+
+                            @await Html.PartialAsync(
+                            "IngresoPV/_SelectorUbicacion",
+                            new SelectorUbicacionVM
+                            {
+                                TipoParcelaID = Model.TipoParcelaID,
+                                SeccionID = Model.SeccionID,
+                                ParcelaID = Model.ParcelaID,
+
+                                TipoParcelaName = "TipoParcelaID",
+                                SeccionName = "SeccionID",
+                                ParcelaName = "ParcelaID",
+
+                                UrlSecciones = Url.Action("ObtenerSeccionesPorTipo", "Seccion") ?? "",
+                                UrlParcelas = Url.Action("ObtenerParcelasPorSeccion", "Parcela") ?? "",
+                            })
+
                         </div>
 
                     </div>
@@ -69,8 +90,11 @@
                     
 
                     <div class="text-center mt-3">
-                        <button type="submit" class="btn btn-success me-2" id="btnBuscar">Filtrar</button>
-                        <a asp-action="ListadoIngresos" asp-controller="Ingreso" class="btn btn-primary">Limpiar fechas</a>
+                        <button type="submit" class="btn btn btn-primary me-2" id="btnBuscar"><i class="bi bi-search"></i> Buscar</button>
+                        <a asp-action="ListadoIngresos" asp-controller="Ingreso" class="btn btn-outline-secondary">
+                            <i class="bi bi-eraser"></i>
+                            Limpiar filtros
+                        </a>
                     </div>
                 </form>
             </div>
@@ -177,5 +201,7 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/ubicacion-selector.js"></script>
+
 }
 

@@ -15,6 +15,9 @@ namespace CemSys3.Interfaces.Ingreso
             DateOnly? fechaHasta,
             int pagina = 1,
             int porPagina = 10,
-            int filtro = 0);
+            int filtro = 0,
+            int? tipoParcelaID = null,
+            int? seccionID = null,
+            int? parcelaID = null);
     }
 }
