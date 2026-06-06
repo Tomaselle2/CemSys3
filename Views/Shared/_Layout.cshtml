@@ -64,6 +64,12 @@
                         </a>
                     </li>
 
+                    <li class="nav-item">
+                        <a class="nav-link text-dark icono-menu" asp-controller="CargaDifunto" asp-action="Index">
+                            <i class="bi bi-cloud-arrow-up"></i> <span class="nav-text">Cargar Difunto</span>
+                        </a>
+                    </li>
+
                 }
 
                 @if (Context.Session.GetInt32("IdRol") == (int)RolUsuario.Empleado || Context.Session.GetInt32("IdRol") == (int)RolUsuario.Administrador)

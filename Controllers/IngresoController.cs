@@ -241,12 +241,10 @@ namespace CemSys3.Controllers
                         viewModel.SweetAlert = new SweetAlertDTO
                         {
                             Titulo = "Verificar",
-                            Mensaje = "El difunto que intenta registrar es titular en concesiones. ¿Desea ingresarlo como fallecido?",
+                            Mensaje = "El difunto que intenta registrar es titular en concesiones",
                             Tipo = "warning"
                         };
 
-                        //marcar IngresoTitularFallecido en true
-                        viewModel.IngresoTitularFallecido = true;
                     }
                     else //si es difunto enviar error difunto existente
                     {

@@ -241,12 +241,20 @@ namespace CemSys3.Business.Persona
             
             if(persona.CategoriaPersonaId == (int)CategoriaPersonaEnum.Fallecido)
             {
-                Models.ParcelaDifunto parcelaDifunto = await _context.ParcelaDifuntos.Where(p => p.DifuntoId == persona.Id).FirstOrDefaultAsync() ?? throw new Exception("Error al actualizar la fecha de ingreso");
-                Models.Introduccione introduccion = await _context.Introducciones.Where(p => p.DifuntoId == persona.Id && p.ParcelaId == parcelaDifunto.ParcelaId).FirstOrDefaultAsync() ?? throw new Exception("Error al actualizar la fecha de ingreso");
+                if (dto.FechaIngreso.HasValue)
+                {
+                    Models.ParcelaDifunto parcelaDifunto = await _context.ParcelaDifuntos.Where(p => p.DifuntoId == persona.Id).FirstOrDefaultAsync() ?? throw new Exception("Error al actualizar la fecha de ingreso");
+                    Models.Introduccione introduccion = await _context.Introducciones.Where(p => p.DifuntoId == persona.Id && p.ParcelaId == parcelaDifunto.ParcelaId).FirstOrDefaultAsync();
 
 
-                parcelaDifunto.FechaIngreso = dto.FechaIngreso;
-                introduccion.FechaIngreso = dto.FechaIngreso;
+                    parcelaDifunto.FechaIngreso = dto.FechaIngreso;
+
+                    if(introduccion != null)
+                    {
+                        introduccion.FechaIngreso = dto.FechaIngreso;
+                    }
+                }
+                
             }
             
             persona.Nombre = dto.Nombre?.Trim();
