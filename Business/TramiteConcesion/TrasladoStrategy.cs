@@ -22,6 +22,7 @@ using CemSys3.Interfaces.Tarea;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.Models;
+using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.EntityFrameworkCore;
 
 namespace CemSys3.Business.TramiteConcesion
@@ -285,6 +286,17 @@ namespace CemSys3.Business.TramiteConcesion
 
                     concesion.InformacionAdicional += $"\n● La concesión ({concesion.Concesion?.ToString("D5")}) ha sido cancelada/caducada automáticamente por no tener más difuntos asociados.";
                     infoConcesion = "La concesión debe ser cancelada/caducada por no tener más difuntos asociados.";
+
+                    // 1. Titulares actuales activos
+                    var titularesActuales = await _context.HistorialTitularesConcesiones
+                        .Where(p => p.ConcesionId == concesion.TramiteId && p.FechaFin == null)
+                        .ToListAsync();
+
+                    // 3. Cerrar titulares
+                    foreach (var titularActual in titularesActuales)
+                    {
+                        titularActual.FechaFin = traslado.FechaPendiente;
+                    }
                 }
 
                 
