@@ -708,3 +708,15 @@ CREATE TABLE PermisosRefacciones (
 	CONSTRAINT FK_PERMISOREFACCION_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
     CONSTRAINT FK_PERMISOREFACCION_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id)
 );
+
+CREATE TABLE EventoCalendario
+(
+    Id INT IDENTITY(1,1) NOT NULL,
+    
+    Titulo NVARCHAR(200) NOT NULL,
+
+    Fecha DATETIME2 NOT NULL,
+
+    CONSTRAINT PK_EventoCalendario
+        PRIMARY KEY (Id)
+);

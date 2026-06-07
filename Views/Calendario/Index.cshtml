@@ -1,0 +1,99 @@
+﻿
+<br />
+<div id='calendar'></div>
+<div id="modal-container"></div>
+
+
+<style>
+    /* Evitar que los números de día sean seleccionables/clicables */
+    .fc-daygrid-day-number {
+        pointer-events: none !important;
+        user-select: none !important;
+        cursor: default !important;
+    }
+    
+    /* Pero permitir clics solo en los eventos */
+    .fc-daygrid-day-frame {
+        pointer-events: none !important;
+    }
+    
+    .fc-daygrid-day-events,
+    .fc-daygrid-event {
+        pointer-events: auto !important;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            var calendarEl = document.getElementById('calendar');
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+
+                initialView: 'dayGridMonth',
+                events: '/Calendario/GetEvents',
+                locale: 'es',
+                timeZone: 'local',
+
+                headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+            },
+
+
+            // Deshabilitar clics en los días
+            dateClick: function(info) {
+            // No hacer nada - esto evita que el clic en fechas haga algo
+            info.jsEvent.preventDefault();
+        info.jsEvent.stopPropagation();
+
+            return false;
+            },
+
+        selectable: false,
+
+
+            eventClick: function(info) {
+                info.jsEvent.preventDefault();
+                info.jsEvent.stopPropagation();
+
+                const tipo = info.event.extendedProps.tipo;
+
+
+                if(tipo === "NotaRecordatorio")
+                {
+                    Loader.hide();
+
+                    htmx.ajax(
+                        'GET',
+                        `/Nota/Visualizar?id=${info.event.extendedProps.tramiteId}`,
+                        '#modal-container'
+                    );
+
+                    return;
+                }
+
+                if (info.event.url) {
+                    window.location.href = info.event.url;
+                }
+
+            }
+
+        });
+
+        calendar.render();
+
+
+    });
+    </script>
+
+    
+
+}
+
+
