@@ -1,6 +1,5 @@
 ﻿using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Tramite;
-using CemSys3.ViewModels.Ingreso;
 
 namespace CemSys3.Interfaces.Tramite
 {
@@ -12,6 +11,7 @@ namespace CemSys3.Interfaces.Tramite
         Task<GenericResultDTO> ActualizarInfoAdicional(int tramiteId, string informacionAdicionalTramite);
 
         Task<ListadoTramitesDeConcesionDTO> GetListadoTramitesDeConcesion(int concesionId); //get
+        Task<IEnumerable<TramiteDTO>> GetIniciadosYPendientes();
 
     }
 }

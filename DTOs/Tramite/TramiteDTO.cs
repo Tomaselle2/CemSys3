@@ -13,5 +13,8 @@
         public int UsuarioId { get; set; }
 
         public int EstadoActualId { get; set; }
+
+
+        public int NroConcesion { get; set; }
     }
 }

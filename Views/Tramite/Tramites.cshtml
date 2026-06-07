@@ -1,0 +1,81 @@
+﻿@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.Tramite
+@model TramiteVM
+
+@{
+    ViewData["Title"] = "Trámites";
+}
+
+<div class="page-header-container">
+    <h1 class="title-page">Trámites inicados y pendientes</h1>
+</div>
+
+<!-- Tabla de historial de tramites -->
+<div class="accordion" id="accordionPanelsStayOpenExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                Trámites (@Model.Tramites.Count())
+            </button>
+        </h2>
+        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+            @* cuerpo del acordion *@
+            @if (Model.Tramites.Any())
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Trámite</th>
+                                    <th>Fecha inicio</th>
+                                    <th>Tipo trámite</th>
+                                    <th>Estado</th>
+                                    <th>Nro Concesión</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var opc in Model.Tramites)
+                                {
+                                    string tipoTramiteDisplay = EnumHelper.GetDisplayNameByValue<TipoTramiteEnum>(opc.TipoTramiteId);
+                                    string estadoTramiteDisplay = EnumHelper.GetDisplayNameByValue<EstadosTramiteEnum>(opc.EstadoActualId);
+
+                                    <tr>
+                                        <td>@opc.Id</td>
+                                        <td>@(opc.FechaCreacion.ToString("dd/MM/yyyy HH:mm"))</td>
+                                        <td>@tipoTramiteDisplay</td>
+                                        <td>@estadoTramiteDisplay</td>
+                                        <td>@opc.NroConcesion.ToString("D5")</td>
+                                        <td>
+                                            <form asp-action="IrATramite" asp-controller="Tramite" target="_blank" method="get" style="display: inline-block;" data-skip-loader="true">
+                                                <input type="hidden" name="tramiteId" value="@opc.Id" />
+                                                <button type="submit" class="btn btn-secondary btn-sm" title="Ir al trámite">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    No hay trámites iniciados o pendientes en este momento.
+                </div>
+            }
+            @* Fin cuerpo del acordeon *@
+        </div>
+    </div>
+</div>
+
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />

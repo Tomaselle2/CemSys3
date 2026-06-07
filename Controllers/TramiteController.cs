@@ -5,6 +5,7 @@ using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Interfaces.TramitesConcesion;
+using CemSys3.ViewModels.Tramite;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CemSys3.Controllers
@@ -153,6 +154,33 @@ namespace CemSys3.Controllers
 
             return RedirectToAction("Concesion", "Concesion", new { tramiteId = concesionId });
 
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> Tramites()
+        {
+            TramiteVM viewModel = new TramiteVM();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+
+            try
+            {
+                var tramites = await _tramiteService.GetIniciadosYPendientes();
+                viewModel.Tramites = tramites;
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "No se han podido cargar los trámites. " + ex.Message,
+                    Tipo = "error"
+                };
+              
+                return View(viewModel);
+            }
         }
     }
 }
