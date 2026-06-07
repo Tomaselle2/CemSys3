@@ -16,6 +16,10 @@ using CemSys3.Interfaces.Concesion;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.PDF;
 using CemSys3.ViewModels.Concesion;
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CemSys3.Controllers
@@ -543,6 +547,260 @@ namespace CemSys3.Controllers
 
             return View(viewModel);
         }
+
+
+
+
+        // ─── Exportar Excel ────────────────────────────────────────────────────
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> ExportarExcel(
+            int filtroEstado = 0, string nombre = "", string apellido = "",
+            int concesion = 0, int? tipoParcelaID = null, int? seccionID = null,
+            int? parcelaID = null, DateOnly? fechaDesde = null, DateOnly? fechaHasta = null)
+        {
+            var datos = await _concesionService.GetAllParaExportar(
+                filtroEstado, nombre, apellido, concesion,
+                tipoParcelaID, seccionID, parcelaID, fechaDesde, fechaHasta);
+
+            using var wb = new XLWorkbook();
+            var ws = wb.Worksheets.Add("Concesiones");
+
+            // Encabezados
+            string[] headers = { "Concesión", "Difuntos", "Sección", "Parcela", "Titular/es", "Celular", "Correo", "Vencimiento", "Estado" };
+            for (int i = 0; i < headers.Length; i++)
+            {
+                var cell = ws.Cell(1, i + 1);
+                cell.Value = headers[i];
+                cell.Style.Font.Bold = true;
+                cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#2E75B6");
+                cell.Style.Font.FontColor = XLColor.White;
+                cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            }
+
+            // Datos
+            int fila = 2;
+            foreach (var item in datos)
+            {
+                string parcela = item.TipoParcelaId switch
+                {
+                    (int)TipoParcelaEnum.Nicho => $"Nicho {item.NroParcela} Fila {item.NroFila}",
+                    (int)TipoParcelaEnum.Fosa => $"Fosa {item.NroParcela}",
+                    (int)TipoParcelaEnum.Panteon => $"Lote {item.NroParcela}",
+                    _ => item.NroParcela.ToString() ?? ""
+                };
+
+                string difuntos = item.Difuntos?.Any() == true
+                    ? string.Join(" / ", item.Difuntos.Select(d => $"{d.Apellido.ToUpper()}, {d.Nombre.ToUpper()}"))
+                    : "---";
+                string titulares = item.Titulares?.Any() == true
+                    ? string.Join(" / ", item.Titulares.Select(t => $"{t.Apellido.ToUpper()}, {t.Nombre.ToUpper()}"))
+                    : "---";
+                string estado = EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(item.EstadoTramiteId);
+
+                ws.Cell(fila, 1).Value = item.Concesion?.ToString("D5") ?? "---";
+                ws.Cell(fila, 2).Value = difuntos;
+                ws.Cell(fila, 3).Value = item.NombreSeccion?.ToUpper() ?? "";
+                ws.Cell(fila, 4).Value = parcela;
+                ws.Cell(fila, 5).Value = titulares;
+                // ── nuevas ──
+                ws.Cell(fila, 6).Value = item.Titulares?.Any() == true
+                    ? string.Join(" / ", item.Titulares.Select(t => t.celular).Where(c => !string.IsNullOrWhiteSpace(c)))
+                    : "";
+                ws.Cell(fila, 7).Value = item.Titulares?.Any() == true
+                    ? string.Join(" / ", item.Titulares.Select(t => t.correo).Where(c => !string.IsNullOrWhiteSpace(c)))
+                    : "";
+                // ────────────
+                ws.Cell(fila, 8).Value = item.Vencimiento?.ToString("dd/MM/yyyy") ?? "";
+                ws.Cell(fila, 9).Value = estado;
+
+                // Color de fila según estado
+                DateOnly hoy = DateOnly.FromDateTime(DateTime.Today);
+                XLColor? color = null;
+                if (item.EstadoTramiteId == (int)EstadosConcesionEnum.Vencido)
+                    color = XLColor.FromHtml("#F4CCCC");
+                else if (item.Vencimiento.HasValue && item.Vencimiento.Value.Year == hoy.Year && item.Vencimiento.Value >= hoy)
+                    color = XLColor.FromHtml("#FFF2CC");
+
+                if (color != null)
+                    ws.Row(fila).Style.Fill.BackgroundColor = color;
+
+                fila++;
+            }
+
+            ws.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            wb.SaveAs(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            string fileName = $"Concesiones_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+            return File(stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                fileName);
+        }
+
+        // ─── Exportar Word ─────────────────────────────────────────────────────
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> ExportarWord(
+            int filtroEstado = 0, string nombre = "", string apellido = "",
+            int concesion = 0, int? tipoParcelaID = null, int? seccionID = null,
+            int? parcelaID = null, DateOnly? fechaDesde = null, DateOnly? fechaHasta = null)
+        {
+            var datos = await _concesionService.GetAllParaExportar(
+                filtroEstado, nombre, apellido, concesion,
+                tipoParcelaID, seccionID, parcelaID, fechaDesde, fechaHasta);
+
+            using var stream = new MemoryStream();
+            using (var doc = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document, true))
+            {
+                var mainPart = doc.AddMainDocumentPart();
+                mainPart.Document = new Document(new Body());
+                var body = mainPart.Document.Body!;
+
+                // ── Estilos básicos ──────────────────────────────────────────
+                var stylesPart = mainPart.AddNewPart<StyleDefinitionsPart>();
+                stylesPart.Styles = new Styles();
+
+                // Título
+                body.AppendChild(new Paragraph(
+                    new ParagraphProperties(
+                        new Justification { Val = JustificationValues.Center },
+                        new SpacingBetweenLines { After = "200" }),
+                    new Run(
+                        new RunProperties(
+                            new Bold(),
+                            new FontSize { Val = "36" },
+                            new Color { Val = "2E75B6" }),
+                        new Text("Tabla de Concesiones"))));
+
+                body.AppendChild(new Paragraph(
+                    new Run(new Text($"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}"))));
+                body.AppendChild(new Paragraph(new Run(new Text(""))));
+
+                // ── Tabla ────────────────────────────────────────────────────
+                string[] headers2 = { "Concesión", "Difuntos", "Sección", "Parcela", "Titular/es", "Vencimiento", "Estado" };
+                // Anchos en DXA (total ~9360 para A4 con márgenes de 1")
+                int[] widths = { 900, 1800, 1200, 1400, 1800, 1100, 1160 };
+
+                var table = new Table();
+
+                // Propiedades de tabla
+                table.AppendChild(new TableProperties(
+                    new TableWidth { Width = "9360", Type = TableWidthUnitValues.Dxa },
+                    new TableBorders(
+                        new TopBorder { Val = BorderValues.Single, Size = 4, Color = "CCCCCC" },
+                        new BottomBorder { Val = BorderValues.Single, Size = 4, Color = "CCCCCC" },
+                        new LeftBorder { Val = BorderValues.Single, Size = 4, Color = "CCCCCC" },
+                        new RightBorder { Val = BorderValues.Single, Size = 4, Color = "CCCCCC" },
+                        new InsideHorizontalBorder { Val = BorderValues.Single, Size = 4, Color = "CCCCCC" },
+                        new InsideVerticalBorder { Val = BorderValues.Single, Size = 4, Color = "CCCCCC" })));
+
+                // Fila de encabezado
+                var headerRow = new TableRow();
+                for (int i = 0; i < headers2.Length; i++)
+                {
+                    headerRow.AppendChild(CreateWordCell(
+                        headers2[i], widths[i], bold: true,
+                        bgColor: "2E75B6", fontColor: "FFFFFF"));
+                }
+                table.AppendChild(headerRow);
+
+                // Filas de datos
+                bool alternar = false;
+                DateOnly hoy2 = DateOnly.FromDateTime(DateTime.Today);
+                foreach (var item in datos)
+                {
+                    string parcela = item.TipoParcelaId switch
+                    {
+                        (int)TipoParcelaEnum.Nicho => $"Nicho {item.NroParcela} Fila {item.NroFila}",
+                        (int)TipoParcelaEnum.Fosa => $"Fosa {item.NroParcela}",
+                        (int)TipoParcelaEnum.Panteon => $"Lote {item.NroParcela}",
+                        _ => item.NroParcela.ToString() ?? ""
+                    };
+
+                    string difuntos = item.Difuntos?.Any() == true
+                        ? string.Join(", ", item.Difuntos.Select(d => $"{d.Apellido.ToUpper()}, {d.Nombre.ToUpper()}"))
+                        : "---";
+                    string titulares = item.Titulares?.Any() == true
+                        ? string.Join(", ", item.Titulares.Select(t => $"{t.Apellido.ToUpper()}, {t.Nombre.ToUpper()}"))
+                        : "---";
+                    string estado = EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(item.EstadoTramiteId);
+
+                    string bg = "FFFFFF";
+                    if (item.EstadoTramiteId == (int)EstadosConcesionEnum.Vencido)
+                        bg = "F4CCCC";
+                    else if (item.Vencimiento.HasValue && item.Vencimiento.Value.Year == hoy2.Year && item.Vencimiento.Value >= hoy2)
+                        bg = "FFF2CC";
+                    else if (alternar)
+                        bg = "F5F5F5";
+
+                    var row = new TableRow();
+                    string[] valores = {
+                item.Concesion?.ToString("D5") ?? "---",
+                difuntos,
+                item.NombreSeccion?.ToUpper() ?? "",
+                parcela,
+                titulares,
+                item.Vencimiento?.ToString("dd/MM/yyyy") ?? "",
+                estado
+            };
+
+                    for (int i = 0; i < valores.Length; i++)
+                        row.AppendChild(CreateWordCell(valores[i], widths[i], bgColor: bg));
+
+                    table.AppendChild(row);
+                    alternar = !alternar;
+                }
+
+                body.AppendChild(table);
+
+                // Pie con total
+                body.AppendChild(new Paragraph(new Run(new Text(""))));
+                body.AppendChild(new Paragraph(
+                    new Run(new Text($"Total de registros: {datos.Count}"))));
+
+                mainPart.Document.Save();
+            }
+
+            string fileNameWord = $"Concesiones_{DateTime.Now:yyyyMMdd_HHmm}.docx";
+            return File(stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                fileNameWord);
+        }
+
+        // ─── Helper para celdas Word ───────────────────────────────────────────
+        private static TableCell CreateWordCell(
+            string text, int widthDxa,
+            bool bold = false, string bgColor = "FFFFFF", string fontColor = "000000")
+        {
+            var runProps = new RunProperties(
+                new Color { Val = fontColor },
+                new FontSize { Val = "18" });  // 9pt
+            if (bold) runProps.AppendChild(new Bold());
+
+            var cell = new TableCell(
+                new TableCellProperties(
+                    new TableCellWidth { Width = widthDxa.ToString(), Type = TableWidthUnitValues.Dxa },
+                    new Shading { Val = ShadingPatternValues.Clear, Fill = bgColor },
+                    new TableCellMargin(
+                        new LeftMargin { Width = "100", Type = TableWidthUnitValues.Dxa },
+                        new RightMargin { Width = "100", Type = TableWidthUnitValues.Dxa })),
+                new Paragraph(
+                    new ParagraphProperties(
+                        new SpacingBetweenLines { Before = "60", After = "60" }),
+                    new Run(runProps, new Text(text))));
+
+            return cell;
+        }
+
+
+
+
+
+
+
 
         private async Task<byte[]> GenerarPdfContrato(GenerarContratoDTO contratoGenerado, string nombreVistaContrato)
         {

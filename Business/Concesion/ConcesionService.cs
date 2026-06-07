@@ -401,9 +401,6 @@ namespace CemSys3.Business.Concesion
             return resultado;
         }
 
-        private static DateTime TruncarASegundos(DateTime dt) =>
-    new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
-
         public async Task<GenerarContratoDTO> SolicitarDatosParaGenerarContrato(int idTramite)
         {
             GenerarContratoDTO dto = new GenerarContratoDTO();
@@ -830,6 +827,120 @@ namespace CemSys3.Business.Concesion
             await _notasService.GenerarNotaSinTransaccion(tramiteNotaId, nota);
         }
 
-  
+
+
+        public async Task<List<TablaConcesionDTO>> GetAllParaExportar(
+    int filtroEstado = 0,
+    string nombre = "",
+    string apellido = "",
+    int concesion = 0,
+    int? tipoParcelaID = null,
+    int? seccionID = null,
+    int? parcelaID = null,
+    DateOnly? fechaDesde = null,
+    DateOnly? fechaHasta = null)
+        {
+            var query = _context.Concesiones
+                .Where(v => v.Visibilidad.HasValue)
+                .AsQueryable().AsNoTracking();
+
+            // ---- mismos filtros que GellAllPaginado ----
+            switch (filtroEstado)
+            {
+                case 5: query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.SinContrato); break;
+                case 6: query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.Vigente); break;
+                case 7: query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.Vencido); break;
+                case 8: query = query.Where(e => e.Tramite.EstadoActualId == (int)EstadosConcesionEnum.Caducado); break;
+            }
+
+            if (concesion > 0)
+                query = query.Where(c => c.Concesion == concesion);
+
+            if (fechaDesde.HasValue)
+                query = query.Where(x => x.Vencimiento >= fechaDesde);
+
+            if (fechaHasta.HasValue)
+                query = query.Where(x => x.Vencimiento < fechaHasta.Value.AddDays(1));
+
+            if (tipoParcelaID.HasValue)
+                query = query.Where(c => c.Parcela.TipoParcelaId == tipoParcelaID.Value);
+
+            if (seccionID.HasValue)
+                query = query.Where(c => c.Parcela.SeccionId == seccionID.Value);
+
+            if (parcelaID.HasValue)
+                query = query.Where(c => c.ParcelaId == parcelaID.Value);
+
+            if (!string.IsNullOrWhiteSpace(nombre) || !string.IsNullOrWhiteSpace(apellido))
+            {
+                query = query.Where(c =>
+                    c.HistorialTitularesConcesiones.Any(h =>
+                        h.FechaFin == null &&
+                        (string.IsNullOrWhiteSpace(nombre) || h.Persona.Nombre.Contains(nombre)) &&
+                        (string.IsNullOrWhiteSpace(apellido) || h.Persona.Apellido.Contains(apellido)))
+                    ||
+                    (c.FechaFin == null &&
+                     c.Parcela.ParcelaDifuntos.Any(pd =>
+                        pd.FechaRetiro == null &&
+                        (string.IsNullOrWhiteSpace(nombre) || pd.Difunto.Nombre.Contains(nombre)) &&
+                        (string.IsNullOrWhiteSpace(apellido) || pd.Difunto.Apellido.Contains(apellido))))
+                );
+            }
+            // ---- fin filtros ----
+
+            var datos = await query
+                .OrderByDescending(c => c.TramiteId)
+                .Select(c => new
+                {
+                    c.TramiteId,
+                    c.Concesion,
+                    c.Visibilidad,
+                    c.ParcelaId,
+                    c.Vencimiento,
+                    c.FechaFin,
+                    c.Tramite.EstadoActualId,
+                    TipoParcelaId = c.Parcela.TipoParcelaId,
+                    NombreSeccion = c.Parcela.Seccion.Nombre,
+                    c.Parcela.NroParcela,
+                    c.Parcela.NroFila
+                })
+                .ToListAsync();
+
+            var tramiteIds = datos.Select(c => c.TramiteId).ToList();
+            var parcelaIds = datos.Select(c => c.ParcelaId).ToList();
+
+            var titulares = await _context.HistorialTitularesConcesiones
+                .Where(h => tramiteIds.Contains(h.ConcesionId ?? 0) && h.FechaFin == null)
+                .Select(h => new { h.ConcesionId, Nombre = h.Persona.Nombre ?? "", Apellido = h.Persona.Apellido ?? "", h.Persona.Celular, h.Persona.Correo })
+                .ToListAsync();
+
+            var difuntos = await _context.ParcelaDifuntos
+                .Where(pd => parcelaIds.Contains(pd.ParcelaId) && pd.FechaRetiro == null)
+                .Select(pd => new { pd.ParcelaId, Nombre = pd.Difunto.Nombre ?? "", Apellido = pd.Difunto.Apellido ?? "" })
+                .ToListAsync();
+
+            return datos.Select(c => new TablaConcesionDTO
+            {
+                TramiteId = c.TramiteId,
+                Concesion = c.Concesion,
+                Visibilidad = c.Visibilidad,
+                TipoParcelaId = c.TipoParcelaId,
+                Vencimiento = c.Vencimiento,
+                EstadoTramiteId = c.EstadoActualId,
+                NombreSeccion = c.NombreSeccion,
+                NroParcela = c.NroParcela,
+                NroFila = c.NroFila,
+                Titulares = titulares
+                    .Where(t => t.ConcesionId == c.TramiteId)
+                    .Select(t => new PersonaTablaGeneral { Nombre = t.Nombre, Apellido = t.Apellido, celular = t.Celular ?? "", correo = t.Correo ?? "" })
+                    .ToList(),
+                Difuntos = c.FechaFin == null
+                    ? difuntos
+                        .Where(d => d.ParcelaId == c.ParcelaId)
+                        .Select(d => new PersonaTablaGeneral { Nombre = d.Nombre, Apellido = d.Apellido })
+                        .ToList()
+                    : new()
+            }).ToList();
+        }
     }
 }

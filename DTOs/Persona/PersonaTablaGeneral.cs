@@ -13,5 +13,9 @@
         public bool Visibilidad { get; set; }
 
         public int CategoriaPersonaId { get; set; }
+
+        public string celular { get; set; } = string.Empty;
+        public string correo { get; set; } = string.Empty;
+
     }
 }

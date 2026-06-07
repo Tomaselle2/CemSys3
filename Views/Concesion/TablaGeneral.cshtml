@@ -19,7 +19,7 @@
             </button>
         </h2>
         <div>
-            <form asp-action="TablaGeneral" method="get">
+            <form asp-action="TablaGeneral" method="get" id="formBusqueda">
 
                 <input type="hidden" id="estadoDelDifunto" value="2" />
 
@@ -164,6 +164,12 @@
 
                         <!-- Botones -->
                         <div class="d-flex justify-content-end gap-2">
+                            <button type="submit"
+                                    class="btn btn-outline-primary">
+
+                                <i class="bi bi-search"></i>
+                                Buscar
+                            </button>
 
                             <a asp-action="TablaGeneral"
                                    asp-controller="Concesion"
@@ -173,11 +179,14 @@
                                 Limpiar filtros
                             </a>
 
-                            <button type="submit"
-                                    class="btn btn-primary">
+                         
 
-                                <i class="bi bi-search"></i>
-                                Buscar
+                            <button type="button" class="btn btn-success" id="btnExportarExcel">
+                                <i class="bi bi-file-earmark-excel"></i> Excel
+                            </button>
+
+                            <button type="button" class="btn btn-primary text-white" id="btnExportarWord">
+                                <i class="bi bi-file-earmark-word"></i> Word
                             </button>
 
                         </div>
@@ -311,4 +320,27 @@
 
     <script src="~/js/ubicacion-selector.js"></script>
 
+    <script>
+        function buildExportUrl(action) {
+            const form = document.getElementById('formBusqueda');
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+
+            for (const [key, value] of formData.entries()) {
+                if (value !== '') {
+                    params.set(key, value);
+                }
+            }
+
+            return `/Concesion/${action}?${params.toString()}`;
+        }
+
+        document.getElementById('btnExportarExcel').addEventListener('click', function () {
+            window.location.href = buildExportUrl('ExportarExcel');
+        });
+
+        document.getElementById('btnExportarWord').addEventListener('click', function () {
+            window.location.href = buildExportUrl('ExportarWord');
+        });
+    </script>
 }

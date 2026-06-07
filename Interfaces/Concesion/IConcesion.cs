@@ -33,5 +33,16 @@ namespace CemSys3.Interfaces.Concesion
         public Task<ModificarDatosConcesionDTO> ModificarDatosConecesion(int tramiteId);
         public Task ModificarDatosConecesion(ModificarDatosConcesionDTO dto);
 
+        Task<List<TablaConcesionDTO>> GetAllParaExportar(
+           int filtroEstado = 0,
+           string nombre = "",
+           string apellido = "",
+           int concesion = 0,
+           int? tipoParcelaID = null,
+           int? seccionID = null,
+           int? parcelaID = null,
+           DateOnly? fechaDesde = null,
+           DateOnly? fechaHasta = null);
+
     }
 }
