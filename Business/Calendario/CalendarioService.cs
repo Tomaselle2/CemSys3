@@ -15,6 +15,49 @@ namespace CemSys3.Business.Calendario
             _context = context;
         }
 
+        public async Task Add(CalendarDTO dto)
+        {
+            Models.EventoCalendario evento = new EventoCalendario
+            {
+                Fecha = dto.start,
+                Titulo = dto.title
+            };
+
+            await _context.AddAsync(evento);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task Delete(int id)
+        {
+            EventoCalendario? evento = await _context.EventoCalendarios.FindAsync(id);
+
+            if (evento == null)
+            {
+                throw new Exception("Evento no encontrado.");
+            }
+
+            _context.EventoCalendarios.Remove(evento);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<CalendarDTO> Get(int id)
+        {
+            EventoCalendario? evento = await _context.EventoCalendarios.FindAsync(id);
+
+            if (evento == null)
+            {
+                throw new Exception("Evento no encontrado.");
+            }
+
+            return new CalendarDTO
+            {
+                id = evento.Id,
+                start = evento.Fecha,
+                title = evento.Titulo,
+                tipo = "Manual"
+            };
+        }
+
         public async Task<IEnumerable<CalendarDTO>> GetEventsAsync()
         {
             var eventos = new List<CalendarDTO>();
@@ -76,13 +119,42 @@ namespace CemSys3.Business.Calendario
                 })
                 .ToListAsync();
 
+            var eventosManuales = await _context.EventoCalendarios
+                .AsNoTracking()
+                .Select(e => new CalendarDTO
+                {
+                    id = e.Id,
+                    start = e.Fecha,
+                    title = e.Titulo,
+                    url = null,
+                    tipo = "Manual"
+                })
+                .ToListAsync();
+
             eventos.AddRange(permisosRefacciones);
             eventos.AddRange(cremaciones);
             eventos.AddRange(traslados);
             eventos.AddRange(reducciones);
             eventos.AddRange(recordatorios);
+            eventos.AddRange(eventosManuales);
 
             return eventos;
+        }
+
+        public async Task Update(CalendarDTO dto)
+        {
+
+            EventoCalendario? evento = await _context.EventoCalendarios.FindAsync(dto.id);
+
+            if(evento == null)
+            {
+                throw new Exception("Evento no encontrado.");
+            }
+
+            evento.Titulo = dto.title;
+            evento.Fecha = dto.start;
+
+            await _context.SaveChangesAsync();
         }
     }
 }

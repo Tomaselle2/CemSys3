@@ -1,0 +1,90 @@
+﻿@using CemSys3.DTOs.Calendario
+@model CalendarDTO
+
+<div class="modal fade"
+     id="eventoModal"
+     tabindex="-1">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    @(Model.id == 0
+                        ? "Nuevo Evento"
+                        : "Editar Evento")
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <input asp-for="id" hidden />
+
+                <div class="mb-3">
+
+                    <label>Título</label>
+
+                    <input asp-for="title"
+                           class="form-control" />
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label>Fecha</label>
+
+                    <input asp-for="start"
+                           type="datetime-local"
+                           class="form-control"
+                           value="@(Model.start == DateTime.MinValue
+                                                           ? ""
+                                                           : Model.start.ToString("yyyy-MM-ddTHH:mm"))" />
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                @if (Model.id == 0)
+                {
+                    <button class="btn btn-success"
+                            onclick="guardarEvento()">
+                        Guardar
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-primary"
+                            onclick="modificarEvento()">
+                        Modificar
+                    </button>
+
+                    <button class="btn btn-danger"
+                            onclick="eliminarEvento(@Model.id)">
+                        Eliminar
+                    </button>
+                }
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    new bootstrap.Modal(
+        document.getElementById('eventoModal')
+    ).show();
+
+</script>

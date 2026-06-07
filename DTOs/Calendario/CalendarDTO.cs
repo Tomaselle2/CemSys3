@@ -2,6 +2,7 @@
 {
     public class CalendarDTO
     {
+        public int id { get; set; }
         public DateTime start { get; set; }
         public string title { get; set; } = string.Empty;
 

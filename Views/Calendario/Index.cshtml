@@ -1,5 +1,10 @@
-﻿
-<br />
+﻿<div class="d-flex justify-content-end mb-3 my-1">
+    <button class="btn btn-primary"
+            onclick="abrirNuevoEvento()">
+        <i class="bi bi-calendar-plus"></i>
+        Nuevo Evento
+    </button>
+</div>
 <div id='calendar'></div>
 <div id="modal-container"></div>
 
@@ -28,18 +33,19 @@
 
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.js'></script>
     <script>
+        let calendar;
         document.addEventListener('DOMContentLoaded', function () {
 
             var calendarEl = document.getElementById('calendar');
 
-            var calendar = new FullCalendar.Calendar(calendarEl, {
+             calendar = new FullCalendar.Calendar(calendarEl, {
 
                 initialView: 'dayGridMonth',
                 events: '/Calendario/GetEvents',
                 locale: 'es',
                 timeZone: 'local',
 
-                headerToolbar: {
+                headerToolbar: { 
                 left: 'prev,next today',
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
@@ -48,11 +54,11 @@
 
             // Deshabilitar clics en los días
             dateClick: function(info) {
-            // No hacer nada - esto evita que el clic en fechas haga algo
-            info.jsEvent.preventDefault();
-        info.jsEvent.stopPropagation();
-
-            return false;
+                htmx.ajax(
+                    'GET',
+                    `/Calendario/NuevoEvento?fecha=${info.dateStr}`,
+                    '#modal-container'
+                );
             },
 
         selectable: false,
@@ -78,6 +84,17 @@
                     return;
                 }
 
+                if(tipo === "Manual")
+                {
+                    htmx.ajax(
+                        'GET',
+                        `/Calendario/ModalEvento?id=${info.event.id}`,
+                        '#modal-container'
+                    );
+
+                    return;
+                }
+
                 if (info.event.url) {
                     window.location.href = info.event.url;
                 }
@@ -90,6 +107,81 @@
 
 
     });
+
+
+    function abrirNuevoEvento()
+    {
+        console.log("click");
+        htmx.ajax(
+            'GET',
+            '/Calendario/ModalEvento',
+            '#modal-container'
+        );
+    }
+
+
+    function guardarEvento()
+    {
+        $.ajax({
+            url: '/Calendario/CrearEvento',
+            type: 'POST',
+            data: {
+                title: $('#title').val(),
+                start: $('#start').val()
+            },
+            success: function() {
+
+                bootstrap.Modal
+                    .getInstance(
+                        document.getElementById('eventoModal')
+                    )
+                    .hide();
+
+                calendar.refetchEvents();
+            }
+        });
+    }
+
+    function modificarEvento()
+    {
+        $.ajax({
+            url: '/Calendario/ModificarEvento',
+            type: 'POST',
+            data: {
+                id: $('#id').val(),
+                title: $('#title').val(),
+                start: $('#start').val()
+            },
+            success: function() {
+
+                bootstrap.Modal
+                    .getInstance(
+                        document.getElementById('eventoModal')
+                    )
+                    .hide();
+
+                calendar.refetchEvents();
+            }
+        });
+    }
+
+    function eliminarEvento(id)
+    {
+        $.post('/Calendario/EliminarEvento',
+        {
+            id: id
+        },
+        function(){
+
+            bootstrap.Modal
+                .getInstance(
+                    document.getElementById('eventoModal')
+                )
+                .hide();
+
+            calendar.refetchEvents();
+        });
+    }
     </script>
 
     

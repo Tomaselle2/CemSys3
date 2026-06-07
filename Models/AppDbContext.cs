@@ -45,6 +45,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<EstadosTramite> EstadosTramites { get; set; }
 
+    public virtual DbSet<EventoCalendario> EventoCalendarios { get; set; }
+
     public virtual DbSet<FirmantesTramite> FirmantesTramites { get; set; }
 
     public virtual DbSet<HistorialEstadoTramite> HistorialEstadoTramites { get; set; }
@@ -524,6 +526,13 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.TipoTramiteId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("EstadosTramites_tipoTramiteId_fk");
+        });
+
+        modelBuilder.Entity<EventoCalendario>(entity =>
+        {
+            entity.ToTable("EventoCalendario");
+
+            entity.Property(e => e.Titulo).HasMaxLength(200);
         });
 
         modelBuilder.Entity<FirmantesTramite>(entity =>
