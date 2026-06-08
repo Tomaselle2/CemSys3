@@ -48,6 +48,9 @@ namespace CemSys3.Enumerables
 
         [Display(Name = "Permiso de refacción")]
         PermisoRefaccion = 10,
+
+        [Display(Name = "Word concesiones")]
+        WordConcesiones = 11,
     }
 
 

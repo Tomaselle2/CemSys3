@@ -16,6 +16,7 @@
 
         public string celular { get; set; } = string.Empty;
         public string correo { get; set; } = string.Empty;
+        public string sexo { get; set; } = string.Empty;
 
     }
 }

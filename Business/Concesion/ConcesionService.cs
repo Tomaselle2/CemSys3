@@ -911,7 +911,7 @@ namespace CemSys3.Business.Concesion
 
             var titulares = await _context.HistorialTitularesConcesiones
                 .Where(h => tramiteIds.Contains(h.ConcesionId ?? 0) && h.FechaFin == null)
-                .Select(h => new { h.ConcesionId, Nombre = h.Persona.Nombre ?? "", Apellido = h.Persona.Apellido ?? "", h.Persona.Celular, h.Persona.Correo })
+                .Select(h => new { h.ConcesionId, Nombre = h.Persona.Nombre ?? "", Apellido = h.Persona.Apellido ?? "", h.Persona.Celular, h.Persona.Correo, h.Persona.Sexo })
                 .ToListAsync();
 
             var difuntos = await _context.ParcelaDifuntos
@@ -932,7 +932,7 @@ namespace CemSys3.Business.Concesion
                 NroFila = c.NroFila,
                 Titulares = titulares
                     .Where(t => t.ConcesionId == c.TramiteId)
-                    .Select(t => new PersonaTablaGeneral { Nombre = t.Nombre, Apellido = t.Apellido, celular = t.Celular ?? "", correo = t.Correo ?? "" })
+                    .Select(t => new PersonaTablaGeneral { Nombre = t.Nombre, Apellido = t.Apellido, celular = t.Celular ?? "", correo = t.Correo ?? "", sexo = t.Sexo ?? "" })
                     .ToList(),
                 Difuntos = c.FechaFin == null
                     ? difuntos

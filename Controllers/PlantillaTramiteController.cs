@@ -384,5 +384,76 @@ namespace CemSys3.Controllers
 
             return View(viewModel.vista, viewModel);
         }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> DeudaConcesion(int plantillaId)
+        {
+            PlantillaTramiteVM viewModel = new PlantillaTramiteVM();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+
+            try
+            {
+                viewModel.vista = "DeudaConcesion";
+
+                viewModel.Requisitos = await _requisitosService.GetByTipoTramiteId((int)TipoTramiteEnum.WordConcesiones);
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Error al cargar la plantilla: {ex.Message}",
+                    Tipo = "error"
+                };
+            }
+
+            return View(viewModel.vista, viewModel);
+        }
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> GuardarWord(PlantillaTramiteVM viewModel)
+        {
+            if (string.IsNullOrEmpty(viewModel.Requisitos.Descripcion))
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "La descripción no puede estar vacía.",
+                    Tipo = "error"
+                };
+
+                return View(viewModel.vista, viewModel);
+            }
+
+            try
+            {
+                await _requisitosService.Update(
+                    (int)TipoTramiteEnum.WordConcesiones,
+                    viewModel.Requisitos.Descripcion
+                );
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "Guardado correctamente.",
+                    Tipo = "success"
+                });
+
+                return RedirectToAction(viewModel.vista, 0);
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Error al guardar: {ex.Message}",
+                    Tipo = "error"
+                };
+
+                return View(viewModel.vista, viewModel);
+            }
+        }
     }
 }

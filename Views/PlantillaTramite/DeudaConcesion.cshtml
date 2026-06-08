@@ -1,0 +1,62 @@
+﻿@using CemSys3.ViewModels.PlantillaTramite
+@model PlantillaTramiteVM
+
+@{
+    ViewData["Title"] = "Concesión Vencida";
+}
+
+<div class="page-header-container">
+    <a asp-action="IndexPlantillas" asp-controller="PlantillaTramite" class="btn btn-secondary m-3" title="Configuración"><i class="bi bi-arrow-left"></i></a>
+    <h1 class="title-page">Modelo Word Concesiones Vencidas</h1>
+</div>
+
+<div>
+    <strong>Variables disponibles:</strong>
+    <ul>
+        <li>{Fecha}</li>
+        <li>{articuloTitularActual}</li>
+        <li>{TitularesActuales}</li>
+        <li>{NroConcesion}</li>
+        <li>{Parcela}</li>
+        <li>{vencimientoConcesion}</li>
+    </ul>
+</div>
+
+<form asp-action="GuardarWord" asp-controller="PlantillaTramite" method="post">
+    <input type="hidden" asp-for="vista" />
+    <input type="hidden" asp-for="Dto.TipoTramiteId" />
+
+    <div class="cardConcesion my-4">
+        <div class="cardConcesion-content">
+            <h3>Concesión Vencida</h3>
+            <textarea asp-for="Requisitos.Descripcion" rows="3" style="overflow:hidden;"
+                          class="form-control auto-resize mb-2">
+            </textarea>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary my-3">Guardar</button>
+    </form>
+
+
+    <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+
+
+    @section Scripts {
+
+        <script>
+            function autoResize(textarea) {
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 'px';
+            }
+
+
+            window.addEventListener('DOMContentLoaded', () => {
+                    document.querySelectorAll('.auto-resize').forEach(t => autoResize(t));
+            });
+        </script>
+
+    }
+
+
+

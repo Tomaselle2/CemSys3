@@ -67,7 +67,8 @@ INSERT INTO TipoTramite (tipo) VALUES
 ('Nota'), --7
 ('Aceptación de titularidad'), --8
 ('Permiso de ingreso'), --9
-('Permiso de refacción'); --10
+('Permiso de refacción'), --10
+('Deuda de concesiones vencidas'); --11
 
 -- INSERT para TipoParcela
 INSERT INTO TipoParcela (tipo) VALUES 
@@ -717,8 +718,8 @@ VALUES
 (5, 'Para el traslado de {Difuntos} debe estar *al día con los impuestos* y *deuda*.   Debe abonar la apertura de la parcela en la municipalidad, que son *${precioApertura}* cada una.  Debe abonar el cierre de nicho o fosa, depende de donde sea trasladado. Cierre de nicho *${precioCierreNicho}* y cierre de fosa *${precioCierreFosa}*  Tiene que firmar el titular del nicho ({TitularesActuales}) y/o los familiares más cercanos al difunto.  Hay que comprobar el vínculo del fallecido con los firmantes, puede ser con libreta de familia, declaratoria de herederos o actas de nacimiento, esto depende de la relación.   Las autorizaciones las entrega esta oficina.'), --traslado
 (6, '- Se necesita que esté presente el titular ({TitularesActuales}) y el nuevo titular.  - El trámite es sin costo.   - De lunes a viernes de 7:00hs a 12:30hs.'), --cambio de titular
 (9, '- Se necesita que esté presente el titular ({TitularesActuales})   - El trámite es sin costo.     - De lunes a viernes de 7:00hs a 12:30hs.'), --permiso de ingreso
-(10, '- Se necesita que esté presente el titular ({TitularesActuales})    - El permiso de refacción tiene un costo de ${precioPermisoRefaccion}      - El permiso para colocar placa tiene un costo de ${precioPermisoColocarPlaca}       - Fotocopia DNI de los obreros   - De lunes a viernes de 7:00hs a 12:30hs.'); --permiso de refaccion
-
+(10, '- Se necesita que esté presente el titular ({TitularesActuales})    - El permiso de refacción tiene un costo de ${precioPermisoRefaccion}      - El permiso para colocar placa tiene un costo de ${precioPermisoColocarPlaca}       - Fotocopia DNI de los obreros   - De lunes a viernes de 7:00hs a 12:30hs.'), --permiso de refaccion
+(11, '{articuloTitularActual} {TitularesActuales} le informamos que su concesión ({NroConcesion}) en {Parcela} se encuentra vencida desde {vencimientoConcesion}.  Debe llegarse a la oficina del cementerio en la municipalidad para regularizar su situación.  Atención de lunes a viernes de 7:00hs a 12:30hs.'); --deuda de concesion
 --Job para pasar de concesion vigente a vencida 
 --BEGIN TRANSACTION;
 

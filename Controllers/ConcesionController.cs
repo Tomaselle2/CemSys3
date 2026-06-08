@@ -15,12 +15,17 @@ using CemSys3.Interfaces.Archivo;
 using CemSys3.Interfaces.Concesion;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.PDF;
+using CemSys3.Interfaces.PlantillaTramite;
+using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.ViewModels.Concesion;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
+using A = DocumentFormat.OpenXml.Drawing;
+using Pic = DocumentFormat.OpenXml.Drawing.Pictures;
+using Wp = DocumentFormat.OpenXml.Drawing.Wordprocessing;
 
 namespace CemSys3.Controllers
 {
@@ -33,9 +38,11 @@ namespace CemSys3.Controllers
         private readonly IHistorialEstados _historialEstadosService;
         private readonly IWebHostEnvironment _env;
         private readonly IDeudaConcesion _deudaConcesionService;
+        private readonly ITemplateProcessor _processor;
+        private readonly IRequisitos _requisitos;
 
         public ConcesionController(IConcesion concesion, IViewRenderService render, PlaywrightPdfGenerator pdfGenerator, IArchivo archivo,
-            IHistorialEstados historialEstados, IWebHostEnvironment env, IDeudaConcesion deudaConcesionService)
+            IHistorialEstados historialEstados, IWebHostEnvironment env, IDeudaConcesion deudaConcesionService, ITemplateProcessor processor, IRequisitos requisitos)
         {
             _concesionService = concesion;
             _viewRenderService = render;
@@ -44,6 +51,8 @@ namespace CemSys3.Controllers
             _historialEstadosService = historialEstados;
             _env = env;
             _deudaConcesionService = deudaConcesionService;
+            _processor = processor;
+            _requisitos = requisitos;
         }
 
         //tabla general de concesiones, con paginacion y filtro por estado
@@ -652,6 +661,12 @@ namespace CemSys3.Controllers
                 filtroEstado, nombre, apellido, concesion,
                 tipoParcelaID, seccionID, parcelaID, fechaDesde, fechaHasta);
 
+            var textoRequisito = await _requisitos.GetByTipoTramiteId((int)TipoTramiteEnum.WordConcesiones);
+
+
+            
+
+
             using var stream = new MemoryStream();
             using (var doc = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document, true))
             {
@@ -663,138 +678,129 @@ namespace CemSys3.Controllers
                 var stylesPart = mainPart.AddNewPart<StyleDefinitionsPart>();
                 stylesPart.Styles = new Styles();
 
-                // Título
-                body.AppendChild(new Paragraph(
-                    new ParagraphProperties(
-                        new Justification { Val = JustificationValues.Center },
-                        new SpacingBetweenLines { After = "200" }),
-                    new Run(
-                        new RunProperties(
-                            new Bold(),
-                            new FontSize { Val = "36" },
-                            new Color { Val = "2E75B6" }),
-                        new Text("Tabla de Concesiones"))));
+                // ── Cargar imagen UNA sola vez ───────────────────────────────────
+                string rutaImagen = Path.Combine(_env.WebRootPath, "Fotos", "logoMuni.png"); // ajustá el path
+                byte[] imagenBytes = await System.IO.File.ReadAllBytesAsync(rutaImagen);
 
-                body.AppendChild(new Paragraph(
-                    new Run(new Text($"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}"))));
-                body.AppendChild(new Paragraph(new Run(new Text(""))));
+                var imagePart = mainPart.AddImagePart(ImagePartType.Png);
+                using (var imgStream = new MemoryStream(imagenBytes))
+                    imagePart.FeedData(imgStream);
 
-                // ── Tabla ────────────────────────────────────────────────────
-                string[] headers2 = { "Concesión", "Difuntos", "Sección", "Parcela", "Titular/es", "Vencimiento", "Estado" };
-                // Anchos en DXA (total ~9360 para A4 con márgenes de 1")
-                int[] widths = { 900, 1800, 1200, 1400, 1800, 1100, 1160 };
+                string rId = mainPart.GetIdOfPart(imagePart);
+                // ────────────────────────────────────────────────────────────────
 
-                var table = new Table();
+                int contador = 0;
+                uint imgId = 1;
 
-                // Propiedades de tabla
-                table.AppendChild(new TableProperties(
-                    new TableWidth { Width = "9360", Type = TableWidthUnitValues.Dxa },
-                    new TableBorders(
-                        new TopBorder { Val = BorderValues.Single, Size = 4, Color = "CCCCCC" },
-                        new BottomBorder { Val = BorderValues.Single, Size = 4, Color = "CCCCCC" },
-                        new LeftBorder { Val = BorderValues.Single, Size = 4, Color = "CCCCCC" },
-                        new RightBorder { Val = BorderValues.Single, Size = 4, Color = "CCCCCC" },
-                        new InsideHorizontalBorder { Val = BorderValues.Single, Size = 4, Color = "CCCCCC" },
-                        new InsideVerticalBorder { Val = BorderValues.Single, Size = 4, Color = "CCCCCC" })));
-
-                // Fila de encabezado
-                var headerRow = new TableRow();
-                for (int i = 0; i < headers2.Length; i++)
-                {
-                    headerRow.AppendChild(CreateWordCell(
-                        headers2[i], widths[i], bold: true,
-                        bgColor: "2E75B6", fontColor: "FFFFFF"));
-                }
-                table.AppendChild(headerRow);
-
-                // Filas de datos
-                bool alternar = false;
-                DateOnly hoy2 = DateOnly.FromDateTime(DateTime.Today);
                 foreach (var item in datos)
                 {
+                    contador++;
+
+                    // ── Imagen ──────────────────────────────────────────────────────
+                    long anchoEmu = 2000000L;
+                    long altoEmu = 600000L;
+
+                    var imgParagraph = new Paragraph(
+                        new ParagraphProperties(
+                            new Justification { Val = JustificationValues.Center }),
+                        new Run(
+                            new Drawing(
+                                new Wp.Inline(
+                                    new Wp.Extent { Cx = anchoEmu, Cy = altoEmu },
+                                    new Wp.EffectExtent { LeftEdge = 0, TopEdge = 0, RightEdge = 0, BottomEdge = 0 },
+                                    new Wp.DocProperties { Id = imgId++, Name = $"Logo{contador}" }, // ← Id único
+                                    new A.Graphic(
+                                        new A.GraphicData(
+                                            new Pic.Picture(
+                                                new Pic.NonVisualPictureProperties(
+                                                    new Pic.NonVisualDrawingProperties { Id = 0U, Name = "logo.png" },
+                                                    new Pic.NonVisualPictureDrawingProperties()),
+                                                new Pic.BlipFill(
+                                                    new A.Blip { Embed = rId },
+                                                    new A.Stretch(new A.FillRectangle())),
+                                                new Pic.ShapeProperties(
+                                                    new A.Transform2D(
+                                                        new A.Offset { X = 0L, Y = 0L },
+                                                        new A.Extents { Cx = anchoEmu, Cy = altoEmu }),
+                                                    new A.PresetGeometry(new A.AdjustValueList())
+                                                    { Preset = A.ShapeTypeValues.Rectangle })))
+                                        { Uri = "http://schemas.openxmlformats.org/drawingml/2006/picture" }))
+                                {
+                                    DistanceFromTop = 0U,
+                                    DistanceFromBottom = 0U,
+                                    DistanceFromLeft = 0U,
+                                    DistanceFromRight = 0U
+                                })));
+
+                    body.AppendChild(imgParagraph);
+
+                    // ── Texto ────────────────────────────────────────────────────────
                     string parcela = item.TipoParcelaId switch
                     {
-                        (int)TipoParcelaEnum.Nicho => $"Nicho {item.NroParcela} Fila {item.NroFila}",
-                        (int)TipoParcelaEnum.Fosa => $"Fosa {item.NroParcela}",
-                        (int)TipoParcelaEnum.Panteon => $"Lote {item.NroParcela}",
+                        (int)TipoParcelaEnum.Nicho => $"NICHO {item.NroParcela} SECC {item.NombreSeccion.ToUpper()} FILA {item.NroFila}",
+                        (int)TipoParcelaEnum.Fosa => $"FOSA {item.NroParcela} SECC {item.NombreSeccion.ToUpper()}",
+                        (int)TipoParcelaEnum.Panteon => $"LOTE {item.NroParcela} SECC {item.NombreSeccion.ToUpper()}",
                         _ => item.NroParcela.ToString() ?? ""
                     };
 
-                    string difuntos = item.Difuntos?.Any() == true
-                        ? string.Join(", ", item.Difuntos.Select(d => $"{d.Apellido.ToUpper()}, {d.Nombre.ToUpper()}"))
-                        : "---";
                     string titulares = item.Titulares?.Any() == true
-                        ? string.Join(", ", item.Titulares.Select(t => $"{t.Apellido.ToUpper()}, {t.Nombre.ToUpper()}"))
+                        ? string.Join(" / ", item.Titulares.Select(t => $"{t.Apellido.ToUpper()}, {t.Nombre.ToUpper()}"))
                         : "---";
-                    string estado = EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(item.EstadoTramiteId);
 
-                    string bg = "FFFFFF";
-                    if (item.EstadoTramiteId == (int)EstadosConcesionEnum.Vencido)
-                        bg = "F4CCCC";
-                    else if (item.Vencimiento.HasValue && item.Vencimiento.Value.Year == hoy2.Year && item.Vencimiento.Value >= hoy2)
-                        bg = "FFF2CC";
-                    else if (alternar)
-                        bg = "F5F5F5";
+                    string sexoReferencia = item.Titulares?.Any() == true
+                        ? item.Titulares.First().sexo
+                        : "masculino";
 
-                    var row = new TableRow();
-                    string[] valores = {
-                item.Concesion?.ToString("D5") ?? "---",
-                difuntos,
-                item.NombreSeccion?.ToUpper() ?? "",
-                parcela,
-                titulares,
-                item.Vencimiento?.ToString("dd/MM/yyyy") ?? "",
-                estado
-            };
+                    var variables = new Dictionary<string, string>
+    {
+        { "Fecha",                 DateTime.Now.ToLongDateString() },
+        { "articuloTitularActual", sexoReferencia == "masculino" ? "Sr." : "Sra." },
+        { "TitularesActuales",     titulares },
+        { "NroConcesion",          item.Concesion?.ToString("D5") ?? "-----" },
+        { "Parcela",               parcela },
+        { "vencimientoConcesion",  item.Vencimiento?.ToString("dd/MM/yyyy") ?? "--/--/----" }
+    };
 
-                    for (int i = 0; i < valores.Length; i++)
-                        row.AppendChild(CreateWordCell(valores[i], widths[i], bgColor: bg));
+                    string mensaje = _processor.Procesar(textoRequisito.Descripcion, variables);
 
-                    table.AppendChild(row);
-                    alternar = !alternar;
+                    body.AppendChild(new Paragraph(
+                        new Run(
+                            new RunProperties(new FontSize { Val = "30" }),
+                            new Text(mensaje))));
+
+                    // ── Separador ────────────────────────────────────────────────────
+                    bool esUltimo = contador == datos.Count;
+
+                    if (!esUltimo)
+                    {
+                        if (contador % 3 == 0)
+                        {
+                            // Cada 3 → nueva página
+                            body.AppendChild(new Paragraph(
+                                new Run(new Break { Type = BreakValues.Page })));
+                        }
+                        else
+                        {
+                            // Dentro de la misma página → espacio
+                            body.AppendChild(new Paragraph(
+                                new ParagraphProperties(
+                                    new SpacingBetweenLines { Before = "400", After = "400" }),
+                                new Run(new Text(""))));
+                        }
+                    }
                 }
 
-                body.AppendChild(table);
-
-                // Pie con total
-                body.AppendChild(new Paragraph(new Run(new Text(""))));
-                body.AppendChild(new Paragraph(
-                    new Run(new Text($"Total de registros: {datos.Count}"))));
 
                 mainPart.Document.Save();
             }
 
-            string fileNameWord = $"Concesiones_{DateTime.Now:yyyyMMdd_HHmm}.docx";
+            string fileNameWord = $"Concesiones_{DateTime.Now:dd_MM_yyyy_HHmm}.docx";
             return File(stream.ToArray(),
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 fileNameWord);
         }
 
-        // ─── Helper para celdas Word ───────────────────────────────────────────
-        private static TableCell CreateWordCell(
-            string text, int widthDxa,
-            bool bold = false, string bgColor = "FFFFFF", string fontColor = "000000")
-        {
-            var runProps = new RunProperties(
-                new Color { Val = fontColor },
-                new FontSize { Val = "18" });  // 9pt
-            if (bold) runProps.AppendChild(new Bold());
-
-            var cell = new TableCell(
-                new TableCellProperties(
-                    new TableCellWidth { Width = widthDxa.ToString(), Type = TableWidthUnitValues.Dxa },
-                    new Shading { Val = ShadingPatternValues.Clear, Fill = bgColor },
-                    new TableCellMargin(
-                        new LeftMargin { Width = "100", Type = TableWidthUnitValues.Dxa },
-                        new RightMargin { Width = "100", Type = TableWidthUnitValues.Dxa })),
-                new Paragraph(
-                    new ParagraphProperties(
-                        new SpacingBetweenLines { Before = "60", After = "60" }),
-                    new Run(runProps, new Text(text))));
-
-            return cell;
-        }
-
+        
 
 
 
@@ -843,5 +849,6 @@ namespace CemSys3.Controllers
 
             return $"data:{mime};base64,{base64}";
         }
+
     }
 }
