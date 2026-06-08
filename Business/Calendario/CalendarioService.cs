@@ -64,7 +64,7 @@ namespace CemSys3.Business.Calendario
 
             var permisosRefacciones = await _context.PermisosRefacciones
                 .AsNoTracking()
-                .Where(p => p.FechaPendiente.HasValue && p.FechaFinalizacion == null)
+                .Where(p => p.FechaPendiente.HasValue && p.FechaFinalizacion == null && (p.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Iniciado || p.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Pendiente))
                 .Select(p => new CalendarDTO
                 {
                     start = p.FechaPendiente!.Value,
@@ -75,7 +75,7 @@ namespace CemSys3.Business.Calendario
 
             var cremaciones = await _context.Cremaciones
                 .AsNoTracking()
-                .Where(c => c.FechaPendiente.HasValue && c.FechaFinalizacion == null)
+                .Where(c => c.FechaPendiente.HasValue && c.FechaFinalizacion == null && (c.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Iniciado || c.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Pendiente))
                 .Select(c => new CalendarDTO
                 {
                     start = c.FechaPendiente!.Value,
@@ -86,7 +86,7 @@ namespace CemSys3.Business.Calendario
 
             var traslados = await _context.Traslados
                 .AsNoTracking()
-                .Where(t => t.FechaPendiente.HasValue && t.FechaFinalizacion == null)
+                .Where(t => t.FechaPendiente.HasValue && t.FechaFinalizacion == null && (t.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Iniciado || t.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Pendiente))
                 .Select(t => new CalendarDTO
                 {
                     start = t.FechaPendiente!.Value,
@@ -97,7 +97,7 @@ namespace CemSys3.Business.Calendario
 
             var reducciones = await _context.Reducciones
                 .AsNoTracking()
-                .Where(r => r.FechaPendiente.HasValue && r.FechaFinalizacion == null)
+                .Where(r => r.FechaPendiente.HasValue && r.FechaFinalizacion == null && (r.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Iniciado || r.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Pendiente))
                 .Select(r => new CalendarDTO
                 {
                     start = r.FechaPendiente!.Value,

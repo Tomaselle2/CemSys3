@@ -131,7 +131,11 @@ namespace CemSys3.Business.Tramite
 
             var permisosRefacciones = await _context.PermisosRefacciones
               .AsNoTracking()
-              .Where(p => p.FechaFinalizacion == null)
+              .Where(p => p.FechaFinalizacion == null &&
+                (
+                    p.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Iniciado ||
+                    p.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Pendiente
+                ))
               .Select(p => new TramiteDTO
               {
                  Id = p.TramiteId,
@@ -146,7 +150,11 @@ namespace CemSys3.Business.Tramite
 
             var cremaciones = await _context.Cremaciones
                 .AsNoTracking()
-                .Where(c => c.FechaFinalizacion == null)
+                .Where(c => c.FechaFinalizacion == null &&
+    (
+        c.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Iniciado ||
+        c.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Pendiente
+    ))
                 .Select(c => new TramiteDTO
                 {
                     Id = c.TramiteId,
@@ -161,7 +169,11 @@ namespace CemSys3.Business.Tramite
 
             var traslados = await _context.Traslados
                 .AsNoTracking()
-                .Where(t => t.FechaFinalizacion == null)
+                .Where(t => t.FechaFinalizacion == null &&
+    (
+        t.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Iniciado ||
+        t.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Pendiente
+    ))
                 .Select(t => new TramiteDTO
                 {
                     Id = t.TramiteId,
@@ -176,7 +188,7 @@ namespace CemSys3.Business.Tramite
 
             var reducciones = await _context.Reducciones
                 .AsNoTracking()
-                .Where(r => r.FechaFinalizacion == null)
+                .Where(r => r.FechaFinalizacion == null && (r.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Iniciado || r.Tramite.EstadoActualId == (int)EstadosTramiteEnum.Pendiente))
                 .Select(r => new TramiteDTO
                 {
                     Id = r.TramiteId,
