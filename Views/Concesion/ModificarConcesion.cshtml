@@ -9,7 +9,8 @@
 
     string nroConcesion = Model.DtoInfo.NroConcesion.HasValue ? Model.DtoInfo.NroConcesion.Value.ToString("D5") : "-----";
     string estadoTramite = EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(Model.DtoInfo.EstadoTramiteId);
-    string claseEstado = Enum.GetName(typeof(EstadosConcesionEnum), Model.DtoInfo.EstadoTramiteId); string fechaVencimiento = Model.Dto.Vencimiento != null ? Model.Dto.Vencimiento.Value.ToString("dd/MM/yyyy") : "--/--/----";
+    string claseEstado = Enum.GetName(typeof(EstadosConcesionEnum), Model.DtoInfo.EstadoTramiteId) ?? "";
+    string fechaVencimiento = Model.Dto.Vencimiento != null ? Model.Dto.Vencimiento.Value.ToString("dd/MM/yyyy") : "--/--/----";
 }
 
 @await Html.PartialAsync("Concesion/_menuConcesion", Model.Dto.TramiteId)
@@ -124,6 +125,22 @@
                         <input class="form-control" type="text" required autocomplete="off"
                                id="nroConcesion" asp-for="Dto.NroConcesion" maxlength="5" />
                         <span asp-validation-for="Dto.NroConcesion" class="text-danger"></span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="cardConcesion">
+
+                <div class="cardConcesion-content">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-calendar-event text-primary"></i> Fecha de inicio de concesión
+                        </h3>
+                    </div>
+                    <div>
+                        <input class="form-control" type="datetime-local" asp-for="Dto.FechaInicioInput" />
+                        <span asp-validation-for="Dto.FechaInicio" class="text-danger"></span>
                     </div>
                 </div>
 

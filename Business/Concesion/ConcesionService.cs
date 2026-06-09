@@ -583,6 +583,7 @@ namespace CemSys3.Business.Concesion
             dto.EstadoTramiteId = concesion.Tramite.EstadoActualId;
             dto.NroConcesion = concesion.Concesion;
             dto.Vencimiento = concesion.Vencimiento;
+            
 
             return dto;
         }
@@ -605,6 +606,7 @@ namespace CemSys3.Business.Concesion
             dto.EstadoTramiteId = concesion.Tramite.EstadoActualId;
             dto.Vencimiento = concesion.Vencimiento;
             dto.NroConcesion = concesion.Concesion;
+            dto.FechaInicio = concesion.FechaInicio;
 
             //Traer Titulares en una sola consulta
             dto.Titulares = await _context.HistorialTitularesConcesiones
@@ -675,7 +677,12 @@ namespace CemSys3.Business.Concesion
                     dto.TitularesPost ?? new List<PersonaDTO>(),
                     concesion,
                     null //importante
-                );
+                         );
+                }
+
+                if (dto.FechaInicio.HasValue)
+                {
+                    concesion.FechaInicio = dto.FechaInicio.Value;
                 }
                 
 

@@ -433,7 +433,6 @@ namespace CemSys3.Controllers
             {
                 viewModel.Dto = await _concesionService.ModificarDatosConecesion(tramiteId);
                 viewModel.DtoInfo = await _concesionService.InfoGeneralMinima(tramiteId);
-
             }
             catch (Exception ex)
             {
@@ -483,6 +482,7 @@ namespace CemSys3.Controllers
             dto.NroConcesion = viewModel.Dto.NroConcesion;
             dto.TramiteId = viewModel.Dto.TramiteId;
             dto.TitularesPost = titulares;
+            dto.FechaInicio = viewModel.Dto.FechaInicio;
 
             try
             {
