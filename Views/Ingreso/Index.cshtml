@@ -241,7 +241,42 @@
     <div style="display: flex; justify-content: center;">
         <input type="button" class="btn btn-success" onclick="confirmarEnvio()" value="Ingresar difunto" />
     </div>
+
+
+    <input type="hidden" id="hiddenTitularFallecido" asp-for="IngresoTitularFallecido" value="false" />
+
 </form>
+
+<!-- Modal titular fallecido (se muestra via JS cuando ViewBag.MostrarModalTitular == true) -->
+<div class="modal fade" tabindex="-1" id="modalTitularFallecido">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Titular encontrado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    La persona <strong id="nombreTitularModal">@ViewBag.NombreTitular</strong>
+                    ya está registrada como <strong>titular</strong> en el cementerio.
+                </p>
+                <p>¿Es esta la persona que falleció y desea ingresar?</p>
+                <p class="text-muted small">
+                    Si confirma, se conservará todo el historial existente
+                    y se actualizará su categoría a fallecido.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    No, es un error de DNI
+                </button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarTitular">
+                    Sí, es el titular fallecido
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Modal de confirmacion de ingreso del difunto -->
 <div class="modal fade" tabindex="-1" id="modalConfirmacion">
@@ -288,6 +323,7 @@
     </div>
 </div>
 
+
 @* Renderizamos el manejador pasándole el DTO del modelo *@
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
 
@@ -296,6 +332,29 @@
     <script src="~/js/ubicacion-selector.js"></script>
 
     <script>
+        // Mostrar modal si el servidor detectó un titular
+        @if (ViewBag.MostrarModalTitular == true)
+        {
+                <text>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        new bootstrap.Modal(document.getElementById('modalTitularFallecido')).show();
+                    });
+                </text>
+        }
+
+        document.getElementById('btnConfirmarTitular')?.addEventListener('click', function () {
+            // Activar el flag y reenviar el form
+            document.getElementById('hiddenTitularFallecido').value = 'true';
+            bootstrap.Modal.getInstance(document.getElementById('modalTitularFallecido')).hide();
+    
+            // Reusar el mismo flujo de confirmación que ya tenés
+            enviarFormulario();
+        });
+
+
+
+
+
         //logica de agregar empresa
         const agregarEmpresaButton = document.getElementById('agregarEmpresaButton');
         const formEmpresa = document.getElementById('formEmpresa');

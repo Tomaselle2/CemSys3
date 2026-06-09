@@ -45,6 +45,15 @@ namespace CemSys3.Business.Persona
             return persona.Id;
         }
 
+        public async Task CambiarCategoria(int personaId, int categoriaId)
+        {
+            Models.Persona persona = await _context.Personas.FindAsync(personaId) ?? throw new Exception("Persona no encontrada");
+            persona.CategoriaPersonaId = categoriaId;
+
+            _context.Personas.Update(persona);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<PersonaDTO> Get(int id)
         {
             Models.Persona persona = await _context.Personas.FindAsync(id) ?? throw new Exception("Persona no encontrada");
@@ -295,6 +304,68 @@ namespace CemSys3.Business.Persona
             persona.NroAge = dto.NroAge;
             persona.EstadoDifuntoId = dto.EstadoDifuntoId;
             persona.CategoriaPersonaId = dto.CategoriaPersonaId;
+
+            await _context.SaveChangesAsync();
+
+            return persona.Id;
+        }
+
+        public async Task<int> UpdateDatosIngresoTitularFallecido(PersonaDTO dto)
+        {
+            Models.Persona persona = await _context.Personas.FindAsync(dto.Id) ?? throw new Exception("Persona no encontrada");
+
+            if (persona.CategoriaPersonaId == (int)CategoriaPersonaEnum.Fallecido)
+            {
+                if (dto.FechaIngreso.HasValue)
+                {
+                    Models.ParcelaDifunto parcelaDifunto = await _context.ParcelaDifuntos.Where(p => p.DifuntoId == persona.Id).FirstOrDefaultAsync() ?? throw new Exception("Error al actualizar la fecha de ingreso");
+                    Models.Introduccione introduccion = await _context.Introducciones.Where(p => p.DifuntoId == persona.Id && p.ParcelaId == parcelaDifunto.ParcelaId).FirstOrDefaultAsync();
+
+
+                    parcelaDifunto.FechaIngreso = dto.FechaIngreso;
+
+                    if (introduccion != null)
+                    {
+                        introduccion.FechaIngreso = dto.FechaIngreso;
+                    }
+                }
+
+            }
+
+            persona.Nombre = dto.Nombre?.Trim();
+            persona.Apellido = dto.Apellido?.Trim();
+
+            if (!string.IsNullOrEmpty(dto.Dni))
+            {
+                persona.Dni = dto.Dni.PadLeft(8, '0');
+            }
+
+            if (dto.FechaNacimiento.HasValue)
+            {
+                persona.FechaNacimiento = dto.FechaNacimiento.Value;
+            }
+            else
+            {
+                persona.FechaNacimiento = null;
+            }
+
+            if (dto.FechaDefuncion.HasValue)
+            {
+                persona.FechaDefuncion = dto.FechaDefuncion.Value;
+            }
+            else
+            {
+                persona.FechaDefuncion = null;
+            }
+
+            persona.InformacionAdicional += dto.InformacionAdicional;
+            persona.Sexo = dto.Sexo;
+            persona.NroActa = dto.NroActa;
+            persona.NroFolio = dto.NroFolio;
+            persona.NroTomo = dto.NroTomo;
+            persona.NroSerie = dto.NroSerie;
+            persona.NroAge = dto.NroAge;
+            persona.EstadoDifuntoId = dto.EstadoDifuntoId;
 
             await _context.SaveChangesAsync();
 

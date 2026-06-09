@@ -69,26 +69,46 @@ namespace CemSys3.Business.Ingreso
                 };
                 await _historialEstadosService.Add(historial);
 
-                //3- se registra el difunto
-                PersonaDTO difunto = new PersonaDTO
+                
+
+                int difuntoId;
+                PersonaDTO difunto = new PersonaDTO();
+
+                if (dto.PersonaExistenteId.HasValue)
                 {
-                    Nombre = dto.Difunto.Nombre?.Trim().ToLower(),
-                    Apellido = dto.Difunto.Apellido?.Trim().ToLower(),
-                    Dni = dto.Difunto.Dni,
-                    Visibilidad = true,
-                    FechaNacimiento = dto.Difunto.FechaNacimiento,
-                    FechaDefuncion  = dto.Difunto.FechaDefuncion,
-                    InformacionAdicional = dto.Difunto.InformacionAdicional,
-                    Sexo = dto.Difunto.Sexo,
-                    NroActa = dto.Difunto.NroActa,
-                    NroFolio = dto.Difunto.NroFolio,
-                    NroTomo = dto.Difunto.NroTomo,
-                    NroSerie = dto.Difunto.NroSerie,
-                    NroAge = dto.Difunto.NroAge,
-                    EstadoDifuntoId = dto.Difunto.EstadoDifuntoId,
-                    CategoriaPersonaId = (int)CategoriaPersonaEnum.Fallecido
-                };
-                int difuntoId = await _personaService.Add(difunto);
+                    // El titular ya existe: solo cambiar su categoría
+                    difuntoId = dto.PersonaExistenteId.Value;
+                    await _personaService.CambiarCategoria(difuntoId, (int)CategoriaPersonaEnum.Fallecido);
+
+                    // Actualizar también los datos del acta si vinieron
+                    dto.Difunto.Id = difuntoId;
+                    await _personaService.UpdateDatosIngresoTitularFallecido(dto.Difunto);
+                }
+                else
+                {
+                    // Flujo normal: crear persona nueva
+                    //3- se registra el difunto
+                    difunto = new PersonaDTO
+                    {
+                        Nombre = dto.Difunto.Nombre?.Trim().ToLower(),
+                        Apellido = dto.Difunto.Apellido?.Trim().ToLower(),
+                        Dni = dto.Difunto.Dni,
+                        Visibilidad = true,
+                        FechaNacimiento = dto.Difunto.FechaNacimiento,
+                        FechaDefuncion = dto.Difunto.FechaDefuncion,
+                        InformacionAdicional = dto.Difunto.InformacionAdicional,
+                        Sexo = dto.Difunto.Sexo,
+                        NroActa = dto.Difunto.NroActa,
+                        NroFolio = dto.Difunto.NroFolio,
+                        NroTomo = dto.Difunto.NroTomo,
+                        NroSerie = dto.Difunto.NroSerie,
+                        NroAge = dto.Difunto.NroAge,
+                        EstadoDifuntoId = dto.Difunto.EstadoDifuntoId,
+                        CategoriaPersonaId = (int)CategoriaPersonaEnum.Fallecido
+                    };
+                    
+                    difuntoId = await _personaService.Add(difunto);
+                }
 
                 //4- se registra la relacion (difunto con el tramite)\
                 await _historialEstadosService.VincularTramiteAPersona(tramiteId, difuntoId);

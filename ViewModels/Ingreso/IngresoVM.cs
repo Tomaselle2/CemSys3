@@ -2,7 +2,6 @@
 using CemSys3.DTOs.Nota;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.Usuario;
-using CemSys3.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace CemSys3.ViewModels.Ingreso

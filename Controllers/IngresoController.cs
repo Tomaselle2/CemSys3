@@ -16,7 +16,6 @@ using CemSys3.Interfaces.Tarifaria;
 using CemSys3.Interfaces.Usuario;
 using CemSys3.ViewModels.Ingreso;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace CemSys3.Controllers
 {
@@ -238,12 +237,24 @@ namespace CemSys3.Controllers
 
                     if (persona.CategoriaPersonaId == (int)CategoriaPersonaEnum.Titular) 
                     {
-                        viewModel.SweetAlert = new SweetAlertDTO
+                        // ¿El usuario ya confirmó que quiere convertirlo?
+                        if (viewModel.IngresoTitularFallecido)
                         {
-                            Titulo = "Verificar",
-                            Mensaje = "El difunto que intenta registrar es titular en concesiones",
-                            Tipo = "warning"
-                        };
+                            // Marcar que la persona existe y es titular → el service lo maneja
+                            // Continuar el flujo normal pero pasando el Id de la persona existente
+                            // (no crear una nueva persona, sino actualizar la existente)
+                        }
+                        else
+                        {
+                            // Primera vez que choca: devolver el form con el flag para mostrar el modal
+                            viewModel.IngresoTitularFallecido = false; // todavía no confirmó
+                            viewModel.SweetAlert = null; // no usamos SweetAlert, usamos modal propio
+                                                         // Señal para la vista de que debe mostrar el modal de confirmación
+                            ViewBag.MostrarModalTitular = true;
+                            ViewBag.NombreTitular = $"{persona.Apellido?.ToUpper()}, {persona.Nombre}";
+                            await CargarListasIngreso(viewModel, viewModel.NotaIngreso.Id);
+                            return View("Index", viewModel);
+                        }
 
                     }
                     else //si es difunto enviar error difunto existente
@@ -254,16 +265,12 @@ namespace CemSys3.Controllers
                             Mensaje = "El difunto que intenta ingresar ya existe",
                             Tipo = "warning"
                         };
+
+                        await CargarListasIngreso(viewModel, viewModel.NotaIngreso.Id);
+
+                        return View("Index", viewModel);
                     }
 
-                    //falta terminar metodo. Se envia mensaje de El difunto que intenta registrar es titular en concesiones.
-                    //Debe aparecer dos botones, para continuar o cancelar
-
-
-                    //si es persona titular enviar los datos a la vista con mensaje de si desea ingresar la persona como fallecida
-                    await CargarListasIngreso(viewModel, viewModel.NotaIngreso.Id);
-
-                    return View("Index", viewModel);
                 }
 
                 PersonaDTO difunto = new PersonaDTO
@@ -294,7 +301,10 @@ namespace CemSys3.Controllers
                     Difunto = difunto,
                     EmpleadoIngresoId = viewModel.EmpleadoID ?? 0,
                     Visibilidad = true,
-                    NotaId = viewModel.NotaIngreso.Id
+                    NotaId = viewModel.NotaIngreso.Id,
+                    PersonaExistenteId = viewModel.IngresoTitularFallecido
+                        ? (await _personaService.GetByDNISexo(viewModel.Dni!.Value, viewModel.Sexo!)).Id
+                        : null
                 };
 
                 GenericResultDTO resultado = await _ingresoService.Add(ingreso);
