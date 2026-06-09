@@ -49,6 +49,8 @@ namespace CemSys3.ViewModels.CargaDifunto
 
         public int? NroAge { get; set; }
 
+        public DateTime? FechaIngreso { get; set; }
+
         //manero de errores
         public SweetAlertDTO? SweetAlert { get; set; }
     }

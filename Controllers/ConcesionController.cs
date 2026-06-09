@@ -521,6 +521,7 @@ namespace CemSys3.Controllers
                 viewModel.Titulares = await _historialEstadosService.HistorialTitulares(tramiteId);
                 viewModel.Tramites = await _historialEstadosService.HistorialTramitesConcesion(tramiteId);
                 viewModel.Dto = await _concesionService.InfoGeneralMinima(tramiteId);
+                viewModel.Difuntos = await _historialEstadosService.DifuntosEnConcesion(tramiteId);
 
             }
             catch (Exception ex)

@@ -147,7 +147,8 @@ namespace CemSys3.Controllers
                     NroSerie = viewModel.NroSerie?.Trim(),
                     NroAge = viewModel.NroAge,
                     Visibilidad = true,
-                    InformacionAdicional = viewModel.InformacionAdicional
+                    InformacionAdicional = viewModel.InformacionAdicional,
+                    FechaIngreso = viewModel.FechaIngreso,
                 };
 
                 CargaDifuntoDTO dto = new CargaDifuntoDTO

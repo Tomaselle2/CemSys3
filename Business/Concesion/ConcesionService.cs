@@ -76,7 +76,7 @@ namespace CemSys3.Business.Concesion
                 concesion.CantidadAniosId = dto.CantidadAniosId;
                 concesion.CuotaId = dto.CuotaId;
                 concesion.UsuarioId = dto.UsuarioId;
-                concesion.FechaInicio = DateTime.Now;
+                concesion.FechaInicio = dto.FechaInicio ?? DateTime.Now;
                 concesion.InformacionAdicional += dto.InformacionAdicional;
                 await _context.Concesiones.AddAsync(concesion);
 

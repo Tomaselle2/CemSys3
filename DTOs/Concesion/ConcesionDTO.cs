@@ -25,7 +25,7 @@ namespace CemSys3.DTOs.Concesion
         public int? UsuarioId { get; set; }
 
         public string? InformacionAdicional { get; set; }
-
+        public DateTime? FechaInicio { get; set; }
         //---
         public int EstadoTramiteId { get; set; }
         public List<PersonaDTO>? Titulares { get; set; }

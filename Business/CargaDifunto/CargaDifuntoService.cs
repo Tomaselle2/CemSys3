@@ -1,24 +1,14 @@
-﻿using CemSys3.Business.Concesion;
-using CemSys3.Business.HistorialEstadoService;
-using CemSys3.Business.Notas;
-using CemSys3.Business.Parcela;
-using CemSys3.Business.Persona;
-using CemSys3.Business.Tramite;
-using CemSys3.DTOs.CargaDifunto;
+﻿using CemSys3.DTOs.CargaDifunto;
 using CemSys3.DTOs.Concesion;
 using CemSys3.DTOs.Generics;
-using CemSys3.DTOs.HistorialEstado;
 using CemSys3.DTOs.Persona;
-using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
 using CemSys3.Helpers.Enumerable;
 using CemSys3.Interfaces.CargaDifunto;
 using CemSys3.Interfaces.Concesion;
 using CemSys3.Interfaces.HistorialEstados;
-using CemSys3.Interfaces.Notas;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Persona;
-using CemSys3.Interfaces.Tramite;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,17 +17,15 @@ namespace CemSys3.Business.CargaDifunto
     public class CargaDifuntoService : ICargaDifunto
     {
         private readonly AppDbContext _context;
-        private readonly ITramite _tramiteService;
         private readonly IHistorialEstados _historialEstadosService;
         private readonly IParcela _parcelaService;
         private readonly IConcesion _concesionService;
         private readonly IPersona _personaService;
-        public CargaDifuntoService(AppDbContext context, ITramite tramiteService,
+        public CargaDifuntoService(AppDbContext context,
             IHistorialEstados historialEstados, IParcela parcelaService,
             IConcesion concesionService, IPersona personaService)
         {
             _context = context;
-            _tramiteService = tramiteService;
             _historialEstadosService = historialEstados;
             _parcelaService = parcelaService;
             _concesionService = concesionService;
@@ -67,10 +55,12 @@ namespace CemSys3.Business.CargaDifunto
                     NroSerie = dto.Difunto.NroSerie,
                     NroAge = dto.Difunto.NroAge,
                     EstadoDifuntoId = dto.Difunto.EstadoDifuntoId,
-                    CategoriaPersonaId = (int)CategoriaPersonaEnum.Fallecido
+                    CategoriaPersonaId = (int)CategoriaPersonaEnum.Fallecido,
+                    FechaIngreso = dto.Difunto.FechaIngreso ?? DateTime.Now
                 };
                 int difuntoId = await _personaService.Add(difunto);
 
+                
                 //5- se registra la relacion (parcela con difunto)
                 ParcelaDifunto parcelaDifunto = new ParcelaDifunto
                 {
@@ -80,6 +70,7 @@ namespace CemSys3.Business.CargaDifunto
                     TramiteIngresoId = null
                 };
                 _context.ParcelaDifuntos.Add(parcelaDifunto);
+                await _context.SaveChangesAsync();
 
 
                 var parcela = await _context.Parcelas
@@ -116,6 +107,7 @@ namespace CemSys3.Business.CargaDifunto
                     concesion.UsuarioId = dto.UsuarioLogueadoId;
                     concesion.EstadoTramiteId = (int)EstadosConcesionEnum.SinContrato;
                     concesion.MensajeParcela = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} para difunto {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} se genera concesión en estado '{EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>((int)EstadosConcesionEnum.SinContrato)}'.";
+                    concesion.FechaInicio = difunto.FechaIngreso;
                     concesion.InformacionAdicional = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} en {ubicacion} se genera concesión en estado '{EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>((int)EstadosConcesionEnum.SinContrato)}'.";
                     GenericResultDTO resultadoConcesion = await _concesionService.Add(concesion);
                 }
@@ -128,6 +120,7 @@ namespace CemSys3.Business.CargaDifunto
                     concesion.ParcelaId = parcela.Id;
                     concesion.TipoParcela = EnumHelper.GetDisplayNameByValue<TipoParcelaEnum>(parcela.TipoParcelaId ?? 0);
                     concesion.UsuarioId = dto.UsuarioLogueadoId;
+                    concesion.FechaInicio = difunto.FechaIngreso;
                     concesion.EstadoTramiteId = (int)EstadosConcesionEnum.Vigente;
                     GenericResultDTO resultadoConcesion = await _concesionService.Add(concesion);
                 }
@@ -136,6 +129,20 @@ namespace CemSys3.Business.CargaDifunto
                    .FirstOrDefaultAsync(c => c.ParcelaId == parcela.Id && c.FechaFin == null) ?? throw new Exception("Concesion no encontrada.");
 
                 await _historialEstadosService.VincularTramiteAPersona(concesionBD.TramiteId, difuntoId);
+
+
+                if (difunto.CategoriaPersonaId == (int)CategoriaPersonaEnum.Fallecido)
+                {
+                    if (difunto.FechaIngreso.HasValue)
+                    {
+                        Models.ParcelaDifunto parcelaDifuntoo = await _context.ParcelaDifuntos.Where(p => p.DifuntoId == difuntoId).FirstOrDefaultAsync() ?? throw new Exception("Error al actualizar la fecha de ingreso");
+
+
+                        parcelaDifuntoo.FechaIngreso = difunto.FechaIngreso;
+
+                    }
+
+                }
 
 
                 await _context.SaveChangesAsync();

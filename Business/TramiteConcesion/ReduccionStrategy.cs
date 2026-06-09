@@ -349,6 +349,7 @@ namespace CemSys3.Business.TramiteConcesion
                         concesionNueva.MensajeParcela += $"\n● El {reduccion.FechaPendiente?.ToString("dd/MM/yyyy")} para difunto {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} se genera concesión en estado '{EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>((int)EstadosConcesionEnum.SinContrato)}'.";
                         concesionNueva.InformacionAdicional += $"\n● El {reduccion.FechaPendiente?.ToString("dd/MM/yyyy")} en {ParcelaFormatter.ObtenerParcela(parcelaDestino.TipoParcelaId ?? 0, parcelaDestino.NroParcela, parcelaDestino.NroFila, parcelaDestino.Seccion.Nombre.ToUpper())} se genera concesión en estado '{EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>((int)EstadosConcesionEnum.SinContrato)}'.";
                         concesionNueva.InformacionAdicional += $"\n● {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} viene de {ParcelaFormatter.ObtenerParcela(parcela.TipoParcelaId ?? 0, parcela.NroParcela, parcela.NroFila, parcela.Seccion.Nombre.ToUpper())} en estado {EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(difunto.EstadoDifuntoId ?? 0)}";
+                        concesionNueva.FechaInicio = reduccion.FechaPendiente;
                         GenericResultDTO resultadoConcesion = await _concesionService.Add(concesionNueva);
                     }
 
@@ -362,6 +363,7 @@ namespace CemSys3.Business.TramiteConcesion
                         concesionNueva.UsuarioId = usuarioId;
                         concesionNueva.EstadoTramiteId = (int)EstadosConcesionEnum.Vigente;
                         concesionNueva.InformacionAdicional += $"\n● {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} viene de {ParcelaFormatter.ObtenerParcela(parcela.TipoParcelaId ?? 0, parcela.NroParcela, parcela.NroFila, parcela.Seccion.Nombre.ToUpper())}";
+                        concesionNueva.FechaInicio = reduccion.FechaPendiente;
                         GenericResultDTO resultadoConcesion = await _concesionService.Add(concesionNueva);
                     }
 

@@ -172,6 +172,7 @@ namespace CemSys3.Business.Ingreso
                     concesion.EstadoTramiteId = (int)EstadosConcesionEnum.SinContrato;
                     concesion.MensajeParcela = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} para difunto {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} se genera concesión en estado '{EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>((int)EstadosConcesionEnum.SinContrato)}'.";
                     concesion.InformacionAdicional = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} en {ubicacion} se genera concesión en estado '{EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>((int)EstadosConcesionEnum.SinContrato)}'.";
+                    concesion.FechaInicio = dto.FechaIngreso;
                     GenericResultDTO resultadoConcesion = await _concesionService.Add(concesion);
                 }
 
@@ -184,6 +185,7 @@ namespace CemSys3.Business.Ingreso
                     concesion.TipoParcela = EnumHelper.GetDisplayNameByValue<TipoParcelaEnum>(ingreso.Parcela.TipoParcelaId ?? 0);
                     concesion.UsuarioId = ingreso.UsuarioId;
                     concesion.EstadoTramiteId = (int)EstadosConcesionEnum.Vigente;
+                    concesion.FechaInicio = dto.FechaIngreso;
                     GenericResultDTO resultadoConcesion = await _concesionService.Add(concesion);
                 }
 

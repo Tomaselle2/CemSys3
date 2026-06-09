@@ -1,5 +1,6 @@
 ﻿using CemSys3.DTOs.Concesion;
 using CemSys3.DTOs.HistorialEstado;
+using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
 using CemSys3.Interfaces.HistorialEstados;
@@ -39,25 +40,6 @@ namespace CemSys3.Business.HistorialEstadoService
             }).ToListAsync();
         }
 
-        //public async Task VincularTramiteAPersona(int tramiteId, int personaId)
-        //{
-        //    bool existe = await _context.TramitePersonas
-        //        .AnyAsync(tp => tp.TramiteId == tramiteId
-        //                    && tp.PersonaId == personaId);
-
-        //    if (!existe)
-        //    {
-        //        TramitePersona tramitePersona = new TramitePersona
-        //        {
-        //            TramiteId = tramiteId,
-        //            PersonaId = personaId,
-        //            FechaRegistro = DateTime.Now
-        //        };
-
-        //        _context.TramitePersonas.Add(tramitePersona);
-        //    }
-        //}
-
         public async Task VincularTramiteAPersona(int tramiteId, int personaId)
         {
             bool existeEnMemoria = _context.ChangeTracker
@@ -85,21 +67,6 @@ namespace CemSys3.Business.HistorialEstadoService
             });
         }
 
-        //public async Task VincularTramiteAParcela(int tramiteId, int parcelaId)
-        //{
-        //    bool existe = await _context.TramitesParcelas
-        //        .AnyAsync(x => x.TramiteId == tramiteId && x.ParcelaId == parcelaId);
-
-        //    if (!existe)
-        //    {
-        //        _context.TramitesParcelas.Add(new TramitesParcela
-        //        {
-        //            TramiteId = tramiteId,
-        //            ParcelaId = parcelaId,
-        //            FechaRegistro = DateTime.Now
-        //        });
-        //    }
-        //}
 
         public async Task VincularTramiteAParcela(int tramiteId, int parcelaId)
         {
@@ -232,6 +199,38 @@ namespace CemSys3.Business.HistorialEstadoService
             return resultado
                 .OrderByDescending(t => t.FechaCreacion)
                 .ToList();
+        }
+
+        public async Task<IEnumerable<DifuntoConcesionDTO>> DifuntosEnConcesion(int concesionId)
+        {
+            var concesion = await _context.Concesiones
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.TramiteId == concesionId)
+                ?? throw new Exception("Concesión no encontrada");
+
+            DateTime inicio = concesion.FechaInicio ?? DateTime.MinValue;
+            DateTime fin = concesion.FechaFin ?? DateTime.MaxValue;
+
+            return await _context.ParcelaDifuntos
+                .AsNoTracking()
+                .Where(pd =>
+                    pd.ParcelaId == concesion.ParcelaId &&
+                    pd.FechaIngreso >= inicio &&
+                    pd.FechaIngreso <= fin)
+                .Select(pd => new DifuntoConcesionDTO
+                {
+                    ParcelaDifuntoId = pd.Id,
+                    DifuntoId = pd.DifuntoId,
+                    Nombre = pd.Difunto.Nombre,
+                    Apellido = pd.Difunto.Apellido,
+                    Dni = pd.Difunto.Dni,
+                    FechaIngreso = pd.FechaIngreso,
+                    FechaRetiro = pd.FechaRetiro,
+                    TramiteIngresoId = pd.TramiteIngresoId,
+                    TramiteRetiroId = pd.TramiteRetiroId
+                })
+                .OrderBy(d => d.FechaIngreso)
+                .ToListAsync();
         }
     }
 }
