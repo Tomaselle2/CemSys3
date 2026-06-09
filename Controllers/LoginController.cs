@@ -56,6 +56,8 @@ namespace CemSys3.Controllers
                 Tipo = "error" //tipo de alerta
             };
 
+            
+
             return View(viewModel);
         }
 

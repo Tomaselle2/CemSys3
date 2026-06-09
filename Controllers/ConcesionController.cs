@@ -455,24 +455,29 @@ namespace CemSys3.Controllers
             ModificarDatosConcesionDTO dto = new ModificarDatosConcesionDTO();
             //pasar de TitularesDTO a PersonaDTO
             List<PersonaDTO> titulares = new List<PersonaDTO>();
-            foreach (var titular in viewModel.Dto.Titulares)
-            {
-                PersonaDTO persona = new PersonaDTO
-                {
-                    Id = titular.Id ?? 0,
-                    Nombre = titular.Nombre,
-                    Apellido = titular.Apellido,
-                    Dni = titular.Dni,
-                    Domicilio = titular.Domicilio,
-                    Celular = titular.Celular,
-                    Sexo = titular.Sexo,
-                    Correo = titular.CorreoElectronico,
-                    Visibilidad = true,
-                    CategoriaPersonaId = (int)CategoriaPersonaEnum.Titular
-                };
 
-                titulares.Add(persona);
+            if (viewModel.Dto.Titulares != null && viewModel.Dto.Titulares.Count() > 0)
+            {
+                foreach (var titular in viewModel.Dto.Titulares)
+                {
+                    PersonaDTO persona = new PersonaDTO
+                    {
+                        Id = titular.Id ?? 0,
+                        Nombre = titular.Nombre,
+                        Apellido = titular.Apellido,
+                        Dni = titular.Dni,
+                        Domicilio = titular.Domicilio,
+                        Celular = titular.Celular,
+                        Sexo = titular.Sexo,
+                        Correo = titular.CorreoElectronico,
+                        Visibilidad = true,
+                        CategoriaPersonaId = (int)CategoriaPersonaEnum.Titular
+                    };
+
+                    titulares.Add(persona);
+                }
             }
+            
 
             dto.Vencimiento = viewModel.Dto.Vencimiento;
             dto.NroConcesion = viewModel.Dto.NroConcesion;

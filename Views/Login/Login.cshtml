@@ -99,7 +99,7 @@
                     <div class="mb-3">
                         <label for="password" class="form-label">Contraseña</label>
                         <div class="input-group">
-                            <input type="password" class="form-control" id="password" asp-for="Clave" required>
+                            <input type="password" class="form-control" id="password" asp-for="Clave" value="@Model?.Clave" required>
                             <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                 <i class="bi bi-eye" id="iconPassword"></i>
                             </button>
@@ -110,14 +110,6 @@
                         <button type="submit" class="btn-ingresar">Ingresar</button>
                     </div>
                 </form>
-                @* <a asp-action="EnviarCorreoRecuperacion" class="text-center" asp-controller="Login">¿Olvidaste tu contraseña?</a>
-
-                @if (ViewData["Login"] != null)
-                {
-                    <div class="alert alert-warning mt-2" role="alert">
-                        @ViewData["Login"]
-                    </div>
-                } *@
             </div>
         </div>
     </div>

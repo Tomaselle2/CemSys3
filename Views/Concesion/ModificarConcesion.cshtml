@@ -405,13 +405,13 @@
             // Validación personalizada adicional
             let valido = true;
 
-            // Validar que haya al menos un titular
-            if (titulares.length === 0) {
-                valido = false;
-                AlertService.show("Verificar", "Debe agregar al menos un titular", "warning");
-                btnGenerar.disabled = false;
-                btnGenerar.value = "Actualizar concesión";
-            }
+            // // Validar que haya al menos un titular
+            // if (titulares.length === 0) {
+            //     valido = false;
+            //     AlertService.show("Verificar", "Debe agregar al menos un titular", "warning");
+            //     btnGenerar.disabled = false;
+            //     btnGenerar.value = "Actualizar concesión";
+            // }
 
 
             if (!valido) {

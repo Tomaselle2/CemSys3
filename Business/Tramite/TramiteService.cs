@@ -1,5 +1,4 @@
-﻿using CemSys3.DTOs.Calendario;
-using CemSys3.DTOs.Generics;
+﻿using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
@@ -7,7 +6,6 @@ using CemSys3.Interfaces.Tramite;
 using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 
 namespace CemSys3.Business.Tramite
 {

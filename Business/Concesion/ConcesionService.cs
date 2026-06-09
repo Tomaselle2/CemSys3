@@ -668,13 +668,16 @@ namespace CemSys3.Business.Concesion
                     await _historialEstadosService.Add(historial);
                 }
 
-
-                await ProcesarTitularesConHistorial(
+                if (dto.TitularesPost != null && dto.TitularesPost.Count > 0)
+                {
+                    await ProcesarTitularesConHistorial(
                     dto.TramiteId,
                     dto.TitularesPost ?? new List<PersonaDTO>(),
                     concesion,
                     null //importante
                 );
+                }
+                
 
 
 
