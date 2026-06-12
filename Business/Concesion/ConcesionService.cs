@@ -12,9 +12,12 @@ using CemSys3.Helpers.Enumerable;
 using CemSys3.Interfaces.Concesion;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Notas;
+using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Models;
+using CemSys3.ViewModels.Tramite;
+using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.EntityFrameworkCore;
 
 namespace CemSys3.Business.Concesion
@@ -577,13 +580,21 @@ namespace CemSys3.Business.Concesion
             InfoGeneralDTO dto = new InfoGeneralDTO();
             Models.Concesione concesion = await _context.Concesiones.AsNoTracking()
                .Include(c => c.Tramite)
+               .Include(p=> p.Parcela)
+                .ThenInclude(p => p.Seccion)
                .FirstOrDefaultAsync(c => c.TramiteId == idTramite) ?? throw new Exception("Concesión no encontrada.");
 
             dto.TramiteId = concesion.TramiteId;
             dto.EstadoTramiteId = concesion.Tramite.EstadoActualId;
             dto.NroConcesion = concesion.Concesion;
             dto.Vencimiento = concesion.Vencimiento;
-            
+            dto.ParcelaId = concesion.ParcelaId;
+            dto.TipoParcela = concesion.TipoParcela;
+            dto.SeccionId = concesion.Parcela.SeccionId;
+            dto.NombreSeccion = concesion.Parcela.Seccion.Nombre;
+            dto.NroParcela = concesion.Parcela.NroParcela;
+            dto.NroFila = concesion.Parcela.NroFila;
+
 
             return dto;
         }
@@ -951,6 +962,84 @@ namespace CemSys3.Business.Concesion
                         .ToList()
                     : new()
             }).ToList();
+        }
+
+        public async Task TrasladarDifuntoManualmente(int difuntoId, int parcelaNuevaId, int parcelaAntiguaId, int concesionNuevaId, int conesionAntiguaId)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                Models.Persona difunto = await _context.Personas.FirstOrDefaultAsync(p => p.Id == difuntoId) ?? throw new Exception("Difunto no encontrado.");
+                Models.Parcela parcelaNueva = await _context.Parcelas.Include(s => s.Seccion).FirstOrDefaultAsync(p => p.Id == parcelaNuevaId) ?? throw new Exception("Parcela nueva no encontrada.");
+                Models.Parcela parcelaAntigua = await _context.Parcelas.Include(s => s.Seccion).FirstOrDefaultAsync(p => p.Id == parcelaAntiguaId) ?? throw new Exception("Parcela antigua no encontrada.");
+                Models.Concesione concesionAntigua = await _context.Concesiones.FirstOrDefaultAsync(c => c.TramiteId == conesionAntiguaId) ?? throw new Exception("Concesión antigua no encontrada.");
+                Models.Concesione concesionNueva = await _context.Concesiones.FirstOrDefaultAsync(c => c.TramiteId == concesionNuevaId) ?? throw new Exception("Concesión nueva no encontrada.");
+
+                Models.ParcelaDifunto parcelaDifunto = await _context.ParcelaDifuntos
+                        .FirstOrDefaultAsync(pd => pd.ParcelaId == parcelaAntigua.Id && pd.DifuntoId == difunto.Id && pd.FechaRetiro == null) ?? throw new Exception("Registro de parcela-difunto no encontrado.");
+
+                parcelaDifunto.FechaRetiro = DateTime.Now;
+                parcelaAntigua.CantidadDifuntos -= 1;
+
+
+                //5.1 pasos por si queda la parcela vacia.
+                if (parcelaAntigua.CantidadDifuntos == 0)
+                {
+                    // cancelar la concesion.
+                    concesionAntigua.FechaFin = DateTime.Now;
+
+                    Models.Tramite tramiteConcesion = await _context.Tramites.FirstOrDefaultAsync(t => t.Id == concesionAntigua.TramiteId) ?? throw new Exception("Trámite no encontrado.");
+
+
+                    tramiteConcesion.EstadoActualId = (int)EstadosTramiteEnum.Caducado;
+                    concesionAntigua.Vencimiento = null;
+                    tramiteConcesion.FechaFinalizacion = DateTime.Now;
+                    HistorialEstadosDTO historialConcesion = new HistorialEstadosDTO
+                    {
+                        Fecha =  DateTime.Now,
+                        TramiteId = tramiteConcesion.Id,
+                        EstadoTramiteId = (int)EstadosTramiteEnum.Caducado
+                    };
+                    await _historialEstadosService.Add(historialConcesion);
+
+                    concesionAntigua.InformacionAdicional += $"\n● La concesión ({concesionAntigua.Concesion?.ToString("D5")}) ha sido cancelada/caducada automáticamente por no tener más difuntos asociados.";
+
+                    // 1. Titulares actuales activos
+                    var titularesActuales = await _context.HistorialTitularesConcesiones
+                        .Where(p => p.ConcesionId == concesionAntigua.TramiteId && p.FechaFin == null)
+                        .ToListAsync();
+
+                    // 3. Cerrar titulares
+                    foreach (var titularActual in titularesActuales)
+                    {
+                        titularActual.FechaFin = DateTime.Now;
+                    }
+                }
+
+                //7 - generar nuevo registro de parcela-difunto con la nueva parcela destino.
+                Models.ParcelaDifunto nuevoParcelaDifunto = new Models.ParcelaDifunto
+                {
+                    DifuntoId = difunto.Id,
+                    ParcelaId = parcelaNueva.Id,
+                    FechaIngreso = DateTime.Now,
+                    TramiteIngresoId = null
+                };
+                await _context.ParcelaDifuntos.AddAsync(nuevoParcelaDifunto);
+
+                //8 - actualizar la cantidad de difuntos en la parcela destino.
+                parcelaNueva.CantidadDifuntos += 1;
+                difunto.CategoriaPersonaId = (int)CategoriaPersonaEnum.Fallecido;
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+
         }
     }
 }

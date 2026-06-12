@@ -563,6 +563,48 @@ namespace CemSys3.Controllers
             return View(viewModel);
         }
 
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> TrasladarDifuntoManualmente(int tramiteId,int difuntoId, int parcelaNuevaId, int parcelaAntiguaId, int concesionNuevaId, int conesionAntiguaId)
+        {
+            try
+            {
+                if (difuntoId <= 0)
+                {
+                    TempData.SetSweetAlert(new SweetAlertDTO
+                    {
+                        Titulo = "Error",
+                        Mensaje = $"ID de difunto no válido.",
+                        Tipo = "error"
+                    });
+
+                    return RedirectToAction("ModificarConcesion", new {tramiteId = tramiteId} );
+                }
+
+                await _concesionService.TrasladarDifuntoManualmente(difuntoId, parcelaNuevaId, parcelaAntiguaId, concesionNuevaId, conesionAntiguaId);
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = $"Difunto trasladado correctamente.",
+                    Tipo = "success"
+                });
+            }
+            catch(Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al trasladar el difunto: {ex.Message}",
+                    Tipo = "error"
+                });
+
+                return RedirectToAction("ModificarConcesion", new { tramiteId = tramiteId });
+
+            }
+
+            return RedirectToAction("ModificarConcesion", new { tramiteId = tramiteId });
+        }
 
 
 

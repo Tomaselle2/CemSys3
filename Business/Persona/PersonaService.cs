@@ -188,6 +188,34 @@ namespace CemSys3.Business.Persona
             return persona;
         }
 
+        public async Task<DifuntoHistorialParcelaDTO> GetParcelaPorDifuntoId(int difuntoId)
+        {
+            Models.Persona persona = await _context.Personas.FindAsync(difuntoId) ?? throw new Exception("Persona no encontrada");
+
+
+            DifuntoHistorialParcelaDTO dto = await _context.ParcelaDifuntos.Where(p => p.DifuntoId == difuntoId && p.FechaRetiro == null).Include(p => p.Parcela).Select(f => new DifuntoHistorialParcelaDTO
+            {
+                Id = persona.Id,
+                FechaIngreso = f.FechaIngreso,
+                FechaRetiro = f.FechaRetiro,
+                Dni = persona.Dni,
+                Nombre = persona.Nombre,
+                Apellido = persona.Apellido,
+                EstadoDifunto = persona.EstadoDifuntoId,
+                IdParcela = f.ParcelaId,
+                NroParcela = f.Parcela.NroParcela,
+                NroFila = f.Parcela.NroFila,
+                NombreSeccion = f.Parcela.Seccion.Nombre,
+                TipoParcelaId = f.Parcela.TipoParcelaId,
+            }).FirstOrDefaultAsync() ?? throw new Exception("No se encontró la parcela para el difunto");
+
+            Models.Concesione concesionAntigua = await _context.Concesiones.FirstOrDefaultAsync(c => c.ParcelaId == dto.IdParcela && c.FechaFin == null) ?? throw new Exception("Concesión antigua no encontrada.");
+
+            dto.ConcesionId = concesionAntigua.TramiteId;
+
+            return dto;
+        }
+
         public async Task<HistorialPersonaDTO> HistorialPersona(int id)
         {
             HistorialPersonaDTO historial = new HistorialPersonaDTO();

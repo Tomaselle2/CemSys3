@@ -20,5 +20,7 @@ namespace CemSys3.Interfaces.Persona
             int porPagina = 10);
 
         Task CambiarCategoria(int personaId, int categoriaId);
+
+        Task<DifuntoHistorialParcelaDTO> GetParcelaPorDifuntoId(int difuntoId);
     }
 }

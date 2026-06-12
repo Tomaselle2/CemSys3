@@ -44,5 +44,7 @@ namespace CemSys3.Interfaces.Concesion
            DateOnly? fechaDesde = null,
            DateOnly? fechaHasta = null);
 
+        Task TrasladarDifuntoManualmente(int difuntoId, int parcelaNuevaId, int parcelaAntiguaId, int concesionNuevaId, int conesionAntiguaId);
+
     }
 }

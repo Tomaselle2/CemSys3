@@ -1,5 +1,4 @@
-﻿using CemSys3.Business.TramiteConcesion;
-using CemSys3.DTOs.Paginacion;
+﻿using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
@@ -271,6 +270,61 @@ namespace CemSys3.Controllers
             }
             catch (Exception ex)
             {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> BuscarPersonaId(int id)
+        {
+            try 
+            {
+                if (id <= 0)
+                {
+                    return Json(new { success = false, message = "ID de persona inválido" });
+                }
+
+                PersonaDTO persona = await _personaService.Get(id);
+                DifuntoHistorialParcelaDTO parcela = await _personaService.GetParcelaPorDifuntoId(id);
+
+                if (persona != null)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        result = new
+                        {
+                            id = persona.Id,
+                            nombre = persona.Nombre,
+                            apellido = persona.Apellido,
+                            dni = persona.Dni,
+                            parcelaAntiguaId = parcela.IdParcela,
+                            nroParcela = parcela.NroParcela,
+                            nroFila = parcela.NroFila,
+                            nombreSeccion = parcela.NombreSeccion,
+                            tipoParcela = parcela.TipoParcelaId,
+                            concesionAntiguaId = parcela.ConcesionId
+                        }
+                    });
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        id = id, // Devolver el ID aunque no se encuentre la persona
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                // Si el mensaje indica que no existe, tratarlo como "no encontrado"
+                if (ex.Message.Contains("no encontrada") || ex.Message.Contains("not found"))
+                {
+                    return Json(new { success = true, id = id });
+                }
                 return Json(new { success = false, message = ex.Message });
             }
         }

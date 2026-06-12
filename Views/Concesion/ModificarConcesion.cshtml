@@ -145,6 +145,19 @@
                 </div>
 
             </div>
+
+            <div class="cardConcesion">
+                <div class="cardConcesion-content">
+                    <!-- Botón para abrir el modal -->
+                    <button type="button"
+                            class="btn btn-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#trasladarDifuntoModal">
+                        <i class="bi bi-arrow-left-right"></i> Trasladar difunto
+                    </button>
+                </div>
+            </div>
+
         </div>
 
 
@@ -273,7 +286,119 @@
     </div>
 </div>
 
+<!-- Modal trasladar difunto -->
+<div class="modal fade"
+     id="trasladarDifuntoModal"
+     tabindex="-1"
+     aria-labelledby="trasladarDifuntoModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
 
+            <div class="modal-header">
+                <h5 class="modal-title" id="trasladarDifuntoModalLabel">
+                    Trasladar difunto a esta parcela
+                </h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <!-- Buscador -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Ingrese el ID del fallecido</label>
+                    <div class="input-group">
+                        <input type="number"
+                               class="form-control"
+                               id="inputIdDifunto"
+                               placeholder="ID"
+                               autocomplete="off"
+                               min="1" />
+                        <button type="button"
+                                class="btn btn-primary"
+                                id="btnBuscarDifunto">
+                            <span id="btnBuscarTexto">Buscar</span>
+                            <span id="btnBuscarSpinner"
+                                  class="spinner-border spinner-border-sm d-none"
+                                  role="status">
+                            </span>
+                        </button>
+                    </div>
+                    <div id="mensajeBusqueda" class="form-text text-danger d-none"></div>
+                </div>
+
+                <!-- Datos del difunto -->
+                <div class="row g-2 mb-2">
+                    <div class="col-4">
+                        <label class="form-label">DNI</label>
+                        <input class="form-control"
+                               id="campoDni"
+                               type="text"
+                               disabled
+                               placeholder="DNI" />
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label">Nombre</label>
+                        <input class="form-control"
+                               id="campoNombre"
+                               type="text"
+                               disabled
+                               placeholder="Nombre" />
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label">Apellido</label>
+                        <input class="form-control"
+                               id="campoApellido"
+                               type="text"
+                               disabled
+                               placeholder="Apellido" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Ubicación actual</label>
+                    <input class="form-control"
+                           type="text"
+                           id="campoUbicacion"
+                           disabled
+                           placeholder="Ubicación actual" />
+                </div>
+
+                <!-- Destino (solo lectura, viene del InfoGeneralDTO) -->
+                <div class="alert alert-info py-2 mb-0 d-none" id="alertaDestino">
+                    <small>
+                        <strong>Destino:</strong>
+                        <span id="textoDestino"></span>
+                    </small>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="button"
+                        class="btn btn-success"
+                        id="btnTrasladar"
+                        disabled>
+                    <span id="btnTrasladarTexto">Trasladar</span>
+                    <span id="btnTrasladarSpinner"
+                          class="spinner-border spinner-border-sm d-none"
+                          role="status">
+                    </span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 @{
     var jsonOptions = new System.Text.Json.JsonSerializerOptions
@@ -301,11 +426,226 @@
     var titularesJson = System.Text.Json.JsonSerializer.Serialize((object?)titularesProjection ?? System.Array.Empty<object>(), jsonOptions);
 }
 
+@{
+    int tipoParcelaNueva = 0;
+    if (!string.IsNullOrEmpty(Model.DtoInfo.TipoParcela) && Enum.TryParse(typeof(TipoParcelaEnum), Model.DtoInfo.TipoParcela, out var tipoParcelaObj))
+    {
+        tipoParcelaNueva = (int)tipoParcelaObj;
+    }
+}
+
 
 @* Renderizamos el manejador pasándole el DTO del modelo *@
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
 
 @section Scripts {
+
+    <script>
+        (function () {
+            // ─── Datos de la concesión DESTINO (vienen del ViewModel) ───────────────
+            const tramiteId       = @Model.DtoInfo.TramiteId;        // = concesionNuevaId
+            const parcelaNuevaId  = @Model.DtoInfo.ParcelaId;
+            const concesionNuevaId = tramiteId;                      // son el mismo
+
+            // Formato legible del destino usando la clase estática del servidor
+            // (lo construimos en JS con los mismos datos)
+            const tipoParcelaNueva = @tipoParcelaNueva;
+            const nroParcelaNueva    = @Model.DtoInfo.NroParcela;
+            const nroFilaNueva       = @Model.DtoInfo.NroFila;
+            const seccionNueva       = '@Model.DtoInfo.NombreSeccion';
+
+            // ─── Estado del difunto encontrado ──────────────────────────────────────
+            let difuntoEncontrado = null;   // { id, parcelaAntiguaId, concesionAntiguaId, ubicacion }
+
+            // ─── Referencias DOM ────────────────────────────────────────────────────
+            const modal           = document.getElementById('trasladarDifuntoModal');
+            const inputId         = document.getElementById('inputIdDifunto');
+            const btnBuscar       = document.getElementById('btnBuscarDifunto');
+            const btnBuscarTxt    = document.getElementById('btnBuscarTexto');
+            const btnBuscarSpin   = document.getElementById('btnBuscarSpinner');
+            const mensajeError    = document.getElementById('mensajeBusqueda');
+            const campoDni        = document.getElementById('campoDni');
+            const campoNombre     = document.getElementById('campoNombre');
+            const campoApellido   = document.getElementById('campoApellido');
+            const campoUbicacion  = document.getElementById('campoUbicacion');
+            const alertaDestino   = document.getElementById('alertaDestino');
+            const textoDestino    = document.getElementById('textoDestino');
+            const btnTrasladar    = document.getElementById('btnTrasladar');
+            const btnTrasladarTxt = document.getElementById('btnTrasladarTexto');
+            const btnTrasladarSpin= document.getElementById('btnTrasladarSpinner');
+
+            // ─── Helpers ────────────────────────────────────────────────────────────
+            function obtenerUbicacion(tipoParcela, nroParcela, nroFila, nombreSeccion) {
+                if (!tipoParcela) return '';
+                const sec = (nombreSeccion || '').toUpperCase();
+                switch (tipoParcela) {
+                    case 1: return `NICHO ${nroParcela} SECC ${sec} FILA ${nroFila}`;   // Nicho
+                    case 2: return `FOSA ${nroParcela} SECC ${sec}`;                     // Fosa
+                    case 3: return `LOTE ${nroParcela} SECC ${sec} (panteón)`;           // Panteón
+                    default: return '';
+                }
+            }
+
+            function limpiarCampos() {
+                campoDni.value        = '';
+                campoNombre.value     = '';
+                campoApellido.value   = '';
+                campoUbicacion.value  = '';
+                mensajeError.textContent = '';
+                mensajeError.classList.add('d-none');
+                btnTrasladar.disabled = true;
+                difuntoEncontrado     = null;
+            }
+
+            function mostrarError(msg) {
+                mensajeError.textContent = msg;
+                mensajeError.classList.remove('d-none');
+                limpiarCampos();
+                mensajeError.textContent = msg;   // re-set porque limpiarCampos lo borra
+                mensajeError.classList.remove('d-none');
+            }
+
+            // ─── Mostrar destino al abrir el modal ───────────────────────────────────
+            modal.addEventListener('show.bs.modal', function () {
+                limpiarCampos();
+                inputId.value = '';
+                const destino = obtenerUbicacion(tipoParcelaNueva, nroParcelaNueva, nroFilaNueva, seccionNueva);
+                textoDestino.textContent = destino || 'Parcela actual de la concesión';
+                alertaDestino.classList.remove('d-none');
+            });
+
+            // ─── Buscar al pulsar Enter ───────────────────────────────────────────────
+            inputId.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') btnBuscar.click();
+            });
+
+            // ─── Limpiar si cambia el input ───────────────────────────────────────────
+            inputId.addEventListener('input', function () {
+                limpiarCampos();
+            });
+
+            // ─── Búsqueda principal ──────────────────────────────────────────────────
+            btnBuscar.addEventListener('click', async function () {
+                const id = parseInt(inputId.value);
+                if (!id || id <= 0) {
+                    mostrarError('Ingrese un ID válido.');
+                    return;
+                }
+
+                // UI: loading
+                btnBuscar.disabled    = true;
+                btnBuscarTxt.textContent = '';
+                btnBuscarSpin.classList.remove('d-none');
+                limpiarCampos();
+
+                try {
+                    const resp = await fetch(`/Persona/BuscarPersonaId?id=${id}`);
+                    const data = await resp.json();
+
+                    if (!data.success) {
+                        mostrarError(data.message || 'Error al buscar el difunto.');
+                        return;
+                    }
+
+                    // Persona no encontrada (el endpoint devuelve success:true pero sin result)
+                    if (!data.result) {
+                        mostrarError('No se encontró ningún difunto con ese ID.');
+                        return;
+                    }
+
+                    const r = data.result;
+
+                    // Validar que la parcela origen no sea la misma que el destino
+                    if (r.nroParcela === nroParcelaNueva && r.nombreSeccion === seccionNueva) {
+                        mostrarError('El difunto ya se encuentra en esta parcela.');
+                        return;
+                    }
+
+                    // Rellenar campos
+                    campoDni.value       = r.dni       || '';
+                    campoNombre.value    = r.nombre    || '';
+                    campoApellido.value  = r.apellido  || '';
+                    campoUbicacion.value = obtenerUbicacion(r.tipoParcela, r.nroParcela, r.nroFila, r.nombreSeccion);
+
+                    // Guardar estado para el traslado
+                    difuntoEncontrado = {
+                        id:               r.id,
+                        parcelaAntiguaId: r.parcelaAntiguaId,   
+                        concesionAntiguaId: r.concesionAntiguaId // ídem
+                    };
+
+                    btnTrasladar.disabled = false;
+
+                } catch (err) {
+                    mostrarError('Error de conexión al buscar el difunto.');
+                    console.error(err);
+                } finally {
+                    btnBuscar.disabled = false;
+                    btnBuscarTxt.textContent = 'Buscar';
+                    btnBuscarSpin.classList.add('d-none');
+                }
+            });
+
+            // ─── Traslado ────────────────────────────────────────────────────────────
+                    btnTrasladar.addEventListener('click', async function () {
+            if (!difuntoEncontrado) return;
+
+            const result = await Swal.fire({
+                title: '¿Confirmar traslado?',
+                html: `
+                    <div style="text-align:left; margin-top:10px;">
+                        <p><strong>Difunto:</strong> ${campoNombre.value} ${campoApellido.value}</p>
+                        <p><strong>Desde:</strong> ${campoUbicacion.value}</p>
+                        <p><strong>Hacia:</strong> ${textoDestino.textContent}</p>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, trasladar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#6c757d',
+                reverseButtons: true
+            });
+
+            if (!result.isConfirmed) return;
+
+            // UI: loading
+            btnTrasladar.disabled = true;
+            btnTrasladarTxt.textContent = '';
+            btnTrasladarSpin.classList.remove('d-none');
+
+            try {
+                const params = new URLSearchParams({
+                    tramiteId:         tramiteId,
+                    difuntoId:         difuntoEncontrado.id,
+                    parcelaNuevaId:    parcelaNuevaId,
+                    parcelaAntiguaId:  difuntoEncontrado.parcelaAntiguaId,
+                    concesionNuevaId:  concesionNuevaId,
+                    conesionAntiguaId: difuntoEncontrado.concesionAntiguaId
+                });
+
+                const resp = await fetch(`/Concesion/TrasladarDifuntoManualmente?${params.toString()}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    }
+                });
+
+                window.location.href = resp.url;
+
+            } catch (err) {
+                console.error(err);
+                btnTrasladar.disabled = false;
+                btnTrasladarTxt.textContent = 'Trasladar';
+                btnTrasladarSpin.classList.add('d-none');
+            }
+        });
+
+        })();
+    </script>
+
+
     <script>
          // Elementos del DOM
         const nroConcesionInput = document.getElementById('nroConcesion');

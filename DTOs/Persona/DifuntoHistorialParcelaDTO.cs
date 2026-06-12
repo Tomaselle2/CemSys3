@@ -15,5 +15,8 @@
         public int? NroFila { get; set; }
         public string? NombreSeccion { get; set; }
         public int? TipoParcelaId { get; set; }
+
+        public int ConcesionId { get; set; }
+
     }
 }
