@@ -330,7 +330,14 @@
                     </div>
                     <div id="mensajeBusqueda" class="form-text text-danger d-none"></div>
                 </div>
-
+                <div class="mb-3">
+                    <label class="form-label">Fecha de ingreso</label>
+                    <input class="form-control"
+                           type="datetime-local"
+                           id="campoFechaInicio"
+                           required
+                           placeholder="Fecha de inicio" />
+                </div>
                 <!-- Datos del difunto -->
                 <div class="row g-2 mb-2">
                     <div class="col-4">
@@ -367,6 +374,7 @@
                            disabled
                            placeholder="Ubicación actual" />
                 </div>
+
 
                 <!-- Destino (solo lectura, viene del InfoGeneralDTO) -->
                 <div class="alert alert-info py-2 mb-0 d-none" id="alertaDestino">
@@ -473,7 +481,7 @@
             const btnTrasladar    = document.getElementById('btnTrasladar');
             const btnTrasladarTxt = document.getElementById('btnTrasladarTexto');
             const btnTrasladarSpin= document.getElementById('btnTrasladarSpinner');
-
+            const campoFechaInicio   = document.getElementById('campoFechaInicio');
             // ─── Helpers ────────────────────────────────────────────────────────────
             function obtenerUbicacion(tipoParcela, nroParcela, nroFila, nombreSeccion) {
                 if (!tipoParcela) return '';
@@ -491,6 +499,7 @@
                 campoNombre.value     = '';
                 campoApellido.value   = '';
                 campoUbicacion.value  = '';
+                campoFechaInicio.value = '';
                 mensajeError.textContent = '';
                 mensajeError.classList.add('d-none');
                 btnTrasladar.disabled = true;
@@ -566,7 +575,7 @@
                     campoNombre.value    = r.nombre    || '';
                     campoApellido.value  = r.apellido  || '';
                     campoUbicacion.value = obtenerUbicacion(r.tipoParcela, r.nroParcela, r.nroFila, r.nombreSeccion);
-
+                    campoFechaInicio.value = r.fechaInicio || '';
                     // Guardar estado para el traslado
                     difuntoEncontrado = {
                         id:               r.id,
@@ -597,6 +606,9 @@
                         <p><strong>Difunto:</strong> ${campoNombre.value} ${campoApellido.value}</p>
                         <p><strong>Desde:</strong> ${campoUbicacion.value}</p>
                         <p><strong>Hacia:</strong> ${textoDestino.textContent}</p>
+                        <p><strong>Fecha de ingreso:</strong> ${
+                            new Date(campoFechaInicio.value).toLocaleString('es-AR')
+                        }</p>
                     </div>
                 `,
                 icon: 'warning',
@@ -622,7 +634,8 @@
                     parcelaNuevaId:    parcelaNuevaId,
                     parcelaAntiguaId:  difuntoEncontrado.parcelaAntiguaId,
                     concesionNuevaId:  concesionNuevaId,
-                    conesionAntiguaId: difuntoEncontrado.concesionAntiguaId
+                    conesionAntiguaId: difuntoEncontrado.concesionAntiguaId,
+                    fechaInicio:       campoFechaInicio.value
                 });
 
                 const resp = await fetch(`/Concesion/TrasladarDifuntoManualmente?${params.toString()}`, {

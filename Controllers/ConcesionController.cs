@@ -565,7 +565,7 @@ namespace CemSys3.Controllers
 
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> TrasladarDifuntoManualmente(int tramiteId,int difuntoId, int parcelaNuevaId, int parcelaAntiguaId, int concesionNuevaId, int conesionAntiguaId)
+        public async Task<IActionResult> TrasladarDifuntoManualmente(int tramiteId,int difuntoId, int parcelaNuevaId, int parcelaAntiguaId, int concesionNuevaId, int conesionAntiguaId, DateTime? fechaInicio)
         {
             try
             {
@@ -581,7 +581,19 @@ namespace CemSys3.Controllers
                     return RedirectToAction("ModificarConcesion", new {tramiteId = tramiteId} );
                 }
 
-                await _concesionService.TrasladarDifuntoManualmente(difuntoId, parcelaNuevaId, parcelaAntiguaId, concesionNuevaId, conesionAntiguaId);
+                if (fechaInicio == null)
+                {
+                    TempData.SetSweetAlert(new SweetAlertDTO
+                    {
+                        Titulo = "Error",
+                        Mensaje = $"Fecha de ingreso no válida.",
+                        Tipo = "error"
+                    });
+
+                    return RedirectToAction("ModificarConcesion", new { tramiteId = tramiteId });
+                }
+
+                await _concesionService.TrasladarDifuntoManualmente(difuntoId, parcelaNuevaId, parcelaAntiguaId, concesionNuevaId, conesionAntiguaId, fechaInicio);
 
                 TempData.SetSweetAlert(new SweetAlertDTO
                 {

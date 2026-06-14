@@ -964,7 +964,7 @@ namespace CemSys3.Business.Concesion
             }).ToList();
         }
 
-        public async Task TrasladarDifuntoManualmente(int difuntoId, int parcelaNuevaId, int parcelaAntiguaId, int concesionNuevaId, int conesionAntiguaId)
+        public async Task TrasladarDifuntoManualmente(int difuntoId, int parcelaNuevaId, int parcelaAntiguaId, int concesionNuevaId, int conesionAntiguaId, DateTime? fechaInicio)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
 
@@ -1022,7 +1022,7 @@ namespace CemSys3.Business.Concesion
                 {
                     DifuntoId = difunto.Id,
                     ParcelaId = parcelaNueva.Id,
-                    FechaIngreso = DateTime.Now,
+                    FechaIngreso = fechaInicio ?? DateTime.Now,
                     TramiteIngresoId = null
                 };
                 await _context.ParcelaDifuntos.AddAsync(nuevoParcelaDifunto);

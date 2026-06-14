@@ -382,23 +382,34 @@ new HistorialOffcanvasVM
                 <option value="">-- Seleccione una opción --</option>
 
                 @{
-                    var porcentaje = Model.PreciosAperturas
-                    .FirstOrDefault(x => x.ConceptoId == (int)ConceptosTarifariaEnum.PorcentajeFondoAyudaCentroSalud);
+                    // 1. Extraemos el objeto del fondo de salud
+                    var itemPorcentaje = Model.PreciosAperturas
+                        .FirstOrDefault(x => x.ConceptoId == (int)ConceptosTarifariaEnum.PorcentajeFondoAyudaCentroSalud);
 
+                    // 2. Nos aseguramos de tener el valor numérico puro en una variable C# local
+                    decimal valorPorcentajeCapa = itemPorcentaje != null ? itemPorcentaje.PrecioBase : 0m;
+
+                    // 3. Si el porcentaje guardado en BD es un entero (ej: 10 para 10%), lo normalizamos a coeficiente (0.10)
+                    if (valorPorcentajeCapa > 1)
+                    {
+                        valorPorcentajeCapa = valorPorcentajeCapa / 100;
+                    }
+
+                    // 4. Filtramos las aperturas reales
                     var aperturas = Model.PreciosAperturas
-                    .Where(x => x.ConceptoId != (int)ConceptosTarifariaEnum.PorcentajeFondoAyudaCentroSalud);
+                        .Where(x => x.ConceptoId != (int)ConceptosTarifariaEnum.PorcentajeFondoAyudaCentroSalud);
 
                     foreach (var apertura in aperturas)
                     {
-                        decimal montoFondo = porcentaje != null
-                        ? apertura.PrecioBase * (porcentaje.PrecioBase)
-                        : 0;
-
+                        // Calculamos el total para mostrarlo en el texto del select usando el coeficiente normalizado
+                        decimal montoFondo = apertura.PrecioBase * valorPorcentajeCapa;
                         decimal total = apertura.PrecioBase + montoFondo;
 
-                        <option value="@apertura.ConceptoId"
-                                data-base="@apertura.PrecioBase"
-                                data-porcentaje="@(porcentaje?.PrecioBase ?? 0)">
+                        // Formateamos los atributos con cultura invariante para evitar problemas de comas/puntos en JS
+                        string strBase = apertura.PrecioBase.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        string strPorcentaje = valorPorcentajeCapa.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+                        <option value="@apertura.ConceptoId" data-base="@strBase" data-porcentaje="@strPorcentaje">
                             @apertura.Nombre (@total.ToString("C"))
                         </option>
                     }
@@ -409,7 +420,6 @@ new HistorialOffcanvasVM
         <div id="contenedorTablaApertura" style="display:none; margin-top:20px;"></div>
 
     </div>
-
 }
 
 
@@ -737,63 +747,76 @@ new ArchivoVM
                 });
             }
 
-            if (selectApertura) {
-                selectApertura.addEventListener('change', function () {
+                           if (selectApertura) {
+            selectApertura.addEventListener('change', function () {
 
-                    const option = this.options[this.selectedIndex];
+                const option = this.options[this.selectedIndex];
 
-                    if (!option.value) {
-                        contenedorTablaApertura.style.display = 'none';
-                        return;
-                    }
+                if (!option.value) {
+                    contenedorTablaApertura.style.display = 'none';
+                    if (cobroAperturaInput) cobroAperturaInput.value = "No se cobra apertura";
+                    return;
+                }
 
-                    const nombre = option.text.split(' (')[0];
-                    const precioBase = parseFloat(option.dataset.base);
-                    const porcentaje = parseFloat(option.dataset.porcentaje);
+                // Forzamos el parseo y aseguramos un valor por defecto (0) si falla
+                const nombre = option.text.split(' (')[0];
+                const precioBase = parseFloat(option.dataset.base) || 0;
+                let porcentaje = parseFloat(option.dataset.porcentaje) || 0;
 
-                    const montoFondo = precioBase * (porcentaje);
-                    const total = precioBase + montoFondo;
+                // REGLA DE VALIDACIÓN: Si el porcentaje viene como entero (ej: 10 en vez de 0.10), lo convertimos a coeficiente
+                if (porcentaje > 1) {
+                    porcentaje = porcentaje / 100;
+                }
 
-                    contenedorTablaApertura.innerHTML = `
-                        <table>
-                            <tr>
-                                <th colspan="2" style="font-size:16px;">APERTURA</th>
-                                <th>${new Date().getFullYear()}</th>
-                            </tr>
+                // Calculamos el monto real del fondo y el total definitivo
+                const montoFondo = precioBase * porcentaje;
+                const total = precioBase + montoFondo;
 
-                            <tr>
-                                <th>Concepto</th>
-                                <th></th>
-                                <th>Importe</th>
-                            </tr>
+                // Multiplicamos por 100 para mostrar de forma amigable en la tabla (ej: 10%)
+                const porcentajeMostrar = (porcentaje * 100).toLocaleString('es-AR', { maximumFractionDigits: 2 });
 
-                            <tr>
-                                <td class="bold">${nombre}</td>
-                                <td></td>
-                                <td class="right">${precioBase.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}</td>
-                            </tr>
+                contenedorTablaApertura.innerHTML = `
+                    <table>
+                        <tr>
+                            <th colspan="2" style="font-size:16px;">APERTURA</th>
+                            <th>${new Date().getFullYear()}</th>
+                        </tr>
 
-                            <tr>
-                                <td>% Fondo ayuda centro salud (${(porcentaje*100)}%)</td>
-                                <td></td>
-                                <td class="right">${montoFondo.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}</td>
-                            </tr>
+                        <tr>
+                            <th>Concepto</th>
+                            <th></th>
+                            <th>Importe</th>
+                        </tr>
 
-                            <tr class="total-ingreso">
-                                <td colspan="2" class="bold">TOTAL APERTURA</td>
-                                <td class="right bold">
-                                    ${total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}
-                                </td>
-                            </tr>
-                        </table>
-                    `;
+                        <tr>
+                            <td class="bold">${nombre}</td>
+                            <td></td>
+                            <td class="right">${precioBase.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}</td>
+                        </tr>
 
-                    contenedorTablaApertura.style.display = 'block';
+                        <tr>
+                            <td>% Fondo ayuda centro salud (${porcentajeMostrar}%)</td>
+                            <td></td>
+                            <td class="right">${montoFondo.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}</td>
+                        </tr>
 
-                    // Guardar valor para enviar al controller
+                        <tr class="total-ingreso">
+                            <td colspan="2" class="bold">TOTAL APERTURA</td>
+                            <td class="right bold">
+                                ${total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}
+                            </td>
+                        </tr>
+                    </table>
+                `;
+
+                contenedorTablaApertura.style.display = 'block';
+
+                // Guardar valor formateado para enviar al controller
+                if (cobroAperturaInput) {
                     cobroAperturaInput.value = `${nombre} (${total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })})`;
-                });
-}
+                }
+            });
+        }
 
 
 
