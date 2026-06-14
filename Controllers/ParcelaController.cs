@@ -3,12 +3,14 @@ using CemSys3.DTOs.Parcela;
 using CemSys3.DTOs.Seccion;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
+using CemSys3.Helpers.Enumerable;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Seccion;
 using CemSys3.Models;
 using CemSys3.ViewModels.Parcela;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -99,7 +101,8 @@ namespace CemSys3.Controllers
             {
                 viewModel.Historial = await _parcelaService.HistorialParcela(parcelaId);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 viewModel.SweetAlert = new SweetAlertDTO
                 {
                     Titulo = "Error",
@@ -133,7 +136,7 @@ namespace CemSys3.Controllers
                     Tipo = "success"
                 });
 
-               return RedirectToAction("HistorialParcela", new { parcelaId = viewModel.Historial.Id });
+                return RedirectToAction("HistorialParcela", new { parcelaId = viewModel.Historial.Id });
             }
             catch (Exception ex)
             {
@@ -146,6 +149,91 @@ namespace CemSys3.Controllers
 
                 return View(viewModel);
             }
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado, RolUsuario.Administrador)]
+        public async Task<IActionResult> ExportarNichosDisponibles()
+        {
+            var datos = await _parcelaService.GetAllNichosDisponibles();
+
+            using var wb = new XLWorkbook();
+            var ws = wb.Worksheets.Add("Nichos Disponibles");
+
+            // Estilo encabezado de sección
+            var estiloSeccion = ws.Style;
+
+            int fila = 1;
+
+            // Agrupar por sección
+            var porSeccion = datos
+                .GroupBy(p => new { p.SeccionId, p.NombreSeccion })
+                .OrderBy(g => g.Key.NombreSeccion);
+
+            bool primeraSeccion = true;
+
+            foreach (var seccion in porSeccion)
+            {
+                if (!primeraSeccion)
+                {
+                    // 3 filas vacías entre secciones
+                    fila += 3;
+                }
+                primeraSeccion = false;
+
+                // ── Título de sección ──
+                var celdaTitulo = ws.Cell(fila, 1);
+                celdaTitulo.Value = $"SECCIÓN: {seccion.Key.NombreSeccion?.ToUpper()}";
+                celdaTitulo.Style.Font.Bold = true;
+                celdaTitulo.Style.Font.FontSize = 12;
+                celdaTitulo.Style.Fill.BackgroundColor = XLColor.FromHtml("#2E75B6");
+                celdaTitulo.Style.Font.FontColor = XLColor.White;
+                ws.Range(fila, 1, fila, 3).Merge();
+                ws.Range(fila, 1, fila, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                fila++;
+
+                // ── Encabezados de columna ──
+                string[] headers = { "Sección", "Parcela", "Tipo de Nicho" };
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    var cell = ws.Cell(fila, i + 1);
+                    cell.Value = headers[i];
+                    cell.Style.Font.Bold = true;
+                    cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#BDD7EE");
+                    cell.Style.Font.FontColor = XLColor.Black;
+                    cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    cell.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+                }
+                fila++;
+
+                // ── Filas de datos ──
+                foreach (var nicho in seccion.OrderBy(p => p.NroFila).ThenBy(p => p.NroParcela))
+                {
+                    string parcela = $"Nicho {nicho.NroParcela} - Fila {nicho.NroFila}";
+                    string tipoNicho = EnumHelper.GetDisplayNameByValue<TipoNichoEnum>(nicho.TipoNichoId ?? 0);
+
+                    ws.Cell(fila, 1).Value = nicho.NombreSeccion?.ToUpper() ?? "";
+                    ws.Cell(fila, 2).Value = parcela;
+                    ws.Cell(fila, 3).Value = tipoNicho;
+
+                    // Filas alternas para mejor legibilidad
+                    if (fila % 2 == 0)
+                        ws.Row(fila).Style.Fill.BackgroundColor = XLColor.FromHtml("#F2F7FB");
+
+                    fila++;
+                }
+            }
+
+            ws.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            wb.SaveAs(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            string fileName = $"NichosDisponibles_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+            return File(stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                fileName);
         }
     }
 }

@@ -24,5 +24,7 @@ namespace CemSys3.Interfaces.Parcela
         Task<ParcelaHistorialDTO> HistorialParcela(int parcelaId);
 
         Task UpdateParcela(ModificarParcelaDTO dto);
+
+        Task<IEnumerable<ParcelaDTO>> GetAllNichosDisponibles();
     }
 }

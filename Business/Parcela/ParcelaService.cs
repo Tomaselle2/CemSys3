@@ -331,5 +331,20 @@ namespace CemSys3.Business.Parcela
             
             await _context.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<ParcelaDTO>> GetAllNichosDisponibles()
+        {
+            return await _context.Parcelas.Where(p => p.TipoParcelaId == (int)TipoParcelaEnum.Nicho && p.CantidadDifuntos == 0).AsNoTracking()
+                .Select(p => new ParcelaDTO
+                {
+                    Id = p.Id,
+                    NroParcela = p.NroParcela,
+                    NroFila = p.NroFila,
+                    NombreSeccion = p.Seccion.Nombre,
+                    SeccionId = p.SeccionId,
+                    TipoParcelaId = p.TipoParcelaId ?? 0,
+                    TipoNichoId = p.TipoNichoId ?? 0
+                }).ToListAsync();
+        }
     }
 }
