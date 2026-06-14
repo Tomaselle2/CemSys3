@@ -12,11 +12,9 @@ using CemSys3.Helpers.Enumerable;
 using CemSys3.Interfaces.Concesion;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Notas;
-using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Models;
-using CemSys3.ViewModels.Tramite;
 using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.EntityFrameworkCore;
 
@@ -1040,6 +1038,65 @@ namespace CemSys3.Business.Concesion
                 throw;
             }
 
+        }
+
+        public async Task CaducarConcesion(int concesionId)
+        {
+            using var transaction = _context.Database.BeginTransaction();
+
+            try
+            {
+                Models.Concesione concesion = await _context.Concesiones
+                   .FirstOrDefaultAsync(c => c.TramiteId == concesionId) ?? throw new Exception("Concesion no encontrada.");
+
+                concesion.FechaFin = DateTime.Now;
+
+                Models.Tramite tramiteConcesion = await _context.Tramites.FirstOrDefaultAsync(t => t.Id == concesion.TramiteId) ?? throw new Exception("Trámite no encontrado.");
+
+
+                tramiteConcesion.EstadoActualId = (int)EstadosTramiteEnum.Caducado;
+                concesion.Vencimiento = null;
+                tramiteConcesion.FechaFinalizacion = DateTime.Now;
+
+                HistorialEstadosDTO historialConcesion = new HistorialEstadosDTO
+                {
+                    Fecha = DateTime.Now,
+                    TramiteId = tramiteConcesion.Id,
+                    EstadoTramiteId = (int)EstadosTramiteEnum.Caducado
+                };
+                await _historialEstadosService.Add(historialConcesion);
+
+                concesion.InformacionAdicional += $"\n●El {DateTime.Now.ToString("dd/MM/yyyy HH:mm")} la concesión ({concesion.Concesion?.ToString("D5")}) ha sido cancelada/caducada manualmente.";
+
+                // 1. Titulares actuales activos
+                var titularesActuales = await _context.HistorialTitularesConcesiones
+                    .Where(p => p.ConcesionId == concesion.TramiteId && p.FechaFin == null)
+                    .ToListAsync();
+
+                // 3. Cerrar titulares
+                foreach (var titularActual in titularesActuales)
+                {
+                    titularActual.FechaFin = DateTime.Now;
+                }
+
+                // 4. Retirar difuntos asociados a la parcela
+                var parcelaDifuntos = await _context.ParcelaDifuntos
+                    .Where(pd => pd.ParcelaId == concesion.ParcelaId && pd.FechaRetiro == null)
+                    .ToListAsync();
+
+                foreach (var pd in parcelaDifuntos)
+                {
+                    pd.FechaRetiro = DateTime.Now;
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception("Error al caducar la concesión: " + ex.Message);
+            }
         }
     }
 }

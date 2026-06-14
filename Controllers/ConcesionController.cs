@@ -619,6 +619,46 @@ namespace CemSys3.Controllers
         }
 
 
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> CaducarConcesion(int concesionId)
+        {
+            if(concesionId == 0)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"ID de concesión no válido.",
+                    Tipo = "error"
+                });
+
+                return RedirectToAction("TablaGeneral");
+            }
+
+            try
+            {
+                await _concesionService.CaducarConcesion(concesionId);
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = $"Concesión caducada correctamente.",
+                    Tipo = "success"
+                });
+                return RedirectToAction("ModificarConcesion", new { tramiteId = concesionId });
+
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al caducar la concesión: {ex.Message}",
+                    Tipo = "error"
+                });
+                return RedirectToAction("ModificarConcesion", new { tramiteId = concesionId });
+            }
+        }
 
         // ─── Exportar Excel ────────────────────────────────────────────────────
         [HttpGet]

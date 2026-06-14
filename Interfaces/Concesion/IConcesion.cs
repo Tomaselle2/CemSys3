@@ -1,6 +1,7 @@
 ﻿using CemSys3.DTOs.Concesion;
 using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Paginacion;
+using iText.Signatures;
 
 namespace CemSys3.Interfaces.Concesion
 {
@@ -46,5 +47,6 @@ namespace CemSys3.Interfaces.Concesion
 
         Task TrasladarDifuntoManualmente(int difuntoId, int parcelaNuevaId, int parcelaAntiguaId, int concesionNuevaId, int conesionAntiguaId, DateTime? fechaInicio);
 
+        Task CaducarConcesion(int concesionId);
     }
 }
