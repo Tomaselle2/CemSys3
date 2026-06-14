@@ -47,7 +47,7 @@ namespace CemSys3.Business.CargaDifunto
                     Visibilidad = true,
                     FechaNacimiento = dto.Difunto.FechaNacimiento,
                     FechaDefuncion = dto.Difunto.FechaDefuncion,
-                    InformacionAdicional = dto.Difunto.InformacionAdicional,
+                    InformacionAdicional = "\n" + dto.Difunto.InformacionAdicional,
                     Sexo = dto.Difunto.Sexo,
                     NroActa = dto.Difunto.NroActa,
                     NroFolio = dto.Difunto.NroFolio,

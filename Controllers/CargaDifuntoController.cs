@@ -1,8 +1,5 @@
-﻿using CemSys3.Business.Ingreso;
-using CemSys3.Business.Persona;
-using CemSys3.DTOs.CargaDifunto;
+﻿using CemSys3.DTOs.CargaDifunto;
 using CemSys3.DTOs.Generics;
-using CemSys3.DTOs.Ingreso;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
@@ -10,22 +7,18 @@ using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.CargaDifunto;
 using CemSys3.Interfaces.Persona;
-using CemSys3.Interfaces.Usuario;
 using CemSys3.ViewModels.CargaDifunto;
-using CemSys3.ViewModels.Ingreso;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CemSys3.Controllers
 {
     public class CargaDifuntoController : Controller
     {
-        private readonly IUsuario _usuarioService;
         private readonly IPersona _personaService;
         private readonly ICargaDifunto _cargaDifuntoService;
 
-        public CargaDifuntoController(IUsuario usuario, IPersona persona, ICargaDifunto cargaDifunto)
+        public CargaDifuntoController(IPersona persona, ICargaDifunto cargaDifunto)
         {
-            _usuarioService = usuario;
             _personaService = persona;
             _cargaDifuntoService = cargaDifunto;
         }

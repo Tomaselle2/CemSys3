@@ -588,7 +588,8 @@
             if (titulares.length === 0) {
                 valido = false;
                 AlertService.show("Verificar", "Debe agregar al menos un titular", "warning");
-
+                btnGenerar.disabled = false;
+                btnGenerar.value = "Generar contrato";
             }
 
             // Validación de forma de pago (si aplica)

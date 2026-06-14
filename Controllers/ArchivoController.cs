@@ -278,5 +278,31 @@ namespace CemSys3.Controllers
 
             return File(archivo.Contenido, tipo);
         }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> DocumentacionSistema()
+        {
+            ArchivosSistemaVM viewModel = new ArchivosSistemaVM();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+
+            try
+            {
+                viewModel.Archivos = await _archivoService.GetDocumentacionSistema();
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new DTOs.SweetAlert.SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "Error al cargar la documentación del sistema: " + ex.Message,
+                    Tipo = "error"
+                };
+
+                return View(viewModel);
+            }
+
+            return View(viewModel);
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using CemSys3.DTOs.Archivo;
 using CemSys3.DTOs.Generics;
+using CemSys3.Enumerables;
 using CemSys3.Interfaces.Archivo;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
@@ -34,7 +35,7 @@ namespace CemSys3.Business.Archivo
             if (dto.Archivo != null)
             {
                 archivo.CategoriaArchivo = dto.CategoriaArchivo;
-                archivo.TramiteId = dto.TramiteId;
+                archivo.TramiteId = dto.TramiteId <= 0 ? null : dto.TramiteId;
                 archivo.NombreArchivo = Path.GetFileName(dto.Archivo.FileName);
                 archivo.TipoArchivo = dto.MimeType ?? "application/octet-stream";
                 archivo.TamanoBytes = dto.Archivo.Length;
@@ -53,7 +54,7 @@ namespace CemSys3.Business.Archivo
             Models.Archivo archivo = new Models.Archivo
             {
                 CategoriaArchivo = dto.CategoriaArchivo,
-                TramiteId = dto.TramiteId,
+                TramiteId = dto.TramiteId <= 0 ? null : dto.TramiteId,
                 NombreArchivo = dto.NombreArchivo,
                 TipoArchivo = dto.MimeType ?? "application/octet-stream",
                 TamanoBytes = dto.Contenido?.Length ?? 0,
@@ -103,6 +104,28 @@ namespace CemSys3.Business.Archivo
                 FechaCreacion = a.FechaCreacion,
                 Visibilidad = a.Visibilidad,
             }).ToListAsync();
+        }
+
+        public async Task<IEnumerable<ArchivoDTO>> GetDocumentacionSistema()
+        {
+            IEnumerable<ArchivoDTO> dto = new List<ArchivoDTO>();
+
+            dto = await _context.Archivos
+            .Where(a =>
+             a.TramiteId == null &&
+             a.CategoriaArchivo == ((int)CategoriaArchivosEnum.DocumentacionCemSys).ToString() || a.CategoriaArchivo == ((int)CategoriaArchivosEnum.Tarifaria).ToString()).Select(a => new ArchivoDTO
+             {
+                 Id = a.Id,
+                 CategoriaArchivo = a.CategoriaArchivo,
+                 TramiteId = a.TramiteId,
+                 NombreArchivo = a.NombreArchivo,
+                 TipoArchivo = a.TipoArchivo,
+                 Descripcion = a.Descripcion,
+                 FechaCreacion = a.FechaCreacion,
+                 Visibilidad = a.Visibilidad,
+             }).ToListAsync();
+
+            return dto;
         }
 
         public async Task Update(ArchivoDTO dto)

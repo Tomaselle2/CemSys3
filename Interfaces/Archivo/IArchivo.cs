@@ -11,5 +11,7 @@ namespace CemSys3.Interfaces.Archivo
         Task Update(ArchivoDTO dto);
         Task Delete(Guid archivoId);
         Task<ArchivoDTO> Get(Guid archivoId);
+
+        Task<IEnumerable<ArchivoDTO>> GetDocumentacionSistema();
     }
 }

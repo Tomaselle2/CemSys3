@@ -379,7 +379,10 @@ namespace CemSys3.Enumerables
         Autorizaciones,
 
         [Display(Name = "Otro tipo de archivo")]
-        Otro
+        Otro,
+        
+        [Display(Name = "Documentación CemSys")]
+        DocumentacionCemSys
     }
 
     public enum TipoTrasladoEnum
