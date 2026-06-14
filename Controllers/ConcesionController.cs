@@ -851,6 +851,94 @@ namespace CemSys3.Controllers
                 }
 
 
+
+
+
+
+                // ── Listado de difuntos por sección ─────────────────────────────────────
+                // Nueva página para el listado
+                body.AppendChild(new Paragraph(
+                    new Run(new Break { Type = BreakValues.Page })));
+
+                // Título general del listado
+                body.AppendChild(new Paragraph(
+                    new ParagraphProperties(
+                        new Justification { Val = JustificationValues.Center }),
+                    new Run(
+                        new RunProperties(new Bold(), new FontSize { Val = "36" }),
+                        new Text("LISTADO DE DIFUNTOS POR SECCIÓN"))));
+
+                // Espacio
+                body.AppendChild(new Paragraph(new Run(new Text(""))));
+
+                // Agrupar por sección
+                var porSeccion = datos
+                    .GroupBy(d => string.IsNullOrWhiteSpace(d.NombreSeccion)
+                                  ? "SIN SECCIÓN"
+                                  : d.NombreSeccion.ToUpper())
+                    .OrderBy(g => g.Key);
+
+                foreach (var seccion in porSeccion)
+                {
+                    // ── Nombre de la sección como encabezado ────────────────────────
+                    body.AppendChild(new Paragraph(
+                        new ParagraphProperties(
+                            new SpacingBetweenLines { Before = "240", After = "80" }),
+                        new Run(
+                            new RunProperties(new Bold(), new FontSize { Val = "28" }),
+                            new Text($"Sección: {seccion.Key}"))));
+
+                    // ── Agrupar por NroParcela dentro de la sección ─────────────────
+                    var porParcela = seccion
+                        .GroupBy(d => d.NroParcela)
+                        .OrderBy(g => g.Key);
+
+                    foreach (var parcelaGroup in porParcela)
+                    {
+                        var primerItem = parcelaGroup.First();
+
+                        // Descripción de la parcela
+                        string tipoParcela = primerItem.TipoParcelaId switch
+                        {
+                            (int)TipoParcelaEnum.Nicho => $"Nicho {primerItem.NroParcela} - Fila {primerItem.NroFila}",
+                            (int)TipoParcelaEnum.Fosa => $"Fosa {primerItem.NroParcela}",
+                            (int)TipoParcelaEnum.Panteon => $"Lote {primerItem.NroParcela}",
+                            _ => $"Parcela {primerItem.NroParcela}"
+                        };
+
+                        // Todos los difuntos de la parcela (varios items pueden compartir parcela)
+                        // separados por " / "
+                        string difuntos = parcelaGroup
+                            .SelectMany(d => d.Difuntos)
+                            .Select(p => $"{p.Apellido.ToUpper()}, {p.Nombre.ToUpper()}")
+                            .Distinct()
+                            .DefaultIfEmpty("---")
+                            .Aggregate((a, b) => $"{a} / {b}");
+
+                        // Una línea por parcela con sangría
+                        body.AppendChild(new Paragraph(
+                            new ParagraphProperties(
+                                new Indentation { Left = "720" },
+                                new SpacingBetweenLines { Before = "40", After = "40" }),
+                            new Run(
+                                new RunProperties(new FontSize { Val = "24" }),
+                                new Text($"{tipoParcela}:  {difuntos}")
+                                { Space = SpaceProcessingModeValues.Preserve })));
+                    }
+
+                    // ── Línea separadora entre secciones ────────────────────────────
+                    body.AppendChild(new Paragraph(
+                        new ParagraphProperties(
+                            new ParagraphBorders(
+                                new BottomBorder
+                                {
+                                    Val = BorderValues.Single,
+                                    Size = 4,
+                                    Color = "AAAAAA"
+                                }),
+                            new SpacingBetweenLines { Before = "120", After = "120" })));
+                }
+
                 mainPart.Document.Save();
             }
 
