@@ -988,11 +988,27 @@ namespace CemSys3.Controllers
                 fileNameWord);
         }
 
-        
 
 
 
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> EnviarWhatsapp(string celular, int tramiteId)
+        {
+            string numero = celular.Replace(" ", "")
+                                   .Replace("-", "")
+                                   .Replace("(", "")
+                                   .Replace(")", "");
 
+            string mensaje = Uri.EscapeDataString(await _deudaConcesionService.CalculoDeudaConcesion(tramiteId));
+
+            if (!numero.StartsWith("549"))
+            {
+                numero = "549" + numero;
+            }
+
+            return Redirect($"https://wa.me/{numero}?text={mensaje}");
+        }
 
 
 

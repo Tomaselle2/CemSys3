@@ -15,7 +15,6 @@ using CemSys3.Interfaces.Notas;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Models;
-using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.EntityFrameworkCore;
 
 namespace CemSys3.Business.Concesion
@@ -350,7 +349,8 @@ namespace CemSys3.Business.Concesion
                     {
                         Id = h.Persona.Id,
                         Nombre = h.Persona.Nombre ?? "",
-                        Apellido = h.Persona.Apellido ?? ""
+                        Apellido = h.Persona.Apellido ?? "",
+                        celular = h.Persona.Celular ?? ""
                     }
                 })
                 .ToListAsync();

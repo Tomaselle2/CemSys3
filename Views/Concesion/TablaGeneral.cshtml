@@ -275,7 +275,30 @@
                                         <td>@opc.Vencimiento?.ToString("dd/MM/yyyy")</td>
                                         <td>@estadoTramiteDisplay</td>
                                         <td>
-                                            <a asp-action="Concesion" asp-controller="Concesion" asp-route-tramiteId="@opc.TramiteId" title="Ir a conesión" target="_blank"><i class="bi bi-box-arrow-in-right fs-3"></i></a>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a asp-action="Concesion"
+                                                   asp-controller="Concesion"
+                                                   asp-route-tramiteId="@opc.TramiteId"
+                                                   title="Ir a concesión"
+                                                   target="_blank">
+                                                    <i class="bi bi-box-arrow-in-right fs-3"></i>
+                                                </a>
+
+                                                @if (opc.Titulares != null && opc.Titulares.Any())
+                                                {
+                                                    foreach (var titular in opc.Titulares.Where(t => !string.IsNullOrEmpty(t.celular)))
+                                                    {
+                                                        <a asp-controller="Concesion"
+                                                           asp-action="EnviarWhatsapp"
+                                                           asp-route-celular="@titular.celular"
+                                                           asp-route-tramiteId="@opc.TramiteId"
+                                                           target="_blank"
+                                                           title="Enviar WhatsApp">
+                                                            <i class="bi bi-whatsapp text-success fs-4"></i>
+                                                        </a>
+                                                    }
+                                                }
+                                            </div>
                                         </td>
                                     </tr>
                                 }

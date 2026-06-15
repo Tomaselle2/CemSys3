@@ -119,7 +119,7 @@ namespace CemSys3.Business.Concesion
         private string EncabezadoMensaje(int nroConcesion, string parcela, string vencimiento, IEnumerable<TitularesContratoDTO> Titulares, IEnumerable<DifuntoContratoDTO> Difuntos)
         {
             string encabezado = string.Empty;
-
+            encabezado += $"Buen día. Me comunico del área del cementerio para informarle el estado de su concesión.\n";
             encabezado += $"Concesión *{nroConcesion.ToString("D5") ?? "-----"}*. Vencimiento: {vencimiento}\n";
             encabezado += $"Ubicación: {parcela}\n";
             encabezado += "Difuntos: ";
@@ -254,22 +254,26 @@ namespace CemSys3.Business.Concesion
             {
                 return $"\nLa renovación se puede abonar en hasta 6 cuotas sin interés.\n" +
                        $"Si renueva durante el mes del vencimiento, accede a un {Math.Round(descuento * 100)}% de descuento abonando en un pago sobre la cantidad de años que elija.\n" +
-                       $"Debe llegarse a la municipalidad para realizar el contrato.\n";
+                       $"Debe llegarse a la municipalidad para realizar el contrato.\n" +
+                       "Horario de atención: de 7:00hs a 12:30hs.\n";
             }
             else if (vencimiento.Year != hoy.Year && tipoParcelaId == (int)TipoParcelaEnum.Nicho)
             {
                 return $"\nLa renovación se puede abonar en hasta 6 cuotas sin interés.\n" +
-                       $"Debe llegarse a la municipalidad para realizar el contrato.\n";
+                       $"Debe llegarse a la municipalidad para realizar el contrato.\n" +
+                       "Horario de atención: de 7:00hs a 12:30hs.\n";
             }
             else if (vencimiento.Year == hoy.Year && tipoParcelaId == (int)TipoParcelaEnum.Nicho)
             {
                 return $"\nLa renovación se puede abonar en hasta 6 cuotas sin interés.\n" +
-                       $"Debe llegarse a la municipalidad para realizar el contrato.\n";
+                       $"Debe llegarse a la municipalidad para realizar el contrato.\n" +
+                       "Horario de atención: de 7:00hs a 12:30hs.\n";
             }
             else
             {
                 return $"\nLa renovación se puede abonar en hasta 4 cuotas sin interés.\n" +
-                       $"Debe llegarse a la municipalidad para realizar el contrato.\n";
+                       $"Debe llegarse a la municipalidad para realizar el contrato.\n" +
+                       "Horario de atención: de 7:00hs a 12:30hs.\n";
             }
         }
 
