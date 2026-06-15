@@ -2,9 +2,7 @@
 using CemSys3.Interfaces.Tarifaria;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Win32;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
+
 
 namespace CemSys3.Business.Tarifaria
 {
@@ -71,6 +69,54 @@ namespace CemSys3.Business.Tarifaria
                 await transaction.RollbackAsync();
                 throw new Exception($"Error al actualizar precios de tarifaria: {ex.Message}", ex);
             }
+        }
+
+        public async Task AplicarAumentoPorcentual(decimal porcentaje, int decimales)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Excluir el TemaId 7 (Fondo de ayuda) - los maneja el admin manualmente
+                const int FONDO_TEMA_ID = 7;
+
+                var preciosActualizar = await _context.PreciosTarifarias
+                    .Where(p => p.Visibilidad == true &&
+                                p.ConceptoTarifaria.TemaId != FONDO_TEMA_ID)
+                    .ToListAsync();
+
+                if (!preciosActualizar.Any())
+                    throw new InvalidOperationException("No se encontraron precios para actualizar.");
+
+                decimal factor = 1 + (porcentaje / 100);
+
+                foreach (var precio in preciosActualizar)
+                {
+                    decimal nuevo = precio.Precio * factor;
+                    precio.Precio = Redondear(nuevo, decimales);
+                }
+
+                var filas = await _context.SaveChangesAsync();
+
+                if (filas == 0)
+                    throw new InvalidOperationException("No se guardaron cambios.");
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception($"Error al aplicar aumento: {ex.Message}", ex);
+            }
+        }
+
+        private static decimal Redondear(decimal valor, int decimales)
+        {
+            if (decimales >= 0)
+                return Math.Round(valor, decimales, MidpointRounding.AwayFromZero);
+
+            // decimales negativos: redondear a decenas, centenas, etc.
+            decimal factor = (decimal)Math.Pow(10, -decimales);
+            return Math.Round(valor / factor, MidpointRounding.AwayFromZero) * factor;
         }
 
         //trae los precios sin paginar de todo menos los nichos

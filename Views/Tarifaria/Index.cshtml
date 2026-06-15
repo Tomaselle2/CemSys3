@@ -1,5 +1,4 @@
-﻿@using CemSys3.DTOs.Paginacion
-@using CemSys3.ViewModels.Tarifaria
+﻿@using CemSys3.ViewModels.Tarifaria
 @using CemSys3.Enumerables
 @using CemSys3.Helpers.Enumerable
 @model TarifariaVM
@@ -23,9 +22,87 @@
     <h1 class="title-page">Tarifaria</h1>
 </div>
 
-<div>
+<div class="mb-3">
     <a asp-action="GetAllPreciosIngreso" asp-controller="Tarifaria" data-no-loader class="btn btn-outline-danger" title="Descargar precios de ingreso">Ingresos <i class="bi bi-filetype-pdf"></i></a>
 </div>
+
+
+
+
+<!-- Botón de aumento anual -->
+<div class="mb-3">
+    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAumentoTarifaria">
+        <i class="bi bi-graph-up-arrow"></i> Aplicar aumento anual
+    </button>
+</div>
+
+<!-- Modal Aumento Tarifaria -->
+<div class="modal fade" id="modalAumentoTarifaria" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-graph-up-arrow me-2"></i>Aumento anual de tarifaria</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Controles -->
+                <div class="row g-3 mb-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Porcentaje de aumento (%)</label>
+                        <div class="input-group">
+                            <input type="number" id="inputPorcentaje" class="form-control" min="0.01" max="9999" step="0.01" placeholder="Ej: 35.5">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Redondear precios a</label>
+                        <select id="selectDecimales" class="form-select">
+                            <option value="2">Centavos ($0,01)</option>
+                            <option value="1">Décimos ($0,10)</option>
+                            <option value="0" selected>Pesos ($1,00)</option>
+                            <option value="-1">Decenas ($10,00)</option>
+                            <option value="-2">Centenas ($100,00)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-outline-secondary w-100" id="btnPreviewAumento">
+                            <i class="bi bi-eye"></i> Previsualizar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Nota exclusión fondo -->
+                <div class="alert alert-info py-2 small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Los conceptos de <strong>Fondo de ayuda</strong> (porcentajes y montos mínimos)
+                    <strong>no se modifican</strong> — los gestionás manualmente.
+                </div>
+
+                <!-- Tabla de preview -->
+                <div id="previewAumentoContainer" style="display:none">
+                    <div class="row g-2 mb-3" id="summaryAumento"></div>
+                    <div id="tablaAumentoContenido"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success d-none" id="btnAplicarAumento">
+                    <i class="bi bi-check-lg"></i> Confirmar y guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
 
 <!-- Formulario precios generales-->
 <div class="accordion" id="accordionGenerales">
@@ -1145,5 +1222,163 @@
                 clickedButton.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
             }
         }
+   </script>
+
+   <script>
+               // ====== AUMENTO TARIFARIA ======
+        let preciosParaAumentar = [];
+
+        document.getElementById('btnPreviewAumento').addEventListener('click', async function () {
+            const pct = parseFloat(document.getElementById('inputPorcentaje').value);
+            const dec = parseInt(document.getElementById('selectDecimales').value);
+
+            if (!pct || pct <= 0) {
+                AlertService.show('Error', 'Ingresá un porcentaje mayor a 0.', 'error');
+                return;
+            }
+
+            this.disabled = true;
+            this.innerHTML = '<i class="bi bi-hourglass-split"></i> Calculando...';
+
+            try {
+                const res = await fetch(`@Url.Action("PreviewAumento", "Tarifaria")?porcentaje=${pct}&decimales=${dec}`);
+                const result = await res.json();
+
+                if (!result.success) {
+                    AlertService.show('Error', result.message, 'error');
+                    return;
+                }
+
+                preciosParaAumentar = result.data;
+                renderPreviewAumento(result.data, pct);
+                document.getElementById('previewAumentoContainer').style.display = 'block';
+                document.getElementById('btnAplicarAumento').classList.remove('d-none');
+
+            } catch (e) {
+                AlertService.show('Error', 'No se pudo obtener el preview.', 'error');
+            } finally {
+                this.disabled = false;
+                this.innerHTML = '<i class="bi bi-eye"></i> Previsualizar';
+            }
+        });
+
+        function renderPreviewAumento(data, pct) {
+            // Summary cards
+            const totalAumento = data.reduce((s, p) => s + (p.precioNuevo - p.precioActual), 0);
+            document.getElementById('summaryAumento').innerHTML = `
+                <div class="col-6 col-md-3">
+                    <div class="card text-center py-2">
+                        <div class="text-muted small">Porcentaje</div>
+                        <div class="fs-5 fw-semibold">${pct.toFixed(2)}%</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card text-center py-2">
+                        <div class="text-muted small">Conceptos</div>
+                        <div class="fs-5 fw-semibold">${data.length}</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card text-center py-2">
+                        <div class="text-muted small">Aumento total</div>
+                        <div class="fs-5 fw-semibold text-success">+$${totalAumento.toLocaleString('es-AR', {minimumFractionDigits:2})}</div>
+                    </div>
+                </div>
+            `;
+
+            // Agrupar por tema
+            const grupos = {};
+            data.forEach(p => {
+                if (!grupos[p.temaId]) grupos[p.temaId] = { nombre: p.nombreConcepto, items: [] };
+                grupos[p.temaId].items.push(p);
+            });
+
+            // Agrupar por TemaId (usamos el primer nombre para la sección — mejor usar temaNombre del DTO)
+            const porTema = {};
+            data.forEach(p => {
+                const key = p.temaId;
+                if (!porTema[key]) porTema[key] = [];
+                porTema[key].push(p);
+            });
+
+            const temasNombres = {
+                1: 'General', 2: 'Inhumación', 3: 'Concesión nicho',
+                4: 'Concesión fosa', 5: 'Registro civil', 6: 'Derecho de oficina'
+            };
+
+            let html = '';
+            Object.entries(porTema).forEach(([temaId, items]) => {
+                html += `
+                <h6 class="mt-3 mb-1 text-muted text-uppercase" style="font-size:11px;letter-spacing:.05em">
+                    ${temasNombres[temaId] ?? 'Otros'} <span class="badge bg-secondary">${items.length}</span>
+                </h6>
+                <table class="table table-sm table-hover table-bordered mb-2">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Concepto</th>
+                            <th class="text-end">Precio actual</th>
+                            <th class="text-end text-success">Precio nuevo</th>
+                            <th class="text-end">Aumento</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+                items.forEach(p => {
+                    const diff = p.precioNuevo - p.precioActual;
+                    html += `<tr>
+                        <td>${p.nombreConcepto}</td>
+                        <td class="text-end text-muted">$${p.precioActual.toLocaleString('es-AR',{minimumFractionDigits:2})}</td>
+                        <td class="text-end text-success fw-semibold">$${p.precioNuevo.toLocaleString('es-AR',{minimumFractionDigits:2})}</td>
+                        <td class="text-end text-success">+$${diff.toLocaleString('es-AR',{minimumFractionDigits:2})}</td>
+                    </tr>`;
+                });
+
+                html += `</tbody></table>`;
+            });
+
+            document.getElementById('tablaAumentoContenido').innerHTML = html;
+        }
+
+        document.getElementById('btnAplicarAumento').addEventListener('click', async function () {
+            const pct = parseFloat(document.getElementById('inputPorcentaje').value);
+            const dec = parseInt(document.getElementById('selectDecimales').value);
+
+            this.disabled = true;
+            this.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
+
+            try {
+                const res = await fetch('@Url.Action("AplicarAumentoPorcentual", "Tarifaria")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ porcentaje: pct, decimales: dec })
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    // Cerrar modal y recargar la página para reflejar nuevos precios
+                    bootstrap.Modal.getInstance(document.getElementById('modalAumentoTarifaria')).hide();
+                    AlertService.show('Éxito', result.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    AlertService.show('Error', result.message, 'error');
+                }
+            } catch (e) {
+                AlertService.show('Error de conexión', 'Intentá nuevamente.', 'error');
+            } finally {
+                this.disabled = false;
+                this.innerHTML = '<i class="bi bi-check-lg"></i> Confirmar y guardar';
+            }
+        });
+
+        // Limpiar preview al cambiar porcentaje o decimales
+        ['inputPorcentaje','selectDecimales'].forEach(id => {
+            document.getElementById(id).addEventListener('change', () => {
+                document.getElementById('previewAumentoContainer').style.display = 'none';
+                document.getElementById('btnAplicarAumento').classList.add('d-none');
+                preciosParaAumentar = [];
+            });
+        });
+
    </script>
 }

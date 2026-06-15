@@ -2,6 +2,7 @@
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.DTOs.Tarifaria;
 using CemSys3.Enumerables;
+using CemSys3.Helpers;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.PDF;
 using CemSys3.Helpers.Roles_Autenticacion;
@@ -10,7 +11,6 @@ using CemSys3.Interfaces.Seccion;
 using CemSys3.Interfaces.Tarifaria;
 using CemSys3.ViewModels.Tarifaria;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace CemSys3.Controllers
 {
@@ -172,6 +172,60 @@ namespace CemSys3.Controllers
             //var pdfBytes = await _pdfGenerator.GenerateFromHtmlAsync(html); // por defecto en vertical
             return File(pdfBytes, "application/pdf", $"Precios_Ingresos_{DateTime.Now.Year}.pdf");
         }
+
+
+
+
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> AplicarAumentoPorcentual([FromBody] AumentoTarifariaDTO dto)
+        {
+            try
+            {
+                if (dto == null || dto.Porcentaje <= 0)
+                    return Json(new { success = false, message = "Porcentaje inválido." });
+
+                await _tarifariaService.AplicarAumentoPorcentual(dto.Porcentaje, dto.Decimales);
+
+                return Json(new { success = true, message = $"Tarifaria actualizada con un aumento del {dto.Porcentaje}%." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> PreviewAumento(decimal porcentaje, int decimales)
+        {
+            if (porcentaje <= 0)
+                return Json(new { success = false, message = "Porcentaje inválido." });
+
+            const int FONDO_TEMA_ID = 7;
+            decimal factor = 1 + (porcentaje / 100);
+
+            var precios = await _tarifariaService.GetPrecios();
+            var preview = precios
+                .Where(p => p.TemaId != FONDO_TEMA_ID)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.ConceptoTarifariaId,
+                    p.NombreConcepto,
+                    p.TemaId,
+                    p.SeccionId,
+                    p.NroFila,
+                    p.AniosConcesionId,
+                    PrecioActual = p.Precio,
+                    PrecioNuevo = TarifariaHelper.Redondear(p.Precio * factor, decimales)
+                });
+
+            return Json(new { success = true, data = preview });
+        }
+
+        
     }
 }
 
