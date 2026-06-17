@@ -335,7 +335,7 @@ namespace CemSys3.Business.TramiteConcesion
                          await _historialEstadosService.VincularTramiteAParcela(traslado.TramiteId, parcelaDestino.Id);
                     }
 
-                    if (!existeConcesion && parcelaDestino.TipoParcelaId != (int)TipoParcelaEnum.Panteon)
+                    if (!existeConcesion && parcelaDestino.TipoParcelaId != (int)TipoParcelaEnum.Panteon) //ES NICHO O FOSA
                     {
                         ConcesionDTO concesionNueva = new ConcesionDTO();
                         concesionNueva.ParcelaId = parcelaDestino.Id;
@@ -349,7 +349,7 @@ namespace CemSys3.Business.TramiteConcesion
                         GenericResultDTO resultadoConcesion = await _concesionService.Add(concesionNueva);
                     }
 
-                    if (!existeConcesion && parcelaDestino.TipoParcelaId == (int)TipoParcelaEnum.Panteon)
+                    if (!existeConcesion && parcelaDestino.TipoParcelaId == (int)TipoParcelaEnum.Panteon) //ES PANTEON
                     {
                         //se crea la concesion para cada panteon registrado, con estado vigente
                         ConcesionDTO concesionNueva = new ConcesionDTO();
