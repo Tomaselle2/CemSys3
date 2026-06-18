@@ -51,6 +51,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<HistorialEstadoTramite> HistorialEstadoTramites { get; set; }
 
+    public virtual DbSet<HistorialParcelasConcesion> HistorialParcelasConcesions { get; set; }
+
     public virtual DbSet<HistorialTitularesConcesione> HistorialTitularesConcesiones { get; set; }
 
     public virtual DbSet<Introduccione> Introducciones { get; set; }
@@ -589,6 +591,34 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.TramiteId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("HistorialEstadoTramite_tramiteId_fk");
+        });
+
+        modelBuilder.Entity<HistorialParcelasConcesion>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Historia__3213E83FC7DE3D70");
+
+            entity.ToTable("HistorialParcelasConcesion");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ConcesionId).HasColumnName("concesionId");
+            entity.Property(e => e.FechaFin).HasColumnName("fechaFin");
+            entity.Property(e => e.FechaInicio).HasColumnName("fechaInicio");
+            entity.Property(e => e.ParcelaId).HasColumnName("parcelaId");
+            entity.Property(e => e.TramiteOrigenId).HasColumnName("tramiteOrigenId");
+
+            entity.HasOne(d => d.Concesion).WithMany(p => p.HistorialParcelasConcesions)
+                .HasForeignKey(d => d.ConcesionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_HPC_Concesion");
+
+            entity.HasOne(d => d.Parcela).WithMany(p => p.HistorialParcelasConcesions)
+                .HasForeignKey(d => d.ParcelaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_HPC_Parcela");
+
+            entity.HasOne(d => d.TramiteOrigen).WithMany(p => p.HistorialParcelasConcesions)
+                .HasForeignKey(d => d.TramiteOrigenId)
+                .HasConstraintName("FK_HPC_Tramite");
         });
 
         modelBuilder.Entity<HistorialTitularesConcesione>(entity =>

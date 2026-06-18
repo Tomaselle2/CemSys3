@@ -720,3 +720,16 @@ CREATE TABLE EventoCalendario
     CONSTRAINT PK_EventoCalendario
         PRIMARY KEY (Id)
 );
+
+CREATE TABLE HistorialParcelasConcesion (
+    id INT IDENTITY PRIMARY KEY,
+    concesionId INT NOT NULL,        -- tramiteId de la concesion
+    parcelaId INT NOT NULL,
+    fechaInicio DATETIME2 NOT NULL,
+    fechaFin DATETIME2 NULL,         -- null = parcela actual
+    tramiteOrigenId INT NULL,        -- tramite que generó el movimiento
+
+    CONSTRAINT FK_HPC_Concesion FOREIGN KEY (concesionId) REFERENCES Concesiones(tramiteId),
+    CONSTRAINT FK_HPC_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_HPC_Tramite FOREIGN KEY (tramiteOrigenId) REFERENCES Tramites(id)
+);

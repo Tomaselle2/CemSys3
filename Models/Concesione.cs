@@ -37,6 +37,8 @@ public partial class Concesione
 
     public virtual CantidadCuota? Cuota { get; set; }
 
+    public virtual ICollection<HistorialParcelasConcesion> HistorialParcelasConcesions { get; set; } = new List<HistorialParcelasConcesion>();
+
     public virtual ICollection<HistorialTitularesConcesione> HistorialTitularesConcesiones { get; set; } = new List<HistorialTitularesConcesione>();
 
     public virtual Parcela Parcela { get; set; } = null!;

@@ -45,6 +45,8 @@ public partial class Tramite
 
     public virtual ICollection<HistorialEstadoTramite> HistorialEstadoTramites { get; set; } = new List<HistorialEstadoTramite>();
 
+    public virtual ICollection<HistorialParcelasConcesion> HistorialParcelasConcesions { get; set; } = new List<HistorialParcelasConcesion>();
+
     public virtual Introduccione? Introduccione { get; set; }
 
     public virtual Nota? NotaTramite { get; set; }

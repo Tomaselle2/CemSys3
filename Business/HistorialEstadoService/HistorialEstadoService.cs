@@ -138,56 +138,130 @@ namespace CemSys3.Business.HistorialEstadoService
             DateTime fechaInicio = concesion.FechaInicio ?? concesion.Tramite.FechaCreacion;
             DateTime fechaFin = concesion.FechaFin ?? DateTime.Now;
 
-            // 🔹 1. Último ingreso previo a la concesión
-            var ingresoPrevio = await _context.TramitesParcelas
-                .AsNoTracking()
-                .Where(tp => tp.ParcelaId == concesion.ParcelaId)
-                .Join(_context.Tramites,
-                    tp => tp.TramiteId,
-                    t => t.Id,
-                    (tp, t) => t)
-                .Where(t =>
-                    t.FechaCreacion < fechaInicio &&
-                    t.TipoTramiteId == (int)TipoTramiteEnum.Ingreso
-                )
-                .OrderByDescending(t => t.FechaCreacion)
-                .Select(t => new TramiteDTO
-                {
-                    Id = t.Id,
-                    Visibilidad = t.Visibilidad,
-                    FechaCreacion = t.FechaCreacion,
-                    TipoTramiteId = t.TipoTramiteId,
-                    UsuarioId = t.UsuarioId,
-                    EstadoActualId = t.EstadoActualId
-                })
-                .FirstOrDefaultAsync();
-
-            // 🔹 2. Trámites dentro del rango de la concesión
-            var tramitesDentro = await _context.TramitesParcelas
-                .AsNoTracking()
-                .Where(tp => tp.ParcelaId == concesion.ParcelaId)
-                .Join(_context.Tramites,
-                    tp => tp.TramiteId,
-                    t => t.Id,
-                    (tp, t) => t)
-                .Where(t =>
-                    t.FechaCreacion >= fechaInicio &&
-                    t.FechaCreacion <= fechaFin &&
-                    t.TipoTramiteId != (int)TipoTramiteEnum.ContratoConcesion
-                )
-                .OrderBy(t => t.FechaCreacion)
-                .Select(t => new TramiteDTO
-                {
-                    Id = t.Id,
-                    Visibilidad = t.Visibilidad,
-                    FechaCreacion = t.FechaCreacion,
-                    TipoTramiteId = t.TipoTramiteId,
-                    UsuarioId = t.UsuarioId,
-                    EstadoActualId = t.EstadoActualId
-                })
+            // Obtener el historial de parcelas con sus fechas de entrada
+            var historialParcelas = await _context.HistorialParcelasConcesions
+                .Where(h => h.ConcesionId == concesionId)
+                .OrderBy(h => h.FechaInicio)
                 .ToListAsync();
 
-            // 🔹 3. Unir resultados
+            // IDs de todas las parcelas que tuvo la concesión
+            var parcelasIds = historialParcelas.Select(h => h.ParcelaId).ToList();
+
+            if (!parcelasIds.Any())
+                parcelasIds.Add(concesion.ParcelaId);
+
+            // ── Ingreso previo ───────────────────────────────────────────────────────
+            // Solo buscarlo en la PRIMERA parcela de la concesión (la original),
+            // y solo si ese ingreso ocurrió antes de que la concesión existiera.
+            // Así no se mezcla con ingresos de concesiones anteriores en parcelas
+            // que la concesión adquirió por traslado/reducción.
+            TramiteDTO? ingresoPrevio = null;
+
+            // Parcela original: la primera en el historial, o la actual si no hay historial
+            int parcelaOriginalId = historialParcelas.Any()
+                ? historialParcelas.OrderBy(h => h.FechaInicio).First().ParcelaId
+                : concesion.ParcelaId;
+
+            // Buscar el ingreso previo del difunto que dio origen a ESTA concesión.
+            // Filtramos por los difuntos vinculados a la concesión para no traer
+            // ingresos de difuntos de concesiones anteriores en la misma parcela.
+            var difuntosEnConcesion = await _context.TramitePersonas
+                .Where(tp => tp.TramiteId == concesionId)
+                .Select(tp => tp.PersonaId)
+                .ToListAsync();
+
+            if (difuntosEnConcesion.Any())
+            {
+                ingresoPrevio = await _context.TramitesParcelas
+                    .AsNoTracking()
+                    .Where(tp => tp.ParcelaId == parcelaOriginalId)
+                    .Join(_context.Tramites,
+                        tp => tp.TramiteId,
+                        t => t.Id,
+                        (tp, t) => t)
+                    .Where(t =>
+                        t.FechaCreacion < fechaInicio &&
+                        t.TipoTramiteId == (int)TipoTramiteEnum.Ingreso)
+                    // Solo ingresos que involucren a algún difunto de esta concesión
+                    .Where(t => _context.TramitePersonas
+                        .Any(tp => tp.TramiteId == t.Id
+                                && difuntosEnConcesion.Contains(tp.PersonaId)))
+                    .OrderByDescending(t => t.FechaCreacion)
+                    .Select(t => new TramiteDTO
+                    {
+                        Id = t.Id,
+                        Visibilidad = t.Visibilidad,
+                        FechaCreacion = t.FechaCreacion,
+                        TipoTramiteId = t.TipoTramiteId,
+                        UsuarioId = t.UsuarioId,
+                        EstadoActualId = t.EstadoActualId
+                    })
+                    .FirstOrDefaultAsync();
+            }
+
+            // ── Trámites dentro del rango ────────────────────────────────────────────
+            // Para parcelas adquiridas por traslado/reducción, solo traer trámites
+            // desde la fecha en que la concesión llegó a esa parcela, no desde el inicio
+            // de la concesión. Así no se mezclan trámites de concesiones anteriores.
+            var tramitesDentro = new List<TramiteDTO>();
+
+            foreach (var hp in historialParcelas)
+            {
+                DateTime desdeParcela = hp.FechaInicio;
+                DateTime hastaParcela = hp.FechaFin ?? fechaFin;
+
+                var tramitesParcela = await _context.TramitesParcelas
+                    .AsNoTracking()
+                    .Where(tp => tp.ParcelaId == hp.ParcelaId)
+                    .Join(_context.Tramites,
+                        tp => tp.TramiteId,
+                        t => t.Id,
+                        (tp, t) => t)
+                    .Where(t =>
+                        t.FechaCreacion >= desdeParcela &&
+                        t.FechaCreacion <= hastaParcela &&
+                        t.TipoTramiteId != (int)TipoTramiteEnum.ContratoConcesion)
+                    .Select(t => new TramiteDTO
+                    {
+                        Id = t.Id,
+                        Visibilidad = t.Visibilidad,
+                        FechaCreacion = t.FechaCreacion,
+                        TipoTramiteId = t.TipoTramiteId,
+                        UsuarioId = t.UsuarioId,
+                        EstadoActualId = t.EstadoActualId
+                    })
+                    .ToListAsync();
+
+                tramitesDentro.AddRange(tramitesParcela);
+            }
+
+            // Si no hay historial de parcelas (concesión vieja), usar el rango completo
+            if (!historialParcelas.Any())
+            {
+                tramitesDentro = await _context.TramitesParcelas
+                    .AsNoTracking()
+                    .Where(tp => tp.ParcelaId == concesion.ParcelaId)
+                    .Join(_context.Tramites,
+                        tp => tp.TramiteId,
+                        t => t.Id,
+                        (tp, t) => t)
+                    .Where(t =>
+                        t.FechaCreacion >= fechaInicio &&
+                        t.FechaCreacion <= fechaFin &&
+                        t.TipoTramiteId != (int)TipoTramiteEnum.ContratoConcesion)
+                    .Select(t => new TramiteDTO
+                    {
+                        Id = t.Id,
+                        Visibilidad = t.Visibilidad,
+                        FechaCreacion = t.FechaCreacion,
+                        TipoTramiteId = t.TipoTramiteId,
+                        UsuarioId = t.UsuarioId,
+                        EstadoActualId = t.EstadoActualId
+                    })
+                    .ToListAsync();
+            }
+
+            // ── Unir, deduplicar y ordenar ───────────────────────────────────────────
             var resultado = new List<TramiteDTO>();
 
             if (ingresoPrevio != null)
@@ -195,12 +269,11 @@ namespace CemSys3.Business.HistorialEstadoService
 
             resultado.AddRange(tramitesDentro);
 
-            // 🔹 4. Orden final
             return resultado
+                .DistinctBy(t => t.Id)
                 .OrderByDescending(t => t.FechaCreacion)
                 .ToList();
         }
-
         public async Task<IEnumerable<DifuntoConcesionDTO>> DifuntosEnConcesion(int concesionId)
         {
             var concesion = await _context.Concesiones
@@ -211,10 +284,20 @@ namespace CemSys3.Business.HistorialEstadoService
             DateTime inicio = concesion.FechaInicio ?? DateTime.MinValue;
             DateTime fin = concesion.FechaFin ?? DateTime.MaxValue;
 
-            return await _context.ParcelaDifuntos
+            var parcelasHistorial = await _context.HistorialParcelasConcesions
+                .AsNoTracking()
+                .Where(h => h.ConcesionId == concesionId)
+                .Select(h => h.ParcelaId)
+                .ToListAsync();
+
+            if (!parcelasHistorial.Any())
+                parcelasHistorial.Add(concesion.ParcelaId);
+
+            // Traer todos los registros crudos
+            var registros = await _context.ParcelaDifuntos
                 .AsNoTracking()
                 .Where(pd =>
-                    pd.ParcelaId == concesion.ParcelaId &&
+                    parcelasHistorial.Contains(pd.ParcelaId) &&
                     pd.FechaIngreso >= inicio &&
                     pd.FechaIngreso <= fin)
                 .Select(pd => new DifuntoConcesionDTO
@@ -231,6 +314,33 @@ namespace CemSys3.Business.HistorialEstadoService
                 })
                 .OrderBy(d => d.FechaIngreso)
                 .ToListAsync();
+
+            // Agrupar por difunto: ingreso más temprano, retiro más reciente
+            // Si algún registro no tiene retiro (sigue activo), el retiro del grupo es null
+            var agrupado = registros
+                .GroupBy(d => d.DifuntoId)
+                .Select(g => new DifuntoConcesionDTO
+                {
+                    // Usar el id del primer registro (el más antiguo)
+                    ParcelaDifuntoId = g.OrderBy(x => x.FechaIngreso).First().ParcelaDifuntoId,
+                    DifuntoId = g.Key,
+                    Nombre = g.First().Nombre,
+                    Apellido = g.First().Apellido,
+                    Dni = g.First().Dni,
+                    FechaIngreso = g.Min(x => x.FechaIngreso),
+                    // Si cualquier registro no tiene retiro, el difunto sigue activo
+                    FechaRetiro = g.Any(x => x.FechaRetiro == null)
+                        ? null
+                        : g.Max(x => x.FechaRetiro),
+                    TramiteIngresoId = g.OrderBy(x => x.FechaIngreso).First().TramiteIngresoId,
+                    TramiteRetiroId = g.Any(x => x.FechaRetiro == null)
+                        ? null
+                        : g.OrderByDescending(x => x.FechaRetiro).First().TramiteRetiroId
+                })
+                .OrderBy(d => d.FechaIngreso)
+                .ToList();
+
+            return agrupado;
         }
     }
 }
