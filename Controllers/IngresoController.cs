@@ -138,7 +138,7 @@ namespace CemSys3.Controllers
             return View(viewModel);
         }
 
-        //envia los datos del ingreso al servidro
+        //envia los datos del ingreso al servidor
         [HttpPost]
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> Ingreso(IngresoVM viewModel)
@@ -218,59 +218,55 @@ namespace CemSys3.Controllers
 
             try
             {
-                bool personaExiste = false;
-
-                if (viewModel.Dni.HasValue)
+                // Si llegan flags de confirmación sin id asociado, los descartamos (estado inconsistente)
+                if ((viewModel.IngresoTitularFallecido || viewModel.ReingresoConfirmado) && !viewModel.PersonaCoincidenciaId.HasValue)
                 {
-                    personaExiste = await _personaService.PersonaExiste(viewModel.Dni.Value, viewModel.Sexo ?? "");
+                    viewModel.IngresoTitularFallecido = false;
+                    viewModel.ReingresoConfirmado = false;
                 }
 
-                if (personaExiste) //persona ya registrada con (DNI + SEXO)
+                // Solo buscamos coincidencias si el empleado todavía no confirmó nada
+                if (!viewModel.IngresoTitularFallecido && !viewModel.ReingresoConfirmado)
                 {
-                    PersonaDTO persona = new PersonaDTO();
+                    string nombreForm = viewModel.Nombre?.Trim() ?? "";
+                    string apellidoForm = viewModel.Apellido?.Trim() ?? "";
 
-                    //consultar el tipo de persona
-                    if (viewModel.Dni.HasValue && viewModel.Sexo != null)
-                    {
-                        persona = await _personaService.GetByDNISexo(viewModel.Dni.Value, viewModel.Sexo);
-                    }
+                    CoincidenciaIngresoDTO coincidencia = await _personaService.BuscarCoincidenciaParaIngreso(
+                        viewModel.Dni, viewModel.Sexo, nombreForm, apellidoForm, viewModel.EsPersonaDistinta);
 
-                    if (persona.CategoriaPersonaId == (int)CategoriaPersonaEnum.Titular) 
+                    if (coincidencia.Existe)
                     {
-                        // ¿El usuario ya confirmó que quiere convertirlo?
-                        if (viewModel.IngresoTitularFallecido)
+                        if (coincidencia.EsTitular)
                         {
-                            // Marcar que la persona existe y es titular → el service lo maneja
-                            // Continuar el flujo normal pero pasando el Id de la persona existente
-                            // (no crear una nueva persona, sino actualizar la existente)
-                        }
-                        else
-                        {
-                            // Primera vez que choca: devolver el form con el flag para mostrar el modal
-                            viewModel.IngresoTitularFallecido = false; // todavía no confirmó
-                            viewModel.SweetAlert = null; // no usamos SweetAlert, usamos modal propio
-                                                         // Señal para la vista de que debe mostrar el modal de confirmación
+                            viewModel.SweetAlert = null;
                             ViewBag.MostrarModalTitular = true;
-                            ViewBag.NombreTitular = $"{persona.Apellido?.ToUpper()}, {persona.Nombre}";
+                            ViewBag.NombreTitular = $"{coincidencia.Persona!.Apellido?.ToUpper()}, {coincidencia.Persona.Nombre}";
+                            ViewBag.PersonaCoincidenciaId = coincidencia.Persona.Id;
                             await CargarListasIngreso(viewModel, viewModel.NotaIngreso.Id);
                             return View("Index", viewModel);
                         }
 
-                    }
-                    else //si es difunto enviar error difunto existente
-                    {
-                        viewModel.SweetAlert = new SweetAlertDTO
+                        if (coincidencia.EstaActivoEnCementerio)
                         {
-                            Titulo = "Verificar",
-                            Mensaje = "El difunto que intenta ingresar ya existe",
-                            Tipo = "warning"
-                        };
+                            viewModel.SweetAlert = new SweetAlertDTO
+                            {
+                                Titulo = "Verificar",
+                                Mensaje = "El difunto que intenta ingresar ya existe y se encuentra actualmente en el cementerio.",
+                                Tipo = "warning"
+                            };
+                            await CargarListasIngreso(viewModel, viewModel.NotaIngreso.Id);
+                            return View("Index", viewModel);
+                        }
 
+                        // Existe pero está retirado -> candidato a reingreso
+                        viewModel.SweetAlert = null;
+                        ViewBag.MostrarModalReingreso = true;
+                        ViewBag.NombreReingreso = $"{coincidencia.Persona!.Apellido?.ToUpper()}, {coincidencia.Persona.Nombre}";
+                        ViewBag.PersonaCoincidenciaId = coincidencia.Persona.Id;
+                        ViewBag.CoincidenciaPorDni = coincidencia.CoincidenciaPorDni;
                         await CargarListasIngreso(viewModel, viewModel.NotaIngreso.Id);
-
                         return View("Index", viewModel);
                     }
-
                 }
 
                 PersonaDTO difunto = new PersonaDTO
@@ -283,7 +279,7 @@ namespace CemSys3.Controllers
                     EstadoDifuntoId = viewModel.EstadoDifuntoId,
                     FechaNacimiento = viewModel.FechaNacimiento,
                     NroActa = viewModel.NroActa,
-                    NroFolio =  viewModel.NroFolio,
+                    NroFolio = viewModel.NroFolio,
                     NroTomo = viewModel.NroTomo,
                     NroSerie = viewModel.NroSerie?.Trim(),
                     NroAge = viewModel.NroAge,
@@ -302,8 +298,8 @@ namespace CemSys3.Controllers
                     EmpleadoIngresoId = viewModel.EmpleadoID ?? 0,
                     Visibilidad = true,
                     NotaId = viewModel.NotaIngreso.Id,
-                    PersonaExistenteId = viewModel.IngresoTitularFallecido
-                        ? (await _personaService.GetByDNISexo(viewModel.Dni!.Value, viewModel.Sexo!)).Id
+                    PersonaExistenteId = (viewModel.IngresoTitularFallecido || viewModel.ReingresoConfirmado)
+                        ? viewModel.PersonaCoincidenciaId
                         : null
                 };
 
@@ -311,15 +307,15 @@ namespace CemSys3.Controllers
 
                 if (resultado.Success)
                 {
-                    TempData.SetSweetAlert(new SweetAlertDTO { 
-                    
+                    TempData.SetSweetAlert(new SweetAlertDTO
+                    {
                         Titulo = "Éxito",
                         Mensaje = resultado.Message,
                         Tipo = "success"
                     });
                 }
 
-                return RedirectToAction("ResumenIngreso", new { ingresoId = resultado.Id});
+                return RedirectToAction("ResumenIngreso", new { ingresoId = resultado.Id });
             }
             catch (Exception ex)
             {

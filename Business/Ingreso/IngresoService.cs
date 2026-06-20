@@ -72,22 +72,22 @@ namespace CemSys3.Business.Ingreso
                 
 
                 int difuntoId;
-                PersonaDTO difunto = new PersonaDTO();
+                PersonaDTO difunto;
 
                 if (dto.PersonaExistenteId.HasValue)
                 {
-                    // El titular ya existe: solo cambiar su categoría
+                    // Reingreso (titular fallecido o difunto que vuelve a entrar)
                     difuntoId = dto.PersonaExistenteId.Value;
                     await _personaService.CambiarCategoria(difuntoId, (int)CategoriaPersonaEnum.Fallecido);
-
-                    // Actualizar también los datos del acta si vinieron
                     dto.Difunto.Id = difuntoId;
                     await _personaService.UpdateDatosIngresoTitularFallecido(dto.Difunto);
+
+                    // Antes acá "difunto" quedaba new PersonaDTO() vacío, y los mensajes de historial
+                    // de más abajo (parcela, concesión) se armaban con Nombre/Apellido en blanco.
+                    difunto = dto.Difunto;
                 }
                 else
                 {
-                    // Flujo normal: crear persona nueva
-                    //3- se registra el difunto
                     difunto = new PersonaDTO
                     {
                         Nombre = dto.Difunto.Nombre?.Trim().ToLower(),
@@ -106,7 +106,7 @@ namespace CemSys3.Business.Ingreso
                         EstadoDifuntoId = dto.Difunto.EstadoDifuntoId,
                         CategoriaPersonaId = (int)CategoriaPersonaEnum.Fallecido
                     };
-                    
+
                     difuntoId = await _personaService.Add(difunto);
                 }
 

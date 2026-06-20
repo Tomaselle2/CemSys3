@@ -1,4 +1,5 @@
-﻿using CemSys3.DTOs.Paginacion;
+﻿using CemSys3.DTOs.Ingreso;
+using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Persona;
 using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
@@ -360,8 +361,8 @@ namespace CemSys3.Business.Persona
 
             }
 
-            persona.Nombre = dto.Nombre?.Trim();
-            persona.Apellido = dto.Apellido?.Trim();
+            persona.Nombre = dto.Nombre?.Trim().ToLower();
+            persona.Apellido = dto.Apellido?.Trim().ToLower();
 
             if (!string.IsNullOrEmpty(dto.Dni))
             {
@@ -398,6 +399,72 @@ namespace CemSys3.Business.Persona
             await _context.SaveChangesAsync();
 
             return persona.Id;
+        }
+
+        public async Task<CoincidenciaIngresoDTO> BuscarCoincidenciaParaIngreso(
+    int? dni, string? sexo, string nombre, string apellido, bool ignorarCoincidenciaPorNombre = false)
+        {
+            Models.Persona? persona = null;
+
+            // 1) Buscar por DNI, con el mismo criterio que ya usa PersonaExiste
+            if (dni.HasValue && dni.Value > 0)
+            {
+                string dniString = dni.Value.ToString("D8");
+
+                if (dniString.StartsWith("0"))
+                {
+                    // DNI antiguo (7 dígitos): se compara también el sexo
+                    persona = await _context.Personas
+                        .FirstOrDefaultAsync(p => p.Dni == dniString && p.Sexo == sexo && p.Visibilidad);
+                }
+                else
+                {
+                    // DNI moderno (8 dígitos): alcanza con el número de documento
+                    persona = await _context.Personas
+                        .FirstOrDefaultAsync(p => p.Dni == dniString && p.Visibilidad);
+                }
+            }
+
+            bool coincidenciaPorDni = persona != null;
+
+            // 2) Si no hubo coincidencia por DNI, buscar por nombre y apellido SOLO entre fallecidos.
+            //    Esto cubre actas viejas que no tienen DNI cargado.
+            //    Si el empleado ya confirmó que es "otra persona", no volvemos a buscar por nombre.
+            if (persona == null && !ignorarCoincidenciaPorNombre)
+            {
+                string n = nombre.Trim().ToLower();
+                string a = apellido.Trim().ToLower();
+
+                persona = await _context.Personas.FirstOrDefaultAsync(p =>
+                    p.Visibilidad &&
+                    p.CategoriaPersonaId == (int)CategoriaPersonaEnum.Fallecido &&
+                    p.Nombre.ToLower() == n &&
+                    p.Apellido.ToLower() == a);
+            }
+
+            if (persona == null)
+            {
+                return new CoincidenciaIngresoDTO { Existe = false };
+            }
+
+            bool esTitular = persona.CategoriaPersonaId == (int)CategoriaPersonaEnum.Titular;
+            bool activo = false;
+
+            if (!esTitular)
+            {
+                // ¿Tiene una asignación de parcela vigente (sin retirar)?
+                activo = await _context.ParcelaDifuntos
+                    .AnyAsync(pd => pd.DifuntoId == persona.Id && pd.FechaRetiro == null);
+            }
+
+            return new CoincidenciaIngresoDTO
+            {
+                Existe = true,
+                EsTitular = esTitular,
+                EstaActivoEnCementerio = activo,
+                CoincidenciaPorDni = coincidenciaPorDni,
+                Persona = await Get(persona.Id)
+            };
         }
     }
 }

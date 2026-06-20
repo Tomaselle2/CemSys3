@@ -50,6 +50,19 @@ namespace CemSys3.ViewModels.Ingreso
 
         public bool IngresoTitularFallecido { get; set; }
 
+
+
+        // Empleado confirmó que es la misma persona que ya estuvo y fue retirada -> reingreso
+        public bool ReingresoConfirmado { get; set; }
+
+        // Empleado confirmó que, pese a la coincidencia de nombre/apellido, es OTRA persona
+        public bool EsPersonaDistinta { get; set; }
+
+        // Id de la persona encontrada como coincidencia (titular o reingreso)
+        public int? PersonaCoincidenciaId { get; set; }
+
+
+
         public string? InformacionAdicional { get; set; }
 
         public DateOnly? FechaNacimiento { get; set; }

@@ -1,4 +1,5 @@
-﻿using CemSys3.DTOs.Paginacion;
+﻿using CemSys3.DTOs.Ingreso;
+using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Persona;
 
 namespace CemSys3.Interfaces.Persona
@@ -22,5 +23,8 @@ namespace CemSys3.Interfaces.Persona
         Task CambiarCategoria(int personaId, int categoriaId);
 
         Task<DifuntoHistorialParcelaDTO> GetParcelaPorDifuntoId(int difuntoId);
+
+        Task<CoincidenciaIngresoDTO> BuscarCoincidenciaParaIngreso(
+              int? dni, string? sexo, string nombre, string apellido, bool ignorarCoincidenciaPorNombre = false);
     }
 }
