@@ -65,16 +65,38 @@ namespace CemSys3.Business.Parcela
                     }
                     break;
                 case 2: //numeracion antigua
-                    for (int i = 1; i <= filas; i++)
+                    //for (int i = 1; i <= filas; i++)
+                    //{
+                    //    for (int j = 1; j <= columnas; j++)
+                    //    {
+                    //        Models.Parcela nicho = new Models.Parcela();
+                    //        nicho.NroFila = i;
+                    //        nicho.NroParcela = nroNichoContador;
+                    //        nicho.Visibilidad = true;
+                    //        nicho.CantidadDifuntos = 0;
+                    //        nicho.TipoNichoId = (int)TipoNichoEnum.Feretro; //valor por defecto
+                    //        nicho.SeccionId = dto.Id;
+                    //        nicho.TipoParcelaId = dto.TipoParcelaId;
+                    //        nicho.InformacionAdicional = string.Empty;
+                    //        nicho.NombrePanteon = string.Empty;
+
+                    //        _context.Parcelas.Add(nicho);
+
+                    //        nroNichoContador++; // Aumenta el contador después de cada nicho
+                    //    }
+                    //}
+
+                    for (int columna = 1; columna <= columnas; columna++)
                     {
-                        for (int j = 1; j <= columnas; j++)
+                        for (int fila = 1; fila <= filas; fila++)
                         {
                             Models.Parcela nicho = new Models.Parcela();
-                            nicho.NroFila = i;
+
+                            nicho.NroFila = fila;
                             nicho.NroParcela = nroNichoContador;
                             nicho.Visibilidad = true;
                             nicho.CantidadDifuntos = 0;
-                            nicho.TipoNichoId = (int)TipoNichoEnum.Feretro; //valor por defecto
+                            nicho.TipoNichoId = (int)TipoNichoEnum.Feretro;
                             nicho.SeccionId = dto.Id;
                             nicho.TipoParcelaId = dto.TipoParcelaId;
                             nicho.InformacionAdicional = string.Empty;
@@ -82,7 +104,7 @@ namespace CemSys3.Business.Parcela
 
                             _context.Parcelas.Add(nicho);
 
-                            nroNichoContador++; // Aumenta el contador después de cada nicho
+                            nroNichoContador++;
                         }
                     }
                     break;
