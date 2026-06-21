@@ -1,0 +1,101 @@
+﻿@using CemSys3.ViewModels.Estadistica
+@model EstadisticasVM
+
+@{
+    ViewData["Title"] = "Estadísticas";
+}
+
+<h2 class="mb-4">Estadísticas del Cementerio</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <h5 class="text-muted">Difuntos</h5>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <div class="display-5 fw-bold text-primary">@Model.Estadisticas.DifuntosActuales</div>
+                <div class="text-muted">Difuntos actuales en el cementerio</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <h5 class="text-muted">Concesiones</h5>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <div class="display-5 fw-bold text-success">@Model.Estadisticas.ConcesionesVigentes</div>
+                <div class="text-muted">Vigentes</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <div class="display-5 fw-bold text-warning">@Model.Estadisticas.ConcesionesVencidas</div>
+                <div class="text-muted">Vencidas</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <div class="display-5 fw-bold text-danger">@Model.Estadisticas.ConcesionesCaducadas</div>
+                <div class="text-muted">Caducadas</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <div class="display-5 fw-bold text-secondary">@Model.Estadisticas.ConcesionesSinContrato</div>
+                <div class="text-muted">Sin contrato</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <h5 class="text-muted">Ocupación de Parcelas</h5>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <div class="display-5 fw-bold text-primary">@Model.Estadisticas.NichosOcupados</div>
+                <div class="text-muted">Nichos ocupados</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <div class="display-5 fw-bold text-secondary">@Model.Estadisticas.NichosDesocupados</div>
+                <div class="text-muted">Nichos desocupados</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <div class="display-5 fw-bold text-primary">@Model.Estadisticas.FosasOcupadas</div>
+                <div class="text-muted">Fosas ocupadas</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <div class="display-5 fw-bold text-primary">@Model.Estadisticas.PanteonesOcupados</div>
+                <div class="text-muted">Panteones ocupados</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />

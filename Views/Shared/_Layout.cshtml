@@ -92,13 +92,19 @@
                 @if (Context.Session.GetInt32("IdRol") == (int)RolUsuario.Administrador) //Administrador
                 {
                     <li class="nav-item">
+                        <a class="nav-link text-dark icono-menu" asp-controller="Estadistica" asp-action="Index">
+                            <i class="bi bi-graph-up"></i> <span class="nav-text">Estadísticas</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
                         <a class="nav-link text-dark icono-menu" asp-controller="Configuracion" asp-action="Index">
                             <i class="bi bi-gear"></i> <span class="nav-text">Configuración</span>
                         </a>
                     </li>
                 }
 
-
+                
                 <li class="nav-item">
                     <a class="nav-link cerrar-sesion" asp-controller="Login" asp-action="CerrarSesion">
                         <i class="bi bi-box-arrow-right"></i> <span class="nav-text">Cerrar sesión</span>

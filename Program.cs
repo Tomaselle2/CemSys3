@@ -6,6 +6,7 @@ using CemSys3.Business.Cementerio;
 using CemSys3.Business.ConceptoTarifaria;
 using CemSys3.Business.Concesion;
 using CemSys3.Business.EmpresaSepelio;
+using CemSys3.Business.Estadistica;
 using CemSys3.Business.HistorialEstadoService;
 using CemSys3.Business.Ingreso;
 using CemSys3.Business.Login;
@@ -34,6 +35,7 @@ using CemSys3.Interfaces.Cementerio;
 using CemSys3.Interfaces.ConceptoTarifaria;
 using CemSys3.Interfaces.Concesion;
 using CemSys3.Interfaces.EmpresaSepelio;
+using CemSys3.Interfaces.Estadistica;
 using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Interfaces.Ingreso;
 using CemSys3.Interfaces.Login;
@@ -103,6 +105,7 @@ builder.Services.AddScoped<IFirmantes, FirmantesService>();
 builder.Services.AddScoped<IArbol, ArbolService>();
 builder.Services.AddScoped<ICargaDifunto, CargaDifuntoService>();
 builder.Services.AddScoped<ICalendario, CalendarioService>();
+builder.Services.AddScoped<IEstadistica, EstadisticaService>();
 
 
 // =========================
