@@ -14,6 +14,9 @@
 <div class="page-header-container">
     <h1 class="title-page">Carga de difunto</h1>
 </div>
+<p>Para cargar difuntos que se encuentran en el cementerio y no estan en CemSys.</p>
+<p>Si es un fallecido reciente debe generar una nota de tipo ingreso.</p>
+
 
 <form asp-action="CargaDifunto" asp-controller="CargaDifunto" class="form-box" method="post" id="formularioRegistrar">
 
@@ -160,9 +163,16 @@
 
     </div>
 
+    <input type="hidden" id="hiddenTitularFallecido" asp-for="IngresoTitularFallecido" value="false" />
+    <input type="hidden" id="hiddenReingresoConfirmado" asp-for="ReingresoConfirmado" value="false" />
+    <input type="hidden" id="hiddenEsPersonaDistinta" asp-for="EsPersonaDistinta" value="false" />
+    <input type="hidden" id="hiddenPersonaCoincidenciaId" asp-for="PersonaCoincidenciaId" />
+
     <div style="display: flex; justify-content: center;">
         <input type="button" class="btn btn-success" onclick="confirmarEnvio()" value="Cargar difunto" />
     </div>
+
+
 </form>
 
 <!-- Modal de confirmacion de ingreso del difunto -->
@@ -184,6 +194,83 @@
     </div>
 </div>
 
+<!-- Modal titular fallecido -->
+<div class="modal fade" tabindex="-1" id="modalTitularFallecido">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Titular encontrado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    La persona <strong>@ViewBag.NombreTitular</strong>
+                    ya está registrada como <strong>titular y/o firmante</strong> en el cementerio.
+                </p>
+                <p>¿Es esta la persona que falleció y desea cargar?</p>
+                <p class="text-muted small">
+                    Si confirma, se conservará todo el historial existente
+                    y se actualizará su categoría a fallecido.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    No, es un error de DNI
+                </button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarTitular">
+                    Sí, es el titular y/o firmante fallecido
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal reingreso de difunto retirado del cementerio -->
+<div class="modal fade" tabindex="-1" id="modalReingreso">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Posible reingreso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Encontramos un registro de <strong>@ViewBag.NombreReingreso</strong>
+                    que ya estuvo en el cementerio y figura como <strong>retirado</strong>.
+                </p>
+                @if (ViewBag.CoincidenciaPorDni == true)
+                {
+                    <p>El DNI ingresado coincide con ese registro. ¿Es la misma persona que desea cargar?</p>
+                }
+                else
+                {
+                    <p>No se cargó DNI, pero el nombre y apellido coinciden con ese registro. ¿Es la misma persona, o se trata de otro fallecido con el mismo nombre?</p>
+                }
+                <p class="text-muted small">
+                    Si confirma, se conserva todo el historial existente del difunto.
+                </p>
+            </div>
+            <div class="modal-footer">
+                @if (ViewBag.CoincidenciaPorDni == true)
+                {
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        No, hay un error en el DNI
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-secondary" id="btnPersonaDistinta">
+                        No, es otro fallecido distinto
+                    </button>
+                }
+                <button type="button" class="btn btn-primary" id="btnConfirmarReingreso">
+                    Sí, es la misma persona
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @* Renderizamos el manejador pasándole el DTO del modelo *@
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
 
@@ -192,6 +279,45 @@
     <script src="~/js/ubicacion-selector.js"></script>
 
     <script>
+
+        @if (ViewBag.MostrarModalTitular == true)
+        {
+            <text>
+                document.addEventListener('DOMContentLoaded', function () {
+                document.getElementById('hiddenPersonaCoincidenciaId').value = '@ViewBag.PersonaCoincidenciaId';
+                new bootstrap.Modal(document.getElementById('modalTitularFallecido')).show();
+                });
+            </text>
+        }
+
+        @if (ViewBag.MostrarModalReingreso == true)
+        {
+            <text>
+                document.addEventListener('DOMContentLoaded', function () {
+                document.getElementById('hiddenPersonaCoincidenciaId').value = '@ViewBag.PersonaCoincidenciaId';
+                new bootstrap.Modal(document.getElementById('modalReingreso')).show();
+                });
+            </text>
+        }
+
+        document.getElementById('btnConfirmarTitular')?.addEventListener('click', function () {
+        document.getElementById('hiddenTitularFallecido').value = 'true';
+        bootstrap.Modal.getInstance(document.getElementById('modalTitularFallecido')).hide();
+        enviarFormulario();
+        });
+
+        document.getElementById('btnConfirmarReingreso')?.addEventListener('click', function () {
+        document.getElementById('hiddenReingresoConfirmado').value = 'true';
+        bootstrap.Modal.getInstance(document.getElementById('modalReingreso')).hide();
+        enviarFormulario();
+        });
+
+        document.getElementById('btnPersonaDistinta')?.addEventListener('click', function () {
+        document.getElementById('hiddenEsPersonaDistinta').value = 'true';
+        bootstrap.Modal.getInstance(document.getElementById('modalReingreso')).hide();
+        enviarFormulario();
+        });
+
 
 
         //logica de modal de confirmacion

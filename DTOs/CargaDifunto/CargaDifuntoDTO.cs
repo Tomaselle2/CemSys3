@@ -16,6 +16,8 @@ namespace CemSys3.DTOs.CargaDifunto
         public int EstadoDifuntoId { get; set; }
 
         public string? InformacionAdicional { get; set; }
+        public int? PersonaExistenteId { get; set; }
+
         public PersonaDTO Difunto { get; set; } = new PersonaDTO();
     }
 }

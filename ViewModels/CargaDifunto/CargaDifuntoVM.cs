@@ -51,6 +51,11 @@ namespace CemSys3.ViewModels.CargaDifunto
 
         public DateTime? FechaIngreso { get; set; }
 
+        public bool IngresoTitularFallecido { get; set; }
+        public bool ReingresoConfirmado { get; set; }
+        public bool EsPersonaDistinta { get; set; }
+        public int? PersonaCoincidenciaId { get; set; }
+
         //manero de errores
         public SweetAlertDTO? SweetAlert { get; set; }
     }

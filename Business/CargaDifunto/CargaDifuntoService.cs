@@ -38,55 +38,86 @@ namespace CemSys3.Business.CargaDifunto
 
             try
             {
-                //3- se registra el difunto
-                PersonaDTO difunto = new PersonaDTO
-                {
-                    Nombre = dto.Difunto.Nombre?.Trim().ToLower(),
-                    Apellido = dto.Difunto.Apellido?.Trim().ToLower(),
-                    Dni = dto.Difunto.Dni,
-                    Visibilidad = true,
-                    FechaNacimiento = dto.Difunto.FechaNacimiento,
-                    FechaDefuncion = dto.Difunto.FechaDefuncion,
-                    InformacionAdicional = "\n" + dto.Difunto.InformacionAdicional,
-                    Sexo = dto.Difunto.Sexo,
-                    NroActa = dto.Difunto.NroActa,
-                    NroFolio = dto.Difunto.NroFolio,
-                    NroTomo = dto.Difunto.NroTomo,
-                    NroSerie = dto.Difunto.NroSerie,
-                    NroAge = dto.Difunto.NroAge,
-                    EstadoDifuntoId = dto.Difunto.EstadoDifuntoId,
-                    CategoriaPersonaId = (int)CategoriaPersonaEnum.Fallecido,
-                    FechaIngreso = dto.Difunto.FechaIngreso ?? DateTime.Now
-                };
-                int difuntoId = await _personaService.Add(difunto);
+                int difuntoId;
+                PersonaDTO difunto;
 
-                
+                if (dto.PersonaExistenteId.HasValue)
+                {
+                    // Reutilizamos una persona existente (titular fallecido o difunto retirado que reingresa)
+                    difuntoId = dto.PersonaExistenteId.Value;
+                    await _personaService.CambiarCategoria(difuntoId, (int)CategoriaPersonaEnum.Fallecido);
+
+                    difunto = new PersonaDTO
+                    {
+                        Id = difuntoId,
+                        Nombre = dto.Difunto.Nombre?.Trim(),
+                        Apellido = dto.Difunto.Apellido?.Trim(),
+                        Dni = dto.Difunto.Dni,
+                        FechaNacimiento = dto.Difunto.FechaNacimiento,
+                        FechaDefuncion = dto.Difunto.FechaDefuncion,
+                        InformacionAdicional = "\n" + dto.Difunto.InformacionAdicional,
+                        Sexo = dto.Difunto.Sexo,
+                        NroActa = dto.Difunto.NroActa,
+                        NroFolio = dto.Difunto.NroFolio,
+                        NroTomo = dto.Difunto.NroTomo,
+                        NroSerie = dto.Difunto.NroSerie,
+                        NroAge = dto.Difunto.NroAge,
+                        EstadoDifuntoId = dto.Difunto.EstadoDifuntoId,
+                        FechaIngreso = dto.Difunto.FechaIngreso
+                    };
+
+                    await _personaService.UpdateDatosIngresoTitularFallecido(difunto);
+                }
+                else
+                {
+                    //3- se registra el difunto
+                    difunto = new PersonaDTO
+                    {
+                        Nombre = dto.Difunto.Nombre?.Trim().ToLower(),
+                        Apellido = dto.Difunto.Apellido?.Trim().ToLower(),
+                        Dni = dto.Difunto.Dni,
+                        Visibilidad = true,
+                        FechaNacimiento = dto.Difunto.FechaNacimiento,
+                        FechaDefuncion = dto.Difunto.FechaDefuncion,
+                        InformacionAdicional = "\n" + dto.Difunto.InformacionAdicional,
+                        Sexo = dto.Difunto.Sexo,
+                        NroActa = dto.Difunto.NroActa,
+                        NroFolio = dto.Difunto.NroFolio,
+                        NroTomo = dto.Difunto.NroTomo,
+                        NroSerie = dto.Difunto.NroSerie,
+                        NroAge = dto.Difunto.NroAge,
+                        EstadoDifuntoId = dto.Difunto.EstadoDifuntoId,
+                        CategoriaPersonaId = (int)CategoriaPersonaEnum.Fallecido,
+                        FechaIngreso = dto.Difunto.FechaIngreso ?? DateTime.Now
+                    };
+                    difuntoId = await _personaService.Add(difunto);
+                }
+
                 //5- se registra la relacion (parcela con difunto)
                 ParcelaDifunto parcelaDifunto = new ParcelaDifunto
                 {
                     ParcelaId = dto.ParcelaId,
                     DifuntoId = difuntoId,
-                    FechaIngreso = null,
+                    FechaIngreso = dto.Difunto.FechaIngreso, // antes se seteaba en null y se "parchaba" después con un re-query
                     TramiteIngresoId = null
                 };
                 _context.ParcelaDifuntos.Add(parcelaDifunto);
                 await _context.SaveChangesAsync();
-
 
                 var parcela = await _context.Parcelas
                     .Include(p => p.Seccion)
                     .FirstOrDefaultAsync(p => p.Id == dto.ParcelaId) ?? throw new Exception("Parcela no encontrada");
                 string ubicacion = "";
 
-                if (parcela.TipoParcelaId == (int)TipoParcelaEnum.Nicho) //nicho
+                if (parcela.TipoParcelaId == (int)TipoParcelaEnum.Nicho)
                 {
                     ubicacion = $"Nicho {parcela.NroParcela.ToString()} Sección {parcela.Seccion.Nombre.ToUpper()} Fila {parcela.NroFila.ToString()}";
                 }
-                else if (parcela.TipoParcelaId == (int)TipoParcelaEnum.Fosa)//fosa
+                else if (parcela.TipoParcelaId == (int)TipoParcelaEnum.Fosa)
                 {
                     ubicacion = $"Fosa {parcela.NroParcela.ToString()} Sección {parcela.Seccion.Nombre.ToUpper()}";
                 }
-                else if (parcela.TipoParcelaId == (int)TipoParcelaEnum.Panteon) //panteon
+                else if (parcela.TipoParcelaId == (int)TipoParcelaEnum.Panteon)
                 {
                     ubicacion = $"Lote {parcela.NroParcela.ToString()} Sección {parcela.Seccion.Nombre.ToUpper()}";
                 }
@@ -97,7 +128,6 @@ namespace CemSys3.Business.CargaDifunto
                 //10- se inicia el contrato de concesion en estado "Sin Contrato" solo si es nicho o fosa
                 bool existeConcesion = await _context.Concesiones
                     .AnyAsync(c => c.ParcelaId == dto.ParcelaId && c.Visibilidad == true && c.FechaFin == null);
-
 
                 if (!existeConcesion && parcela.TipoParcelaId != (int)TipoParcelaEnum.Panteon)
                 {
@@ -114,7 +144,6 @@ namespace CemSys3.Business.CargaDifunto
 
                 if (!existeConcesion && parcela.TipoParcelaId == (int)TipoParcelaEnum.Panteon)
                 {
-                    //se crea la concesion para cada panteon registrado, con estado vigente
                     ConcesionDTO concesion = new ConcesionDTO();
                     concesion.Visibilidad = true;
                     concesion.ParcelaId = parcela.Id;
@@ -129,21 +158,6 @@ namespace CemSys3.Business.CargaDifunto
                    .FirstOrDefaultAsync(c => c.ParcelaId == parcela.Id && c.FechaFin == null) ?? throw new Exception("Concesion no encontrada.");
 
                 await _historialEstadosService.VincularTramiteAPersona(concesionBD.TramiteId, difuntoId);
-
-
-                if (difunto.CategoriaPersonaId == (int)CategoriaPersonaEnum.Fallecido)
-                {
-                    if (difunto.FechaIngreso.HasValue)
-                    {
-                        Models.ParcelaDifunto parcelaDifuntoo = await _context.ParcelaDifuntos.Where(p => p.DifuntoId == difuntoId).FirstOrDefaultAsync() ?? throw new Exception("Error al actualizar la fecha de ingreso");
-
-
-                        parcelaDifuntoo.FechaIngreso = difunto.FechaIngreso;
-
-                    }
-
-                }
-
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();

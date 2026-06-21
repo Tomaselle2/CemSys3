@@ -72,6 +72,17 @@ namespace CemSys3.Controllers
 
                 viewModel.Paginacion.Parametros = new Dictionary<string, string>();
 
+
+                viewModel.Concesion = concesion;
+                viewModel.Nombre = nombre;
+                viewModel.Apellido = apellido;
+                viewModel.TipoParcelaID = tipoParcelaID;
+                viewModel.SeccionID = seccionID;
+                viewModel.ParcelaID = parcelaID;
+                viewModel.FechaDesde = fechaDesde;
+                viewModel.FechaHasta = fechaHasta;
+
+
                 viewModel.Paginacion.Parametros.Add("filtroEstado", filtroEstado.ToString());
                 viewModel.Paginacion.Parametros.Add("porPagina", porPagina.ToString());
                 viewModel.Paginacion.Parametros.Add("nombre", nombre);
@@ -82,15 +93,6 @@ namespace CemSys3.Controllers
                 viewModel.Paginacion.Parametros.Add("parcelaID", viewModel.ParcelaID?.ToString() ?? "");
                 viewModel.Paginacion.Parametros.Add("fechaDesde", fechaDesde?.ToString("yyyy-MM-dd") ?? "");
                 viewModel.Paginacion.Parametros.Add("fechaHasta", fechaHasta?.ToString("yyyy-MM-dd") ?? "");
-
-                viewModel.Concesion = concesion;
-                viewModel.Nombre = nombre;
-                viewModel.Apellido = apellido;
-                viewModel.TipoParcelaID = tipoParcelaID;
-                viewModel.SeccionID = seccionID;
-                viewModel.ParcelaID = parcelaID;
-                viewModel.FechaDesde = fechaDesde;
-                viewModel.FechaHasta = fechaHasta;
 
                 if (viewModel.Listado.Count() == 0)
                 {

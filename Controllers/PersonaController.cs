@@ -38,14 +38,16 @@ namespace CemSys3.Controllers
                 viewModel.Personas = resultado.Items;
                 viewModel.Paginacion = resultado.Paginacion;
                 viewModel.Paginacion.Parametros = new Dictionary<string, string>();
-                viewModel.Paginacion.Parametros.Add("dni", dni.ToString());
-                viewModel.Paginacion.Parametros.Add("nombre", nombre);
-                viewModel.Paginacion.Parametros.Add("apellido", apellido);
-                viewModel.Paginacion.Parametros.Add("porPagina", porPagina.ToString());
+                
 
                 viewModel.Dni = dni == 0 ? null : dni;
                 viewModel.Nombre = nombre;
                 viewModel.Apellido = apellido;
+
+                viewModel.Paginacion.Parametros.Add("dni", dni.ToString());
+                viewModel.Paginacion.Parametros.Add("nombre", nombre);
+                viewModel.Paginacion.Parametros.Add("apellido", apellido);
+                viewModel.Paginacion.Parametros.Add("porPagina", porPagina.ToString());
 
                 if (viewModel.Personas.Count() == 0)
                 {
