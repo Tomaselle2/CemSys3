@@ -31,7 +31,7 @@
             <form hx-post="/Nota/Guardar"
                   hx-target="#modal-container"
                   hx-swap="innerHTML"
-                  onsubmit="return validarTareas()">
+                  onsubmit="return manejarSubmit(event)">
 
                 <input type="hidden" asp-for="Id" />
                 <input type="hidden" asp-for="TipoNotaId" />
@@ -424,6 +424,86 @@
     function esNotaFinalizada() {
         const estado = document.querySelector('input[name="EstadoId"]')?.value;
         return estado === "@((int)EstadosNotaEnum.NotaFinalizado)";
+    }
+
+
+    function manejarSubmit(event) {
+        // Validación
+        if (!validarTareas()) {
+            return false;
+        }
+
+        // Si ya está procesando, evitar doble submit
+        const form = event.target;
+        if (form.dataset.procesando === 'true') {
+            return false;
+        }
+
+        // Marcar como procesando
+        form.dataset.procesando = 'true';
+
+        // Bloquear botones
+        const botones = form.querySelectorAll('.modal-footer button');
+        botones.forEach(btn => {
+            if (!btn.disabled) {
+                btn.dataset.fueDeshabilitado = 'true';
+                btn.disabled = true;
+            }
+        });
+
+        // Personalizar el botón de guardar
+        const btnGuardar = form.querySelector('button[type="submit"]');
+        if (btnGuardar) {
+            btnGuardar.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
+        }
+
+        return true;
+    }
+
+    document.addEventListener('htmx:afterRequest', function(event) {
+        const form = event.detail.target?.closest?.('form');
+        if (form) {
+            form.dataset.procesando = 'false';
+
+            // Restaurar botones
+            const botones = form.querySelectorAll('.modal-footer button[data-fue-deshabilitado="true"]');
+            botones.forEach(btn => {
+                btn.disabled = false;
+                delete btn.dataset.fueDeshabilitado;
+            });
+
+            // Restaurar texto del botón guardar
+            const btnGuardar = form.querySelector('button[type="submit"]');
+            if (btnGuardar && !btnGuardar.disabled) {
+                btnGuardar.innerHTML = 'Guardar';
+            }
+
+            // Reevaluar estado
+            evaluarFinalizacion();
+        }
+    });
+
+    // También manejar errores de validación
+    document.addEventListener('htmx:responseError', function(event) {
+        const form = event.detail.target?.closest?.('form');
+        if (form) {
+            form.dataset.procesando = 'false';
+            desbloquearBotonesDespuesDeError(form);
+        }
+    });
+
+    function desbloquearBotonesDespuesDeError(form) {
+        const botones = form.querySelectorAll('.modal-footer button[data-fue-deshabilitado="true"]');
+        botones.forEach(btn => {
+            btn.disabled = false;
+            delete btn.dataset.fue-deshabilitado;
+        });
+
+        const btnGuardar = form.querySelector('button[type="submit"]');
+        if (btnGuardar) {
+            btnGuardar.disabled = false;
+            btnGuardar.innerHTML = 'Guardar';
+        }
     }
 
 </script>
