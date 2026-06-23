@@ -1,7 +1,6 @@
 ﻿using CemSys3.DTOs.Concesion;
 using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Paginacion;
-using iText.Signatures;
 
 namespace CemSys3.Interfaces.Concesion
 {
@@ -16,6 +15,7 @@ namespace CemSys3.Interfaces.Concesion
             int porPagina = 10,
             string nombre = "",
             string apellido = "",
+            string nombrePanteon = "",
             int concesion = 0,
             int? tipoParcelaID = null,
             int? seccionID = null, 

@@ -243,6 +243,7 @@ namespace CemSys3.Business.Concesion
     int porPagina = 10,
     string nombre = "",
     string apellido = "",
+    string nombrePanteon = "",
     int concesion = 0,
     int? tipoParcelaID = null,
     int? seccionID = null,
@@ -288,6 +289,11 @@ namespace CemSys3.Business.Concesion
 
             if (parcelaID.HasValue)
                 query = query.Where(c => c.ParcelaId == parcelaID.Value);
+
+            if (!string.IsNullOrWhiteSpace(nombrePanteon))
+            {
+                query = query.Where(c => c.Parcela.NombrePanteon.Contains(nombrePanteon));
+            }
 
             if (!string.IsNullOrWhiteSpace(nombre) || !string.IsNullOrWhiteSpace(apellido))
             {

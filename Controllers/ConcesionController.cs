@@ -59,14 +59,14 @@ namespace CemSys3.Controllers
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)] 
         public async Task<IActionResult> TablaGeneral(int filtroEstado = 0, string nombre = "",
-            string apellido = "", int concesion = 0, int? tipoParcelaID = null, int? seccionID = null, int? parcelaID = null, DateOnly? fechaDesde = null, DateOnly? fechaHasta = null, int pagina = 1, int porPagina = 10)
+            string apellido = "",string nombrePanteon = "", int concesion = 0, int? tipoParcelaID = null, int? seccionID = null, int? parcelaID = null, DateOnly? fechaDesde = null, DateOnly? fechaHasta = null, int pagina = 1, int porPagina = 10)
         {
             TablaGeneralVM viewModel = new TablaGeneralVM();
             viewModel.SweetAlert = TempData.GetSweetAlert();
 
             try
             {
-                PaginadoResponse<TablaConcesionDTO> resultado = await _concesionService.GellAllPaginado(filtroEstado, pagina, porPagina, nombre, apellido, concesion, tipoParcelaID, seccionID, parcelaID, fechaDesde, fechaHasta);
+                PaginadoResponse<TablaConcesionDTO> resultado = await _concesionService.GellAllPaginado(filtroEstado, pagina, porPagina, nombre, apellido, nombrePanteon, concesion, tipoParcelaID, seccionID, parcelaID, fechaDesde, fechaHasta);
                 viewModel.Listado = resultado.Items;
                 viewModel.Paginacion = resultado.Paginacion;
 
@@ -76,6 +76,7 @@ namespace CemSys3.Controllers
                 viewModel.Concesion = concesion;
                 viewModel.Nombre = nombre;
                 viewModel.Apellido = apellido;
+                viewModel.NombrePanteon = nombrePanteon;
                 viewModel.TipoParcelaID = tipoParcelaID;
                 viewModel.SeccionID = seccionID;
                 viewModel.ParcelaID = parcelaID;
@@ -87,6 +88,7 @@ namespace CemSys3.Controllers
                 viewModel.Paginacion.Parametros.Add("porPagina", porPagina.ToString());
                 viewModel.Paginacion.Parametros.Add("nombre", nombre);
                 viewModel.Paginacion.Parametros.Add("apellido", apellido);
+                viewModel.Paginacion.Parametros.Add("nombrePanteon", nombrePanteon);
                 viewModel.Paginacion.Parametros.Add("concesion", concesion.ToString("D5"));
                 viewModel.Paginacion.Parametros.Add("tipoParcelaID", viewModel.TipoParcelaID?.ToString() ?? "");
                 viewModel.Paginacion.Parametros.Add("seccionID", viewModel.SeccionID?.ToString() ?? "");

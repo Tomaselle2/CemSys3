@@ -96,6 +96,20 @@
                                 </select>
                             </div>
 
+                            <div class="col-md-4 mb-3">
+                                <label for="panteonInput" class="form-label fw-semibold">
+                                    Nombre del Panteón
+                                </label>
+                                <input class="form-control"
+                                       id="panteonInput"
+                                       name="nombrePanteon"
+                                       type="text"
+                                       asp-for="NombrePanteon"
+                                       maxlength="60"
+                                       minlength="2"
+                                       autocomplete="off" />
+                            </div>
+
                         </div>
 
                         <!-- Ubicación -->

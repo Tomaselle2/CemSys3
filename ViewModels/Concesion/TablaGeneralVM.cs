@@ -8,6 +8,7 @@ namespace CemSys3.ViewModels.Concesion
     {
         public string? Nombre { get; set; }
         public string? Apellido { get; set; }
+        public string? NombrePanteon { get; set; }
         public int? Concesion { get; set; }
 
         public int? TipoParcelaID { get; set; }
