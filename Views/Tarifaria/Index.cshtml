@@ -26,6 +26,13 @@
     <a asp-action="GetAllPreciosIngreso" asp-controller="Tarifaria" data-no-loader class="btn btn-outline-danger" title="Descargar precios de ingreso">Ingresos <i class="bi bi-filetype-pdf"></i></a>
 </div>
 
+<div>
+    <a asp-action="GetPdfPreciosNichosFosas" asp-controller="Tarifaria"
+       data-no-loader class="btn btn-outline-danger" title="Descargar precios nichos y fosas">
+        Nichos y Fosas <i class="bi bi-filetype-pdf"></i>
+    </a>
+</div>
+
 
 
 
@@ -658,8 +665,8 @@
                                                                         data-seccion-id="@seccion.Id"
                                                                         data-nro-fila="@fila"
                                                                         data-anios-concesion="@anio"
-                                                                        data-concepto-id="@(precio?.ConceptoTarifariaId ?? 0)"
-                                                                        value="@(precio?.Precio.ToString("0.00"))"
+                                                                        data-concepto-id="@(precio?.ConceptoTarifariaId ?? (int)ConceptosTarifariaEnum.ConcesionNicho)"
+                                                                        value="@(precio?.Precio.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))"
                                                                         step="0.01"
                                                                         min="0" 
                                                                         placeholder="0.00" />
@@ -827,7 +834,17 @@
 
 @section Scripts{
    <script>
-               // Ejecutar al cargar para validar estado inicial del botón
+
+       // ── MAPA de años → AniosConcesionId (igual al enum en C#) ──────────────
+        const mapaAniosAConcesionId = {
+            25: 5,   // AniosConcesionEnum.anio25 = 5
+            15: 4,   // AniosConcesionEnum.anio15 = 4
+            10: 3,   // AniosConcesionEnum.anio10 = 3
+             5: 2,   //  AniosConcesionEnum.anio5 = 2
+             1: 1    // AniosConcesionEnum.anio1  = 1
+        };
+
+        // Ejecutar al cargar para validar estado inicial del botón
         actualizarEstadoBotonCombinar();
 
         // Función para combinar los precios
@@ -946,35 +963,35 @@
         }
 
         // Función para guardar los precios combinados
-        function guardarPreciosCombinados() {
+                function guardarPreciosCombinados() {
             let precios = [];
-            let todosValidos = true;
             let seccionesSeleccionadas = obtenerSeccionesSeleccionadas();
 
             document.querySelectorAll('.precio-input-modal').forEach(input => {
-                let precio = parseFloat(input.value) || 0;
+                const rawValue = input.value.replace(',', '.');
+                const precio   = parseFloat(rawValue) || 0;
 
-                let nroFila = parseInt(input.dataset.nroFila);
-                let aniosConcesion = parseInt(input.dataset.aniosConcesion);
-                let conceptoTarifariaId = parseInt(input.dataset.conceptoId || 0);
+                const nroFila           = parseInt(input.dataset.nroFila);
+                const aniosRaw          = parseInt(input.dataset.aniosConcesion);
+                const aniosConcesionId  = mapaAniosAConcesionId[aniosRaw] ?? null;
+                const conceptoId        = parseInt(input.dataset.conceptoId || 0);
 
-                // Para cada sección seleccionada, agrega un precio
                 seccionesSeleccionadas.forEach(seccion => {
-                    let inputOriginal = document.querySelector(`.precio-input[data-seccion-id="${seccion.id}"][data-nro-fila="${nroFila}"][data-anios-concesion="${aniosConcesion}"]`);
-                    let idPrecio = inputOriginal ? parseInt(inputOriginal.dataset.precioId) : 0;
+                    const inputOriginal = document.querySelector(
+                        `.precio-input[data-seccion-id="${seccion.id}"][data-nro-fila="${nroFila}"][data-anios-concesion="${aniosRaw}"]`
+                    );
+                    const idPrecio = inputOriginal ? parseInt(inputOriginal.dataset.precioId) : 0;
 
                     precios.push({
-                        Id: idPrecio,
-                        SeccionId: seccion.id,
-                        NroFila: nroFila,
-                        AniosConcesion: aniosConcesion,
-                        Precio: precio,
-                        ConceptoTarifariaId: conceptoTarifariaId
+                        Id:                  idPrecio,
+                        SeccionId:           seccion.id,
+                        NroFila:             nroFila,
+                        AniosConcesionId:    aniosConcesionId,
+                        Precio:              precio,
+                        ConceptoTarifariaId: conceptoId
                     });
                 });
             });
-
-            console.log(precios);
 
             fetch('@Url.Action("ActualizarPreciosTarifaria", "Tarifaria")', {
                 method: 'POST',
@@ -984,35 +1001,23 @@
                 },
                 body: JSON.stringify(precios)
             })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        AlertService.show('Éxito', result.message, 'success');
+            .then(r => r.json())
+            .then(result => {
+                if (result.success) {
+                    AlertService.show('Éxito', result.message, 'success');
+                    actualizarInputsOriginales(precios);
 
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('modalCombinarPrecios'));
+                    modal.hide();
 
-                        // Actualizar los inputs originales con los nuevos valores
-                        actualizarInputsOriginales(precios);
-
-                        var modal = bootstrap.Modal.getInstance(document.getElementById('modalCombinarPrecios'));
-                        modal.hide();
-
-                        // Opcional: Limpiar las selecciones de checkboxes
-                        document.querySelectorAll('input[name="seccionesSeleccionadas"]:checked').forEach(checkbox => {
-                            checkbox.checked = false;
-                        });
-
-                        // Actualizar estado del botón
-                        actualizarEstadoBotonCombinar();
-
-                    } else {
-                        AlertService.show('Error', result.message, 'error');
-
-                    }
-                    console.log(result);
-                })
-                .catch(error => {
-                    AlertService.show('Error de conexión', 'Por favor, intente nuevamente.', 'error');
-                });
+                    document.querySelectorAll('input[name="seccionesSeleccionadas"]:checked')
+                        .forEach(cb => cb.checked = false);
+                    actualizarEstadoBotonCombinar();
+                } else {
+                    AlertService.show('Error', result.message, 'error');
+                }
+            })
+            .catch(() => AlertService.show('Error de conexión', 'Por favor, intente nuevamente.', 'error'));
         }
 
         // Actualizar los inputs originales en la página
@@ -1058,14 +1063,14 @@
         });
 
         // La función ahora recibe el formulario específico y el botón que la llamó
-        async function actualizarPrecios(formElement, clickedButton) {
+                async function actualizarPrecios(formElement, clickedButton) {
             const precios = [];
             let todosValidos = true;
 
-            // Recopilar solo los precios de los inputs dentro de ESTE formulario
-            const inputsPrecios = formElement.querySelectorAll('.precio-input');
-            inputsPrecios.forEach(input => {
-                const precio = parseFloat(input.value) || 0;
+            formElement.querySelectorAll('.precio-input').forEach(input => {
+                // Leer el valor como string y normalizar: reemplazar coma por punto
+                const rawValue = input.value.replace(',', '.');
+                const precio = parseFloat(rawValue) || 0;
 
                 if (precio < 0) {
                     todosValidos = false;
@@ -1074,10 +1079,23 @@
                     input.classList.remove('is-invalid');
                 }
 
+                // Leer los datos del input
+                const precioId          = parseInt(input.dataset.precioId)   || 0;
+                const conceptoId        = parseInt(input.dataset.conceptoId) || 0;
+                const seccionId         = input.dataset.seccionId   ? parseInt(input.dataset.seccionId)   : null;
+                const nroFila           = input.dataset.nroFila     ? parseInt(input.dataset.nroFila)     : null;
+                // data-anios-concesion tiene los AÑOS (25, 15, 10, 5)
+                // hay que convertirlos al ID del enum antes de mandar
+                const aniosRaw          = input.dataset.aniosConcesion ? parseInt(input.dataset.aniosConcesion) : null;
+                const aniosConcesionId  = aniosRaw != null ? (mapaAniosAConcesionId[aniosRaw] ?? null) : null;
+
                 precios.push({
-                    Id: parseInt(input.dataset.precioId),
-                    ConceptoTarifariaId: parseInt(input.dataset.conceptoId),
-                    Precio: precio
+                    Id:                  precioId,
+                    ConceptoTarifariaId: conceptoId,
+                    Precio:              precio,
+                    SeccionId:           seccionId,
+                    NroFila:             nroFila,
+                    AniosConcesionId:    aniosConcesionId
                 });
             });
 
@@ -1086,9 +1104,9 @@
                 return;
             }
 
-            const requestVerificationToken = formElement.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+            const requestVerificationToken =
+                formElement.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
 
-            // Mostrar loading en el botón específico que fue clickeado
             clickedButton.disabled = true;
             clickedButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
@@ -1102,14 +1120,27 @@
                     body: JSON.stringify(precios)
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
                 const result = await response.json();
 
                 if (result.success) {
                     AlertService.show('Éxito', result.message, 'success');
+
+                    // ── Actualizar data-precio-id si el server devuelve los nuevos IDs ──
+                    // Si tu endpoint devuelve result.nuevosIds (ver abajo), actualizamos
+                    // los inputs para que la próxima vez sean UPDATE y no INSERT
+                    if (result.nuevosIds && Array.isArray(result.nuevosIds)) {
+                        result.nuevosIds.forEach(item => {
+                            const selector = [
+                                `.precio-input[data-seccion-id="${item.seccionId}"]`,
+                                `[data-nro-fila="${item.nroFila}"]`,
+                                `[data-anios-concesion="${item.aniosRaw}"]`
+                            ].join('');
+                            const inp = formElement.querySelector(selector);
+                            if (inp) inp.dataset.precioId = item.id;
+                        });
+                    }
                 } else {
                     AlertService.show('Error', result.message, 'error');
                 }
@@ -1118,7 +1149,6 @@
                 AlertService.show('Error de conexión', 'Por favor, intente nuevamente.', 'error');
                 console.error('Error:', error);
             } finally {
-                // Restaurar el botón clickeado
                 clickedButton.disabled = false;
                 clickedButton.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
             }

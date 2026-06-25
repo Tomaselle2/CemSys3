@@ -56,7 +56,7 @@ namespace CemSys3.Controllers
 
         // Método actualizado para AJAX
         [HttpPost]
-        [IgnoreAntiforgeryToken]
+        [AuthorizeRole(RolUsuario.Administrador)]
         public async Task<IActionResult> ActualizarPreciosTarifaria([FromBody] List<PrecioActualizarDTO> precios)
         {
             try
@@ -64,11 +64,7 @@ namespace CemSys3.Controllers
                 // Validar que se recibieron datos
                 if (precios == null || !precios.Any())
                 {
-                    return Json(new
-                    {
-                        success = false,
-                        message = "No se recibieron precios para actualizar."
-                    });
+                    return Json(new { success = false, message = "No se recibieron precios para actualizar." });
                 }
 
                 // Validar el modelo
@@ -78,79 +74,51 @@ namespace CemSys3.Controllers
                         .SelectMany(v => v.Errors)
                         .Select(e => e.ErrorMessage)
                         .ToList();
-
-                    return Json(new
-                    {
-                        success = false,
-                        message = $"Datos inválidos: {string.Join(", ", errores)}"
-                    });
+                    return Json(new { success = false, message = $"Datos inválidos: {string.Join(", ", errores)}" });
                 }
 
                 // Validaciones adicionales
                 foreach (var precio in precios)
                 {
-                    if (precio.Id <= 0)
+                    // Id == 0 ahora es válido (significa INSERT de precio nuevo)
+                    if (precio.Id < 0)
                     {
-                        return Json(new
-                        {
-                            success = false,
-                            message = "ID de precio inválido."
-                        });
+                        return Json(new { success = false, message = "ID de precio inválido." });
                     }
 
                     if (precio.ConceptoTarifariaId <= 0)
                     {
-                        return Json(new
-                        {
-                            success = false,
-                            message = "ID de concepto tarifario inválido."
-                        });
+                        return Json(new { success = false, message = "ID de concepto tarifario inválido." });
                     }
 
                     if (precio.Precio < 0)
                     {
-                        return Json(new
-                        {
-                            success = false,
-                            message = "El precio no puede ser negativo."
-                        });
+                        return Json(new { success = false, message = "El precio no puede ser negativo." });
                     }
                 }
 
-                // Actualizar los precios usando el business logic
-                await _tarifariaService.ActualizarPreciosTarifaria(precios);
+                // Actualizar/insertar los precios
+                var nuevosIds = await _tarifariaService.ActualizarPreciosTarifaria(precios);
 
                 return Json(new
                 {
                     success = true,
-                    message = "Precios actualizados correctamente."
+                    message = "Precios actualizados correctamente.",
+                    nuevosIds = nuevosIds
                 });
             }
             catch (ArgumentException ex)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = ex.Message
-                });
+                return Json(new { success = false, message = ex.Message });
             }
             catch (InvalidOperationException ex)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = ex.Message
-                });
+                return Json(new { success = false, message = ex.Message });
             }
             catch (Exception ex)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = "No se actualizo ningun precio"
-                });
+                return Json(new { success = false, message = "No se actualizó ningún precio." });
             }
-
         }
 
         [HttpGet]
@@ -225,7 +193,35 @@ namespace CemSys3.Controllers
             return Json(new { success = true, data = preview });
         }
 
-        
+
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> GetPdfPreciosNichosFosas()
+        {
+            var datos = await _tarifariaService.ObtenerDatosParaPdfNichosFosasAsync();
+
+            string html = await _viewRenderService.RenderToStringAsync(
+                "Tarifaria/GetPdfPreciosNichosFosas",
+                datos);
+
+            var pdfBytes = await _pdfGenerator.GenerateFromHtmlAsync(
+                html,
+                new PdfOptionsDto
+                {
+                    Landscape = false,
+                    MarginTop = "50px",
+                    MarginBottom = "30px",
+                    MarginLeft = "100px",
+                    MarginRight = "30px",
+                });
+
+            return File(
+                pdfBytes,
+                "application/pdf",
+                $"Precios_Nichos_Fosas_{DateTime.Now.Year}.pdf");
+        }
+
     }
 }
 

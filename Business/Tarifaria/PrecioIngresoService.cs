@@ -1,6 +1,5 @@
 ﻿using CemSys3.DTOs.Tarifaria;
 using CemSys3.Enumerables;
-using CemSys3.Interfaces.ConceptoTarifaria;
 using CemSys3.Interfaces.Tarifaria;
 using CemSys3.Models;
 using CemSys3.Helpers.Enumerable;

@@ -1,0 +1,267 @@
+﻿@{
+    Layout = null; // PDF sin layout maestro
+
+    // Porcentaje de fondo como entero para mostrar en título: 0.05 → 5
+    int pctFondoEntero = (int)Math.Round(Model.PorcentajeFondo * 100);
+
+    int[] anios = { 25, 15, 10, 5 };
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: Arial, sans-serif;
+                font-size: 16px;
+                color: #000;
+                background: #fff;
+            }
+
+            /* ── Encabezado de sección principal ── */
+            h1.titulo-principal {
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                background-color: #ffd700;
+                padding: 6px 10px;
+                margin-bottom: 14px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            h2.titulo-seccion {
+                font-size: 18px;
+                font-weight: bold;
+                margin: 14px 0 5px 0;
+            }
+
+            /* ── Tablas ── */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 10px;
+            }
+
+            th {
+                background-color: #e8e8e8;
+                font-weight: bold;
+                text-align: center;
+                padding: 4px 6px;
+                border: 1px solid #999;
+                font-size: 14px;
+            }
+
+            td {
+                padding: 3px 6px;
+                border: 1px solid #bbb;
+                text-align: center;
+                font-size: 16px;
+            }
+
+                td.td-label {
+                    text-align: left;
+                    font-weight: normal;
+                    min-width: 130px;
+                }
+
+            tr:nth-child(even) td {
+                background-color: #f9f9f9;
+            }
+
+            /* ── Separador entre páginas lógicas ── */
+            .page-break {
+                page-break-before: always;
+            }
+
+            /* ── Bloque fosa ── */
+            .fosa-table {
+                width: 320px;
+            }
+
+            /* ── Título "Difuntos de otras jurisdicciones" ── */
+            h1.titulo-otras {
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                background-color: #ffd700;
+                padding: 6px 10px;
+                margin: 20px 0 14px 0;
+                text-transform: uppercase;
+            }
+
+            /* Layout dos columnas para nichos + fosas en misma página */
+            .col-wrapper {
+                display: flex;
+                gap: 40px;
+            }
+
+            .col-left {
+                flex: 1;
+            }
+
+            .col-right {
+                flex: 0 0 340px;
+            }
+
+            .fosa-block {
+                margin-top: 8px;
+            }
+
+                .fosa-block h2 {
+                    font-size: 16px;
+                    font-weight: bold;
+                    margin-bottom: 4px;
+                }
+
+            .nota-fosa {
+                font-size: 16px;
+                margin-bottom: 8px;
+                color: #333;
+            }
+    </style>
+</head>
+<body>
+
+    @* ============================================================
+       PÁGINA 1: CONCESIONES LOCALES (Tirolesa) + FOSA LOCAL
+       ============================================================ *@
+
+    <h1 class="titulo-principal">
+        CONCESIONES (Tirolesa) / RENOV. DE NICHOS @DateTime.Now.Year
+        (con el @pctFondoEntero% incluido)
+    </h1>
+
+    @foreach (var grupo in Model.GruposNichosLocales)
+    {
+        <h2 class="titulo-seccion">Secciones: @grupo.NombreSecciones.ToUpper()</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    @foreach (var anio in anios)
+                    {
+                        <th>@anio AÑOS</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var fila in grupo.Filas)
+                {
+                    <tr>
+                        <td class="td-label">@fila.Etiqueta</td>
+                        @foreach (var anio in anios)
+                        {
+                            <td>@fila.PreciosPorAnio[anio].ToString("N0")</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+
+    @* ============================================================
+       PÁGINA 2: DIFUNTOS DE OTRAS JURISDICCIONES (nichos)
+       ============================================================ *@
+
+    <div class="page-break"></div>
+
+    <h1 class="titulo-otras">
+        DIFUNTOS DE OTRAS JURISDICCIONES
+    </h1>
+
+    <h1 class="titulo-principal">
+        CONCESIONES DE NICHOS @DateTime.Now.Year (con el @pctFondoEntero% incluido)
+    </h1>
+
+    @foreach (var grupo in Model.GruposNichosOtrasJurisdicciones)
+    {
+        <h2 class="titulo-seccion">Secciones: @grupo.NombreSecciones</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    @foreach (var anio in anios)
+                    {
+                        <th>@anio AÑOS</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var fila in grupo.Filas)
+                {
+                    <tr>
+                        <td class="td-label">@fila.Etiqueta</td>
+                        @foreach (var anio in anios)
+                        {
+                            <td>@fila.PreciosPorAnio[anio].ToString("N0")</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+
+    @* ============================================================
+       PÁGINA 3: FOSAS
+       ============================================================ *@
+
+    <div class="page-break"></div>
+
+    <h1 class="titulo-principal">
+        CONCESIÓN TERRENO PARA FOSA (con el @pctFondoEntero% incluido)
+    </h1>
+
+    <p class="nota-fosa">Fosa de 1,20 x 2,20 mts.</p>
+
+    <table class="fosa-table">
+        <thead>
+            <tr>
+                <th style="text-align:left">Período</th>
+                <th>Precio</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var fosa in Model.FosasLocales)
+            {
+                <tr>
+                    <td class="td-label">@fosa.Etiqueta</td>
+                    <td>@fosa.Precio.ToString("N0")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h1 class="titulo-otras" style="margin-top:24px;">
+        DIFUNTOS DE OTRAS JURISDICCIONES
+    </h1>
+
+    <table class="fosa-table">
+        <thead>
+            <tr>
+                <th style="text-align:left">Período</th>
+                <th>Precio</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var fosa in Model.FosasOtrasJurisdicciones)
+            {
+                <tr>
+                    <td class="td-label">@fosa.Etiqueta</td>
+                    <td>@fosa.Precio.ToString("N0")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</body>
+</html>
