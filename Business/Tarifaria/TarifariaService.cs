@@ -140,22 +140,6 @@ namespace CemSys3.Business.Tarifaria
             return Math.Round(valor / factor, MidpointRounding.AwayFromZero) * factor;
         }
 
-        //public async Task<IEnumerable<TarifariaRequestDTO>> GetPrecios()
-        //{
-        //    return await _context.PreciosTarifarias.Where(p => p.Visibilidad == true).AsNoTracking().Select(pre => new TarifariaRequestDTO
-        //    {
-        //        Id = pre.Id,
-        //        Precio = pre.Precio,
-        //        NroFila = pre.NroFila,
-        //        ConceptoTarifariaId = pre.ConceptoTarifariaId,
-        //        AniosConcesionId = pre.AniosConcesionId,
-        //        SeccionId = pre.SeccionId,
-        //        Visibilidad = pre.Visibilidad,
-        //        TemaId = pre.ConceptoTarifaria.TemaId,
-        //        NombreConcepto = pre.ConceptoTarifaria.Nombre
-        //    }).ToListAsync();
-        //}
-
         public async Task<IEnumerable<TarifariaRequestDTO>> GetPrecios()
         {
             var precios = await _context.PreciosTarifarias

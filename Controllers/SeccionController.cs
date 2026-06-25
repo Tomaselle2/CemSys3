@@ -9,7 +9,6 @@ using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Seccion;
 using CemSys3.ViewModels.Seccion;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace CemSys3.Controllers
 {
@@ -128,7 +127,7 @@ namespace CemSys3.Controllers
             SeccionRequestDTO seccion = new SeccionRequestDTO
             {
                 Id = viewModel.Id ?? 0,
-                Nombre = viewModel.Nombre.Trim(),
+                Nombre = viewModel.Nombre.Trim().ToUpper(),
                 NroParcelas = viewModel.NroParcelas.Value,
                 Filas = viewModel.Filas.Value,
                 TipoNumeracionParcelaId = viewModel.TipoNumeracionParcelaId,
@@ -207,7 +206,7 @@ namespace CemSys3.Controllers
             await ListarSecciones(TipoParcelaId, viewModel, filtro, pagina, porPagina);
 
             viewModel.Id = seccion.Id;
-            viewModel.Nombre = seccion.Nombre;
+            viewModel.Nombre = seccion.Nombre.Trim().ToUpper();
             viewModel.NroParcelas = seccion.NroParcelas;
             viewModel.Filas = seccion.Filas;
             viewModel.TipoNumeracionParcelaId = seccion.TipoNumeracionParcelaId;

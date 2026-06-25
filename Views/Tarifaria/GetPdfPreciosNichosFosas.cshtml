@@ -184,7 +184,7 @@
 
     @foreach (var grupo in Model.GruposNichosOtrasJurisdicciones)
     {
-        <h2 class="titulo-seccion">Secciones: @grupo.NombreSecciones</h2>
+        <h2 class="titulo-seccion">Secciones: @grupo.NombreSecciones.ToUpper()</h2>
         <table>
             <thead>
                 <tr>
