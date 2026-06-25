@@ -224,12 +224,24 @@ namespace CemSys3.Controllers
         {
             ModelState.Remove("contrato.NroConcesion");
 
+            // Si es modo manual, el select de precio automático no aplica
+            var modoPrecio = Request.Form["ModoPrecio"].ToString();
+            if (modoPrecio.Contains("manual"))
+            {
+                ModelState.Remove("PrecioSeleccionado");
+            }
+
+
             if (!ModelState.IsValid)
             {
+                var errores = ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .Select(x => $"{x.Key}: {string.Join(", ", x.Value!.Errors.Select(e => e.ErrorMessage))}");
+
                 return Json(new
                 {
                     success = false,
-                    message = "Los datos ingresados no son válidos."
+                    message = string.Join(" | ", errores) // temporal para debug
                 });
             }
 
@@ -241,6 +253,11 @@ namespace CemSys3.Controllers
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> ContratoFirmado(GenerarContratoVM viewModel)
         {
+            var modoPrecio = Request.Form["ModoPrecio"].ToString();
+            if (modoPrecio.Contains("manual") || viewModel.CantidadAniosId.HasValue)
+            {
+                ModelState.Remove("PrecioSeleccionado");
+            }
 
             if (!ModelState.IsValid)
             {
@@ -267,9 +284,13 @@ namespace CemSys3.Controllers
             dto.TipoParcela = viewModel.contrato.TipoParcela;
             dto.ParcelaId = viewModel.contrato.ParcelaId;
             dto.EstadoTramiteId = (int)EstadosConcesionEnum.Vigente;
-            dto.MensajeParcela = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizó contrato de concesión ({viewModel.contrato.NroConcesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(viewModel.CantidadAniosId.Value)}. Vencimiento {viewModel.Vencimiento}.";
-            dto.InformacionAdicional = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} se realizó contrato de concesión ({viewModel.contrato.NroConcesion?.ToString("D5") ?? "-----"}) por {EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(viewModel.CantidadAniosId.Value)}. Vencimiento {viewModel.Vencimiento}.";
+            string descripcionAnios = viewModel.CantidadAniosId.HasValue
+            ? EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(viewModel.CantidadAniosId.Value)
+            : "cantidad no especificada";
 
+            dto.MensajeParcela = $"\n● El {DateTime.Now:dd/MM/yyyy} se realizó contrato de concesión ({viewModel.contrato.NroConcesion?.ToString("D5") ?? "-----"}) por {descripcionAnios}. Vencimiento {viewModel.Vencimiento}.";
+            dto.InformacionAdicional = $"\n● El {DateTime.Now:dd/MM/yyyy} se realizó contrato de concesión ({viewModel.contrato.NroConcesion?.ToString("D5") ?? "-----"}) por {descripcionAnios}. Vencimiento {viewModel.Vencimiento}.";
+            
             //pasar de TitularesDTO a PersonaDTO
             List<PersonaDTO> titulares = new List<PersonaDTO>();
             foreach (var titular in viewModel.contrato.Titulares)

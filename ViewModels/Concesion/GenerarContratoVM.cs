@@ -1,5 +1,7 @@
 ﻿using CemSys3.DTOs.Concesion;
 using CemSys3.DTOs.SweetAlert;
+using CemSys3.Helpers;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
 namespace CemSys3.ViewModels.Concesion
@@ -17,6 +19,7 @@ namespace CemSys3.ViewModels.Concesion
 
         public string ParcelaString { get; set; } = string.Empty;
 
+        [ModelBinder(typeof(InvariantDecimalModelBinder))]
         public decimal PrecioFinal { get; set; }
 
         public string? otraFormaPago { get; set; }

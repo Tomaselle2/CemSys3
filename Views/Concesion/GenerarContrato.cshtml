@@ -182,60 +182,102 @@
                     </select>
                 </div>
 
-
+                <!-- Toggle de modo de carga de precio -->
                 <div class="p-3">
-                    <label>Precio de la concesión<span class="obligatorio"> * </span></label>
-                    <select asp-for="PrecioSeleccionado" class="form-control form-select" id="selectCantidadPrecio">
-                        <option value="">-- Seleccione la cantidad de años --</option>
-                        @if(Model.contrato.TipoParcela == "Nicho"){
-                            @foreach (var precio in Model.contrato.PreciosNichos)
-                            {
-                                <option value="@precio.Id"
-                                        data-precio="@precio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
-                                        data-cantidad-anios-id="@precio.AniosConcesionId"
-                                        data-anios="@EnumHelper.ObtenerAnios((AniosConcesionEnum)precio.AniosConcesionId.Value)"
-                                        selected="@(Model.PrecioSeleccionado == precio.Id ? "selected" : null)">
-                                    @(EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(precio.AniosConcesionId.Value)) - $ @precio.Precio.ToString("N2")
-                                </option>
+                    <label>Modo de carga del precio<span class="obligatorio"> * </span></label>
+                    <div class="d-flex gap-3 mt-1">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="modoPrecio" id="modoAutomatico" value="automatico" checked />
+                            <label class="form-check-label" for="modoAutomatico">Precio de tarifa</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="modoPrecio" id="modoManual" value="manual" />
+                            <label class="form-check-label" for="modoManual">Precio manual</label>
+                        </div>
+                    </div>
+                </div>
 
+                <div id="bloqueAutomatico" class="p-3">
+                    <div class="p-3">
+                        <label>Precio de la concesión<span class="obligatorio"> * </span></label>
+                        <select asp-for="PrecioSeleccionado" class="form-control form-select" id="selectCantidadPrecio">
+                            <option value="">-- Seleccione la cantidad de años --</option>
+                            @if (Model.contrato.TipoParcela == "Nicho")
+                            {
+                                @foreach (var precio in Model.contrato.PreciosNichos)
+                                {
+                                    <option value="@precio.Id"
+                                            data-precio="@precio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                            data-cantidad-anios-id="@precio.AniosConcesionId"
+                                            data-anios="@EnumHelper.ObtenerAnios((AniosConcesionEnum)precio.AniosConcesionId.Value)"
+                                            selected="@(Model.PrecioSeleccionado == precio.Id ? "selected" : null)">
+                                        @(EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(precio.AniosConcesionId.Value)) - $ @precio.Precio.ToString("N2")
+                                    </option>
+
+                                }
+
+                                @for (int i = 0; i < Model.contrato.PreciosNichos.Count; i++)
+                                {
+                                    <input type="hidden" asp-for="contrato.PreciosNichos[i].Id" />
+                                    <input type="hidden" asp-for="contrato.PreciosNichos[i].AniosConcesionId" />
+                                    <input type="hidden" asp-for="contrato.PreciosNichos[i].ConceptoTarifariaId" />
+                                    <input type="hidden" asp-for="contrato.PreciosNichos[i].NroFila" />
+                                    <input type="hidden" asp-for="contrato.PreciosNichos[i].Precio" />
+                                    <input type="hidden" asp-for="contrato.PreciosNichos[i].SeccionId" />
+                                    <input type="hidden" asp-for="contrato.PreciosNichos[i].Visibilidad" />
+                                }
+                            }
+                            else
+                            {
+                                @foreach (var precio in Model.contrato.PreciosFosas)
+                                {
+                                    <option value="@precio.Id"
+                                            data-precio="@precio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                            data-cantidad-anios-id="@precio.AniosConcesionId"
+                                            data-anios="@EnumHelper.ObtenerAnios((AniosConcesionEnum)precio.AniosConcesionId.Value)"
+                                            selected="@(Model.PrecioSeleccionado == precio.Id ? "selected" : null)">
+                                        @(EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(precio.AniosConcesionId.Value)) - $ @precio.Precio.ToString("N2")
+                                    </option>
+                                }
+
+                                @for (int i = 0; i < Model.contrato.PreciosFosas.Count; i++)
+                                {
+                                    <input type="hidden" asp-for="contrato.PreciosFosas[i].Id" />
+                                    <input type="hidden" asp-for="contrato.PreciosFosas[i].AniosConcesionId" />
+                                    <input type="hidden" asp-for="contrato.PreciosFosas[i].ConceptoTarifariaId" />
+                                    <input type="hidden" asp-for="contrato.PreciosFosas[i].NroFila" />
+                                    <input type="hidden" asp-for="contrato.PreciosFosas[i].Precio" />
+                                    <input type="hidden" asp-for="contrato.PreciosFosas[i].SeccionId" />
+                                    <input type="hidden" asp-for="contrato.PreciosFosas[i].Visibilidad" />
+                                }
                             }
 
-                            @for (int i = 0; i < Model.contrato.PreciosNichos.Count; i++)
-                            {
-                                <input type="hidden" asp-for="contrato.PreciosNichos[i].Id" />
-                                <input type="hidden" asp-for="contrato.PreciosNichos[i].AniosConcesionId" />
-                                <input type="hidden" asp-for="contrato.PreciosNichos[i].ConceptoTarifariaId" />
-                                <input type="hidden" asp-for="contrato.PreciosNichos[i].NroFila" />
-                                <input type="hidden" asp-for="contrato.PreciosNichos[i].Precio" />
-                                <input type="hidden" asp-for="contrato.PreciosNichos[i].SeccionId" />
-                                <input type="hidden" asp-for="contrato.PreciosNichos[i].Visibilidad" />
-                            }
-                        }else{
-                            @foreach (var precio in Model.contrato.PreciosFosas)
-                            {
-                                <option value="@precio.Id"
-                                        data-precio="@precio.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
-                                        data-cantidad-anios-id="@precio.AniosConcesionId"
-                                        data-anios="@EnumHelper.ObtenerAnios((AniosConcesionEnum)precio.AniosConcesionId.Value)"
-                                        selected="@(Model.PrecioSeleccionado == precio.Id ? "selected" : null)">
-                                    @(EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(precio.AniosConcesionId.Value)) - $ @precio.Precio.ToString("N2")
-                                </option>
-                            }
+                        </select>
+                        <span asp-validation-for="PrecioSeleccionado" class="text-danger"></span>
+                    </div>
+                </div>
+                
 
-                            @for (int i = 0; i < Model.contrato.PreciosFosas.Count; i++)
-                            {
-                                <input type="hidden" asp-for="contrato.PreciosFosas[i].Id" />
-                                <input type="hidden" asp-for="contrato.PreciosFosas[i].AniosConcesionId" />
-                                <input type="hidden" asp-for="contrato.PreciosFosas[i].ConceptoTarifariaId" />
-                                <input type="hidden" asp-for="contrato.PreciosFosas[i].NroFila" />
-                                <input type="hidden" asp-for="contrato.PreciosFosas[i].Precio" />
-                                <input type="hidden" asp-for="contrato.PreciosFosas[i].SeccionId" />
-                                <input type="hidden" asp-for="contrato.PreciosFosas[i].Visibilidad" />
-                            }
-                        }
-                        
-                    </select>
-                    <span asp-validation-for="PrecioSeleccionado" class="text-danger"></span>
+                <div id="bloqueManual" class="p-3" style="display:none">
+                    <div class="form-columns-container3 mb-3">
+                        <div>
+                            <label>Cantidad de años<span class="obligatorio"> * </span></label>
+                            <select class="form-control form-select" id="selectAniosManual">
+                                <option value="">-- Seleccione los años --</option>
+                                <option value="1" data-anios="1">1 año</option>
+                                <option value="2" data-anios="5">5 años</option>
+                                <option value="3" data-anios="10">10 años</option>
+                                <option value="4" data-anios="15">15 años</option>
+                                <option value="5" data-anios="25">25 años</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Precio manual ($)<span class="obligatorio"> * </span></label>
+                            <input class="form-control" type="number" min="0" step="0.01"
+                                   id="precioManualInput" placeholder="Ej: 15000.00" />
+                        </div>
+                    </div>
+                    <small class="text-muted">El tipo de precio seleccionado arriba no se aplica en modo manual.</small>
                 </div>
 
                 <div class="form-columns-container3 mb-3 p-3">
@@ -290,6 +332,7 @@
                 <input type="hidden" asp-for="contrato.NroFila" value="@Model.contrato.NroFila" />
                 <input type="hidden" asp-for="contrato.NroParcela" value="@Model.contrato.NroParcela" />
                 <input type="hidden" asp-for="contrato.EsRenovacion"/>
+                <input type="hidden" id="modoPrecioHidden" name="ModoPrecio" value="automatico" />
 
                 <div class="text-center p-3">
                     <input type="submit" value="Generar contrato" class="btn btn-success" id="btnGenerarContrato" data-no-loader="true" />
@@ -595,6 +638,19 @@
                 AlertService.show("Verificar", "Debe agregar al menos un titular", "warning");
                 btnGenerar.disabled = false;
                 btnGenerar.value = "Generar contrato";
+            }
+
+            // Validar modo manual
+            if (esModoManual()) {
+                if (!selectAniosManual.value) {
+                    valido = false;
+                    AlertService.show("Verificar", "Debe seleccionar la cantidad de años.", "warning");
+                }
+                const pm = parseFloat(precioManualInput.value);
+                if (isNaN(pm) || pm <= 0) {
+                    valido = false;
+                    AlertService.show("Verificar", "Debe ingresar un precio válido.", "warning");
+                }
             }
 
             // Validación de forma de pago (si aplica)
@@ -1172,10 +1228,7 @@
                 valorCuotaInput.value = '';
             }
 
-                precioFinalHidden.value =
-        Number(getPrecioSeleccionado())
-            .toFixed(2)
-            .replace('.', ',');
+        precioFinalHidden.value = Number(getPrecioSeleccionado()).toFixed(2);
             calcularValorCuota();
         });
 
@@ -1198,10 +1251,7 @@
                 valorCuotaInput.value = '';
             }
 
-                precioFinalHidden.value =
-        Number(getPrecioSeleccionado())
-            .toFixed(2)
-            .replace('.', ',');
+                precioFinalHidden.value = Number(getPrecioSeleccionado()).toFixed(2);
             calcularValorCuota();
         });
 
@@ -1310,9 +1360,7 @@
 
             // actualizar precio hidden
                precioFinalHidden.value =
-        Number(getPrecioSeleccionado())
-            .toFixed(2)
-            .replace('.', ',');
+        precioFinalHidden.value = Number(getPrecioSeleccionado()).toFixed(2);
 
             calcularValorCuota();
         }
@@ -1322,10 +1370,19 @@
         });
 
         function getPrecioSeleccionado() {
+            if (esModoManual()) {
+                const v = parseFloat(precioManualInput ? precioManualInput.value.replace(',', '.') : 'NaN');
+                return Number.isFinite(v) ? v : NaN;
+            }
             const opt = selectCantidadPrecio.selectedOptions && selectCantidadPrecio.selectedOptions[0];
             if (!opt) return NaN;
 
+            console.log('precioFinal:', opt.dataset.precioFinal);
+            console.log('precio:', opt.dataset.precio);
+
             let raw = opt.dataset.precioFinal ?? opt.dataset.precio ?? '';
+            console.log('raw usado:', raw);
+
             return parsePrecioString(raw);
         }
 
@@ -1339,6 +1396,95 @@
             elementosDNI.forEach(function (elemento) {
                 elemento.textContent = formatearDNI(elemento.textContent);
             });
+            document.getElementById('modoPrecioHidden').value = 'automatico';
+        });
+
+
+
+
+
+
+
+                // ── MODO MANUAL ──────────────────────────────────────────────
+        const modoAutomaticoRadio = document.getElementById('modoAutomatico');
+        const modoManualRadio     = document.getElementById('modoManual');
+        const bloqueAutomatico    = document.getElementById('bloqueAutomatico');
+        const bloqueManual        = document.getElementById('bloqueManual');
+        const selectAniosManual   = document.getElementById('selectAniosManual');
+        const precioManualInput   = document.getElementById('precioManualInput');
+
+        function esModoManual() {
+            return modoManualRadio.checked;
+        }
+
+        function aplicarModo() {
+            document.getElementById('modoPrecioHidden').value = esModoManual() ? 'manual' : 'automatico';
+            if (esModoManual()) {
+                bloqueAutomatico.style.display = 'none';
+                bloqueManual.style.display     = 'block';
+                // habilitar forma de pago si hay precio y años
+                sincronizarDesdeManual();
+            } else {
+                bloqueAutomatico.style.display = 'block';
+                bloqueManual.style.display     = 'none';
+                // limpiar estado del manual
+                selectAniosManual.value  = '';
+                precioManualInput.value  = '';
+                // relanzar lógica del select automático
+                selectCantidadPrecio.dispatchEvent(new Event('change'));
+            }
+        }
+
+        function sincronizarDesdeManual() {
+            const aniosOpt = selectAniosManual.options[selectAniosManual.selectedIndex];
+            const anios    = aniosOpt ? parseInt(aniosOpt.dataset.anios) : NaN;
+            const precio   = parseFloat(precioManualInput.value);
+
+            // Vencimiento
+            if (!isNaN(anios) && anios > 0) {
+                const hoy = new Date();
+                const nueva = new Date(hoy);
+                nueva.setFullYear(nueva.getFullYear() + anios);
+                const y  = nueva.getFullYear();
+                const m  = String(nueva.getMonth() + 1).padStart(2, '0');
+                const d  = String(nueva.getDate()).padStart(2, '0');
+                vencimientoConcesion.value = `${y}-${m}-${d}`;
+
+                // Guardar cantidadAniosId (el value del option es el enum id)
+                cantidadAniosIdHidden.value = selectAniosManual.value;
+
+                // Habilitar forma de pago
+                formaDePagoSelect.removeAttribute('disabled');
+            } else {
+                vencimientoConcesion.value   = '';
+                cantidadAniosIdHidden.value  = '';
+                formaDePagoSelect.setAttribute('disabled', 'disabled');
+                formaDePagoSelect.value = '';
+            }
+
+            // Precio final
+            if (!isNaN(precio) && precio > 0) {
+                precioFinalHidden.value = precio.toFixed(2);
+            } else {
+                precioFinalHidden.value = '';
+            }
+
+            calcularValorCuota();
+        }
+
+        // Sobreescribir getPrecioSeleccionado para que en modo manual use el input
+        const _getPrecioSeleccionadoOriginal = getPrecioSeleccionado;
+        // (redefinición al final del bloque, después de las existentes)
+
+        modoAutomaticoRadio.addEventListener('change', aplicarModo);
+        modoManualRadio.addEventListener('change', aplicarModo);
+
+        selectAniosManual.addEventListener('change', function () {
+            if (esModoManual()) sincronizarDesdeManual();
+        });
+
+        precioManualInput.addEventListener('input', function () {
+            if (esModoManual()) sincronizarDesdeManual();
         });
     </script>
 }
