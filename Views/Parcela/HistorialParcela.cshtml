@@ -29,6 +29,22 @@
     <h1 class="title-page">@parcela Sección @Model.Historial.NombreSeccion.ToUpper()</h1>
 </div>
 
+<div>
+    @if (Model.ParcelaTieneConcesion)
+    {
+        <div class="alert alert-info" role="alert">
+            Esta parcela tiene una concesión activa.
+        </div>
+    }
+    else
+    {
+        <form asp-action="GenerarConcesionManualmente" asp-controller="Parcela" method="get" class="js-confirm">
+            <input type="hidden" name="parcelaId" value="@Model.Historial.Id" />
+            <input type="submit" class="btn btn-danger mb-3" value="Generar concesión manualmente" />
+        </form>
+    }
+</div>
+
 <div class="contenedor-resumen">
     <p>Estado: <span class="@ocupacionParcela">@ocupacionParcela</span></p>
 

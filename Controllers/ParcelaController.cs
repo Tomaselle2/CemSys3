@@ -1,13 +1,19 @@
-﻿using CemSys3.DTOs.Paginacion;
+﻿using CemSys3.Business.Concesion;
+using CemSys3.DTOs.Concesion;
+using CemSys3.DTOs.Generics;
+using CemSys3.DTOs.Paginacion;
 using CemSys3.DTOs.Parcela;
 using CemSys3.DTOs.Seccion;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
+using CemSys3.Helpers;
 using CemSys3.Helpers.Enumerable;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
+using CemSys3.Interfaces.Concesion;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Seccion;
+using CemSys3.Models;
 using CemSys3.ViewModels.Parcela;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
@@ -18,11 +24,13 @@ namespace CemSys3.Controllers
     {
         private readonly IParcela _parcelaService;
         private readonly ISeccion _seccionService;
+        private readonly IConcesion _concesionService;
 
-        public ParcelaController(IParcela parcelaService, ISeccion seccionService)
+        public ParcelaController(IParcela parcelaService, ISeccion seccionService, IConcesion concesionService)
         {
             _parcelaService = parcelaService;
             _seccionService = seccionService;
+            _concesionService = concesionService;
         }
 
         //listado de parcelas de una seccion
@@ -98,6 +106,7 @@ namespace CemSys3.Controllers
             try
             {
                 viewModel.Historial = await _parcelaService.HistorialParcela(parcelaId);
+                viewModel.ParcelaTieneConcesion = await _parcelaService.ParcelaTieneConcesion(parcelaId);
             }
             catch (Exception ex)
             {
@@ -232,6 +241,49 @@ namespace CemSys3.Controllers
             return File(stream.ToArray(),
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 fileName);
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> GenerarConcesionManualmente(int parcelaId)
+        {
+            ConcesionDTO concesionNueva = new ConcesionDTO
+            {
+                ParcelaId = parcelaId,
+                UsuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0,
+                FechaInicio = DateTime.Now,
+            };
+
+            GenericResultDTO resultado = new GenericResultDTO();
+
+            try
+            {
+                resultado = await _concesionService.AddManualmente(concesionNueva);
+
+                if(resultado.Success)
+                {
+                    TempData.SetSweetAlert(new SweetAlertDTO
+                    {
+                        Titulo = "Éxito",
+                        Mensaje = $"Concesión realizada correctamente",
+                        Tipo = "success"
+                    });
+                }
+
+            } catch (Exception ex) {
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "Ocurrió un error al realizar la concesión. " + ex.Message,
+                    Tipo = "error"
+                });
+
+                return RedirectToAction("HistorialParcela", new { parcelaId = parcelaId });
+
+            }
+
+            return RedirectToAction("Concesion", "Concesion", new { tramiteId = resultado.Id });
         }
     }
 }

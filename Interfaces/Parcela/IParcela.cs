@@ -26,5 +26,7 @@ namespace CemSys3.Interfaces.Parcela
         Task UpdateParcela(ModificarParcelaDTO dto);
 
         Task<IEnumerable<ParcelaDTO>> GetAllNichosDisponibles();
+
+        Task<bool> ParcelaTieneConcesion(int parcelaId);
     }
 }

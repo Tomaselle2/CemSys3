@@ -7,6 +7,8 @@ namespace CemSys3.Interfaces.Concesion
     public interface IConcesion
     {
         Task<GenericResultDTO> Add(ConcesionDTO dto);
+
+        Task<GenericResultDTO> AddManualmente(ConcesionDTO dto);
         Task<GenericResultDTO> Update(ConcesionDTO dto);
 
         Task<PaginadoResponse<TablaConcesionDTO>> GellAllPaginado(
@@ -48,5 +50,7 @@ namespace CemSys3.Interfaces.Concesion
         Task TrasladarDifuntoManualmente(int difuntoId, int parcelaNuevaId, int parcelaAntiguaId, int concesionNuevaId, int conesionAntiguaId, DateTime? fechaInicio);
 
         Task CaducarConcesion(int concesionId);
+
+        
     }
 }

@@ -64,28 +64,7 @@ namespace CemSys3.Business.Parcela
                         }
                     }
                     break;
-                case 2: //numeracion antigua
-                    //for (int i = 1; i <= filas; i++)
-                    //{
-                    //    for (int j = 1; j <= columnas; j++)
-                    //    {
-                    //        Models.Parcela nicho = new Models.Parcela();
-                    //        nicho.NroFila = i;
-                    //        nicho.NroParcela = nroNichoContador;
-                    //        nicho.Visibilidad = true;
-                    //        nicho.CantidadDifuntos = 0;
-                    //        nicho.TipoNichoId = (int)TipoNichoEnum.Feretro; //valor por defecto
-                    //        nicho.SeccionId = dto.Id;
-                    //        nicho.TipoParcelaId = dto.TipoParcelaId;
-                    //        nicho.InformacionAdicional = string.Empty;
-                    //        nicho.NombrePanteon = string.Empty;
-
-                    //        _context.Parcelas.Add(nicho);
-
-                    //        nroNichoContador++; // Aumenta el contador después de cada nicho
-                    //    }
-                    //}
-
+                case 2: 
                     for (int columna = 1; columna <= columnas; columna++)
                     {
                         for (int fila = 1; fila <= filas; fila++)
@@ -316,16 +295,19 @@ namespace CemSys3.Business.Parcela
             }).ToListAsync();
 
             //historial de difuntos actuales
-            historial.DifuntosActuales = await _context.ParcelaDifuntos.Where(p => p.ParcelaId == parcelaId && p.TramiteRetiroId == null).OrderByDescending(t => t.FechaIngreso).Select(f => new DifuntoHistorialParcelaDTO
-            {
-                Id = f.Difunto.Id,
-                FechaIngreso = f.FechaIngreso,
-                FechaRetiro = f.FechaRetiro,
-                Dni = f.Difunto.Dni,
-                Nombre = f.Difunto.Nombre,
-                Apellido = f.Difunto.Apellido,
-                EstadoDifunto = f.Difunto.EstadoDifuntoId
-            }).ToListAsync();
+            historial.DifuntosActuales = await _context.ParcelaDifuntos
+                .Where(p => p.ParcelaId == parcelaId && p.FechaRetiro == null)
+                .OrderByDescending(t => t.FechaIngreso)
+                .Select(f => new DifuntoHistorialParcelaDTO
+                {
+                    Id = f.Difunto.Id,
+                    FechaIngreso = f.FechaIngreso,
+                    FechaRetiro = f.FechaRetiro,
+                    Dni = f.Difunto.Dni,
+                    Nombre = f.Difunto.Nombre,
+                    Apellido = f.Difunto.Apellido,
+                    EstadoDifunto = f.Difunto.EstadoDifuntoId
+                }).ToListAsync();
 
             //historial de difuntos historicos
             historial.DifuntosHistoricos = await _context.ParcelaDifuntos.Where(p => p.ParcelaId == parcelaId).OrderByDescending(t => t.FechaIngreso).Select(f => new DifuntoHistorialParcelaDTO
@@ -356,7 +338,7 @@ namespace CemSys3.Business.Parcela
 
         public async Task<IEnumerable<ParcelaDTO>> GetAllNichosDisponibles()
         {
-            return await _context.Parcelas.Where(p => p.TipoParcelaId == (int)TipoParcelaEnum.Nicho && p.CantidadDifuntos == 0).AsNoTracking()
+            return await _context.Parcelas.Where(p => p.TipoParcelaId == (int)TipoParcelaEnum.Nicho && p.CantidadDifuntos == 0 && p.Visibilidad).AsNoTracking()
                 .Select(p => new ParcelaDTO
                 {
                     Id = p.Id,
@@ -367,6 +349,17 @@ namespace CemSys3.Business.Parcela
                     TipoParcelaId = p.TipoParcelaId ?? 0,
                     TipoNichoId = p.TipoNichoId ?? 0
                 }).ToListAsync();
+        }
+
+        public async Task<bool> ParcelaTieneConcesion(int parcelaId)
+        {
+            return await _context.Concesiones
+                .AnyAsync(c =>
+                    c.ParcelaId == parcelaId &&
+                    c.Visibilidad == true &&
+                    c.TramiteRetiroId == null &&
+                    (c.FechaFin == null || c.FechaFin > DateTime.Now)
+                );
         }
     }
 }

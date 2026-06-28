@@ -83,6 +83,19 @@ namespace CemSys3.Business.Concesion
                 //4 - relacion de tramite con parcela
                 await _historialEstadosService.VincularTramiteAParcela(tramiteId, dto.ParcelaId);
 
+
+                //4.1 - registrar historial de parcela en la concesion
+                Models.HistorialParcelasConcesion historialParcela = new Models.HistorialParcelasConcesion
+                {
+                    ConcesionId = tramiteId,
+                    ParcelaId = dto.ParcelaId,
+                    FechaInicio = DateTime.Now,
+                    FechaFin = null,           // null = parcela actualmente vinculada
+                    TramiteOrigenId = tramiteId
+                };
+                await _context.HistorialParcelasConcesions.AddAsync(historialParcela);
+
+
                 //5 - relacion de titulares con concesiones(si existe)
                 if (dto.Titulares != null && dto.Titulares.Count > 0)
                 {
@@ -1055,6 +1068,8 @@ namespace CemSys3.Business.Concesion
                 Models.Concesione concesion = await _context.Concesiones
                    .FirstOrDefaultAsync(c => c.TramiteId == concesionId) ?? throw new Exception("Concesion no encontrada.");
 
+                Models.Parcela parcela = await _context.Parcelas.FirstOrDefaultAsync(p => p.Id == concesion.ParcelaId) ?? throw new Exception("Parcela no encontrada.");
+
                 concesion.FechaFin = DateTime.Now;
 
                 Models.Tramite tramiteConcesion = await _context.Tramites.FirstOrDefaultAsync(t => t.Id == concesion.TramiteId) ?? throw new Exception("Trámite no encontrado.");
@@ -1093,6 +1108,22 @@ namespace CemSys3.Business.Concesion
                 foreach (var pd in parcelaDifuntos)
                 {
                     pd.FechaRetiro = DateTime.Now;
+                    pd.TramiteRetiroId = concesion.TramiteId;
+                }
+
+                parcela.CantidadDifuntos = 0;
+
+                // 4. Cerrar el historial de parcela de la concesión
+                var historialParcela = await _context.HistorialParcelasConcesions
+                    .FirstOrDefaultAsync(h =>
+                        h.ConcesionId == concesion.TramiteId &&
+                        h.FechaFin == null
+                    );
+
+                if (historialParcela != null)
+                {
+                    historialParcela.FechaFin = DateTime.Now;
+                    historialParcela.TramiteOrigenId = concesion.TramiteId; // el trámite que generó el cierre
                 }
 
                 await _context.SaveChangesAsync();
@@ -1102,6 +1133,81 @@ namespace CemSys3.Business.Concesion
             {
                 await transaction.RollbackAsync();
                 throw new Exception("Error al caducar la concesión: " + ex.Message);
+            }
+        }
+
+        public async Task<GenericResultDTO> AddManualmente(ConcesionDTO dto)
+        {
+            try
+            {
+                Models.Parcela parcela = await _context.Parcelas.FirstOrDefaultAsync(p => p.Id == dto.ParcelaId) ?? throw new Exception("Parcela no encontrada.");
+
+                //1- registrar tramite
+                TramiteDTO tramite = new TramiteDTO
+                {
+                    Visibilidad = true,
+                    FechaCreacion = DateTime.Now,
+                    TipoTramiteId = (int)TipoTramiteEnum.ContratoConcesion,
+                    UsuarioId = dto.UsuarioId ?? 0,
+                    EstadoActualId = parcela.TipoParcelaId == (int)TipoParcelaEnum.Panteon
+                                ? (int)EstadosConcesionEnum.Vigente
+                                : (int)EstadosConcesionEnum.SinContrato,
+                };
+
+                int tramiteId = await _tramiteService.Add(tramite);
+                await _context.SaveChangesAsync(); //guardar cambios antes de continuar
+
+                //2- registrar Historial del tramite
+                HistorialEstadosDTO historial = new HistorialEstadosDTO
+                {
+                    Fecha = tramite.FechaCreacion,
+                    TramiteId = tramiteId,
+                    EstadoTramiteId = tramite.EstadoActualId
+                };
+                await _historialEstadosService.Add(historial);
+
+                //3 - registrar el contrato de concesion
+                Models.Concesione concesion = new Models.Concesione();
+                concesion.TramiteId = tramiteId;
+                concesion.Concesion = dto.Concesion;
+                concesion.Precio = dto.Precio;
+                concesion.Visibilidad = true;
+                concesion.TipoParcela = EnumHelper.GetDisplayNameByValue<TipoParcelaEnum>(parcela.TipoParcelaId ?? 0);
+                concesion.Vencimiento = dto.Vencimiento;
+                concesion.ParcelaId = dto.ParcelaId;
+                concesion.CantidadAniosId = dto.CantidadAniosId;
+                concesion.CuotaId = dto.CuotaId;
+                concesion.UsuarioId = dto.UsuarioId;
+                concesion.FechaInicio = dto.FechaInicio ?? DateTime.Now;
+                concesion.InformacionAdicional += dto.InformacionAdicional;
+                await _context.Concesiones.AddAsync(concesion);
+
+                //4 - relacion de tramite con parcela
+                await _historialEstadosService.VincularTramiteAParcela(tramiteId, dto.ParcelaId);
+
+                //4.1 - registrar historial de parcela en la concesion
+                Models.HistorialParcelasConcesion historialParcela = new Models.HistorialParcelasConcesion
+                {
+                    ConcesionId = tramiteId,
+                    ParcelaId = dto.ParcelaId,
+                    FechaInicio = DateTime.Now,
+                    FechaFin = null,           // null = parcela actualmente vinculada
+                    TramiteOrigenId = tramiteId
+                };
+                await _context.HistorialParcelasConcesions.AddAsync(historialParcela);
+
+
+                await _context.SaveChangesAsync();
+                return new GenericResultDTO
+                {
+                    Success = true,
+                    Message = "Concesión registrada con éxito.",
+                    Id = tramiteId
+                };
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }
