@@ -372,8 +372,12 @@ namespace CemSys3.Business.TramiteConcesion
 
                         // 5. Vincular concesión y trámite con nueva parcela
                         await _historialEstadosService.VincularTramiteAParcela(concesion.TramiteId, parcelaDestino.Id);
+                        await _historialEstadosService.VincularTramiteAParcela(concesion.TramiteId, parcela.Id);
                         await _historialEstadosService.VincularTramiteAPersona(concesion.TramiteId, difunto.Id);
                         await _historialEstadosService.VincularTramiteAParcela(tramiteId, parcelaDestino.Id);
+                        await _historialEstadosService.VincularTramiteAParcela(tramiteId, parcela.Id);
+                        await _historialEstadosService.VincularTramiteAPersona(tramiteId, difunto.Id);
+
 
                         // 6. Log en parcela destino
                         parcelaDestino.InformacionAdicional +=
@@ -548,7 +552,7 @@ namespace CemSys3.Business.TramiteConcesion
             dto.TramiteId = reduccion.TramiteId;
             dto.TipoTramiteId = reduccion.Tramite.TipoTramiteId;
             dto.EstadoTramiteId = reduccion.Tramite.EstadoActualId;
-            dto.ParcelaId = reduccion.ParcelaOrigenId;
+            dto.ParcelaId = concesion.ParcelaId;
             dto.TipoParcela = concesion.TipoParcela;
             dto.NombreSeccion = concesion.Parcela.Seccion.Nombre;
             dto.NroParcela = concesion.Parcela.NroParcela;

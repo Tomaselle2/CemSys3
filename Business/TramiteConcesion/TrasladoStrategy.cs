@@ -22,7 +22,6 @@ using CemSys3.Interfaces.Tarea;
 using CemSys3.Interfaces.Tramite;
 using CemSys3.Interfaces.TramitesConcesion;
 using CemSys3.Models;
-using CemSys3.ViewModels.TramiteConcesion;
 using Microsoft.EntityFrameworkCore;
 
 namespace CemSys3.Business.TramiteConcesion
@@ -367,7 +366,10 @@ namespace CemSys3.Business.TramiteConcesion
                         // 5. Vincular concesión con nueva parcela y difunto
                         await _historialEstadosService.VincularTramiteAParcela(concesion.TramiteId, parcelaDestino.Id);
                         await _historialEstadosService.VincularTramiteAPersona(concesion.TramiteId, difunto.Id);
+                        await _historialEstadosService.VincularTramiteAParcela(concesion.TramiteId, parcela.Id);
                         await _historialEstadosService.VincularTramiteAParcela(tramiteId, parcelaDestino.Id);
+                        await _historialEstadosService.VincularTramiteAPersona(tramiteId, difunto.Id);
+                        await _historialEstadosService.VincularTramiteAParcela(tramiteId, parcela.Id);
 
                         // 6. Log en parcela destino
                         parcelaDestino.InformacionAdicional +=
@@ -539,7 +541,7 @@ namespace CemSys3.Business.TramiteConcesion
             dto.TramiteId = traslado.TramiteId;
             dto.TipoTramiteId = traslado.Tramite.TipoTramiteId;
             dto.EstadoTramiteId = traslado.Tramite.EstadoActualId;
-            dto.ParcelaId = traslado.ParcelaOrigenId;
+            dto.ParcelaId = concesion.ParcelaId;
             dto.TipoParcela = concesion.TipoParcela;
             dto.NombreSeccion = concesion.Parcela.Seccion.Nombre;
             dto.NroParcela = concesion.Parcela.NroParcela;

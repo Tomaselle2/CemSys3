@@ -353,6 +353,14 @@ namespace CemSys3.Business.Parcela
 
         public async Task<bool> ParcelaTieneConcesion(int parcelaId)
         {
+            
+            Models.Parcela parcela = await _context.Parcelas.FindAsync(parcelaId) ?? throw new Exception("La parcela no existe");
+
+            if(parcela.CantidadDifuntos == 0)
+            {
+                return false;
+            }
+
             return await _context.Concesiones
                 .AnyAsync(c =>
                     c.ParcelaId == parcelaId &&

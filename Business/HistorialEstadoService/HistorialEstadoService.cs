@@ -205,9 +205,43 @@ namespace CemSys3.Business.HistorialEstadoService
             // de la concesión. Así no se mezclan trámites de concesiones anteriores.
             var tramitesDentro = new List<TramiteDTO>();
 
+            //foreach (var hp in historialParcelas)
+            //{
+            //    DateTime desdeParcela = hp.FechaInicio;
+            //    DateTime hastaParcela = hp.FechaFin ?? fechaFin;
+
+            //    var tramitesParcela = await _context.TramitesParcelas
+            //        .AsNoTracking()
+            //        .Where(tp => tp.ParcelaId == hp.ParcelaId)
+            //        .Join(_context.Tramites,
+            //            tp => tp.TramiteId,
+            //            t => t.Id,
+            //            (tp, t) => t)
+            //        .Where(t =>
+            //            t.FechaCreacion >= desdeParcela &&
+            //            t.FechaCreacion <= hastaParcela &&
+            //            t.TipoTramiteId != (int)TipoTramiteEnum.ContratoConcesion)
+            //        .Select(t => new TramiteDTO
+            //        {
+            //            Id = t.Id,
+            //            Visibilidad = t.Visibilidad,
+            //            FechaCreacion = t.FechaCreacion,
+            //            TipoTramiteId = t.TipoTramiteId,
+            //            UsuarioId = t.UsuarioId,
+            //            EstadoActualId = t.EstadoActualId
+            //        })
+            //        .ToListAsync();
+
+            //    tramitesDentro.AddRange(tramitesParcela);
+            //}
+
             foreach (var hp in historialParcelas)
             {
-                DateTime desdeParcela = hp.FechaInicio;
+                // Para la parcela original (primera en el historial), el rango arranca
+                // desde el inicio de la concesión, no desde FechaInicio del historial
+                // que puede ser posterior si hubo un traslado previo.
+                bool esPrimeraEntrada = hp.FechaInicio == historialParcelas.Min(x => x.FechaInicio);
+                DateTime desdeParcela = esPrimeraEntrada ? fechaInicio : hp.FechaInicio;
                 DateTime hastaParcela = hp.FechaFin ?? fechaFin;
 
                 var tramitesParcela = await _context.TramitesParcelas

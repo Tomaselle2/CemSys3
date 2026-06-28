@@ -272,15 +272,17 @@ namespace CemSys3.Business.Tramite
         {
             ListadoTramitesDeConcesionDTO dto = new ListadoTramitesDeConcesionDTO();
 
-            int parcelaId = await _context.TramitesParcelas
-                .Where(tp => tp.TramiteId == concesionId)
-                .Select(tp => tp.ParcelaId)
-                .FirstOrDefaultAsync();
+            // Obtener parcelaId desde la concesión directamente, ya refleja traslados
+            Models.Concesione concesion = await _context.Concesiones
+                .FirstOrDefaultAsync(c => c.TramiteId == concesionId)
+                ?? throw new Exception("Concesión no encontrada.");
 
             IEnumerable<Models.Tramite> tramites = await _context.TramitesParcelas.OrderByDescending(d=>d.FechaRegistro)
-                .Where(tp => tp.ParcelaId == parcelaId)
+                .Where(tp => tp.ParcelaId == concesion.ParcelaId)
                 .Select(tp => tp.Tramite)
                 .ToListAsync();
+
+            
 
             int[] tiposNoPermitidos = new[] { (int)TipoTramiteEnum.Nota, (int)TipoTramiteEnum.Ingreso, (int)TipoTramiteEnum.ContratoConcesion };
 
@@ -291,7 +293,7 @@ namespace CemSys3.Business.Tramite
             dto.Requisitos = await _requisitosService.GetAll(concesionId);
 
             dto.ConcesionId = concesionId;
-            dto.ParcelaId = parcelaId;
+            dto.ParcelaId = concesion.ParcelaId;
 
             dto.TramitesIniciados = tramitesFiltrados.Select(t => new TramiteDTO
             {
