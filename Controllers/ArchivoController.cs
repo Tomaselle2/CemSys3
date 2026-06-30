@@ -250,33 +250,48 @@ namespace CemSys3.Controllers
         [AuthorizeRole(RolUsuario.Empleado, RolUsuario.Administrador)]
         public async Task<IActionResult> VerArchivo(Guid archivoId, int tramiteId)
         {
-            var archivo = await _archivoService.Get(archivoId);
-
-            if (archivo == null || archivo.Contenido == null)
+            try
             {
+                var archivo = await _archivoService.Get(archivoId);
+
+                if (archivo == null || archivo.Contenido == null)
+                {
+                    TempData.SetSweetAlert(new DTOs.SweetAlert.SweetAlertDTO
+                    {
+                        Titulo = "Error",
+                        Mensaje = "Error al buscar el archivo",
+                        Tipo = "error"
+                    });
+
+                    return RedirectToAction("IrATramite", "Tramite", new { tramiteId = tramiteId });
+                }
+                string tipo = archivo.TipoArchivo.ToLower();
+
+                if (tipo.StartsWith("image/"))
+                {
+                    // Convertir la imagen a PDF
+                    archivo.Contenido = PdfHelper.ImagenComoPdf(archivo.Contenido);
+                    tipo = "application/pdf";
+                    archivo.NombreArchivo = Path.ChangeExtension(archivo.NombreArchivo, ".pdf");
+                }
+
+                // Forzar a que el navegador intente mostrarlo
+                Response.Headers["Content-Disposition"] = $"inline; filename=\"{archivo.NombreArchivo}\"";
+
+                return File(archivo.Contenido, tipo);
+            }
+            catch (Exception ex) {
+
                 TempData.SetSweetAlert(new DTOs.SweetAlert.SweetAlertDTO
                 {
                     Titulo = "Error",
-                    Mensaje = "Error al buscar el archivo",
+                    Mensaje = "Ocurrió un error al abrir el archivo. " + ex.Message,
                     Tipo = "error"
                 });
 
-                return RedirectToAction("IrATramite", "Tramite", new { tramiteId = tramiteId });
+                return RedirectToAction("IrATramite", "Tramite", new { tramiteId });
             }
-            string tipo = archivo.TipoArchivo.ToLower();
-
-            if (tipo.StartsWith("image/"))
-            {
-                // Convertir la imagen a PDF
-                archivo.Contenido = PdfHelper.ImagenComoPdf(archivo.Contenido);
-                tipo = "application/pdf";
-                archivo.NombreArchivo = Path.ChangeExtension(archivo.NombreArchivo, ".pdf");
-            }
-
-            // Forzar a que el navegador intente mostrarlo
-            Response.Headers["Content-Disposition"] = $"inline; filename=\"{archivo.NombreArchivo}\"";
-
-            return File(archivo.Contenido, tipo);
+            
         }
 
         [HttpGet]
