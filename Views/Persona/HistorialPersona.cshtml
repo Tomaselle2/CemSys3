@@ -213,6 +213,71 @@
     </div>
 }
 
+<!-- Tabla de concesiones activas-->
+@if (Model.persona.Persona.CategoriaPersonaId == (int)CategoriaPersonaEnum.Titular)
+{
+    <div class="accordion" id="accordionPanelsStayOpenExample">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+                <button class="accordion-button nueva-seccion acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                    Concesiones activas (@Model.persona.ConecesionesActivasTitular.Count())
+                </button>
+            </h2>
+            <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+                @* cuerpo del acordion *@
+                @if (Model.persona.ConecesionesActivasTitular.Any())
+                {
+                    <div class="card shadow-sm">
+                        <div class="card-body p-0">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Concesión</th>
+                                        <th>Estado</th>
+                                        <th>Vencimiento</th>
+                                        <th>Tipo parcela</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var opc in Model.persona.ConecesionesActivasTitular)
+                                    {
+                                        string estadoTramiteDisplay = opc.EstadoId > 0 ? EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(opc.EstadoId) : "";
+
+                                        <tr>
+                                            <td>@opc.NroConcesion?.ToString("D5")</td>
+                                            <td>@estadoTramiteDisplay</td>
+                                            <td>@(opc.Vencimiento?.ToString("dd/MM/yyyy"))</td>
+                                            <td>@opc.TipoParcela</td>
+                                            <td>
+                                                <form asp-action="IrATramite" asp-controller="Tramite" target="_blank" method="get" style="display: inline-block;" data-skip-loader="true">
+                                                    <input type="hidden" name="tramiteId" value="@opc.TramiteId" />
+                                                    <button type="submit" class="btn btn-secondary btn-sm" title="Ir al trámite">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle"></i>
+                        No hay historial de tramites.
+                    </div>
+                }
+                @* Fin cuerpo del acordeon *@
+            </div>
+        </div>
+    </div>
+
+}
 <!-- Tabla de historial de tramites -->
 <div class="accordion" id="accordionPanelsStayOpenExample">
     <div class="accordion-item">

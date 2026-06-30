@@ -5,6 +5,7 @@ using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Models;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 
 namespace CemSys3.Business.Persona
@@ -223,7 +224,7 @@ namespace CemSys3.Business.Persona
             historial.Persona = await Get(id);
 
             //historial de tramites persona
-            historial.Tramites = await _context.TramitePersonas.Where(p => p.PersonaId == id).OrderByDescending(t => t.FechaRegistro).Select(s => new TramiteDTO
+            historial.Tramites = await _context.TramitePersonas.Where(p => p.PersonaId == id).OrderByDescending(t => t.FechaRegistro).AsNoTracking().Select(s => new TramiteDTO
             {
                 Id = s.TramiteId,
                 Visibilidad = s.Tramite.Visibilidad,
@@ -233,7 +234,7 @@ namespace CemSys3.Business.Persona
             }).ToListAsync();
 
             //historial de las parcelas donde estuvo el difunto
-            historial.Parcelas = await _context.ParcelaDifuntos.Where(p => p.DifuntoId == id).Include(p=> p.Parcela).OrderByDescending(t => t.FechaIngreso).Select(f => new DifuntoHistorialParcelaDTO
+            historial.Parcelas = await _context.ParcelaDifuntos.Where(p => p.DifuntoId == id).Include(p=> p.Parcela).AsNoTracking().OrderByDescending(t => t.FechaIngreso).Select(f => new DifuntoHistorialParcelaDTO
             {
                 Id = f.Difunto.Id,
                 FechaIngreso = f.FechaIngreso,
@@ -248,6 +249,25 @@ namespace CemSys3.Business.Persona
                 NombreSeccion = f.Parcela.Seccion.Nombre,
                 TipoParcelaId = f.Parcela.TipoParcelaId
             }).ToListAsync();
+
+            if (historial.Persona.CategoriaPersonaId == (int)CategoriaPersonaEnum.Titular)
+            {
+                historial.ConecesionesActivasTitular = await _context.HistorialTitularesConcesiones.Include(h => h.Concesion).ThenInclude(c => c.Tramite).AsNoTracking()
+                    .Where(h =>
+                        h.PersonaId == historial.Persona.Id &&
+                        h.FechaFin == null &&
+                        h.Concesion.FechaFin == null)
+                    .Select(h => new DTO_ConcesionTitular
+                    {
+                        TramiteId = h.Concesion.TramiteId,
+                        NroConcesion = h.Concesion.Concesion ?? 0,
+                        EstadoId = h.Concesion.Tramite.EstadoActualId,
+                        Vencimiento = h.Concesion.Vencimiento,
+                        TipoParcela = h.Concesion.TipoParcela
+                    })
+                    .OrderBy(c => c.NroConcesion)
+                    .ToListAsync();
+            }
 
             return historial;
         }
