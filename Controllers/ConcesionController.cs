@@ -205,7 +205,8 @@ namespace CemSys3.Controllers
                 fechaGeneracion = DateTime.Now,
                 EsRenovacion = viewModel.contrato.EsRenovacion,
                 LogoBase64 = ObtenerImagenBase64("logoMuni.png"),
-                PieBase64 = ObtenerImagenBase64("pieContrato.png")
+                PieBase64 = ObtenerImagenBase64("pieContrato.png"),
+                IgnorarFechaIngreso = viewModel.contrato.IgnorarFechaIngreso
             };
 
             var ruta = Path.Combine(_env.WebRootPath, "config", "intendente.txt");

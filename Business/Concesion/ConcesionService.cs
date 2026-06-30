@@ -858,7 +858,11 @@ namespace CemSys3.Business.Concesion
                 {
                     new() { Descripcion = vencimiento, Estado = false },
                     new() { Descripcion = titularNota, Estado = false },
-                    new() { Descripcion = pago, Estado = false }
+                    new() { Descripcion = pago, Estado = false },
+                    new() { Descripcion = "Modificar contribuyente en Program", Estado = false },
+                    new() { Descripcion = "Modificar deudo en Program", Estado = false },
+                    new() { Descripcion = "Modificar celular / mail en Program", Estado = false }
+
                 };
 
             int tramiteNotaId = await _notasService.GenerarTramiteNota(usuarioId);

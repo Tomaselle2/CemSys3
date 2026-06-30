@@ -401,7 +401,7 @@ namespace CemSys3.Business.TramiteConcesion
                             ?? throw new Exception("Concesión destino no encontrada.");
 
                         concesionDestino.InformacionAdicional +=
-                            $"\n● El {reduccion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")}el difunto {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} (reducido) " +
+                            $"\n● El {reduccion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} el difunto {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} (reducido) " +
                             $"viene de {ParcelaFormatter.ObtenerParcela(parcela.TipoParcelaId ?? 0, parcela.NroParcela, parcela.NroFila, parcela.Seccion.Nombre.ToUpper())} " +
                             $"en estado {EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(difunto.EstadoDifuntoId ?? 0)}";
                         concesionDestino.InformacionAdicional +=

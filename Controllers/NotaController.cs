@@ -94,7 +94,7 @@ namespace CemSys3.Controllers
                 Tareas = new List<TareaDTO>
                 {
                     new() { Descripcion = "Recibir acta de defunción", Estado = false },
-                    new() { Descripcion = "Cargar difunto en Progam", Estado = false },
+                    new() { Descripcion = "Cargar difunto en Progam (unid. catastral, deudo, contribuyente, difunto, impuestos)", Estado = false },
                     new() { Descripcion = "Realizar contrato de concesión", Estado = false },
                     new() { Descripcion = "Cobrar ingreso", Estado = false },
                     new() { Descripcion = "Realizar ingreso en CemSys", Estado = false },

@@ -35,7 +35,7 @@ namespace CemSys3.DTOs.Concesion
 
         public string NombreIntendente { get; set; } = string.Empty;
         public bool EsRenovacion {  get; set; } = false;
-
+        public bool IgnorarFechaIngreso { get; set; } = false;
         public string LogoBase64 { get; set; } = "";
         public string PieBase64 { get; set; } = "";
 

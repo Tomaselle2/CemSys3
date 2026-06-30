@@ -101,6 +101,11 @@
                             </div>
                         }
                     </div>
+
+                    <div class="p-3">
+                        <label for="ignorarFechaIngreso">Ignorar Fecha de Ingreso</label>
+                        <input type="checkbox" id="ignorarFechaIngreso" asp-for="contrato.IgnorarFechaIngreso" />
+                    </div>
                 }
                 else
                 {
@@ -952,7 +957,7 @@
                             </div>
                             <div>
                                 <label>Correo</label>
-                                <input class="form-control" type="text" name="Personas[${index}].CorreoElectronico" value="${titular.correoElectronico || titular.CorreoElectronico || titular.Correo || titular.correo || titular.correoInput || titular.CorreoInput || ''}" maxlength="100" />
+                                <input class="form-control" type="text" name="contrato.Titulares[${index}].CorreoElectronico" value="${titular.correoElectronico || titular.CorreoElectronico || titular.Correo || titular.correo || titular.correoInput || titular.CorreoInput || ''}" maxlength="100" />
                             </div>
                         </div>
                     </div>
