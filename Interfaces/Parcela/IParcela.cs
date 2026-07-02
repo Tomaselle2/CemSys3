@@ -28,5 +28,10 @@ namespace CemSys3.Interfaces.Parcela
         Task<IEnumerable<ParcelaDTO>> GetAllNichosDisponibles();
 
         Task<bool> ParcelaTieneConcesion(int parcelaId);
+
+        Task<List<ParcelaDTO>> GetAllParcelasExcel();
+
+        Task<int> ImportarParcelas(List<ParcelaDTO> parcelas);
+
     }
 }

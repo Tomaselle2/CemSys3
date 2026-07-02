@@ -241,8 +241,57 @@ namespace CemSys3.Business.Seccion
             await _context.SaveChangesAsync();
         }
 
+        public async Task<List<SeccionDTO>> GetAllSeccionesExcel()
+        {
+            return await _context.Secciones.AsNoTracking().Select(sec => new SeccionDTO
+            {
+                Id = sec.Id,
+                Nombre = sec.Nombre.ToUpper(),
+                Visibilidad = sec.Visibilidad,
+                Filas = sec.Filas,
+                NroParcelas = sec.NroParcelas,
+                TipoNumeracionParcelaId = sec.TipoNumeracionParcelaId,
+                TipoParcelaId = sec.TipoParcelaId
+            }).ToListAsync();
+        }
 
+        public async Task<int> ImportarSecciones(List<SeccionDTO> secciones)
+        {
+            if (secciones == null || secciones.Count == 0)
+                return 0;
 
+            var entidades = secciones.Select(s => new Models.Seccione
+            {
+                Id = s.Id,
+                Nombre = s.Nombre,
+                Visibilidad = s.Visibilidad,
+                Filas = s.Filas,
+                NroParcelas = s.NroParcelas,
+                TipoNumeracionParcelaId = s.TipoNumeracionParcelaId,
+                TipoParcelaId = s.TipoParcelaId
+            }).ToList();
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT dbo.Secciones ON");
+                await _context.Secciones.AddRangeAsync(entidades);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+            finally
+            {
+                // Siempre se apaga, incluso si falló el insert
+                await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT dbo.Secciones OFF");
+            }
+
+            return entidades.Count;
+        }
         //-----------------------------------ISeccionNichoTarifaria----------------------------------------------------
         public async Task<IEnumerable<SeccionNichoTarifariaDTO>> GetAllSeccionesNichosParaTarifaria()
         {
@@ -253,5 +302,7 @@ namespace CemSys3.Business.Seccion
                 Filas = sec.Filas
             }).ToListAsync();
         }
+
+      
     }
 }

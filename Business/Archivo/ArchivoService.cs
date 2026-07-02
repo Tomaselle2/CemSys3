@@ -1,10 +1,8 @@
 ﻿using CemSys3.DTOs.Archivo;
-using CemSys3.DTOs.Generics;
 using CemSys3.Enumerables;
 using CemSys3.Interfaces.Archivo;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Numerics;
 
 namespace CemSys3.Business.Archivo
 {
@@ -94,7 +92,7 @@ namespace CemSys3.Business.Archivo
 
         public async Task<IEnumerable<ArchivoDTO>> GetAllByTramiteId(int tramiteId)
         {
-            return await _context.Archivos.Where(a => a.TramiteId == tramiteId).OrderByDescending(f=>f.FechaCreacion).Select(a => new ArchivoDTO {
+            return await _context.Archivos.Where(a => a.TramiteId == tramiteId).AsNoTracking().OrderByDescending(f=>f.FechaCreacion).Select(a => new ArchivoDTO {
                 Id = a.Id,
                 CategoriaArchivo = a.CategoriaArchivo,
                 TramiteId = a.TramiteId,

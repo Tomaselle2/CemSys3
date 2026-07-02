@@ -58,7 +58,7 @@ namespace CemSys3.Business.Tarea
         public async Task<List<TareaDTO>> GetAllByTramite(int tramiteId)
         {
             return await _context.Tareas
-                            .Where(t => t.TramiteId == tramiteId)
+                            .Where(t => t.TramiteId == tramiteId).AsNoTracking()
                             .Select(t => new TareaDTO
                             {
                                 Id = t.Id,

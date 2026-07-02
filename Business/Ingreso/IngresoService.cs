@@ -268,7 +268,7 @@ namespace CemSys3.Business.Ingreso
 
         public async Task<ResumenIngresoDTO> Get(int ingresoId)
         {
-            ResumenIngresoDTO ingreso = await _context.Introducciones.Where(i => i.TramiteId == ingresoId).Select(s => new ResumenIngresoDTO
+            ResumenIngresoDTO ingreso = await _context.Introducciones.Where(i => i.TramiteId == ingresoId).AsNoTracking().Select(s => new ResumenIngresoDTO
             {
                 TramiteId = s.TramiteId,
                 Visibilidad = s.Visibilidad,

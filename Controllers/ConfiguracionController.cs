@@ -7,10 +7,10 @@ namespace CemSys3.Controllers
     public class ConfiguracionController : Controller
     {
         [AuthorizeRole(RolUsuario.Administrador)]
-
         public IActionResult Index()
         {
             return View();
         }
+
     }
 }

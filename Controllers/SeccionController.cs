@@ -1,5 +1,6 @@
 ﻿using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Paginacion;
+using CemSys3.DTOs.Parcela;
 using CemSys3.DTOs.Seccion;
 using CemSys3.DTOs.SweetAlert;
 using CemSys3.Enumerables;
@@ -8,6 +9,7 @@ using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Seccion;
 using CemSys3.ViewModels.Seccion;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CemSys3.Controllers
@@ -346,6 +348,220 @@ namespace CemSys3.Controllers
                 _ => nameof(IndexSeccionesNichos)
             };
 
+        }
+
+
+
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> ExportarSecciones()
+        {
+            var datos = await _seccionService.GetAllSeccionesExcel();
+
+            using var wb = new XLWorkbook();
+            var ws = wb.Worksheets.Add("Secciones");
+
+            // ── Encabezados (nombre de propiedad) ──
+            string[] headers = { "Id", "Nombre", "Visibilidad", "Filas", "NroParcelas", "TipoNumeracionParcelaId", "TipoParcelaId" };
+            for (int i = 0; i < headers.Length; i++)
+            {
+                var cell = ws.Cell(1, i + 1);
+                cell.Value = headers[i];
+                cell.Style.Font.Bold = true;
+                cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#BDD7EE");
+                cell.Style.Font.FontColor = XLColor.Black;
+                cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                cell.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+            }
+
+            // ── Filas de datos ──
+            int fila = 2;
+            foreach (var sec in datos.OrderBy(s => s.Id))
+            {
+                ws.Cell(fila, 1).Value = sec.Id;
+                ws.Cell(fila, 2).Value = sec.Nombre;
+                ws.Cell(fila, 3).Value = sec.Visibilidad ? 1 : 0;
+                ws.Cell(fila, 4).Value = sec.Filas;
+                ws.Cell(fila, 5).Value = sec.NroParcelas;
+                ws.Cell(fila, 6).Value = sec.TipoNumeracionParcelaId;
+                ws.Cell(fila, 7).Value = sec.TipoParcelaId;
+
+                if (fila % 2 == 0)
+                    ws.Row(fila).Style.Fill.BackgroundColor = XLColor.FromHtml("#F2F7FB");
+
+                fila++;
+            }
+
+            ws.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            wb.SaveAs(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            string fileName = $"Secciones_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+            return File(stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                fileName);
+        }
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> ExportarParcelas()
+        {
+            var datos = await _parcelaService.GetAllParcelasExcel();
+
+            using var wb = new XLWorkbook();
+            var ws = wb.Worksheets.Add("Parcelas");
+
+            // ── Encabezados (nombre de propiedad) ──
+            string[] headers =
+            {
+        "Id", "Visibilidad", "NroParcela", "NroFila", "CantidadDifuntos", "NombrePanteon", "InformacionAdicional", "SeccionId",
+        "TipoNichoId", "TipoPanteonId", "TipoParcelaId",   
+         
+    };
+            for (int i = 0; i < headers.Length; i++)
+            {
+                var cell = ws.Cell(1, i + 1);
+                cell.Value = headers[i];
+                cell.Style.Font.Bold = true;
+                cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#BDD7EE");
+                cell.Style.Font.FontColor = XLColor.Black;
+                cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                cell.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+            }
+
+            // ── Filas de datos ──
+            int fila = 2;
+            foreach (var p in datos.OrderBy(p => p.SeccionId).ThenBy(p => p.NroFila).ThenBy(p => p.NroParcela))
+            {
+                ws.Cell(fila, 1).Value = p.Id;
+                ws.Cell(fila, 2).Value = p.Visibilidad ? 1 : 0;
+                ws.Cell(fila, 3).Value = p.NroParcela;
+                ws.Cell(fila, 4).Value = p.NroFila;
+                ws.Cell(fila, 5).Value = p.CantidadDifuntos;
+                ws.Cell(fila, 6).Value = p.NombrePanteon;
+                ws.Cell(fila, 7).Value = p.InformacionAdicional ?? "";
+                ws.Cell(fila, 8).Value = p.SeccionId;
+                ws.Cell(fila, 9).Value = p.TipoNichoId;
+                ws.Cell(fila, 10).Value = p.TipoPanteonId;
+                ws.Cell(fila, 11).Value = p.TipoParcelaId;
+
+                if (fila % 2 == 0)
+                    ws.Row(fila).Style.Fill.BackgroundColor = XLColor.FromHtml("#F2F7FB");
+
+                fila++;
+            }
+
+            ws.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            wb.SaveAs(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            string fileName = $"Parcelas_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+            return File(stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                fileName);
+        }
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> ImportarSecciones(IFormFile excel)
+        {
+            if (excel == null || excel.Length == 0)
+                return BadRequest("Debe adjuntar un archivo Excel.");
+
+            var secciones = new List<SeccionDTO>();
+            var errores = new List<string>();
+
+            using (var stream = new MemoryStream())
+            {
+                await excel.CopyToAsync(stream);
+                using var wb = new XLWorkbook(stream);
+                var ws = wb.Worksheet(1);
+                var filas = ws.RangeUsed()!.RowsUsed().Skip(1); // saltar encabezado
+
+                foreach (var fila in filas)
+                {
+                    try
+                    {
+                        secciones.Add(new SeccionDTO
+                        {
+                            Id = fila.Cell(1).GetValue<int>(),
+                            Nombre = fila.Cell(2).GetString(),
+                            Visibilidad = fila.Cell(3).GetValue<int>() == 1,
+                            Filas = fila.Cell(4).GetValue<int>(),
+                            NroParcelas = fila.Cell(5).GetValue<int>(),
+                            TipoNumeracionParcelaId = fila.Cell(6).GetValue<int>(),
+                            TipoParcelaId = fila.Cell(7).GetValue<int>()
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        errores.Add($"Fila {fila.RowNumber()}: {ex.Message}");
+                    }
+                }
+            }
+
+            if (errores.Count > 0)
+                return BadRequest(new { mensaje = "Se encontraron errores en el archivo.", errores });
+
+            var cantidad = await _seccionService.ImportarSecciones(secciones);
+
+            return Ok(new { mensaje = $"{cantidad} secciones importadas correctamente." });
+        }
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> ImportarParcelas(IFormFile excel)
+        {
+            if (excel == null || excel.Length == 0)
+                return BadRequest("Debe adjuntar un archivo Excel.");
+
+            var parcelas = new List<ParcelaDTO>();
+            var errores = new List<string>();
+
+            using (var stream = new MemoryStream())
+            {
+                await excel.CopyToAsync(stream);
+                using var wb = new XLWorkbook(stream);
+                var ws = wb.Worksheet(1);
+                var filas = ws.RangeUsed()!.RowsUsed().Skip(1); // saltar encabezado
+
+                foreach (var fila in filas)
+                {
+                    try
+                    {
+                        parcelas.Add(new ParcelaDTO
+                        {
+                            Id = fila.Cell(1).GetValue<int>(),
+                            Visibilidad = fila.Cell(2).GetValue<int>() == 1,
+                            NroParcela = fila.Cell(3).GetValue<int>(),
+                            NroFila = fila.Cell(4).GetValue<int>(),
+                            CantidadDifuntos = fila.Cell(5).GetValue<int>(),
+                            NombrePanteon = fila.Cell(6).GetString(),
+                            InformacionAdicional = fila.Cell(7).GetString(),
+                            SeccionId = fila.Cell(8).GetValue<int>(),
+                            TipoNichoId = fila.Cell(9).GetValue<int>(),
+                            TipoPanteonId = fila.Cell(10).GetValue<int>(),
+                            TipoParcelaId = fila.Cell(11).GetValue<int>()
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        errores.Add($"Fila {fila.RowNumber()}: {ex.Message}");
+                    }
+                }
+            }
+
+            if (errores.Count > 0)
+                return BadRequest(new { mensaje = "Se encontraron errores en el archivo.", errores });
+
+            var cantidad = await _parcelaService.ImportarParcelas(parcelas);
+
+            return Ok(new { mensaje = $"{cantidad} parcelas importadas correctamente." });
         }
     }
 }

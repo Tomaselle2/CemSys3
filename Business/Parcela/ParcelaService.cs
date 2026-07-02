@@ -369,5 +369,69 @@ namespace CemSys3.Business.Parcela
                     (c.FechaFin == null || c.FechaFin > DateTime.Now)
                 );
         }
+
+        public async Task<List<ParcelaDTO>> GetAllParcelasExcel()
+        {
+            return await _context.Parcelas.AsNoTracking().Select(p => new ParcelaDTO
+            {
+                Id = p.Id,
+                NroParcela = p.NroParcela,
+                NroFila = p.NroFila,
+                NombreSeccion = p.Seccion.Nombre,
+                SeccionId = p.SeccionId,
+                TipoParcelaId = p.TipoParcelaId ?? 0,
+                TipoNichoId = p.TipoNichoId ?? 0,
+                Visibilidad = p.Visibilidad,
+                CantidadDifuntos = p.CantidadDifuntos,
+                NombrePanteon = p.NombrePanteon ?? string.Empty,
+                TipoPanteonId = p.TipoPanteonId ?? 0,
+                InformacionAdicional = p.InformacionAdicional ?? string.Empty
+            }).ToListAsync();
+        }
+
+        public async Task<int> ImportarParcelas(List<ParcelaDTO> parcelas)
+        {
+            if (parcelas == null || parcelas.Count == 0)
+                return 0;
+
+            // 0 se usa como "sin valor" en el DTO (ver GetAllParcelasExcel: ?? 0),
+            // pero las columnas son FK nullable → hay que convertir 0 a null.
+            static int? NuloSiCero(int valor) => valor == 0 ? null : valor;
+
+            var entidades = parcelas.Select(p => new Models.Parcela
+            {
+                Id = p.Id,
+                Visibilidad = p.Visibilidad,
+                NroParcela = p.NroParcela,
+                NroFila = p.NroFila,
+                CantidadDifuntos = p.CantidadDifuntos,
+                NombrePanteon = p.NombrePanteon ?? "",
+                InformacionAdicional = p.InformacionAdicional ?? "",
+                SeccionId = p.SeccionId,
+                TipoNichoId = NuloSiCero(p.TipoNichoId ?? 0),
+                TipoPanteonId = NuloSiCero(p.TipoPanteonId ?? 0),
+                TipoParcelaId = NuloSiCero(p.TipoParcelaId)
+            }).ToList();
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT dbo.Parcelas ON");
+                await _context.Parcelas.AddRangeAsync(entidades);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+            finally
+            {
+                await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT dbo.Parcelas OFF");
+            }
+
+            return entidades.Count;
+        }
     }
 }
