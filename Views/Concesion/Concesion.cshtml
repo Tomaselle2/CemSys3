@@ -25,7 +25,7 @@
     string parcela = "";
     if (Model.Dto.TipoParcela == "Nicho") //nicho
     {
-        parcela = $"Nicho {Model.Dto.NroParcela.ToString()} Fila {Model.Dto.NroFila.ToString()}";
+        parcela = $"Nicho {Model.Dto.NroParcela.ToString()} Fila {Model.Dto.NroFila.ToString()} ({EnumHelper.GetDisplayNameByValue<TipoNichoEnum>(Model.Dto.TipoNichoId)})";
     }
 
     if (Model.Dto.TipoParcela == "Fosa")//fosa
@@ -35,7 +35,7 @@
 
     if (Model.Dto.TipoParcela == "Panteón")//panteon
     {
-        parcela = $"Lote {Model.Dto.NroParcela.ToString()}";
+        parcela = $"Lote {Model.Dto.NroParcela.ToString()} ({EnumHelper.GetDisplayNameByValue<TipoNichoEnum>(Model.Dto.TipoPanteonId)})";
     }
 }
 

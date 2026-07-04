@@ -39,6 +39,8 @@ namespace CemSys3.DTOs.Concesion
         public string LogoBase64 { get; set; } = "";
         public string PieBase64 { get; set; } = "";
 
+        public int TipoNichoId { get; set; }
+
 
     }
 }

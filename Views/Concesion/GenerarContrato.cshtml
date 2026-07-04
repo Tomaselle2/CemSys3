@@ -145,7 +145,7 @@
                     string parcela = "";
                     if (Model.contrato.TipoParcela == "Nicho") //nicho
                     {
-                        parcela = $"Nicho {Model.contrato.NroParcela.ToString()} Fila {Model.contrato.NroFila.ToString()}";
+                        parcela = $"Nicho {Model.contrato.NroParcela.ToString()} Fila {Model.contrato.NroFila.ToString()} ({EnumHelper.GetDisplayNameByValue<TipoNichoEnum>(Model.contrato.TipoNichoId)})";
                     }
 
                     if (Model.contrato.TipoParcela == "Fosa")//fosa

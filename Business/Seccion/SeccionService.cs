@@ -103,6 +103,30 @@ namespace CemSys3.Business.Seccion
             }
         }
 
+        // overload nuevo: recibe el conceptoId ya resuelto, para no repetir la query en cada iteración
+        private async Task AgregarPreciosConcesionNicho(Seccione seccion, int conceptoId)
+        {
+            var valoresAnios = Enum.GetValues(typeof(AniosConcesionEnum));
+
+            for (int i = 0; i < seccion.Filas; i++)
+            {
+                for (int j = 0; j < valoresAnios.Length; j++)
+                {
+                    var precio = new PreciosTarifaria
+                    {
+                        Precio = 0.00m,
+                        NroFila = i + 1,
+                        ConceptoTarifariaId = conceptoId,
+                        AniosConcesionId = j + 1,
+                        SeccionId = seccion.Id,
+                        Visibilidad = true
+                    };
+
+                    await _context.PreciosTarifarias.AddAsync(precio);
+                }
+            }
+        }
+
         //hay que recorrer todas las parcelas y asegurarse de que esten vacias antes de eliminar la seccion. Y colocar en false la visibilidad de todas las parcelas de esa seccion.
         public async Task Delete(int id)
         {
@@ -277,6 +301,21 @@ namespace CemSys3.Business.Seccion
                 await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT dbo.Secciones ON");
                 await _context.Secciones.AddRangeAsync(entidades);
                 await _context.SaveChangesAsync();
+                await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT dbo.Secciones OFF");
+
+                // se resuelve el conceptoId una sola vez para todo el lote
+                int conceptoId = await _context.ConceptosTarifaria
+                    .Where(c => c.TemaId == (int)TemaTarifariaEnum.ConcesionNicho)
+                    .Select(c => c.Id)
+                    .FirstOrDefaultAsync();
+
+                // se agregan los precios de tarifaria para cada seccion importada
+                foreach (var seccion in entidades)
+                {
+                    await AgregarPreciosConcesionNicho(seccion, conceptoId);
+                }
+
+                await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
             }
             catch
@@ -286,7 +325,7 @@ namespace CemSys3.Business.Seccion
             }
             finally
             {
-                // Siempre se apaga, incluso si falló el insert
+                // por si el catch se disparó antes del OFF explícito de arriba
                 await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT dbo.Secciones OFF");
             }
 

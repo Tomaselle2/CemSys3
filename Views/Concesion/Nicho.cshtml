@@ -1,4 +1,6 @@
 ﻿@using CemSys3.DTOs.Concesion;
+@using CemSys3.Enumerables;
+@using CemSys3.Helpers.Enumerable
 @model GenerarContratoDTO
 @{
     Layout = null;
@@ -217,9 +219,10 @@
 
 @{ //logica de ubicacion parcela
     string parcela = "";
+        string tipoNicho = Model.TipoNichoId != (int)TipoNichoEnum.Feretro ? $" ({EnumHelper.GetDisplayNameByValue<TipoNichoEnum>(Model.TipoNichoId)})" : "";
     if (Model.TipoParcela == "Nicho") //nicho
     {
-        parcela = $"NICHO {Model.NroParcela.ToString()} SECC {Model.NombreSeccion.ToUpper()} FILA {Model.NroFila.ToString()}";
+            parcela = $"NICHO {Model.NroParcela.ToString()} SECC {Model.NombreSeccion.ToUpper()} FILA {Model.NroFila.ToString()} {tipoNicho}";
     }
 
     if (Model.TipoParcela == "Fosa")//fosa

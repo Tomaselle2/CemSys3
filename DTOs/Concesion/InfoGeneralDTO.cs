@@ -19,6 +19,8 @@ namespace CemSys3.DTOs.Concesion
         public List<TitularesContratoDTO> Titulares { get; set; } = new List<TitularesContratoDTO>();
 
         public bool PuedeRenovar { get; set; }
+        public int TipoNichoId { get; set; }
+        public int TipoPanteonId { get; set; }
 
     }
 }

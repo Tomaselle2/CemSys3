@@ -440,6 +440,7 @@ namespace CemSys3.Business.Concesion
             dto.NroParcela = concesion.Parcela.NroParcela;
             dto.NroFila = concesion.Parcela.NroFila;
             dto.NroConcesion = concesion.Concesion;
+            dto.TipoNichoId = concesion.Parcela.TipoNichoId ?? 0;
 
             //consultar los difuntos relacionados a la parcela
             dto.Difuntos = await _context.ParcelaDifuntos
@@ -534,6 +535,8 @@ namespace CemSys3.Business.Concesion
             dto.NroConcesion = concesion.Concesion;
             dto.Vencimiento = concesion.Vencimiento;
             dto.InfoAdicional = concesion.InformacionAdicional ?? "";
+            dto.TipoNichoId = concesion.Parcela.TipoNichoId ?? 0;
+            dto.TipoPanteonId = concesion.Parcela.TipoPanteonId ?? 0;
 
             // Solo mostrar difuntos actuales si la concesión está activa
             if (concesion.FechaFin == null)
@@ -611,8 +614,8 @@ namespace CemSys3.Business.Concesion
             dto.NombreSeccion = concesion.Parcela.Seccion.Nombre;
             dto.NroParcela = concesion.Parcela.NroParcela;
             dto.NroFila = concesion.Parcela.NroFila;
-
-
+            dto.TipoNichoId = concesion.Parcela.TipoNichoId ?? 0;
+            dto.TipoPanteonId = concesion.Parcela.TipoPanteonId ?? 0;
             return dto;
         }
         public async Task<bool> ExisteNroConcesion(int nroConcesion)
