@@ -1,3 +1,5 @@
+USE cemsys;
+GO
 -- INSERT para CantidadCuotas (según el ejemplo proporcionado)
 INSERT INTO CantidadCuotas (cuota) VALUES 
 (1),
