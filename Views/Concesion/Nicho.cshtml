@@ -219,7 +219,7 @@
 
 @{ //logica de ubicacion parcela
     string parcela = "";
-        string tipoNicho = Model.TipoNichoId != (int)TipoNichoEnum.Feretro ? $" ({EnumHelper.GetDisplayNameByValue<TipoNichoEnum>(Model.TipoNichoId)})" : "";
+        string tipoNicho = Model.TipoNichoId != (int)TipoNichoEnum.Feretro ? $" ({EnumHelper.GetDisplayNameByValue<TipoNichoEnum>(Model.TipoNichoId).ToUpper()})" : "";
     if (Model.TipoParcela == "Nicho") //nicho
     {
             parcela = $"NICHO {Model.NroParcela.ToString()} SECC {Model.NombreSeccion.ToUpper()} FILA {Model.NroFila.ToString()} {tipoNicho}";
