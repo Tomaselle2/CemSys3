@@ -134,7 +134,8 @@ namespace CemSys3.Controllers
 
                 if (viewModel.contrato.TipoParcela == "Nicho")
                 {
-                    viewModel.CalcularPrecioNichoUnAnio();
+                    viewModel.AplicarDescuentoUrnario();   // 1º: descuento urnario si corresponde
+                    viewModel.CalcularPrecioNichoUnAnio(); // 2º: cálculo especial de 1 año
                 }
             }
             catch (Exception ex)
@@ -206,7 +207,8 @@ namespace CemSys3.Controllers
                 EsRenovacion = viewModel.contrato.EsRenovacion,
                 LogoBase64 = ObtenerImagenBase64("logoMuni.png"),
                 PieBase64 = ObtenerImagenBase64("pieContrato.png"),
-                IgnorarFechaIngreso = viewModel.contrato.IgnorarFechaIngreso
+                IgnorarFechaIngreso = viewModel.contrato.IgnorarFechaIngreso,
+                TipoNichoId = viewModel.contrato.TipoNichoId
             };
 
             var ruta = Path.Combine(_env.WebRootPath, "config", "intendente.txt");

@@ -16,5 +16,8 @@
 
         // Precios de fosas (otras jurisdicciones)
         public List<PrecioFosaPdfDTO> FosasOtrasJurisdicciones { get; set; } = new();
+
+        public List<FilaNichoPdfDTO> NichosEspecialesLocales { get; set; } = new();
+        public List<FilaNichoPdfDTO> NichosEspecialesOtras { get; set; } = new();
     }
 }

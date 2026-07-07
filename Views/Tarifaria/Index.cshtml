@@ -579,7 +579,76 @@
 </div>
 
 
-
+<!-- Formulario precios nichos especiales -->
+<div class="accordion" id="accordionNichoEspecial">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsNichoEspecial-headingOne">
+            <button class="accordion-button nueva-seccion" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#panelsNichoEspecial-collapseOne" aria-expanded="false">
+                Nichos Especiales
+            </button>
+        </h2>
+        <div id="panelsNichoEspecial-collapseOne" class="accordion-collapse collapse"
+             aria-labelledby="panelsNichoEspecial-headingOne" data-bs-parent="#accordionNichoEspecial">
+            <div class="accordion-body" style="padding:0">
+                <form id="formNichoEspecial" class="form-box">
+                    @Html.AntiForgeryToken()
+                    @{
+                        var aniosEspeciales = new[] { 25, 15, 10, 5 };
+                        var preciosEspeciales = Model.ListadoPrecios
+                            .Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.ConcesionNicho
+                                     && p.SeccionId == null)
+                            .ToList();
+                    }
+                    <table class="table table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width:120px;"></th>
+                                @foreach (var anio in aniosEspeciales)
+                                {
+                                    <th class="text-center">@anio años</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int fila = 5; fila >= 1; fila--)
+                            {
+                                <tr>
+                                    <td class="fw-bold text-center">Fila @fila</td>
+                                    @foreach (var anio in aniosEspeciales)
+                                    {
+                                        var precio = preciosEspeciales
+                                            .FirstOrDefault(p => p.NroFila == fila && p.AniosConcesionId == mapaAnios[anio]);
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number"
+                                                       class="form-control precio-input text-center"
+                                                       data-precio-id="@(precio?.Id ?? 0)"
+                                                       data-nro-fila="@fila"
+                                                       data-anios-concesion="@anio"
+                                                       data-concepto-id="@((int)ConceptosTarifariaEnum.ConcesionNicho)"
+                                                       value="@(precio?.Precio.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))"
+                                                       step="0.01" min="0" placeholder="0.00" />
+                                            </div>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-success btn-guardar-precios mb-2 my-2" data-form-id="formNichoEspecial">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Formulario precios nichos -->
 <div class="accordion" id="accordionNichosPrincipal">

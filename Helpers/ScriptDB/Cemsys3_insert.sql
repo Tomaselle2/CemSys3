@@ -722,6 +722,16 @@ VALUES
 (9, '- Se necesita que esté presente el titular ({TitularesActuales})   - El trámite es sin costo.     - De lunes a viernes de 7:00hs a 12:30hs.'), --permiso de ingreso
 (10, '- Se necesita que esté presente el titular ({TitularesActuales})    - El permiso de refacción tiene un costo de ${precioPermisoRefaccion}      - El permiso para colocar placa tiene un costo de ${precioPermisoColocarPlaca}       - Fotocopia DNI de los obreros   - De lunes a viernes de 7:00hs a 12:30hs.'), --permiso de refaccion
 (11, '{articuloTitularActual} {TitularesActuales} le informamos que su concesión ({NroConcesion}) en {Parcela} se encuentra vencida desde {vencimientoConcesion}.  Debe llegarse a la oficina del cementerio en la municipalidad para regularizar su situación.  Atención de lunes a viernes de 7:00hs a 12:30hs.'); --deuda de concesion
+
+go
+DECLARE @conceptoNicho INT = (SELECT id FROM ConceptosTarifaria WHERE nombre = 'Concesión Nicho');
+
+-- 5 filas x años (5, 10, 15, 25) = 20 registros, sin sección asociada
+INSERT INTO PreciosTarifarias (precio, nroFila, conceptoTarifariaId, aniosConcesionId, seccionId, visibilidad)
+SELECT 0.00, fila.n, @conceptoNicho, anio.id, NULL, 1
+FROM (VALUES (1),(2),(3),(4),(5)) AS fila(n)
+CROSS JOIN (SELECT id FROM AnioConcesion WHERE anios IN (5,10,15,25)) AS anio;
+
 --Job para pasar de concesion vigente a vencida 
 --BEGIN TRANSACTION;
 

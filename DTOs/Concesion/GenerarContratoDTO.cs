@@ -32,6 +32,8 @@ namespace CemSys3.DTOs.Concesion
         public decimal PorcentajeDescuentoRenovacionConcesionAlDia { get; set; }
         public decimal PorcentajeAumentoConcesionesOtrasLocalidades { get; set; }
         public decimal PorcentajeFondoAyudaCentroSalud { get; set; }
+        public decimal PorcentajePreciosNichosUrnariosConcesionSecc16_18 { get; set; }
+
 
         public string NombreIntendente { get; set; } = string.Empty;
         public bool EsRenovacion {  get; set; } = false;

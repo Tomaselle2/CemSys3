@@ -1,5 +1,6 @@
 ﻿using CemSys3.DTOs.Concesion;
 using CemSys3.DTOs.SweetAlert;
+using CemSys3.Enumerables;
 using CemSys3.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -30,6 +31,22 @@ namespace CemSys3.ViewModels.Concesion
 
         //manero de errores
         public SweetAlertDTO? SweetAlert { get; set; }
+
+
+        // NUEVO: aplica el descuento de urnario sobre los precios ya traídos
+        public void AplicarDescuentoUrnario()
+        {
+            if (contrato.TipoParcela != "Nicho" || contrato.TipoNichoId != (int)TipoNichoEnum.Urnario)
+                return;
+
+            var descuento = contrato.PorcentajePreciosNichosUrnariosConcesionSecc16_18;
+
+            foreach (var precio in contrato.PreciosNichos)
+            {
+                // Ej: 10000 * (1 - 0.5) = 5000
+                precio.Precio = Math.Round(precio.Precio * (1 - descuento), 2);
+            }
+        }
 
 
         //Método para calcular el precio de 1 año

@@ -212,6 +212,68 @@
 
 
     @* ============================================================
+   PÁGINA 4: NICHOS ESPECIALES
+   ============================================================ *@
+
+    <div class="page-break"></div>
+
+    <h1 class="titulo-principal">
+        NICHOS ESPECIALES @DateTime.Now.Year (con el @pctFondoEntero% incluido)
+    </h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                @foreach (var anio in anios)
+                {
+                    <th>@anio AÑOS</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var fila in Model.NichosEspecialesLocales)
+            {
+                <tr>
+                    <td class="td-label">@fila.Etiqueta</td>
+                    @foreach (var anio in anios)
+                    {
+                        <td>@fila.PreciosPorAnio[anio].ToString("N0")</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h1 class="titulo-otras" style="margin-top:24px;">
+        DIFUNTOS DE OTRAS JURISDICCIONES
+    </h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                @foreach (var anio in anios)
+                {
+                    <th>@anio AÑOS</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var fila in Model.NichosEspecialesOtras)
+            {
+                <tr>
+                    <td class="td-label">@fila.Etiqueta</td>
+                    @foreach (var anio in anios)
+                    {
+                        <td>@fila.PreciosPorAnio[anio].ToString("N0")</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @* ============================================================
        PÁGINA 3: FOSAS
        ============================================================ *@
 
@@ -265,6 +327,6 @@
 
     <p class="nota-fosa">Los nichos de construcción antigua renovaran o serán adquiridos en concesión al 50% del valor estipulado.</p>
 
-
+    
 </body>
 </html>

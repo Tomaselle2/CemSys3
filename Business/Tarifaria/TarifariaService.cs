@@ -286,6 +286,20 @@ namespace CemSys3.Business.Tarifaria
 
             var gruposOtras = AgruparSecciones(seccionesConDatosOtras);
 
+            // --- 6bis. Nichos especiales (sin sección) ----------------------
+            var preciosEspeciales = todosLosPrecios
+                .Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.ConcesionNicho
+                            && !p.SeccionId.HasValue
+                            && p.NroFila.HasValue
+                            && p.AniosConcesionId.HasValue)
+                .ToList();
+
+            var nichosEspecialesLocales = ConstruirFilasNichoEspecial(
+                preciosEspeciales, aniosOrdenados, mapaAniosConcesion, porcentajeFondo, null);
+
+            var nichosEspecialesOtras = ConstruirFilasNichoEspecial(
+                preciosEspeciales, aniosOrdenados, mapaAniosConcesion, porcentajeFondo, porcentajeOtrasLocalidades);
+
             // --- 6. Fosas --------------------------------------------------
             var preciosFosa = todosLosPrecios
                 .Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.ConcesionFosa
@@ -325,7 +339,9 @@ namespace CemSys3.Business.Tarifaria
                 GruposNichosLocales = gruposLocales,
                 GruposNichosOtrasJurisdicciones = gruposOtras,
                 FosasLocales = fosasLocales,
-                FosasOtrasJurisdicciones = fosasOtras
+                FosasOtrasJurisdicciones = fosasOtras,
+                NichosEspecialesLocales = nichosEspecialesLocales,   // NUEVO
+                NichosEspecialesOtras = nichosEspecialesOtras        // NUEVO
             };
         }
 
@@ -478,6 +494,41 @@ namespace CemSys3.Business.Tarifaria
     { 2,  5 },
     { 1,  1 }
 };
+
+        private List<FilaNichoPdfDTO> ConstruirFilasNichoEspecial(
+    List<PreciosTarifaria> preciosEspeciales,
+    int[] aniosOrdenados,
+    Dictionary<int, int> mapaAniosConcesion,
+    decimal porcentajeFondo,
+    decimal? porcentajeOtras)
+        {
+            var filasBruto = preciosEspeciales
+                .GroupBy(p => p.NroFila!.Value)
+                .OrderByDescending(g => g.Key)
+                .ToList();
+
+            var filasCalculadas = new List<(int NroFila, Dictionary<int, decimal> PreciosPorAnio)>();
+
+            foreach (var grupo in filasBruto)
+            {
+                var preciosPorAnio = new Dictionary<int, decimal>();
+                foreach (var anio in aniosOrdenados)
+                {
+                    var precioBase = grupo
+                        .FirstOrDefault(p => p.AniosConcesionId == mapaAniosConcesion[anio])
+                        ?.Precio ?? 0m;
+
+                    decimal precioFinal = porcentajeOtras.HasValue
+                        ? AplicarPorcentaje(AplicarPorcentaje(precioBase, porcentajeOtras.Value), porcentajeFondo)
+                        : AplicarPorcentaje(precioBase, porcentajeFondo);
+
+                    preciosPorAnio[anio] = precioFinal;
+                }
+                filasCalculadas.Add((grupo.Key, preciosPorAnio));
+            }
+
+            return AgruparFilasConMismoPrecio(filasCalculadas);
+        }
 
 
     }
