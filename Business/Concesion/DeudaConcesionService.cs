@@ -53,10 +53,22 @@ namespace CemSys3.Business.Concesion
             
             List<PrecioTarifariaDTO> precios = new List<PrecioTarifariaDTO>();
             //consultar los precios relacionados a la parcela dependiendo del tipo de parcela
+            bool esNichoEspecial = concesion.Parcela.TipoNichoId == (int)TipoNichoEnum.Especial;
+            bool esNichoUrnario = concesion.Parcela.TipoNichoId == (int)TipoNichoEnum.Urnario;
+
             if (concesion.TipoParcela == "Nicho")
             {
-                precios = await _context.PreciosTarifarias
-                    .Where(t => t.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.ConcesionNicho && t.SeccionId == concesion.Parcela.SeccionId && t.NroFila == concesion.Parcela.NroFila)
+                var queryPrecios = _context.PreciosTarifarias
+                    .Where(t => t.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.ConcesionNicho
+                                && t.NroFila == concesion.Parcela.NroFila);
+
+                // Los nichos especiales no pertenecen a ninguna sección real:
+                // sus precios están cargados con SeccionId = NULL
+                queryPrecios = esNichoEspecial
+                    ? queryPrecios.Where(t => t.SeccionId == null)
+                    : queryPrecios.Where(t => t.SeccionId == concesion.Parcela.SeccionId);
+
+                precios = await queryPrecios
                     .Select(t => new PrecioTarifariaDTO
                     {
                         Id = t.Id,
@@ -67,6 +79,19 @@ namespace CemSys3.Business.Concesion
                         SeccionId = t.SeccionId,
                         Visibilidad = t.Visibilidad,
                     }).ToListAsync();
+
+                // Si es urnario, se descuenta el % configurado sobre cada precio antes de seguir
+                if (esNichoUrnario)
+                {
+                    Models.PreciosTarifaria porcentajeUrnario = await _context.PreciosTarifarias
+                        .Where(p => p.ConceptoTarifariaId == (int)ConceptosTarifariaEnum.PorcentajePreciosNichosUrnariosConcesionSecc16_18)
+                        .FirstOrDefaultAsync() ?? throw new Exception("No se encontró el % de descuento para nichos urnarios.");
+
+                    foreach (var precio in precios)
+                    {
+                        precio.Precio = Math.Round(precio.Precio * (1 - porcentajeUrnario.Precio), 2);
+                    }
+                }
             }
             //consultar los precios relacionados a la parcela dependiendo del tipo de parcela
             if (concesion.TipoParcela == "Fosa")

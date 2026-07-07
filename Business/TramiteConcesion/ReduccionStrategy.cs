@@ -692,7 +692,9 @@ namespace CemSys3.Business.TramiteConcesion
                 {
                     new() { Descripcion = mensajeDifunto, Estado = false },
                     new() { Descripcion = infoConcesion, Estado = false },
-                    new() { Descripcion = nuevoDestino, Estado = false },
+                    new() { Descripcion = nuevoDestino, Estado = false },  
+                    new() { Descripcion = "Revisar / Modificar plano", Estado = false }
+
                 };
 
             int tramiteNotaId = await _notasService.GenerarTramiteNota(usuarioId);
