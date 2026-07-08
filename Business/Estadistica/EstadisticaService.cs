@@ -65,8 +65,14 @@ namespace CemSys3.Business.Estadistica
             dto.FosasOcupadas = await parcelas.CountAsync(p =>
                 p.TipoParcelaId == (int)TipoParcelaEnum.Fosa && p.CantidadDifuntos > 0);
 
+            dto.FosasDesocupadas = await parcelas.CountAsync(p =>
+                p.TipoParcelaId == (int)TipoParcelaEnum.Fosa && p.CantidadDifuntos == 0);
+
             dto.PanteonesOcupados = await parcelas.CountAsync(p =>
                 p.TipoParcelaId == (int)TipoParcelaEnum.Panteon && p.CantidadDifuntos > 0);
+            
+            dto.PanteonesDesocupados = await parcelas.CountAsync(p =>
+                p.TipoParcelaId == (int)TipoParcelaEnum.Panteon && p.CantidadDifuntos == 0);
 
             return dto;
         }

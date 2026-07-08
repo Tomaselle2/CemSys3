@@ -13,7 +13,8 @@
         public int NichosDesocupados { get; set; }
 
         public int FosasOcupadas { get; set; }
-
+        public int FosasDesocupadas { get; set; }
         public int PanteonesOcupados { get; set; }
+        public int PanteonesDesocupados { get; set; }
     }
 }
