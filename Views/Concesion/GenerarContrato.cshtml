@@ -132,6 +132,7 @@
 
 
     <!-- Tabla de datos de la concesion -->
+    <!-- Tabla de datos de la concesion -->
     <div class="accordion" id="accordionDatosConcesion">
         <div class="accordion-item">
             <h2 class="accordion-header" id="panelsStayOpen-headingDatosConcesion">
@@ -173,38 +174,53 @@
                     </div>
                 </div>
 
-                <div class="p-3"> 
+                <div class="p-3">
                     <label for="renovacion">Renovación</label>
                     <input type="checkbox" id="renovacion" asp-for="contrato.EsRenovacion" />
                 </div>
 
+                <!-- BLOQUE 1: Tipo de precio -->
                 <div class="p-3">
-                    <label>Se aplicará el siguiente tipo de precio:<span class="obligatorio"> * </span></label>
-                    <select class="form-control form-select" id="cambioPrecioSelect">
-                        <option value="regular" selected>Precio regular (base + @(Model.contrato.PorcentajeFondoAyudaCentroSalud * 100)%)</option>
-                        <option value="otraLocalidad">Aumento de otra localidad (base + @(Model.contrato.PorcentajeAumentoConcesionesOtrasLocalidades * 100)% + @(Model.contrato.PorcentajeFondoAyudaCentroSalud * 100)%)</option>
-                        <option value="descuentoRenovacion">Descuento renovación (base - @(Model.contrato.PorcentajeDescuentoRenovacionConcesionAlDia * 100)% + @(Model.contrato.PorcentajeFondoAyudaCentroSalud * 100)%)</option>
-                    </select>
+                    <div class="bloque-precio-card">
+                        <div class="bloque-precio-card-header">
+                            <i class="bi bi-tag"></i>
+                            <span>Se aplicará el siguiente tipo de precio<span class="obligatorio"> * </span></span>
+                        </div>
+                        <select class="form-control form-select" id="cambioPrecioSelect">
+                            <option value="regular" selected>Precio regular (base + @(Model.contrato.PorcentajeFondoAyudaCentroSalud * 100)%)</option>
+                            <option value="otraLocalidad">Aumento de otra localidad (base + @(Model.contrato.PorcentajeAumentoConcesionesOtrasLocalidades * 100)% + @(Model.contrato.PorcentajeFondoAyudaCentroSalud * 100)%)</option>
+                            <option value="descuentoRenovacion">Descuento renovación (base - @(Model.contrato.PorcentajeDescuentoRenovacionConcesionAlDia * 100)% + @(Model.contrato.PorcentajeFondoAyudaCentroSalud * 100)%)</option>
+                        </select>
+                    </div>
                 </div>
 
-                <!-- Toggle de modo de carga de precio -->
+                <!-- BLOQUE 2: Modo de carga -->
                 <div class="p-3">
-                    <label>Modo de carga del precio<span class="obligatorio"> * </span></label>
-                    <div class="d-flex gap-3 mt-1">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="modoPrecio" id="modoAutomatico" value="automatico" checked />
-                            <label class="form-check-label" for="modoAutomatico">Precio de tarifa</label>
+                    <div class="bloque-precio-card">
+                        <div class="bloque-precio-card-header">
+                            <i class="bi bi-calculator"></i>
+                            <span>Modo de carga del precio<span class="obligatorio"> * </span></span>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="modoPrecio" id="modoManual" value="manual" />
-                            <label class="form-check-label" for="modoManual">Precio manual</label>
+                        <div class="modo-precio-toggle">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="modoPrecio" id="modoAutomatico" value="automatico" checked />
+                                <label class="form-check-label" for="modoAutomatico"><i class="bi bi-receipt"></i>Precio de tarifa</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="modoPrecio" id="modoManual" value="manual" />
+                                <label class="form-check-label" for="modoManual"><i class="bi bi-pencil"></i>Precio manual</label>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="bloqueAutomatico" class="p-3">
-                    <div class="p-3">
-                        <label>Precio de la concesión<span class="obligatorio"> * </span></label>
+                <!-- BLOQUE 3: Precio automático -->
+                <div class="p-3">
+                    <div class="bloque-precio-card" id="bloqueAutomatico">
+                        <div class="bloque-precio-card-header">
+                            <i class="bi bi-cash-coin"></i>
+                            <span>Precio de la concesión<span class="obligatorio"> * </span></span>
+                        </div>
                         <select asp-for="PrecioSeleccionado" class="form-control form-select" id="selectCantidadPrecio">
                             <option value="">-- Seleccione la cantidad de años --</option>
                             @if (Model.contrato.TipoParcela == "Nicho")
@@ -261,69 +277,117 @@
                         <span asp-validation-for="PrecioSeleccionado" class="text-danger"></span>
                     </div>
                 </div>
-                
 
                 <div id="bloqueManual" class="p-3" style="display:none">
-                    <div class="form-columns-container3 mb-3">
-                        <div>
-                            <label>Cantidad de años<span class="obligatorio"> * </span></label>
-                            <select class="form-control form-select" id="selectAniosManual">
-                                <option value="">-- Seleccione los años --</option>
-                                <option value="1" data-anios="1">1 año</option>
-                                <option value="2" data-anios="5">5 años</option>
-                                <option value="3" data-anios="10">10 años</option>
-                                <option value="4" data-anios="15">15 años</option>
-                                <option value="5" data-anios="25">25 años</option>
-                            </select>
+                    <div class="bloque-precio-card">
+                        <div class="bloque-precio-card-header">
+                            <i class="bi bi-pencil-square"></i>
+                            <span>Carga manual del precio</span>
                         </div>
-                        <div>
-                            <label>Precio manual ($)<span class="obligatorio"> * </span></label>
-                            <input class="form-control" type="number" min="0" step="0.01"
-                                   id="precioManualInput" placeholder="Ej: 15000.00" />
+                        <div class="form-columns-container3 mb-3">
+                            <div>
+                                <label>Cantidad de años<span class="obligatorio"> * </span></label>
+                                <select class="form-control form-select" id="selectAniosManual">
+                                    <option value="">-- Seleccione los años --</option>
+                                    <option value="1" data-anios="1">1 año</option>
+                                    <option value="2" data-anios="5">5 años</option>
+                                    <option value="3" data-anios="10">10 años</option>
+                                    <option value="4" data-anios="15">15 años</option>
+                                    <option value="5" data-anios="25">25 años</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Precio manual ($)<span class="obligatorio"> * </span></label>
+                                <input class="form-control" type="number" min="0" step="0.01"
+                                       id="precioManualInput" placeholder="Ej: 15000.00" />
+                            </div>
                         </div>
-                    </div>
-                    <small class="text-muted">El tipo de precio seleccionado arriba no se aplica en modo manual.</small>
-                </div>
-
-                <div class="form-columns-container3 mb-3 p-3">
-                    <div>
-                        <label>Vencimiento<span class="obligatorio"> * </span></label>
-                        <input class="form-control" type="date" required id="vencimientoConcesion" asp-for="Vencimiento" />
-                        <span asp-validation-for="Vencimiento" class="text-danger"></span>
-                    </div>
-                    <div>
-                        <label>N° Concesión<span class="obligatorio"> * si no tiene numero colocar 5 (-) </span></label>
-                        <input class="form-control" type="text" required autocomplete="off"
-                               id="nroConcesion" asp-for="contrato.NroConcesion" maxlength="5" />
-                        <span asp-validation-for="contrato.NroConcesion" class="text-danger"></span>
+                        <small class="text-muted">El tipo de precio seleccionado arriba no se aplica en modo manual.</small>
                     </div>
                 </div>
 
+                <!-- BLOQUE 4: Vencimiento y N° Concesión (siempre visible, no depende del modo) -->
                 <div class="p-3">
-                    <label>Forma de pago<span class="obligatorio"> * </span></label>
-                    <div class="form-columns-container3 mb-3">
-                        <div>
-                            <select id="formaDePago" class="form-control form-select" asp-for="FormaDePago" disabled>
-                                <option value="">--Seleccione una forma de pago--</option>
-                                <option value="cuota">Cuotas</option>
-                                <option value="otra">Otra</option>
-                            </select>
+                    <div class="bloque-precio-card">
+                        <div class="bloque-precio-card-header">
+                            <i class="bi bi-calendar-check"></i>
+                            <span>Vencimiento y N° de concesión</span>
                         </div>
-                        <div>
-                            <select disabled class="form-control form-select" id="CantidadCuotaSeleccionada" asp-for="CantidadCuotaSeleccionada" asp-items="@(EnumHelper.GetSelectListItems<CuotasEnum>())">
-                                <option value="">--Elija una cuota--</option>
-                            </select>
-                            <span id="cuota-error" class="text-danger"></span> <!-- mensaje de validación -->
-                        </div>
-                        <div>
-                            <input class="form-control" type="text" id="valorCuota" readonly />
+                        <div class="form-columns-container3">
+                            <div>
+                                <label>Vencimiento<span class="obligatorio"> * </span></label>
+                                <input class="form-control" type="date" required id="vencimientoConcesion" asp-for="Vencimiento" />
+                                <span asp-validation-for="Vencimiento" class="text-danger"></span>
+                            </div>
+                            <div>
+                                <label>N° Concesión<span class="obligatorio"> * si no tiene numero colocar 5 (-) </span></label>
+                                <input class="form-control" type="text" required autocomplete="off"
+                                       id="nroConcesion" asp-for="contrato.NroConcesion" maxlength="5" />
+                                <span asp-validation-for="contrato.NroConcesion" class="text-danger"></span>
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <div id="divOtraFormaPago" style="display: none">
-                        <label>Escriba la forma de pago</label>
-                        <input class="form-control" type="text" id="otraForma" asp-for="otraFormaPago" readonly />
-                        <span id="otraForma-error" class="text-danger"></span> <!-- mensaje de validación -->
+                <div id="bloqueManual" class="p-3" style="display:none">
+                    <div class="bloque-precio-card">
+                        <div class="bloque-precio-card-header">
+                            <i class="bi bi-pencil-square"></i>
+                            <span>Carga manual del precio</span>
+                        </div>
+                        <div class="form-columns-container3 mb-3">
+                            <div>
+                                <label>Cantidad de años<span class="obligatorio"> * </span></label>
+                                <select class="form-control form-select" id="selectAniosManual">
+                                    <option value="">-- Seleccione los años --</option>
+                                    <option value="1" data-anios="1">1 año</option>
+                                    <option value="2" data-anios="5">5 años</option>
+                                    <option value="3" data-anios="10">10 años</option>
+                                    <option value="4" data-anios="15">15 años</option>
+                                    <option value="5" data-anios="25">25 años</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Precio manual ($)<span class="obligatorio"> * </span></label>
+                                <input class="form-control" type="number" min="0" step="0.01"
+                                       id="precioManualInput" placeholder="Ej: 15000.00" />
+                            </div>
+                        </div>
+                        <small class="text-muted">El tipo de precio seleccionado arriba no se aplica en modo manual.</small>
+                    </div>
+                </div>
+
+                <!-- BLOQUE 5: Forma de pago -->
+                <div class="p-3">
+                    <div class="bloque-precio-card">
+                        <div class="bloque-precio-card-header">
+                            <i class="bi bi-credit-card"></i>
+                            <span>Forma de pago<span class="obligatorio"> * </span></span>
+                        </div>
+                        <div class="form-columns-container3 mb-3">
+                            <div>
+                                <select id="formaDePago" class="form-control form-select" asp-for="FormaDePago" disabled>
+                                    <option value="">--Seleccione una forma de pago--</option>
+                                    <option value="cuota">Cuotas</option>
+                                    <option value="otra">Otra</option>
+                                </select>
+                            </div>
+                            <div>
+                                <select disabled class="form-control form-select" id="CantidadCuotaSeleccionada" asp-for="CantidadCuotaSeleccionada" asp-items="@(EnumHelper.GetSelectListItems<CuotasEnum>())">
+                                    <option value="">--Elija una cuota--</option>
+                                </select>
+                                <span id="cuota-error" class="text-danger"></span> <!-- mensaje de validación -->
+                            </div>
+                            <div>
+                                <input class="form-control" type="text" id="valorCuota" readonly />
+                            </div>
+                        </div>
+
+                        <div id="divOtraFormaPago" style="display: none">
+                            <label>Escriba la forma de pago</label>
+                            <input class="form-control" type="text" id="otraForma" asp-for="otraFormaPago" readonly />
+                            <span id="otraForma-error" class="text-danger"></span> <!-- mensaje de validación -->
+                        </div>
                     </div>
                 </div>
 
@@ -336,7 +400,6 @@
                 <input type="hidden" asp-for="PrecioFinal" id="precioFinal" name="PrecioFinal" />
                 <input type="hidden" asp-for="contrato.NroFila" value="@Model.contrato.NroFila" />
                 <input type="hidden" asp-for="contrato.NroParcela" value="@Model.contrato.NroParcela" />
-                <input type="hidden" asp-for="contrato.EsRenovacion"/>
                 <input type="hidden" id="modoPrecioHidden" name="ModoPrecio" value="automatico" />
 
                 <div class="text-center p-3">
@@ -348,7 +411,72 @@
     </div>
 </form> 
 
+<style>
+    .bloque-precio-card {
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 14px;
+        background-color: #fff;
+    }
 
+    .bloque-precio-card-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+        .bloque-precio-card-header i {
+            font-size: 18px;
+            color: #0f6e56;
+        }
+
+        .bloque-precio-card-header span {
+            font-weight: 600;
+            font-size: 14px;
+            color: #343a40;
+        }
+
+    .modo-precio-toggle {
+        display: flex;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+        .modo-precio-toggle label {
+            flex: 1;
+            text-align: center;
+            padding: 10px 8px;
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6c757d;
+            cursor: pointer;
+            transition: background-color .15s ease, color .15s ease;
+        }
+
+            .modo-precio-toggle label i {
+                margin-right: 4px;
+            }
+
+        .modo-precio-toggle input[type="radio"] {
+            display: none;
+        }
+
+            .modo-precio-toggle input[type="radio"]:checked + label {
+                background-color: #e1f5ee;
+                color: #0f6e56;
+            }
+
+        .modo-precio-toggle .form-check {
+            flex: 1;
+            margin: 0;
+            display: flex;
+            padding: 0;
+        }
+</style>
 
 <!-- Modal contribuyente-->
 <div class="modal fade" id="TitularModal" tabindex="-1" aria-labelledby="titularModalLabel" aria-hidden="true">
