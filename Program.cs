@@ -61,7 +61,7 @@ var builder = WebApplication.CreateBuilder(args);
 //para el manejo de sesiones
 builder.Services.AddSession(option =>
 {
-    option.IdleTimeout = TimeSpan.FromMinutes(60); // Tiempo de expiración por inactividad
+    option.IdleTimeout = TimeSpan.FromMinutes(360); // Tiempo de expiración por inactividad
 });
 
 // Add services to the container.

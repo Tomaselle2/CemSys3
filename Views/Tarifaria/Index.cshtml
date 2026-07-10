@@ -16,32 +16,36 @@
         { 5,  (int)AniosConcesionEnum.anio5  }
     };
 }
-
 <div class="page-header-container">
     <a asp-action="Index" asp-controller="Configuracion" class="btn btn-secondary m-3" title="Configuración"><i class="bi bi-arrow-left"></i></a>
     <h1 class="title-page">Tarifaria</h1>
 </div>
+<div class="container3">
 
-<div class="mb-3">
-    <a asp-action="GetAllPreciosIngreso" asp-controller="Tarifaria" data-no-loader class="btn btn-outline-danger" title="Descargar precios de ingreso">Ingresos <i class="bi bi-filetype-pdf"></i></a>
+    <div class="mb-3">
+        <a asp-action="GetAllPreciosIngreso" asp-controller="Tarifaria" data-no-loader class="btn btn-outline-danger" title="Descargar precios de ingreso">Ingresos <i class="bi bi-filetype-pdf"></i></a>
+    </div>
+
+    <div class="mb-3">
+        <a asp-action="GetPdfPreciosNichosFosas" asp-controller="Tarifaria"
+           data-no-loader class="btn btn-outline-danger" title="Descargar precios nichos y fosas">
+            Nichos y Fosas <i class="bi bi-filetype-pdf"></i>
+        </a>
+    </div>
+
+    <!-- Botón de aumento anual -->
+    <div class="mb-3">
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAumentoTarifaria">
+            <i class="bi bi-graph-up-arrow"></i> Aplicar aumento anual
+        </button>
+    </div>
 </div>
 
-<div class="mb-3">
-    <a asp-action="GetPdfPreciosNichosFosas" asp-controller="Tarifaria"
-       data-no-loader class="btn btn-outline-danger" title="Descargar precios nichos y fosas">
-        Nichos y Fosas <i class="bi bi-filetype-pdf"></i>
-    </a>
-</div>
 
 
 
 
-<!-- Botón de aumento anual -->
-<div class="mb-3">
-    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAumentoTarifaria">
-        <i class="bi bi-graph-up-arrow"></i> Aplicar aumento anual
-    </button>
-</div>
+
 
 <!-- Modal Aumento Tarifaria -->
 <div class="modal fade" id="modalAumentoTarifaria" tabindex="-1" aria-hidden="true">
