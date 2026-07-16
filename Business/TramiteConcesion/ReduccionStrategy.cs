@@ -591,6 +591,8 @@ namespace CemSys3.Business.TramiteConcesion
             //consultar el difuntos relacionados a la parcela para el tramite
             DifuntoContratoDTO difunto = await _context.ParcelaDifuntos
                 .Where(p => p.DifuntoId == reduccion.DifuntoId)
+                .OrderByDescending(p => p.FechaIngreso)
+                .Take(1)
                 .Select(p => new DifuntoContratoDTO
                 {
                     Id = p.Difunto.Id,

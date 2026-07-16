@@ -275,8 +275,12 @@ namespace CemSys3.Controllers
                     archivo.NombreArchivo = Path.ChangeExtension(archivo.NombreArchivo, ".pdf");
                 }
 
+                var nombre = archivo.NombreArchivo;
+
                 // Forzar a que el navegador intente mostrarlo
-                Response.Headers["Content-Disposition"] = $"inline; filename=\"{archivo.NombreArchivo}\"";
+                Response.Headers["Content-Disposition"] =
+    $"inline; filename*=UTF-8''{Uri.EscapeDataString(nombre)}";
+
 
                 return File(archivo.Contenido, tipo);
             }

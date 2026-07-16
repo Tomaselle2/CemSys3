@@ -54,7 +54,6 @@ using CemSys3.Interfaces.Usuario;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Playwright;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
