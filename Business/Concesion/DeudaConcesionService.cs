@@ -7,7 +7,6 @@ using CemSys3.Interfaces.Concesion;
 using CemSys3.Interfaces.Parcela;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace CemSys3.Business.Concesion
 {
@@ -147,7 +146,7 @@ namespace CemSys3.Business.Concesion
             encabezado += $"Buen día. Me comunico del área del cementerio para informarle el estado de su concesión.\n";
             encabezado += $"Concesión *{nroConcesion.ToString("D5") ?? "-----"}*. Vencimiento: {vencimiento}\n";
             encabezado += $"Ubicación: {parcela}\n";
-            encabezado += "Difuntos: ";
+            encabezado += "Difunto/s: ";
             foreach (var difunto in Difuntos)
             {
                 encabezado += $"{difunto.Apellido?.ToUpper()} {difunto.Nombre?.ToUpper()}. ";
@@ -275,7 +274,7 @@ namespace CemSys3.Business.Concesion
 
         private string ObtenerMensajeFinal(DateOnly vencimiento, DateOnly hoy, int tipoParcelaId, decimal descuento)
         {
-            if (vencimiento >= hoy && vencimiento.Year == hoy.Year && tipoParcelaId == (int)TipoParcelaEnum.Nicho)
+            if ((vencimiento.Month == hoy.Month || vencimiento >= hoy) && vencimiento.Year == hoy.Year && tipoParcelaId == (int)TipoParcelaEnum.Nicho)
             {
                 return $"\nLa renovación se puede abonar en hasta 6 cuotas sin interés.\n" +
                        $"Si renueva durante el mes del vencimiento, accede a un {Math.Round(descuento * 100)}% de descuento abonando en un pago sobre la cantidad de años que elija.\n" +

@@ -171,7 +171,7 @@ INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNich
 conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
 porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
 porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
-('Nicho - Fallecidos de otra localidad con domicilio en otra localidad',
+('Nicho - Fallecidos en otra localidad con domicilio en otra localidad',
 1, --tipoParcelaId--nicho
 1, --estadoDifuntoId --cuerpo completo o reduccion
 1, --tipoNichoId --feretro o especial
@@ -193,7 +193,7 @@ INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNich
 conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
 porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
 porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
-('Nicho - Fallecidos de otra localidad con domicilio en Tirolesa',
+('Nicho - Fallecidos en otra localidad con domicilio en Tirolesa',
 1, --tipoParcelaId--nicho
 1, --estadoDifuntoId --cuerpo completo o reduccion
 1, --tipoNichoId --feretro o especial
@@ -282,7 +282,7 @@ INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNich
 conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
 porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
 porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
-('Fosa - Fallecidos de otra localidad con domicilio en otra localidad',
+('Fosa - Fallecidos en otra localidad con domicilio en otra localidad',
 2, --tipoParcelaId--fosa
 1, --estadoDifuntoId --cuerpo completo o reduccion
 null, --tipoNichoId --feretro o especial
@@ -304,7 +304,7 @@ INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNich
 conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
 porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
 porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
-('Fosa - Fallecidos de otra localidad con domicilio en Tirolesa',
+('Fosa - Fallecidos en otra localidad con domicilio en Tirolesa',
 2, --tipoParcelaId--nicho
 1, --estadoDifuntoId --cuerpo completo o reduccion
 null, --tipoNichoId --feretro o especial
@@ -393,7 +393,7 @@ INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNich
 conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
 porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
 porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
-('Panteón con nichos - Fallecidos de otra localidad con domicilio en otra localidad',
+('Panteón con nichos - Fallecidos en otra localidad con domicilio en otra localidad',
 3, --tipoParcelaId--nicho
 1, --estadoDifuntoId --cuerpo completo o reduccion
 null, --tipoNichoId --feretro o especial
@@ -415,7 +415,7 @@ INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNich
 conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
 porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
 porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
-('Panteón con nichos - Fallecidos de otra localidad con domicilio en Tirolesa',
+('Panteón con nichos - Fallecidos en otra localidad con domicilio en Tirolesa',
 3, --tipoParcelaId--nicho
 1, --estadoDifuntoId --cuerpo completo o reduccion
 null, --tipoNichoId --feretro o especial
@@ -504,7 +504,7 @@ INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNich
 conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
 porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
 porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
-('Panteón sin nichos - Fallecidos de otra localidad con domicilio en otra localidad',
+('Panteón sin nichos - Fallecidos en otra localidad con domicilio en otra localidad',
 3, --tipoParcelaId--nicho
 1, --estadoDifuntoId --cuerpo completo o reduccion
 null, --tipoNichoId --feretro o especial
@@ -526,7 +526,7 @@ INSERT INTO ReglasIngreso (nombreRegla, tipoParcelaId, estadoDifuntoId, tipoNich
 conceptoInhumacionId, conceptoDefuncionId, conceptoTranscripcionId, conceptoIntroduccionId, 
 porcentajeFondoSaludId, porcentajeAumentoOtraLocalidadId, porcentajeAumentoDerechoOficinaId, 
 porcentajeIntroduccionUrnaDerechoOficna, montoMinimoFondoId, cierreNicho, cierreFosa, visibilidad) VALUES
-('Panteón sin nichos - Fallecidos de otra localidad con domicilio en Tirolesa',
+('Panteón sin nichos - Fallecidos en otra localidad con domicilio en Tirolesa',
 3, --tipoParcelaId--nicho
 1, --estadoDifuntoId --cuerpo completo o reduccion
 null, --tipoNichoId --feretro o especial
@@ -726,7 +726,7 @@ VALUES
 go
 DECLARE @conceptoNicho INT = (SELECT id FROM ConceptosTarifaria WHERE nombre = 'Concesión Nicho');
 
--- 5 filas x años (5, 10, 15, 25) = 20 registros, sin sección asociada
+-- 5 filas x años (5, 10, 15, 25) = 20 registros, sin sección asociada. Esto completa la tabla de nichos especiales
 INSERT INTO PreciosTarifarias (precio, nroFila, conceptoTarifariaId, aniosConcesionId, seccionId, visibilidad)
 SELECT 0.00, fila.n, @conceptoNicho, anio.id, NULL, 1
 FROM (VALUES (1),(2),(3),(4),(5)) AS fila(n)
