@@ -7,11 +7,13 @@ using CemSys3.Interfaces.HistorialEstados;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace CemSys3.Business.HistorialEstadoService
 {
     public class HistorialEstadoService : IHistorialEstados
     {
         private readonly AppDbContext _context;
+
 
         public HistorialEstadoService(AppDbContext context)
         {
@@ -114,7 +116,7 @@ namespace CemSys3.Business.HistorialEstadoService
         //titulares de concesion
         public async Task<IEnumerable<HistorialTitularesDTO>> HistorialTitulares(int concesionId)
         {
-            return await _context.HistorialTitularesConcesiones
+            return await _context.HistorialTitularesConcesiones.AsNoTracking()
                 .Where(h => h.ConcesionId == concesionId)
                 .OrderByDescending(h => h.FechaInicio)
                 .Select(s => new HistorialTitularesDTO
@@ -130,7 +132,7 @@ namespace CemSys3.Business.HistorialEstadoService
 
         public async Task<IEnumerable<TramiteDTO>> HistorialTramitesConcesion(int concesionId)
         {
-            var concesion = await _context.Concesiones
+            var concesion = await _context.Concesiones.AsNoTracking()
                 .Include(c => c.Tramite)
                 .FirstOrDefaultAsync(c => c.TramiteId == concesionId)
                 ?? throw new Exception("Concesión no encontrada");
@@ -205,35 +207,7 @@ namespace CemSys3.Business.HistorialEstadoService
             // de la concesión. Así no se mezclan trámites de concesiones anteriores.
             var tramitesDentro = new List<TramiteDTO>();
 
-            //foreach (var hp in historialParcelas)
-            //{
-            //    DateTime desdeParcela = hp.FechaInicio;
-            //    DateTime hastaParcela = hp.FechaFin ?? fechaFin;
-
-            //    var tramitesParcela = await _context.TramitesParcelas
-            //        .AsNoTracking()
-            //        .Where(tp => tp.ParcelaId == hp.ParcelaId)
-            //        .Join(_context.Tramites,
-            //            tp => tp.TramiteId,
-            //            t => t.Id,
-            //            (tp, t) => t)
-            //        .Where(t =>
-            //            t.FechaCreacion >= desdeParcela &&
-            //            t.FechaCreacion <= hastaParcela &&
-            //            t.TipoTramiteId != (int)TipoTramiteEnum.ContratoConcesion)
-            //        .Select(t => new TramiteDTO
-            //        {
-            //            Id = t.Id,
-            //            Visibilidad = t.Visibilidad,
-            //            FechaCreacion = t.FechaCreacion,
-            //            TipoTramiteId = t.TipoTramiteId,
-            //            UsuarioId = t.UsuarioId,
-            //            EstadoActualId = t.EstadoActualId
-            //        })
-            //        .ToListAsync();
-
-            //    tramitesDentro.AddRange(tramitesParcela);
-            //}
+           
 
             foreach (var hp in historialParcelas)
             {
