@@ -12,5 +12,12 @@ namespace CemSys3.Controllers
             return View();
         }
 
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> CargaIncialDatos()
+        {
+            return View();
+        }
+
     }
 }

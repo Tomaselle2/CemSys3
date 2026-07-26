@@ -1,0 +1,76 @@
+﻿@{
+    ViewData["Title"] = "Carga Inicial de Datos";
+}
+
+<div class="page-header-container">
+    <a asp-action="Index" asp-controller="Configuracion" class="btn btn-secondary m-3" title="Configuración">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <h1 class="title-page">Carga Inicial de Datos</h1>
+</div>
+
+<div class="card shadow-sm mt-4">
+    <div class="card-body">
+
+        <div class="mb-3">
+            <label for="archivo" class="form-label">Archivo de carga inicial</label>
+            <input type="file" class="form-control" id="archivo" accept=".xlsx,.xls,.csv">
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-warning" onclick="subirArchivo('/api/CargaInicial/simular')">
+                <i class="bi bi-search"></i> Simular carga
+            </button>
+
+            <button type="button" class="btn btn-danger" onclick="subirArchivo('/api/CargaInicial/ejecutar')">
+                <i class="bi bi-play-fill"></i> Ejecutar carga
+            </button>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        async function subirArchivo(url) {
+
+            const input = document.getElementById("archivo");
+
+            if (input.files.length === 0) {
+                alert("Seleccione un archivo.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("archivo", input.files[0]);
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error("Error al procesar el archivo.");
+                }
+
+                // Descargar el ZIP devuelto por la API
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+
+                const a = document.createElement("a");
+                a.href = downloadUrl;
+                a.download = "resultado_carga_inicial.zip";
+                a.click();
+
+                window.URL.revokeObjectURL(downloadUrl);
+
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+    </script>
+}
+
+

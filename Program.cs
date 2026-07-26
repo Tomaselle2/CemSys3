@@ -2,6 +2,7 @@ using CemSys3.Business.Arbol;
 using CemSys3.Business.Archivo;
 using CemSys3.Business.Calendario;
 using CemSys3.Business.CargaDifunto;
+using CemSys3.Business.CargaInicialCemSys;
 using CemSys3.Business.Cementerio;
 using CemSys3.Business.ConceptoTarifaria;
 using CemSys3.Business.Concesion;
@@ -31,6 +32,7 @@ using CemSys3.Interfaces;
 using CemSys3.Interfaces.Archivo;
 using CemSys3.Interfaces.Calendario;
 using CemSys3.Interfaces.CargaDifunto;
+using CemSys3.Interfaces.CargaIncialCemSys;
 using CemSys3.Interfaces.Cementerio;
 using CemSys3.Interfaces.ConceptoTarifaria;
 using CemSys3.Interfaces.Concesion;
@@ -130,6 +132,12 @@ builder.Services.AddScoped<IComplementoTramite<PermisoRefaccionDTO>, PermisoRefa
 // =========================
 builder.Services.AddScoped<IStrategyFactory, StrategyFactory>();
 
+//carga inicial
+builder.Services.AddKeyedScoped<ICargaInicial>("prueba", (sp, _) =>
+    new CargaInicialService(sp.GetRequiredService<AppDbContext>(), sp.GetRequiredService<IHistorialEstados>(), modoPrueba: true));
+
+builder.Services.AddKeyedScoped<ICargaInicial>("real", (sp, _) =>
+    new CargaInicialService(sp.GetRequiredService<AppDbContext>(), sp.GetRequiredService<IHistorialEstados>(), modoPrueba: false));
 
 
 builder.Services.AddSingleton<IBrowser>(sp =>
