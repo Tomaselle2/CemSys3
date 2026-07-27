@@ -60,12 +60,20 @@ namespace CemSys3.Business.Persona
         {
             Models.Persona persona = await _context.Personas.FindAsync(id) ?? throw new Exception("Persona no encontrada");
             DateTime? fechaIngreso = null;
-            if(persona.CategoriaPersonaId == (int)CategoriaPersonaEnum.Fallecido)
-            {
-                Models.ParcelaDifunto parcelaDifunto = await _context.ParcelaDifuntos.Where(p => p.DifuntoId == persona.Id).FirstOrDefaultAsync() 
-                    ?? throw new Exception("Error al obtener la fecha de ingreso");
 
-                fechaIngreso = parcelaDifunto.FechaIngreso;
+            if (persona.CategoriaPersonaId == (int)CategoriaPersonaEnum.Fallecido)
+            {
+                Models.ParcelaDifunto parcelaDifunto = await _context.ParcelaDifuntos.Where(p => p.DifuntoId == persona.Id).FirstOrDefaultAsync();
+
+                if(parcelaDifunto != null)
+                {
+                    fechaIngreso = parcelaDifunto.FechaIngreso;
+                }
+                else
+                {
+                    fechaIngreso = null;
+                }
+
             }
 
             return new PersonaDTO
@@ -485,6 +493,24 @@ namespace CemSys3.Business.Persona
                 CoincidenciaPorDni = coincidenciaPorDni,
                 Persona = await Get(persona.Id)
             };
+        }
+
+        public async Task CambiarEstadoPersona(int personaId)
+        {
+            Models.Persona persona = _context.Personas.Find(personaId) ?? throw new Exception("Persona no encontrada");
+
+            if(persona.CategoriaPersonaId == (int)CategoriaPersonaEnum.Titular)
+            {
+                persona.CategoriaPersonaId = (int)CategoriaPersonaEnum.Fallecido;
+                persona.EstadoDifuntoId = (int)EstadoDifuntoEnum.CuerpoCompleto;
+            }
+            else
+            {
+                persona.CategoriaPersonaId = (int)CategoriaPersonaEnum.Titular;
+                persona.EstadoDifuntoId = null;
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }

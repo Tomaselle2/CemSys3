@@ -172,22 +172,18 @@ namespace CemSys3.Business.Concesion
 
         private string PreciosRenovacion(List<PrecioTarifariaDTO> precios, decimal fondo)
         {
-            string mensaje = "\nPuede renovar la concesión por:\n";
+            // 1. Eliminar los precios <= 0 de forma segura
+            precios.RemoveAll(p => p.Precio <= 0);
 
-            for(int i=0; i < precios.Count; i++)
-            { 
-                //remuevo todo lo que el precio sea $0.
-                if (precios[i].Precio <= 0)
-                {
-                    precios.Remove(precios[i]);
-                }
-
-                //aumentar el porcentaje de fondo.
-                precios[i].Precio += precios[i].Precio * fondo;
+            // 2. Aplicar el porcentaje de fondo a los restantes
+            foreach (var precio in precios)
+            {
+                precio.Precio += precio.Precio * fondo;
             }
 
-            //muestro todos los precios
-            foreach(var precio in precios)
+            // 3. Construir mensaje
+            string mensaje = "\nPuede renovar la concesión por:\n";
+            foreach (var precio in precios)
             {
                 mensaje += $"{EnumHelper.GetDisplayNameByValue<AniosConcesionEnum>(precio.AniosConcesionId.Value)} - ${precio.Precio.ToString("N2")}\n";
             }

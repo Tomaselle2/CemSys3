@@ -127,6 +127,19 @@
                         </div>
                     </form>
                 </div>
+
+                <form asp-action="CambiarEstadoPersona" asp-controller="Persona" class="js-confirm"
+                      method="get" style="display: inline-block;"
+                      data-confirm-title="Confirmar acción"
+                      data-confirm-message="¿Está seguro de cambiar el estado 'fallecido - vivo' o 'vivo - fallecido'?"
+                      data-confirm-icon="warning">
+
+                    <input type="hidden" asp-for="persona.Persona.Id" name="personaId" />
+
+                    <button type="submit" class="btn btn-info js-confirm" title="Cambiar estado">
+                        <i class="bi bi-pencil-square"> Cambiar estado</i>
+                    </button>
+                </form>
             </div>
         </div>
     </div>

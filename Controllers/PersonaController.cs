@@ -331,6 +331,32 @@ namespace CemSys3.Controllers
             }
         }
 
+        public async Task<IActionResult> CambiarEstadoPersona(int personaId)
+        {
+            try
+            {
+                await _personaService.CambiarEstadoPersona(personaId);
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "Se ha cambiado el estado de la persona correctamente.",
+                    Tipo = "success"
+                });
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al cambiar el estado: {ex.Message}",
+                    Tipo = "error"
+                });
+            }
+
+            return RedirectToAction("HistorialPersona", new { id = personaId });
+        }
+
         public class AgregarFirmanteRequest
         {
             public int TramiteId { get; set; }

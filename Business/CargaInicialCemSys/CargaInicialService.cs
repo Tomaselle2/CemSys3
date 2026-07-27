@@ -498,7 +498,8 @@ namespace CemSys3.Business.CargaInicialCemSys
                 Celular = celular,
                 FechaDefuncion = fechaDefuncion,
                 CategoriaPersonaId = categoriaPersonaId,
-                EstadoDifuntoId = estadoDifuntoId
+                EstadoDifuntoId = estadoDifuntoId,
+                Domicilio = "Desconocido - Modificar"
             };
 
             await _context.Personas.AddAsync(nueva);

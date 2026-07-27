@@ -26,5 +26,7 @@ namespace CemSys3.Interfaces.Persona
 
         Task<CoincidenciaIngresoDTO> BuscarCoincidenciaParaIngreso(
               int? dni, string? sexo, string nombre, string apellido, bool ignorarCoincidenciaPorNombre = false);
+
+        Task CambiarEstadoPersona(int personaId);
     }
 }
