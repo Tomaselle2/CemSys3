@@ -325,6 +325,7 @@ namespace CemSys3.Business.CargaInicialCemSys
                 await _historialEstados.VincularTramiteAPersona(tramiteId, titularId);
                 await _historialEstados.VincularTitularAConcesion(titularId, tramiteId);
 
+                await _context.SaveChangesAsync();
                 if (esCaducada)
                 {
                     // El método VincularTitularAConcesion no permite pasar FechaFin, así que

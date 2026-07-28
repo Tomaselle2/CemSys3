@@ -16,5 +16,15 @@ namespace CemSys3.Interfaces.HistorialEstados
         Task<IEnumerable<HistorialTitularesDTO>> HistorialTitulares(int concesionId);
         Task<IEnumerable<TramiteDTO>> HistorialTramitesConcesion(int concesionId);
         Task<IEnumerable<DifuntoConcesionDTO>> DifuntosEnConcesion(int concesionId);
+
+        Task CerrarHistorialParcelaConcesion(
+            int concesionId,
+            DateTime fechaFin);
+
+        Task CrearHistorialParcelaConcesion(
+            int concesionId,
+            int parcelaId,
+            int tramiteId,
+            DateTime fechaInicio);
     }
 }

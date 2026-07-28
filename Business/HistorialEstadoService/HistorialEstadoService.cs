@@ -350,5 +350,44 @@ namespace CemSys3.Business.HistorialEstadoService
 
             return agrupado;
         }
+
+        public async Task CerrarHistorialParcelaConcesion(int concesionId, DateTime fechaFin)
+        {
+            var historial = await _context.HistorialParcelasConcesions
+            .FirstOrDefaultAsync(h =>
+                h.ConcesionId == concesionId &&
+                h.FechaFin == null);
+
+            if (historial != null)
+            {
+                historial.FechaFin = fechaFin;
+            }
+
+        }
+
+        public async Task CrearHistorialParcelaConcesion(int concesionId, int parcelaId, int tramiteId, DateTime fechaInicio)
+        {
+            bool existeHistorialAbierto = await _context.HistorialParcelasConcesions
+        .AnyAsync(h =>
+            h.ConcesionId == concesionId &&
+            h.FechaFin == null);
+
+            if (existeHistorialAbierto)
+            {
+                throw new InvalidOperationException(
+                    $"La concesión {concesionId} ya posee una parcela activa en el historial.");
+            }
+
+            await _context.HistorialParcelasConcesions.AddAsync(
+                new HistorialParcelasConcesion
+                {
+                    ConcesionId = concesionId,
+                    ParcelaId = parcelaId,
+                    FechaInicio = fechaInicio,
+                    FechaFin = null,
+                    TramiteOrigenId = tramiteId
+                });
+
+        }
     }
 }

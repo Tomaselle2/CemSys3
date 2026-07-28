@@ -285,6 +285,10 @@ namespace CemSys3.Business.TramiteConcesion
                     concesion.FechaFin = reduccion.FechaFinalizacion;
                     concesion.TramiteRetiroId = tramiteId;
 
+                    await _historialEstadosService.CerrarHistorialParcelaConcesion(
+                    concesion.TramiteId,
+                    reduccion.FechaPendiente ?? DateTime.Now);
+
                     Models.Tramite tramiteConcesion = await _context.Tramites
                         .FirstOrDefaultAsync(t => t.Id == concesion.TramiteId)
                         ?? throw new Exception("Trámite de concesión no encontrado.");
@@ -349,14 +353,24 @@ namespace CemSys3.Business.TramiteConcesion
                             historialParcelaActual.FechaFin = reduccion.FechaPendiente;
 
                         // 2. Registrar nueva parcela en historial
-                        _context.HistorialParcelasConcesions.Add(new HistorialParcelasConcesion
-                        {
-                            ConcesionId = concesion.TramiteId,
-                            ParcelaId = parcelaDestino.Id,
-                            FechaInicio = reduccion.FechaPendiente ?? DateTime.Now,
-                            FechaFin = null,
-                            TramiteOrigenId = tramiteId
-                        });
+                        //_context.HistorialParcelasConcesions.Add(new HistorialParcelasConcesion
+                        //{
+                        //    ConcesionId = concesion.TramiteId,
+                        //    ParcelaId = parcelaDestino.Id,
+                        //    FechaInicio = reduccion.FechaPendiente ?? DateTime.Now,
+                        //    FechaFin = null,
+                        //    TramiteOrigenId = tramiteId
+                        //});
+
+                        await _historialEstadosService.CerrarHistorialParcelaConcesion(
+                        concesion.TramiteId,
+                        reduccion.FechaPendiente ?? DateTime.Now);
+
+                        await _historialEstadosService.CrearHistorialParcelaConcesion(
+                            concesion.TramiteId,
+                            parcelaDestino.Id,
+                            tramiteId,
+                            reduccion.FechaPendiente ?? DateTime.Now);
 
                         // 3. Mover la concesión a la nueva parcela
                         concesion.ParcelaId = parcelaDestino.Id;

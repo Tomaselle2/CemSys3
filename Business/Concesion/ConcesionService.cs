@@ -89,7 +89,7 @@ namespace CemSys3.Business.Concesion
                 {
                     ConcesionId = tramiteId,
                     ParcelaId = dto.ParcelaId,
-                    FechaInicio = DateTime.Now,
+                    FechaInicio = dto.FechaInicio ?? DateTime.Now,
                     FechaFin = null,           // null = parcela actualmente vinculada
                     TramiteOrigenId = tramiteId
                 };

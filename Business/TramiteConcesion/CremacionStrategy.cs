@@ -292,6 +292,10 @@ namespace CemSys3.Business.TramiteConcesion
                     {
                         titularActual.FechaFin = cremacion.FechaPendiente;   
                     }
+
+                    await _historialEstadosService.CerrarHistorialParcelaConcesion(
+                        concesion.TramiteId,
+                        cremacion.FechaPendiente ?? DateTime.Now);
                 }
 
                 //6 - generar la nota de recordatorio.
