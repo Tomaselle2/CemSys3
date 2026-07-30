@@ -1067,6 +1067,8 @@ namespace CemSys3.Business.Concesion
                     {
                         titularActual.FechaFin = DateTime.Now;
                     }
+
+                    await _historialEstadosService.CerrarHistorialParcelaConcesion(conesionAntiguaId, DateTime.Now);
                 }
 
                 //7 - generar nuevo registro de parcela-difunto con la nueva parcela destino.
@@ -1081,6 +1083,7 @@ namespace CemSys3.Business.Concesion
 
                 //8 - actualizar la cantidad de difuntos en la parcela destino.
                 parcelaNueva.CantidadDifuntos += 1;
+                await _historialEstadosService.CrearHistorialParcelaConcesion(concesionNuevaId, parcelaNueva.Id, concesionAntigua.TramiteId, fechaInicio ?? DateTime.Now);
                 difunto.CategoriaPersonaId = (int)CategoriaPersonaEnum.Fallecido;
 
                 await _context.SaveChangesAsync();
@@ -1242,6 +1245,112 @@ namespace CemSys3.Business.Concesion
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
+
+
+
+        public async Task QuitarDifuntoDeParcelaAsync(int difuntoId, int parcelaId, int usuarioId, string? motivo = null)
+        {
+            // 1- Buscar el registro activo de ParcelaDifunto (aún no retirado)
+            Models.ParcelaDifunto parcelaDifunto = await _context.ParcelaDifuntos
+                .FirstOrDefaultAsync(pd => pd.DifuntoId == difuntoId && pd.ParcelaId == parcelaId && pd.FechaRetiro == null)
+                ?? throw new Exception("El difunto no figura activo en esta parcela (ya fue retirado o no existe el registro).");
+
+            // Traigo el DTO completo para no pisar otros campos al hacer Update
+            PersonaDTO difuntoDto = await _personaService.Get(difuntoId)
+                ?? throw new Exception("Difunto no encontrado.");
+
+            Models.Parcela parcela = await _context.Parcelas
+                .FirstOrDefaultAsync(p => p.Id == parcelaId)
+                ?? throw new Exception("Parcela no encontrada.");
+
+            if (parcela.CantidadDifuntos <= 0)
+            {
+                throw new Exception("La parcela no tiene difuntos asociados según el conteo actual, revisar consistencia de datos.");
+            }
+
+            // 2- Buscar la concesión activa/vigente de la parcela (la que no está caducada)
+            Models.Concesione concesion = await (
+                from c in _context.Concesiones
+                join t in _context.Tramites on c.TramiteId equals t.Id
+                where c.ParcelaId == parcela.Id && t.EstadoActualId != (int)EstadosTramiteEnum.Caducado
+                select c
+            ).FirstOrDefaultAsync() ?? throw new Exception("No se encontró una concesión activa o vigente para esta parcela.");
+
+            DateTime fecha = DateTime.Now;
+            string motivoTexto = string.IsNullOrWhiteSpace(motivo)
+                ? "corrección de datos por migración"
+                : motivo;
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                // 3- Retirar al difunto de la parcela
+                parcelaDifunto.FechaRetiro = fecha;
+                parcelaDifunto.TramiteRetiroId = null; // no hay trámite real asociado a esta corrección
+
+                parcela.CantidadDifuntos -= 1;
+
+                // 4- Log en difunto (via DTO para no pisar el resto de los campos)
+                difuntoDto.InformacionAdicional += $"\n● El {fecha:dd/MM/yyyy HH:mm} se retiró de la parcela ({motivoTexto}).";
+                await _personaService.Update(difuntoDto);
+
+                // 5- Log en parcela
+                parcela.InformacionAdicional += $"\n● El {fecha:dd/MM/yyyy HH:mm} se retiró al difunto {difuntoDto.Apellido?.ToUpper()}, {difuntoDto.Nombre?.ToUpper()} ({motivoTexto}).";
+
+                string infoConcesion = "Revisar el libro de concesión";
+
+                // 6- Si la parcela queda vacía, caducar la concesión (mismo criterio que FinalizarAsync de cremación)
+                if (parcela.CantidadDifuntos == 0)
+                {
+                    Models.Tramite tramiteConcesion = await _context.Tramites
+                        .FirstOrDefaultAsync(t => t.Id == concesion.TramiteId)
+                        ?? throw new Exception("Trámite de la concesión no encontrado.");
+
+                    concesion.FechaFin = fecha;
+                    concesion.TramiteRetiroId = null; // idem, sin trámite formal
+                    concesion.Vencimiento = null;
+
+                    tramiteConcesion.EstadoActualId = (int)EstadosTramiteEnum.Caducado;
+                    tramiteConcesion.FechaFinalizacion = fecha;
+
+                    HistorialEstadosDTO historialConcesion = new HistorialEstadosDTO
+                    {
+                        Fecha = fecha,
+                        TramiteId = tramiteConcesion.Id,
+                        EstadoTramiteId = (int)EstadosTramiteEnum.Caducado
+                    };
+                    await _historialEstadosService.Add(historialConcesion);
+
+                    concesion.InformacionAdicional += $"\n● La concesión ({concesion.Concesion?.ToString("D5")}) fue cancelada/caducada automáticamente por no tener más difuntos asociados ({motivoTexto}).";
+                    infoConcesion = "La concesión fue cancelada/caducada por no tener más difuntos asociados.";
+
+                    // Cerrar titulares activos
+                    var titularesActuales = await _context.HistorialTitularesConcesiones
+                        .Where(p => p.ConcesionId == concesion.TramiteId && p.FechaFin == null)
+                        .ToListAsync();
+
+                    foreach (var titularActual in titularesActuales)
+                    {
+                        titularActual.FechaFin = fecha;
+                    }
+
+                    await _historialEstadosService.CerrarHistorialParcelaConcesion(concesion.TramiteId, fecha);
+                }
+                else
+                {
+                    concesion.InformacionAdicional += $"\n● El {fecha:dd/MM/yyyy HH:mm} se retiró un difunto de la parcela asociada ({difuntoDto.Apellido?.ToUpper()}, {difuntoDto.Nombre?.ToUpper()}) ({motivoTexto}). Quedan {parcela.CantidadDifuntos} difunto(s) en la parcela.";
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
                 throw;
             }
         }

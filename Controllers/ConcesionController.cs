@@ -23,6 +23,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using A = DocumentFormat.OpenXml.Drawing;
 using Pic = DocumentFormat.OpenXml.Drawing.Pictures;
 using Wp = DocumentFormat.OpenXml.Drawing.Wordprocessing;
@@ -460,7 +461,7 @@ namespace CemSys3.Controllers
             try
             {
                 viewModel.Dto = await _concesionService.ModificarDatosConecesion(tramiteId);
-                viewModel.DtoInfo = await _concesionService.InfoGeneralMinima(tramiteId);
+                viewModel.DtoInfo = await _concesionService.InfoGeneral(tramiteId);
             }
             catch (Exception ex)
             {
@@ -646,6 +647,37 @@ namespace CemSys3.Controllers
             return RedirectToAction("ModificarConcesion", new { tramiteId = tramiteId });
         }
 
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> QuitarDifuntoDeConcesion(int tramiteId, int difuntoId, int parcelaId)
+        {
+            // TODO: ajustar según cómo obtenés el usuario logueado en el resto del sistema
+            int usuarioId = HttpContext.Session.GetInt32("IdUsuario") ?? 0;
+
+            try
+            {
+                await _concesionService.QuitarDifuntoDeParcelaAsync(difuntoId, parcelaId, usuarioId);
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "El difunto fue quitado de la parcela correctamente.",
+                    Tipo = "success"
+                });
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al quitar el difunto: {ex.Message}",
+                    Tipo = "error"
+                });
+            }
+
+            return RedirectToAction("ModificarConcesion", new { tramiteId = tramiteId });
+        }
 
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]

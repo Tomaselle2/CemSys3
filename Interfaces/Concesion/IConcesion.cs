@@ -51,6 +51,9 @@ namespace CemSys3.Interfaces.Concesion
 
         Task CaducarConcesion(int concesionId);
 
-        
+        Task QuitarDifuntoDeParcelaAsync(int difuntoId, int parcelaId, int usuarioId, string? motivo = null);
+
+
+
     }
 }

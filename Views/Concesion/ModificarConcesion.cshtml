@@ -92,6 +92,64 @@
     </div>
 
 
+    <div class="cardConcesion my-4">
+        <div class="cardConcesion-content">
+            <h3 class="mb-3"><i class="bi bi-people text-primary"></i> Difuntos en la parcela</h3>
+            <p>Solo se usa esta opción cuando el fallecido no se encuentra dentro del cementerio. Caso contrario usar la opción de traslado.</p>
+
+            @if (Model.DtoInfo.Difuntos != null && Model.DtoInfo.Difuntos.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>DNI</th>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>Fecha de ingreso</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var difunto in Model.DtoInfo.Difuntos)
+                            {
+                                <tr id="filaDifunto-@difunto.Id">
+                                    <td>@difunto.Id</td>
+                                    <td>@(difunto.DNI ?? "-")</td>
+                                    <td>@(difunto.Nombre?.ToUpper() ?? "-")</td>
+                                    <td>@(difunto.Apellido?.ToUpper() ?? "-")</td>
+                                    <td>@(difunto.FechaIngreso.HasValue ? difunto.FechaIngreso.Value.ToString("dd/MM/yyyy HH:mm") : "-")</td>
+                                    <td class="text-end">
+                                        <button type="button"
+                                                class="btn btn-outline-danger btn-sm btn-quitar-difunto"
+                                                data-difunto-id="@difunto.Id"
+                                                data-difunto-nombre="@($"{difunto.Nombre} {difunto.Apellido}")">
+                                            <i class="bi bi-person-dash"></i> Quitar de la parcela
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">No hay difuntos registrados en esta parcela.</p>
+            }
+        </div>
+    </div>
+
+    <form id="formQuitarDifunto" asp-action="QuitarDifuntoDeConcesion" asp-controller="Concesion" method="post" style="display:none;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="tramiteId" id="quitarTramiteId" />
+        <input type="hidden" name="difuntoId" id="quitarDifuntoId" />
+        <input type="hidden" name="parcelaId" id="quitarParcelaId" />
+    </form>
+
+
+
 
     <form asp-action="ModificarConcesion" method="post" id="formPrincipal">
         <input type="hidden" asp-for="Dto.TramiteId" />
@@ -148,6 +206,7 @@
 
             <div class="cardConcesion">
                 <div class="cardConcesion-content">
+                    <p>Trasladar un difunto dentro del cementerio a esta parcela.</p>
                     <!-- Botón para abrir el modal -->
                     <button type="button"
                             class="btn btn-primary"
@@ -411,6 +470,7 @@
 @if (Model.DtoInfo.EstadoTramiteId != (int)EstadosTramiteEnum.Caducado)
 {
     <hr />
+    <p>Al caducar la concesión se quitarán todos los difuntos dentro de la parcela quedando vacía para nuevas concesiones.</p>
 
     <form asp-action="CaducarConcesion" asp-controller="Concesion" method="get" class="js-confirm">
         <button type="submit" class="btn btn-outline-dark my-2 p-2">
@@ -669,6 +729,43 @@
             }
         });
 
+        })();
+    </script>
+
+
+    <script>
+        (function() {
+            const tramiteIdConcesion = @Model.DtoInfo.TramiteId;
+            const parcelaActualId = @Model.DtoInfo.ParcelaId;
+
+            document.querySelectorAll('.btn-quitar-difunto').forEach(function(btn) {
+                btn.addEventListener('click', async function() {
+                    const difuntoId = this.dataset.difuntoId;
+                    const difuntoNombre = this.dataset.difuntoNombre;
+
+                    const result = await Swal.fire({
+                        title: '¿Quitar difunto de la parcela?',
+                        html: `Se quitará a <strong>${difuntoNombre}</strong> de la parcela.<br>
+                                   Si es el único difunto de la parcela, la concesión quedará <strong>caducada automáticamente</strong>.`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, quitar',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        reverseButtons: true
+                    });
+
+                    if (!result.isConfirmed) return;
+
+                    document.getElementById('quitarTramiteId').value = tramiteIdConcesion;
+                    document.getElementById('quitarDifuntoId').value = difuntoId;
+                    document.getElementById('quitarParcelaId').value = parcelaActualId;
+
+                    // Submit real del navegador -> el redirect + TempData funciona como en ModificarConcesion
+                    document.getElementById('formQuitarDifunto').submit();
+                });
+            });
         })();
     </script>
 
