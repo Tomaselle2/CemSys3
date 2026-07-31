@@ -8,9 +8,11 @@ using CemSys3.Models;
 using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
+using iText.Kernel.Pdf.Canvas.Wmf;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -326,19 +328,21 @@ namespace CemSys3.Business.CargaInicialCemSys
                 await _historialEstados.VincularTitularAConcesion(titularId, tramiteId);
 
                 await _context.SaveChangesAsync();
-                if (esCaducada)
-                {
-                    // El método VincularTitularAConcesion no permite pasar FechaFin, así que
-                    // buscamos el registro recién creado y lo cerramos acá.
-                    // OJO: "Models.HistorialTitularesConcesione" es un nombre asumido siguiendo
-                    // el mismo patrón de tu scaffolding (Concesiones -> Concesione). Si no
-                    // compila, ajustar el nombre de la clase por el real.
-                    var historialTitular = await _context.HistorialTitularesConcesiones
-                        .Where(h => h.ConcesionId == tramiteId && h.PersonaId == titularId && h.FechaFin == null)
-                        .OrderByDescending(h => h.Id)
-                        .FirstOrDefaultAsync();
 
-                    if (historialTitular != null)
+                // El método VincularTitularAConcesion arma el registro con la fecha de
+                // carga (DateTime.Now), no con la fecha real de inicio de la concesión.
+                // Corregimos acá el registro recién creado, y de paso cerramos FechaFin
+                // si la concesión ya nace caducada.
+                var historialTitular = await _context.HistorialTitularesConcesiones
+                    .Where(h => h.ConcesionId == tramiteId && h.PersonaId == titularId)
+                    .OrderByDescending(h => h.Id)
+                    .FirstOrDefaultAsync();
+
+                if (historialTitular != null)
+                {
+                    historialTitular.FechaInicio = fechaInicio.ToDateTime(TimeOnly.MinValue);
+
+                    if (esCaducada)
                         historialTitular.FechaFin = fechaCierre;
                 }
 

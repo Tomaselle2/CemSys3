@@ -12,6 +12,7 @@ namespace CemSys3.Interfaces.Tramite
 
         Task<ListadoTramitesDeConcesionDTO> GetListadoTramitesDeConcesion(int concesionId); //get
         Task<IEnumerable<TramiteDTO>> GetIniciadosYPendientes();
+        Task<IEnumerable<TramiteDTO>> Buscar(TramiteFiltroDTO filtro);
 
     }
 }

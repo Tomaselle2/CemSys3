@@ -6,10 +6,56 @@
 @{
     ViewData["Title"] = "Trámites";
 }
-
 <div class="page-header-container">
-    <h1 class="title-page">Trámites inicados y pendientes</h1>
+    <h2 class="title-page">Buscar trámite</h2>
 </div>
+@{
+    var tiposTramite = Html.GetEnumSelectList<TipoTramiteEnum>()
+        .Where(t => t.Value != ((int)TipoTramiteEnum.Nota).ToString()
+                 && t.Value != ((int)TipoTramiteEnum.WordConcesiones).ToString()
+        && t.Value != ((int)TipoTramiteEnum.ContratoConcesion).ToString());
+}
+
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <form asp-action="Tramites" asp-controller="Tramite" method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label asp-for="Filtro.TramiteId" class="form-label">Nro. Trámite</label>
+                <input asp-for="Filtro.TramiteId" class="form-control" placeholder="Ej: 1024" />
+            </div>
+            <div class="col-md-3">
+                <label asp-for="Filtro.TipoTramiteId" class="form-label">Tipo de trámite</label>
+                <select asp-for="Filtro.TipoTramiteId" class="form-select" asp-items="tiposTramite">
+                    <option value="">-- Todos --</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="Filtro.EstadoActualId" class="form-label">Estado</label>
+                <select asp-for="Filtro.EstadoActualId" class="form-select" asp-items="Html.GetEnumSelectList<EstadosTramiteEnum>()">
+                    <option value="">-- Todos --</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="Filtro.FechaDesde" class="form-label">Fecha desde</label>
+                <input asp-for="Filtro.FechaDesde" class="form-control" type="date" />
+            </div>
+            <div class="col-md-3">
+                <label asp-for="Filtro.FechaHasta" class="form-label">Fecha hasta</label>
+                <input asp-for="Filtro.FechaHasta" class="form-control" type="date" />
+            </div>
+
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+                <a asp-action="Tramites" asp-controller="Tramite" class="btn btn-outline-secondary">
+                    Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
 
 <!-- Tabla de historial de tramites -->
 <div class="accordion" id="accordionPanelsStayOpenExample">
@@ -20,8 +66,14 @@
             </button>
         </h2>
         <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
-            @* cuerpo del acordion *@
-            @if (Model.Tramites.Any())
+            @if (!string.IsNullOrEmpty(Model.MensajeTipoNoDisponible))
+            {
+                <div class="alert alert-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    @Model.MensajeTipoNoDisponible
+                </div>
+            }
+            else if (Model.Tramites.Any())
             {
                 <div class="card shadow-sm">
                     <div class="card-body p-0">
@@ -57,7 +109,6 @@
                                             </form>
                                         </td>
                                     </tr>
-
                                 }
                             </tbody>
                         </table>
@@ -68,14 +119,11 @@
             {
                 <div class="alert alert-info" role="alert">
                     <i class="fas fa-info-circle"></i>
-                    No hay trámites iniciados o pendientes en este momento.
+                    No hay trámites que coincidan con la búsqueda.
                 </div>
             }
-            @* Fin cuerpo del acordeon *@
         </div>
     </div>
 </div>
 
-
-@* Renderizamos el manejador pasándole el DTO del modelo *@
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />

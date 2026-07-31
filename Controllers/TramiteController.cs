@@ -1,6 +1,8 @@
 ﻿using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.SweetAlert;
+using CemSys3.DTOs.Tramite;
 using CemSys3.Enumerables;
+using CemSys3.Helpers.Enumerable;
 using CemSys3.Helpers.Mensajes;
 using CemSys3.Helpers.Roles_Autenticacion;
 using CemSys3.Interfaces.Tramite;
@@ -156,16 +158,38 @@ namespace CemSys3.Controllers
 
         }
 
+        private static readonly HashSet<int> TiposSinVistaDetalle = new HashSet<int>
+{
+    (int)TipoTramiteEnum.Nota,
+    (int)TipoTramiteEnum.WordConcesiones
+};
+
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
-        public async Task<IActionResult> Tramites()
+        public async Task<IActionResult> Tramites(TramiteFiltroDTO filtro)
         {
             TramiteVM viewModel = new TramiteVM();
             viewModel.SweetAlert = TempData.GetSweetAlert();
+            viewModel.Filtro = filtro ?? new TramiteFiltroDTO();
+
+            // Tipos que no tienen vista de detalle: cortamos acá, no tiene sentido buscar
+            if (viewModel.Filtro.TipoTramiteId.HasValue &&
+                TiposSinVistaDetalle.Contains(viewModel.Filtro.TipoTramiteId.Value))
+            {
+                string tipoDisplay = EnumHelper.GetDisplayNameByValue<TipoTramiteEnum>(viewModel.Filtro.TipoTramiteId.Value);
+                viewModel.MensajeTipoNoDisponible =
+                    $"No es posible mostrar trámites de tipo \"{tipoDisplay}\", ya que no cuentan con una vista de detalle.";
+                viewModel.Tramites = new List<TramiteDTO>();
+
+                return View(viewModel);
+            }
 
             try
             {
-                var tramites = await _tramiteService.GetIniciadosYPendientes();
+                var tramites = viewModel.Filtro.TieneFiltros
+                    ? await _tramiteService.Buscar(viewModel.Filtro)
+                    : await _tramiteService.GetIniciadosYPendientes();
+
                 viewModel.Tramites = tramites;
 
                 return View(viewModel);
@@ -178,7 +202,7 @@ namespace CemSys3.Controllers
                     Mensaje = "No se han podido cargar los trámites. " + ex.Message,
                     Tipo = "error"
                 };
-              
+
                 return View(viewModel);
             }
         }

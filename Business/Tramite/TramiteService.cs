@@ -339,6 +339,199 @@ namespace CemSys3.Business.Tramite
             return (maxId ?? 0) + 1;
         }
 
+        public async Task<IEnumerable<TramiteDTO>> Buscar(TramiteFiltroDTO filtro)
+        {
+            var tramites = new List<TramiteDTO>();
+
+            var permisosRefacciones = await _context.PermisosRefacciones
+                .AsNoTracking()
+                .Where(p =>
+                    (filtro.TramiteId == null || p.TramiteId == filtro.TramiteId) &&
+                    (filtro.TipoTramiteId == null || p.Tramite.TipoTramiteId == filtro.TipoTramiteId) &&
+                    (filtro.EstadoActualId == null || p.Tramite.EstadoActualId == filtro.EstadoActualId) &&
+                    (filtro.FechaDesde == null || p.FechaCreacion >= filtro.FechaDesde) &&
+                    (filtro.FechaHasta == null || p.FechaCreacion <= filtro.FechaHasta))
+                .Select(p => new TramiteDTO
+                {
+                    Id = p.TramiteId,
+                    FechaCreacion = p.FechaCreacion,
+                    TipoTramiteId = p.Tramite.TipoTramiteId,
+                    EstadoActualId = p.Tramite.EstadoActualId,
+                    NroConcesion = p.Concesion != null && p.Concesion.ConcesioneTramite != null
+                        ? p.Concesion.ConcesioneTramite.Concesion ?? 0
+                        : 0
+                })
+                .ToListAsync();
+
+            var cremaciones = await _context.Cremaciones
+                .AsNoTracking()
+                .Where(c =>
+                    (filtro.TramiteId == null || c.TramiteId == filtro.TramiteId) &&
+                    (filtro.TipoTramiteId == null || c.Tramite.TipoTramiteId == filtro.TipoTramiteId) &&
+                    (filtro.EstadoActualId == null || c.Tramite.EstadoActualId == filtro.EstadoActualId) &&
+                    (filtro.FechaDesde == null || c.FechaCreacion >= filtro.FechaDesde) &&
+                    (filtro.FechaHasta == null || c.FechaCreacion <= filtro.FechaHasta))
+                .Select(c => new TramiteDTO
+                {
+                    Id = c.TramiteId,
+                    FechaCreacion = c.FechaCreacion,
+                    TipoTramiteId = c.Tramite.TipoTramiteId,
+                    EstadoActualId = c.Tramite.EstadoActualId,
+                    NroConcesion = c.Concesion != null && c.Concesion.ConcesioneTramite != null
+                        ? c.Concesion.ConcesioneTramite.Concesion ?? 0
+                        : 0
+                })
+                .ToListAsync();
+
+            var traslados = await _context.Traslados
+                .AsNoTracking()
+                .Where(t =>
+                    (filtro.TramiteId == null || t.TramiteId == filtro.TramiteId) &&
+                    (filtro.TipoTramiteId == null || t.Tramite.TipoTramiteId == filtro.TipoTramiteId) &&
+                    (filtro.EstadoActualId == null || t.Tramite.EstadoActualId == filtro.EstadoActualId) &&
+                    (filtro.FechaDesde == null || t.FechaCreacion >= filtro.FechaDesde) &&
+                    (filtro.FechaHasta == null || t.FechaCreacion <= filtro.FechaHasta))
+                .Select(t => new TramiteDTO
+                {
+                    Id = t.TramiteId,
+                    FechaCreacion = t.FechaCreacion,
+                    TipoTramiteId = t.Tramite.TipoTramiteId,
+                    EstadoActualId = t.Tramite.EstadoActualId,
+                    NroConcesion = t.Concesion != null && t.Concesion.ConcesioneTramite != null
+                        ? t.Concesion.ConcesioneTramite.Concesion ?? 0
+                        : 0
+                })
+                .ToListAsync();
+
+            var reducciones = await _context.Reducciones
+                .AsNoTracking()
+                .Where(r =>
+                    (filtro.TramiteId == null || r.TramiteId == filtro.TramiteId) &&
+                    (filtro.TipoTramiteId == null || r.Tramite.TipoTramiteId == filtro.TipoTramiteId) &&
+                    (filtro.EstadoActualId == null || r.Tramite.EstadoActualId == filtro.EstadoActualId) &&
+                    (filtro.FechaDesde == null || r.FechaCreacion >= filtro.FechaDesde) &&
+                    (filtro.FechaHasta == null || r.FechaCreacion <= filtro.FechaHasta))
+                .Select(r => new TramiteDTO
+                {
+                    Id = r.TramiteId,
+                    FechaCreacion = r.FechaCreacion,
+                    TipoTramiteId = r.Tramite.TipoTramiteId,
+                    EstadoActualId = r.Tramite.EstadoActualId,
+                    NroConcesion = r.Concesion != null && r.Concesion.ConcesioneTramite != null
+                        ? r.Concesion.ConcesioneTramite.Concesion ?? 0
+                        : 0
+                })
+                .ToListAsync();
+
+            // Introducciones usa EstadosIngresoEnum, no EstadosTramiteEnum -> no filtramos por EstadoActualId acá
+            var ingresos = await _context.Introducciones
+                .AsNoTracking()
+                .Where(p =>
+                    (filtro.TramiteId == null || p.TramiteId == filtro.TramiteId) &&
+                    (filtro.TipoTramiteId == null || p.Tramite.TipoTramiteId == filtro.TipoTramiteId) &&
+                    (filtro.FechaDesde == null || p.Tramite.FechaCreacion >= filtro.FechaDesde) &&
+                    (filtro.FechaHasta == null || p.Tramite.FechaCreacion <= filtro.FechaHasta))
+                .Select(p => new TramiteDTO
+                {
+                    Id = p.TramiteId,
+                    FechaCreacion = p.Tramite.FechaCreacion,
+                    TipoTramiteId = p.Tramite.TipoTramiteId,
+                    EstadoActualId = p.Tramite.EstadoActualId
+                })
+                .ToListAsync();
+
+            var cambioTitular = await _context.CambiosTitularidads
+                .AsNoTracking()
+                .Where(p =>
+                    (filtro.TramiteId == null || p.TramiteId == filtro.TramiteId) &&
+                    (filtro.TipoTramiteId == null || p.Tramite.TipoTramiteId == filtro.TipoTramiteId) &&
+                    (filtro.EstadoActualId == null || p.Tramite.EstadoActualId == filtro.EstadoActualId) &&
+                    (filtro.FechaDesde == null || p.FechaCreacion >= filtro.FechaDesde) &&
+                    (filtro.FechaHasta == null || p.FechaCreacion <= filtro.FechaHasta))
+                .Select(p => new TramiteDTO
+                {
+                    Id = p.TramiteId,
+                    FechaCreacion = p.FechaCreacion,
+                    TipoTramiteId = p.Tramite.TipoTramiteId,
+                    EstadoActualId = p.Tramite.EstadoActualId,
+                    NroConcesion = p.Concesion != null && p.Concesion.ConcesioneTramite != null
+                        ? p.Concesion.ConcesioneTramite.Concesion ?? 0
+                        : 0
+                })
+                .ToListAsync();
+
+            var aceptacion = await _context.AceptacionTitularidads
+                .AsNoTracking()
+                .Where(p =>
+                    (filtro.TramiteId == null || p.TramiteId == filtro.TramiteId) &&
+                    (filtro.TipoTramiteId == null || p.Tramite.TipoTramiteId == filtro.TipoTramiteId) &&
+                    (filtro.EstadoActualId == null || p.Tramite.EstadoActualId == filtro.EstadoActualId) &&
+                    (filtro.FechaDesde == null || p.FechaCreacion >= filtro.FechaDesde) &&
+                    (filtro.FechaHasta == null || p.FechaCreacion <= filtro.FechaHasta))
+                .Select(p => new TramiteDTO
+                {
+                    Id = p.TramiteId,
+                    FechaCreacion = p.FechaCreacion,
+                    TipoTramiteId = p.Tramite.TipoTramiteId,
+                    EstadoActualId = p.Tramite.EstadoActualId,
+                    NroConcesion = p.Concesion != null && p.Concesion.ConcesioneTramite != null
+                        ? p.Concesion.ConcesioneTramite.Concesion ?? 0
+                        : 0
+                })
+                .ToListAsync();
+
+            var permisoIngreso = await _context.PermisosIngresos
+                .AsNoTracking()
+                .Where(p =>
+                    (filtro.TramiteId == null || p.TramiteId == filtro.TramiteId) &&
+                    (filtro.TipoTramiteId == null || p.Tramite.TipoTramiteId == filtro.TipoTramiteId) &&
+                    (filtro.EstadoActualId == null || p.Tramite.EstadoActualId == filtro.EstadoActualId) &&
+                    (filtro.FechaDesde == null || p.FechaCreacion >= filtro.FechaDesde) &&
+                    (filtro.FechaHasta == null || p.FechaCreacion <= filtro.FechaHasta))
+                .Select(p => new TramiteDTO
+                {
+                    Id = p.TramiteId,
+                    FechaCreacion = p.FechaCreacion,
+                    TipoTramiteId = p.Tramite.TipoTramiteId,
+                    EstadoActualId = p.Tramite.EstadoActualId,
+                    NroConcesion = p.Concesion != null && p.Concesion.ConcesioneTramite != null
+                        ? p.Concesion.ConcesioneTramite.Concesion ?? 0
+                        : 0
+                })
+                .ToListAsync();
+
+            // NUEVO: la concesión es un trámite en sí mismo (Concesiones.tramiteId -> Tramites.id)
+            var concesiones = await _context.Concesiones
+                .AsNoTracking()
+                .Where(c =>
+                    (filtro.TramiteId == null || c.TramiteId == filtro.TramiteId) &&
+                    (filtro.TipoTramiteId == null || c.Tramite.TipoTramiteId == filtro.TipoTramiteId) &&
+                    (filtro.EstadoActualId == null || c.Tramite.EstadoActualId == filtro.EstadoActualId) &&
+                    (filtro.FechaDesde == null || c.Tramite.FechaCreacion >= filtro.FechaDesde) &&
+                    (filtro.FechaHasta == null || c.Tramite.FechaCreacion <= filtro.FechaHasta))
+                .Select(c => new TramiteDTO
+                {
+                    Id = c.TramiteId,
+                    FechaCreacion = c.Tramite.FechaCreacion,
+                    TipoTramiteId = c.Tramite.TipoTramiteId,
+                    EstadoActualId = c.Tramite.EstadoActualId,
+                    NroConcesion = c.Concesion ?? 0
+                })
+                .ToListAsync();
+
+            tramites.AddRange(permisosRefacciones);
+            tramites.AddRange(cremaciones);
+            tramites.AddRange(traslados);
+            tramites.AddRange(reducciones);
+            tramites.AddRange(ingresos);
+            tramites.AddRange(cambioTitular);
+            tramites.AddRange(aceptacion);
+            tramites.AddRange(permisoIngreso);
+            tramites.AddRange(concesiones);
+
+            return tramites.OrderByDescending(t => t.FechaCreacion);
+        }
+
 
     }
 }
