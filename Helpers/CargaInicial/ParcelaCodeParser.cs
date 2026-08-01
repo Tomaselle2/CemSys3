@@ -61,6 +61,7 @@ namespace CemSys3.Helpers.CargaInicial
              { "M-20", "M-2" },
              { "SECC26", "26" },
              { "SECC22", "22" },
+             { "X", "X-1" },
 
 
         };

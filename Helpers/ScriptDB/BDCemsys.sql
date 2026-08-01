@@ -24,7 +24,7 @@ go
 ALTER DATABASE [cemsys] 
 ADD FILE (
     NAME = 'CementerioFileStreamFile',
-    FILENAME = 'C:\CemsysArchive3' -- RUTA
+    FILENAME = 'D:\CemsysArchive3' -- RUTA
 ) TO FILEGROUP [CementerioFileStreamGroupArchive];
 
 PRINT 'Configuración FILESTREAM completada.';
