@@ -107,6 +107,7 @@ builder.Services.AddScoped<IArbol, ArbolService>();
 builder.Services.AddScoped<ICargaDifunto, CargaDifuntoService>();
 builder.Services.AddScoped<ICalendario, CalendarioService>();
 builder.Services.AddScoped<IEstadistica, EstadisticaService>();
+builder.Services.AddScoped<IActualizarConcesionesAutomaticas, ActualizarConcesionesAutomaticas>();
 
 
 // =========================

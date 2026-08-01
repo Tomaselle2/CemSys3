@@ -168,7 +168,7 @@ namespace CemSys3.Business.CargaInicialCemSys
             {
                 MarcarTodasError(
                     $"No existe una Sección '{parcelaParse.NombreSeccion}' de tipo '{tipoCsv}' en el sistema nuevo. " +
-                    "Revisar manualmente (posible sección renombrada/consolidada).");
+                    "Revisar manualmente (posible sección renombrada).");
                 return;
             }
 
