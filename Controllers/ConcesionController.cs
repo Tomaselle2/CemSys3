@@ -724,12 +724,12 @@ namespace CemSys3.Controllers
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> ExportarExcel(
-            int filtroEstado = 0, string nombre = "", string apellido = "",
+            int filtroEstado = 0, string nombre = "", string apellido = "", string nombrePanteon = "",
             int concesion = 0, int? tipoParcelaID = null, int? seccionID = null,
             int? parcelaID = null, DateOnly? fechaDesde = null, DateOnly? fechaHasta = null)
         {
             var datos = await _concesionService.GetAllParaExportar(
-                filtroEstado, nombre, apellido, concesion,
+                filtroEstado, nombre, apellido, nombrePanteon, concesion,
                 tipoParcelaID, seccionID, parcelaID, fechaDesde, fechaHasta);
 
             using var wb = new XLWorkbook();
@@ -813,12 +813,12 @@ namespace CemSys3.Controllers
         [HttpGet]
         [AuthorizeRole(RolUsuario.Empleado)]
         public async Task<IActionResult> ExportarWord(
-            int filtroEstado = 0, string nombre = "", string apellido = "",
+            int filtroEstado = 0, string nombre = "", string apellido = "", string nombrePanteon = "",
             int concesion = 0, int? tipoParcelaID = null, int? seccionID = null,
             int? parcelaID = null, DateOnly? fechaDesde = null, DateOnly? fechaHasta = null)
         {
             var datos = await _concesionService.GetAllParaExportar(
-                filtroEstado, nombre, apellido, concesion,
+                filtroEstado, nombre, apellido, nombrePanteon, concesion,
                 tipoParcelaID, seccionID, parcelaID, fechaDesde, fechaHasta);
 
             var textoRequisito = await _requisitos.GetByTipoTramiteId((int)TipoTramiteEnum.WordConcesiones);

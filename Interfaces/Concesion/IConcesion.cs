@@ -40,6 +40,7 @@ namespace CemSys3.Interfaces.Concesion
            int filtroEstado = 0,
            string nombre = "",
            string apellido = "",
+           string nombrePanteon = "",
            int concesion = 0,
            int? tipoParcelaID = null,
            int? seccionID = null,
