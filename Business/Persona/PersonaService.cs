@@ -430,14 +430,15 @@ namespace CemSys3.Business.Persona
         }
 
         public async Task<CoincidenciaIngresoDTO> BuscarCoincidenciaParaIngreso(
-    int? dni, string? sexo, string nombre, string apellido, bool ignorarCoincidenciaPorNombre = false)
+     int? dni, string? sexo, string nombre, string apellido, bool ignorarCoincidenciaPorNombre = false)
         {
             Models.Persona? persona = null;
+            bool dniProvisto = dni.HasValue && dni.Value > 0;
 
             // 1) Buscar por DNI, con el mismo criterio que ya usa PersonaExiste
-            if (dni.HasValue && dni.Value > 0)
+            if (dniProvisto)
             {
-                string dniString = dni.Value.ToString("D8");
+                string dniString = dni!.Value.ToString("D8");
 
                 if (dniString.StartsWith("0"))
                 {
@@ -455,10 +456,11 @@ namespace CemSys3.Business.Persona
 
             bool coincidenciaPorDni = persona != null;
 
-            // 2) Si no hubo coincidencia por DNI, buscar por nombre y apellido SOLO entre fallecidos.
+            // 2) Solo buscamos por nombre y apellido si NO se proporcionó DNI.
             //    Esto cubre actas viejas que no tienen DNI cargado.
-            //    Si el empleado ya confirmó que es "otra persona", no volvemos a buscar por nombre.
-            if (persona == null && !ignorarCoincidenciaPorNombre)
+            //    Si se proporcionó un DNI y no matcheó, se asume que es una persona distinta,
+            //    aunque comparta nombre y apellido con otra.
+            if (persona == null && !dniProvisto && !ignorarCoincidenciaPorNombre)
             {
                 string n = nombre.Trim().ToLower();
                 string a = apellido.Trim().ToLower();
@@ -480,7 +482,6 @@ namespace CemSys3.Business.Persona
 
             if (!esTitular)
             {
-                // ¿Tiene una asignación de parcela vigente (sin retirar)?
                 activo = await _context.ParcelaDifuntos
                     .AnyAsync(pd => pd.DifuntoId == persona.Id && pd.FechaRetiro == null);
             }

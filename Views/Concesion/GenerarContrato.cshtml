@@ -812,6 +812,9 @@
                 return;
             }
 
+            if (nroConcesionInput.value === "-----") {
+                nroConcesionInput.value = "";
+            }
                 //VALIDACIÓN EN SERVIDOR
             const formData = new FormData(this);
 

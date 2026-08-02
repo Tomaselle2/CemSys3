@@ -271,7 +271,7 @@ namespace CemSys3.Controllers
                     Mensaje = "Los datos ingresados no son válidos. Por favor, revise el formulario.",
                     Tipo = "error"
                 };
-                return View(viewModel);
+                return View("GenerarContrato", viewModel);
             }
 
             //todos los datos se deben guardar al precionar en contrato firmado, no antes, para evitar que se guarden datos erroneos en la base de datos.
