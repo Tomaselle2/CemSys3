@@ -580,7 +580,7 @@ namespace CemSys3.Business.TramiteConcesion
             dto.TipoParcelaId = reduccion.ParcelaDestino?.TipoParcelaId ?? 0;
             dto.NuevaParcelaId = reduccion.ParcelaDestinoId ?? 0;
             dto.TipoTraslado = reduccion.TipoTraslado;
-
+            dto.InfoAdicional = reduccion.InfoAdicional;
             dto.TitularesActuales = await _context.HistorialTitularesConcesiones
                     .Where(h => h.ConcesionId == reduccion.ConcesionId && h.FechaFin == null)
                     .Select(h => new TitularesContratoDTO

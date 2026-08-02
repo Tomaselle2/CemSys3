@@ -132,7 +132,6 @@
 
 
     <!-- Tabla de datos de la concesion -->
-    <!-- Tabla de datos de la concesion -->
     <div class="accordion" id="accordionDatosConcesion">
         <div class="accordion-item">
             <h2 class="accordion-header" id="panelsStayOpen-headingDatosConcesion">
@@ -175,8 +174,10 @@
                 </div>
 
                 <div class="p-3">
-                    <label for="renovacion">Renovación</label>
-                    <input type="checkbox" id="renovacion" asp-for="contrato.EsRenovacion" />
+                    <div class="bloque-precio-card">
+                         <label for="renovacion">Renovación</label>
+                         <input type="checkbox" id="renovacion" asp-for="contrato.EsRenovacion" />
+                    </div>
                 </div>
 
                 <!-- BLOQUE 1: Tipo de precio -->

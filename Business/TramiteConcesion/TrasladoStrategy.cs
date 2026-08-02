@@ -564,7 +564,7 @@ namespace CemSys3.Business.TramiteConcesion
             dto.ConcesionId = concesion.TramiteId;
             dto.CementerioId = traslado.CementerioId ?? 0;
             dto.FechaRealizacion = traslado.FechaPendiente;
-
+            dto.InfoAdicional = traslado.InfoAdicional;
             dto.SeccionId = traslado.ParcelaDestino?.SeccionId ?? 0;
             dto.TipoParcelaId = traslado.ParcelaDestino?.TipoParcelaId ?? 0;
             dto.NuevaParcelaId = traslado.ParcelaDestinoId ?? 0;

@@ -420,6 +420,7 @@ namespace CemSys3.Business.TramiteConcesion
             dto.ConcesionId = concesion.TramiteId;
             dto.CementerioId = cremacion.CementerioId ?? 0;
             dto.FechaRealizacion = cremacion.FechaPendiente;
+            dto.InfoAdicional = cremacion.InfoAdicional;
 
             dto.TitularesActuales = await _context.HistorialTitularesConcesiones
                     .Where(h => h.ConcesionId == cremacion.ConcesionId && h.FechaFin == null)
