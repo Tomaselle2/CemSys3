@@ -308,8 +308,8 @@ namespace CemSys3.Business.CargaInicialCemSys
                     FechaInicio = fechaInicio.ToDateTime(TimeOnly.MinValue),
                     UsuarioId = 1,
                     InformacionAdicional = esCaducada
-                        ? $"\n● Carga inicial: concesión Nº {numeroConcesion:00000} importada desde el sistema anterior (caducada, parcela liberada)."
-                        : $"\n● Carga inicial: concesión Nº {numeroConcesion:00000} importada desde el sistema anterior."
+                        ? $"\n● Carga inicial: concesión Nº {numeroConcesion:00000} importada desde Program (caducada, parcela liberada)."
+                        : $"\n● Carga inicial: concesión Nº {numeroConcesion:00000} importada desde Program."
                 };
                 await _context.Concesiones.AddAsync(concesion);
 
@@ -369,6 +369,21 @@ namespace CemSys3.Business.CargaInicialCemSys
 
             foreach (var fila in filasGrupo)
             {
+                // Fila sin FALLECIDO: no es un error, simplemente esta fila del grupo no trae
+                // un difunto para vincular (la concesión ya se creó más arriba para el grupo).
+                if (string.IsNullOrWhiteSpace(fila.Fallecido))
+                {
+                    resultados.Add(new ResultadoFilaCarga
+                    {
+                        Fila = fila,
+                        Exito = true,
+                        Motivo = "Concesión cargada sin difuntos (fila sin FALLECIDO).",
+                        TramiteConcesionId = tramiteId,
+                        TitularPersonaId = titularId
+                    });
+                    continue;
+                }
+
                 var savepoint = $"sp_{fila.NumeroFilaOriginal}";
                 bool savepointCreado = false;
 
