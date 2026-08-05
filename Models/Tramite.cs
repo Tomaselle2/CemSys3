@@ -43,6 +43,8 @@ public partial class Tramite
 
     public virtual ICollection<FirmantesTramite> FirmantesTramites { get; set; } = new List<FirmantesTramite>();
 
+    public virtual ICollection<HistorialContratosConcesion> HistorialContratosConcesions { get; set; } = new List<HistorialContratosConcesion>();
+
     public virtual ICollection<HistorialEstadoTramite> HistorialEstadoTramites { get; set; } = new List<HistorialEstadoTramite>();
 
     public virtual ICollection<HistorialParcelasConcesion> HistorialParcelasConcesions { get; set; } = new List<HistorialParcelasConcesion>();

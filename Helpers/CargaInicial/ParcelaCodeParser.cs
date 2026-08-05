@@ -62,6 +62,9 @@ namespace CemSys3.Helpers.CargaInicial
              { "SECC26", "26" },
              { "SECC22", "22" },
              { "X", "X-1" },
+             { "ANT", "ANTIG" },
+             { "ANTG", "ANTIG" },
+             { "23", "23ANTIG" }
 
 
         };

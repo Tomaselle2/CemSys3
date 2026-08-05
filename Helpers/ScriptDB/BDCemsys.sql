@@ -733,3 +733,27 @@ CREATE TABLE HistorialParcelasConcesion (
     CONSTRAINT FK_HPC_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
     CONSTRAINT FK_HPC_Tramite FOREIGN KEY (tramiteOrigenId) REFERENCES Tramites(id)
 );
+
+CREATE TABLE HistorialContratosConcesion (
+    id INT IDENTITY PRIMARY KEY,
+    tramiteId INT NOT NULL,
+    concesion INT NULL,
+    parcelaId INT NOT NULL,
+    fechaContrato DATETIME NOT NULL DEFAULT GETDATE(),
+    esRenovacion BIT NOT NULL DEFAULT 0,
+    usuarioId INT NULL,
+    visibilidad BIT NOT NULL DEFAULT 1,
+
+    CONSTRAINT FK_HCC_Tramite FOREIGN KEY (tramiteId) REFERENCES Tramites(id),
+    CONSTRAINT FK_HCC_Parcela FOREIGN KEY (parcelaId) REFERENCES Parcelas(id),
+    CONSTRAINT FK_HCC_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(id)
+);
+
+CREATE TABLE HistorialContratosConcesionDifuntos (
+    id INT IDENTITY PRIMARY KEY,
+    historialContratoId INT NOT NULL,
+    difuntoId INT NOT NULL,
+
+    CONSTRAINT FK_HCCD_Historial FOREIGN KEY (historialContratoId) REFERENCES HistorialContratosConcesion(id),
+    CONSTRAINT FK_HCCD_Difunto FOREIGN KEY (difuntoId) REFERENCES Personas(id)
+);

@@ -108,7 +108,7 @@ builder.Services.AddScoped<ICargaDifunto, CargaDifuntoService>();
 builder.Services.AddScoped<ICalendario, CalendarioService>();
 builder.Services.AddScoped<IEstadistica, EstadisticaService>();
 builder.Services.AddScoped<IActualizarConcesionesAutomaticas, ActualizarConcesionesAutomaticas>();
-
+builder.Services.AddScoped<IHistorialContratosService, HistorialContratosService>();
 
 // =========================
 // STRATEGIES

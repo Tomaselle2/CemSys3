@@ -33,6 +33,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Concesione> Concesiones { get; set; }
 
+    public virtual DbSet<ControlProcesosDiario> ControlProcesosDiarios { get; set; }
+
     public virtual DbSet<Cremacione> Cremaciones { get; set; }
 
     public virtual DbSet<Diagrama> Diagramas { get; set; }
@@ -48,6 +50,10 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<EventoCalendario> EventoCalendarios { get; set; }
 
     public virtual DbSet<FirmantesTramite> FirmantesTramites { get; set; }
+
+    public virtual DbSet<HistorialContratosConcesion> HistorialContratosConcesions { get; set; }
+
+    public virtual DbSet<HistorialContratosConcesionDifunto> HistorialContratosConcesionDifuntos { get; set; }
 
     public virtual DbSet<HistorialEstadoTramite> HistorialEstadoTramites { get; set; }
 
@@ -119,9 +125,15 @@ public partial class AppDbContext : DbContext
     {
         modelBuilder.Entity<AceptacionTitularidad>(entity =>
         {
-            entity.HasKey(e => e.TramiteId).HasName("PK__Aceptaci__324535475C5C5AB7");
+            entity.HasKey(e => e.TramiteId).HasName("PK__Aceptaci__3245354735CA8C98");
 
             entity.ToTable("AceptacionTitularidad");
+
+            entity.HasIndex(e => e.ConcesionId, "IX_AceptacionTitularidad_ConcesionId");
+
+            entity.HasIndex(e => e.ParcelaId, "IX_AceptacionTitularidad_ParcelaId");
+
+            entity.HasIndex(e => e.UsuarioId, "IX_AceptacionTitularidad_UsuarioId");
 
             entity.Property(e => e.TramiteId)
                 .ValueGeneratedNever()
@@ -163,7 +175,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<AnioConcesion>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__AnioConc__3213E83F9C8D39CE");
+            entity.HasKey(e => e.Id).HasName("PK__AnioConc__3213E83F576E9B9D");
 
             entity.ToTable("AnioConcesion");
 
@@ -173,9 +185,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Archivo>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Archivos__3213E83F459F6D1F");
+            entity.HasKey(e => e.Id).HasName("PK__Archivos__3213E83F4533439F");
 
-            entity.HasIndex(e => e.Id, "UQ__Archivos__3213E83ECB75E598").IsUnique();
+            entity.HasIndex(e => new { e.TramiteId, e.FechaCreacion }, "IX_Archivos_TramiteId_FechaCreacion").IsDescending(false, true);
+
+            entity.HasIndex(e => e.Id, "UQ__Archivos__3213E83E0D7B04A0").IsUnique();
 
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("(newid())")
@@ -209,9 +223,15 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<CambiosTitularidad>(entity =>
         {
-            entity.HasKey(e => e.TramiteId).HasName("PK__CambiosT__324535474FCBB6C0");
+            entity.HasKey(e => e.TramiteId).HasName("PK__CambiosT__3245354761B57A71");
 
             entity.ToTable("CambiosTitularidad");
+
+            entity.HasIndex(e => e.ConcesionId, "IX_CambiosTitularidad_ConcesionId");
+
+            entity.HasIndex(e => e.ParcelaId, "IX_CambiosTitularidad_ParcelaId");
+
+            entity.HasIndex(e => e.UsuarioId, "IX_CambiosTitularidad_UsuarioId");
 
             entity.Property(e => e.TramiteId)
                 .ValueGeneratedNever()
@@ -253,7 +273,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<CantidadCuota>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Cantidad__3213E83F9BF64100");
+            entity.HasKey(e => e.Id).HasName("PK__Cantidad__3213E83F7C9EDC29");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Cuota).HasColumnName("cuota");
@@ -261,7 +281,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<CategoriasPersona>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Categori__3213E83F77CD3CBB");
+            entity.HasKey(e => e.Id).HasName("PK__Categori__3213E83FD246F535");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Categoria)
@@ -271,7 +291,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Cementerio>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Cementer__3213E83FF3E63141");
+            entity.HasKey(e => e.Id).HasName("PK__Cementer__3213E83F83FDE7C6");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Nombre)
@@ -284,7 +304,9 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ConceptosTarifarium>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Concepto__3213E83F4B30274D");
+            entity.HasKey(e => e.Id).HasName("PK__Concepto__3213E83F70AEEB7F");
+
+            entity.HasIndex(e => e.TemaId, "IX_ConceptosTarifaria_TemaId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Nombre)
@@ -303,7 +325,21 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Concesione>(entity =>
         {
-            entity.HasKey(e => e.TramiteId).HasName("PK__Concesio__3245354794DA42D5");
+            entity.HasKey(e => e.TramiteId).HasName("PK__Concesio__32453547B21EC73E");
+
+            entity.HasIndex(e => e.CantidadAniosId, "IX_Concesiones_CantidadAniosId");
+
+            entity.HasIndex(e => e.Concesion, "IX_Concesiones_Concesion");
+
+            entity.HasIndex(e => e.CuotaId, "IX_Concesiones_CuotaId");
+
+            entity.HasIndex(e => new { e.ParcelaId, e.FechaFin }, "IX_Concesiones_ParcelaId_FechaFin");
+
+            entity.HasIndex(e => e.TramiteRetiroId, "IX_Concesiones_TramiteRetiroId");
+
+            entity.HasIndex(e => e.UsuarioId, "IX_Concesiones_UsuarioId");
+
+            entity.HasIndex(e => e.Vencimiento, "IX_Concesiones_Vencimiento");
 
             entity.Property(e => e.TramiteId)
                 .ValueGeneratedNever()
@@ -352,9 +388,41 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("Concesiones_usuarioId_fk");
         });
 
+        modelBuilder.Entity<ControlProcesosDiario>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__ControlP__3213E83F46B0D798");
+
+            entity.HasIndex(e => new { e.NombreProceso, e.FechaEjecucion }, "UQ_ControlProcesosDiarios").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CantidadActualizadas).HasColumnName("cantidadActualizadas");
+            entity.Property(e => e.FechaEjecucion).HasColumnName("fechaEjecucion");
+            entity.Property(e => e.FechaHoraEjecucion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaHoraEjecucion");
+            entity.Property(e => e.NombreProceso)
+                .HasMaxLength(100)
+                .HasColumnName("nombreProceso");
+        });
+
         modelBuilder.Entity<Cremacione>(entity =>
         {
-            entity.HasKey(e => e.TramiteId).HasName("PK__Cremacio__324535475BC2041A");
+            entity.HasKey(e => e.TramiteId).HasName("PK__Cremacio__32453547C3057D7F");
+
+            entity.HasIndex(e => e.FechaFinalizacion, "IX_Cremaciones_Activos").HasFilter("([fechaFinalizacion] IS NULL)");
+
+            entity.HasIndex(e => e.CementerioId, "IX_Cremaciones_CementerioId");
+
+            entity.HasIndex(e => e.ConcesionId, "IX_Cremaciones_ConcesionId");
+
+            entity.HasIndex(e => e.DifuntoId, "IX_Cremaciones_DifuntoId");
+
+            entity.HasIndex(e => e.ParcelaDestinoId, "IX_Cremaciones_ParcelaDestinoId");
+
+            entity.HasIndex(e => e.ParcelaOrigenId, "IX_Cremaciones_ParcelaOrigenId");
+
+            entity.HasIndex(e => e.UsuarioId, "IX_Cremaciones_UsuarioId");
 
             entity.Property(e => e.TramiteId)
                 .ValueGeneratedNever()
@@ -419,7 +487,9 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Diagrama>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Diagrama__3214EC07B3269873");
+            entity.HasKey(e => e.Id).HasName("PK__Diagrama__3214EC07DA06CA73");
+
+            entity.HasIndex(e => e.TramiteId, "IX_Diagramas_TramiteId");
 
             entity.Property(e => e.FechaCreacion)
                 .HasDefaultValueSql("(getdate())")
@@ -429,9 +499,21 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<DocumentosTramite>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Document__3213E83FFC58A458");
+            entity.HasKey(e => e.Id).HasName("PK__Document__3213E83F4E1BCD2C");
 
             entity.ToTable("DocumentosTramite");
+
+            entity.HasIndex(e => e.FirmanteId, "IX_DocumentosTramite_FirmanteId");
+
+            entity.HasIndex(e => e.PersonaId, "IX_DocumentosTramite_PersonaId");
+
+            entity.HasIndex(e => e.PlantillaId, "IX_DocumentosTramite_PlantillaId");
+
+            entity.HasIndex(e => e.TipoAutorizacionId, "IX_DocumentosTramite_TipoAutorizacionId");
+
+            entity.HasIndex(e => e.TramiteId, "IX_DocumentosTramite_TramiteId");
+
+            entity.HasIndex(e => e.UsuarioId, "IX_DocumentosTramite_UsuarioId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ContenidoHtml).HasColumnName("contenidoHtml");
@@ -488,7 +570,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<EmpresasFunebre>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Empresas__3213E83F9B3F5606");
+            entity.HasKey(e => e.Id).HasName("PK__Empresas__3213E83F592C80A7");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Nombre)
@@ -501,7 +583,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<EstadosDifunto>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__EstadosD__3213E83F63E2072B");
+            entity.HasKey(e => e.Id).HasName("PK__EstadosD__3213E83FD079326D");
 
             entity.ToTable("EstadosDifunto");
 
@@ -513,7 +595,9 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<EstadosTramite>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__EstadosT__3213E83F45A865D7");
+            entity.HasKey(e => e.Id).HasName("PK__EstadosT__3213E83FE63EDFCB");
+
+            entity.HasIndex(e => e.TipoTramiteId, "IX_EstadosTramites_TipoTramiteId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Estado)
@@ -534,14 +618,20 @@ public partial class AppDbContext : DbContext
         {
             entity.ToTable("EventoCalendario");
 
+            entity.HasIndex(e => e.Fecha, "IX_EventoCalendario_Fecha");
+
             entity.Property(e => e.Titulo).HasMaxLength(200);
         });
 
         modelBuilder.Entity<FirmantesTramite>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Firmante__3213E83FC197C42E");
+            entity.HasKey(e => e.Id).HasName("PK__Firmante__3213E83F43B7A0B2");
 
             entity.ToTable("FirmantesTramite");
+
+            entity.HasIndex(e => e.PersonaId, "IX_FirmantesTramite_PersonaId");
+
+            entity.HasIndex(e => e.TramiteId, "IX_FirmantesTramite_TramiteId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.EsTitular).HasColumnName("esTitular");
@@ -569,11 +659,69 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK_FT_Tramite");
         });
 
+        modelBuilder.Entity<HistorialContratosConcesion>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Historia__3213E83FE8199C92");
+
+            entity.ToTable("HistorialContratosConcesion");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Concesion).HasColumnName("concesion");
+            entity.Property(e => e.EsRenovacion).HasColumnName("esRenovacion");
+            entity.Property(e => e.FechaContrato)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaContrato");
+            entity.Property(e => e.ParcelaId).HasColumnName("parcelaId");
+            entity.Property(e => e.TramiteId).HasColumnName("tramiteId");
+            entity.Property(e => e.UsuarioId).HasColumnName("usuarioId");
+            entity.Property(e => e.Visibilidad)
+                .HasDefaultValue(true)
+                .HasColumnName("visibilidad");
+
+            entity.HasOne(d => d.Parcela).WithMany(p => p.HistorialContratosConcesions)
+                .HasForeignKey(d => d.ParcelaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_HCC_Parcela");
+
+            entity.HasOne(d => d.Tramite).WithMany(p => p.HistorialContratosConcesions)
+                .HasForeignKey(d => d.TramiteId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_HCC_Tramite");
+
+            entity.HasOne(d => d.Usuario).WithMany(p => p.HistorialContratosConcesions)
+                .HasForeignKey(d => d.UsuarioId)
+                .HasConstraintName("FK_HCC_Usuario");
+        });
+
+        modelBuilder.Entity<HistorialContratosConcesionDifunto>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Historia__3213E83FEDFD8586");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.DifuntoId).HasColumnName("difuntoId");
+            entity.Property(e => e.HistorialContratoId).HasColumnName("historialContratoId");
+
+            entity.HasOne(d => d.Difunto).WithMany(p => p.HistorialContratosConcesionDifuntos)
+                .HasForeignKey(d => d.DifuntoId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_HCCD_Difunto");
+
+            entity.HasOne(d => d.HistorialContrato).WithMany(p => p.HistorialContratosConcesionDifuntos)
+                .HasForeignKey(d => d.HistorialContratoId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_HCCD_Historial");
+        });
+
         modelBuilder.Entity<HistorialEstadoTramite>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Historia__3213E83F5F6707E9");
+            entity.HasKey(e => e.Id).HasName("PK__Historia__3213E83F1ECAC504");
 
             entity.ToTable("HistorialEstadoTramite");
+
+            entity.HasIndex(e => e.EstadoTramiteId, "IX_HistorialEstadoTramite_EstadoTramiteId");
+
+            entity.HasIndex(e => e.TramiteId, "IX_HistorialEstadoTramite_TramiteId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.EstadoTramiteId).HasColumnName("estadoTramiteId");
@@ -595,9 +743,15 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<HistorialParcelasConcesion>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Historia__3213E83FC7DE3D70");
+            entity.HasKey(e => e.Id).HasName("PK__Historia__3213E83FC2C91395");
 
             entity.ToTable("HistorialParcelasConcesion");
+
+            entity.HasIndex(e => e.ConcesionId, "IX_HistorialParcelasConcesion_ConcesionId");
+
+            entity.HasIndex(e => new { e.ParcelaId, e.FechaFin }, "IX_HistorialParcelasConcesion_ParcelaId_Activos");
+
+            entity.HasIndex(e => e.TramiteOrigenId, "IX_HistorialParcelasConcesion_TramiteOrigenId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ConcesionId).HasColumnName("concesionId");
@@ -623,7 +777,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<HistorialTitularesConcesione>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Historia__3213E83FF8C63320");
+            entity.HasKey(e => e.Id).HasName("PK__Historia__3213E83FEACC6B4D");
+
+            entity.HasIndex(e => new { e.ConcesionId, e.FechaFin }, "IX_HistorialTitularesConcesiones_ConcesionId_FechaFin");
+
+            entity.HasIndex(e => e.PersonaId, "IX_HistorialTitularesConcesiones_PersonaId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ConcesionId).HasColumnName("concesionId");
@@ -646,7 +804,17 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Introduccione>(entity =>
         {
-            entity.HasKey(e => e.TramiteId).HasName("PK__Introduc__3245354774BB66DF");
+            entity.HasKey(e => e.TramiteId).HasName("PK__Introduc__32453547FB67BBAF");
+
+            entity.HasIndex(e => e.DifuntoId, "IX_Introducciones_DifuntoId");
+
+            entity.HasIndex(e => e.EmpresaFunebreId, "IX_Introducciones_EmpresaFunebreId");
+
+            entity.HasIndex(e => e.EstadoDifuntoId, "IX_Introducciones_EstadoDifuntoId");
+
+            entity.HasIndex(e => e.ParcelaId, "IX_Introducciones_ParcelaId");
+
+            entity.HasIndex(e => e.UsuarioId, "IX_Introducciones_UsuarioId");
 
             entity.Property(e => e.TramiteId)
                 .ValueGeneratedNever()
@@ -696,7 +864,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Nota>(entity =>
         {
-            entity.HasKey(e => e.TramiteId).HasName("PK__Notas__32453547FF7292AC");
+            entity.HasKey(e => e.TramiteId).HasName("PK__Notas__3245354752469C49");
+
+            entity.HasIndex(e => e.TipoNotaId, "IX_Notas_TipoNotaId");
+
+            entity.HasIndex(e => e.TramiteIngresoId, "IX_Notas_TramiteIngresoId");
 
             entity.Property(e => e.TramiteId)
                 .ValueGeneratedNever()
@@ -731,7 +903,15 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Parcela>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Parcelas__3213E83FA3E2EC20");
+            entity.HasKey(e => e.Id).HasName("PK__Parcelas__3213E83F6607CA4C");
+
+            entity.HasIndex(e => e.SeccionId, "IX_Parcelas_SeccionId");
+
+            entity.HasIndex(e => e.TipoNichoId, "IX_Parcelas_TipoNichoId");
+
+            entity.HasIndex(e => e.TipoPanteonId, "IX_Parcelas_TipoPanteonId");
+
+            entity.HasIndex(e => e.TipoParcelaId, "IX_Parcelas_TipoParcelaId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CantidadDifuntos).HasColumnName("cantidadDifuntos");
@@ -769,7 +949,15 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ParcelaDifunto>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ParcelaD__3213E83F25A10CAA");
+            entity.HasKey(e => e.Id).HasName("PK__ParcelaD__3213E83FAC90C6FD");
+
+            entity.HasIndex(e => e.DifuntoId, "IX_ParcelaDifuntos_DifuntoId");
+
+            entity.HasIndex(e => e.ParcelaId, "IX_ParcelaDifuntos_ParcelaId_Activos").HasFilter("([fechaRetiro] IS NULL)");
+
+            entity.HasIndex(e => e.TramiteIngresoId, "IX_ParcelaDifuntos_TramiteIngresoId");
+
+            entity.HasIndex(e => e.TramiteRetiroId, "IX_ParcelaDifuntos_TramiteRetiroId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.DifuntoId).HasColumnName("difuntoId");
@@ -804,7 +992,13 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<PermisosIngreso>(entity =>
         {
-            entity.HasKey(e => e.TramiteId).HasName("PK__Permisos__3245354791A58F7F");
+            entity.HasKey(e => e.TramiteId).HasName("PK__Permisos__324535473D5F5C3F");
+
+            entity.HasIndex(e => e.ConcesionId, "IX_PermisosIngresos_ConcesionId");
+
+            entity.HasIndex(e => e.ParcelaId, "IX_PermisosIngresos_ParcelaId");
+
+            entity.HasIndex(e => e.UsuarioId, "IX_PermisosIngresos_UsuarioId");
 
             entity.Property(e => e.TramiteId)
                 .ValueGeneratedNever()
@@ -846,7 +1040,15 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<PermisosRefaccione>(entity =>
         {
-            entity.HasKey(e => e.TramiteId).HasName("PK__Permisos__324535475DE06CED");
+            entity.HasKey(e => e.TramiteId).HasName("PK__Permisos__32453547CA9ABC97");
+
+            entity.HasIndex(e => e.FechaFinalizacion, "IX_PermisosRefacciones_Activos").HasFilter("([fechaFinalizacion] IS NULL)");
+
+            entity.HasIndex(e => e.ConcesionId, "IX_PermisosRefacciones_ConcesionId");
+
+            entity.HasIndex(e => e.ParcelaId, "IX_PermisosRefacciones_ParcelaId");
+
+            entity.HasIndex(e => e.UsuarioId, "IX_PermisosRefacciones_UsuarioId");
 
             entity.Property(e => e.TramiteId)
                 .ValueGeneratedNever()
@@ -890,7 +1092,15 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Persona>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Personas__3213E83F4A7D3E7A");
+            entity.HasKey(e => e.Id).HasName("PK__Personas__3213E83FE697F78B");
+
+            entity.HasIndex(e => new { e.Apellido, e.Nombre }, "IX_Personas_Apellido_Nombre");
+
+            entity.HasIndex(e => e.CategoriaPersonaId, "IX_Personas_CategoriaPersonaId");
+
+            entity.HasIndex(e => e.Dni, "IX_Personas_Dni");
+
+            entity.HasIndex(e => e.EstadoDifuntoId, "IX_Personas_EstadoDifuntoId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Apellido)
@@ -941,9 +1151,13 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<PlantillasTramite>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Plantill__3213E83F9221BF82");
+            entity.HasKey(e => e.Id).HasName("PK__Plantill__3213E83FEB372FB2");
 
             entity.ToTable("PlantillasTramite");
+
+            entity.HasIndex(e => e.TipoAutorizacionId, "IX_PlantillasTramite_TipoAutorizacionId");
+
+            entity.HasIndex(e => e.TipoTramiteId, "IX_PlantillasTramite_TipoTramiteId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Activo)
@@ -972,7 +1186,13 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<PreciosTarifaria>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__PreciosT__3213E83F7C4C2FFC");
+            entity.HasKey(e => e.Id).HasName("PK__PreciosT__3213E83FF7E7D319");
+
+            entity.HasIndex(e => e.ConceptoTarifariaId, "IX_PreciosTarifarias_ConceptoTarifariaId");
+
+            entity.HasIndex(e => e.SeccionId, "IX_PreciosTarifarias_SeccionId");
+
+            entity.HasIndex(e => e.Visibilidad, "IX_PreciosTarifarias_Visibilidad_Activos").HasFilter("([visibilidad]=(1))");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AniosConcesionId).HasColumnName("aniosConcesionId");
@@ -998,7 +1218,21 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Reduccione>(entity =>
         {
-            entity.HasKey(e => e.TramiteId).HasName("PK__Reduccio__32453547753DDBEF");
+            entity.HasKey(e => e.TramiteId).HasName("PK__Reduccio__32453547474633A2");
+
+            entity.HasIndex(e => e.FechaFinalizacion, "IX_Reducciones_Activos").HasFilter("([fechaFinalizacion] IS NULL)");
+
+            entity.HasIndex(e => e.CementerioId, "IX_Reducciones_CementerioId");
+
+            entity.HasIndex(e => e.ConcesionId, "IX_Reducciones_ConcesionId");
+
+            entity.HasIndex(e => e.DifuntoId, "IX_Reducciones_DifuntoId");
+
+            entity.HasIndex(e => e.ParcelaDestinoId, "IX_Reducciones_ParcelaDestinoId");
+
+            entity.HasIndex(e => e.ParcelaOrigenId, "IX_Reducciones_ParcelaOrigenId");
+
+            entity.HasIndex(e => e.UsuarioId, "IX_Reducciones_UsuarioId");
 
             entity.Property(e => e.TramiteId)
                 .ValueGeneratedNever()
@@ -1064,9 +1298,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ReglasIngreso>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ReglasIn__3213E83F713F85D0");
+            entity.HasKey(e => e.Id).HasName("PK__ReglasIn__3213E83F694A01A8");
 
             entity.ToTable("ReglasIngreso");
+
+            entity.HasIndex(e => new { e.TipoParcelaId, e.EstadoDifuntoId, e.TipoNichoId, e.TipoPanteonId }, "IX_ReglasIngreso_Combinacion");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CierreFosa).HasColumnName("cierreFosa");
@@ -1160,9 +1396,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<RequisitosTramite>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Requisit__3213E83FB30338E1");
+            entity.HasKey(e => e.Id).HasName("PK__Requisit__3213E83FE0F9710B");
 
             entity.ToTable("RequisitosTramite");
+
+            entity.HasIndex(e => e.TipoTramiteId, "IX_RequisitosTramite_TipoTramiteId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Activo)
@@ -1179,7 +1417,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<RolesUsuario>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RolesUsu__3213E83FFFB18A43");
+            entity.HasKey(e => e.Id).HasName("PK__RolesUsu__3213E83F9323B6E5");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Rol)
@@ -1189,7 +1427,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Seccione>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Seccione__3213E83F46619BA2");
+            entity.HasKey(e => e.Id).HasName("PK__Seccione__3213E83F2CC640F9");
+
+            entity.HasIndex(e => e.TipoNumeracionParcelaId, "IX_Secciones_TipoNumeracionParcelaId");
+
+            entity.HasIndex(e => e.TipoParcelaId, "IX_Secciones_TipoParcelaId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Filas).HasColumnName("filas");
@@ -1216,7 +1458,13 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Tarea>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Tareas__3213E83F450F1B0C");
+            entity.HasKey(e => e.Id).HasName("PK__Tareas__3213E83FA6D49531");
+
+            entity.HasIndex(e => e.NotaId, "IX_Tareas_NotaId");
+
+            entity.HasIndex(e => e.TareaPlantillaId, "IX_Tareas_TareaPlantillaId");
+
+            entity.HasIndex(e => e.TramiteId, "IX_Tareas_TramiteId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Descripcion)
@@ -1244,9 +1492,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TareaPlantilla>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TareaPla__3214EC074D43805B");
+            entity.HasKey(e => e.Id).HasName("PK__TareaPla__3214EC0703215D54");
 
             entity.ToTable("TareaPlantilla");
+
+            entity.HasIndex(e => e.TipoTramiteId, "IX_TareaPlantilla_TipoTramiteId");
 
             entity.Property(e => e.Descripcion).HasMaxLength(150);
             entity.Property(e => e.Estado).HasColumnName("estado");
@@ -1260,7 +1510,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TemasTarifarium>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TemasTar__3213E83F085DF1C2");
+            entity.HasKey(e => e.Id).HasName("PK__TemasTar__3213E83FE9F661DD");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Nombre)
@@ -1273,9 +1523,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TipoAutorizacion>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TipoAuto__3213E83FB68A41AD");
+            entity.HasKey(e => e.Id).HasName("PK__TipoAuto__3213E83F20E770EF");
 
             entity.ToTable("TipoAutorizacion");
+
+            entity.HasIndex(e => e.TipoTramiteId, "IX_TipoAutorizacion_TipoTramiteId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Nombre)
@@ -1291,7 +1543,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TipoNicho>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TipoNich__3213E83F4C98C0B1");
+            entity.HasKey(e => e.Id).HasName("PK__TipoNich__3213E83F818E21FB");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Tipo)
@@ -1301,7 +1553,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TipoNotum>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TipoNota__3213E83F9AEC39D2");
+            entity.HasKey(e => e.Id).HasName("PK__TipoNota__3213E83FF0BAFC30");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Descripcion).HasMaxLength(30);
@@ -1310,7 +1562,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TipoNumeracionParcela>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TipoNume__3213E83F711B1CAB");
+            entity.HasKey(e => e.Id).HasName("PK__TipoNume__3213E83F1C739605");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.TipoNumeracion)
@@ -1320,7 +1572,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TipoPanteon>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TipoPant__3213E83F3183155F");
+            entity.HasKey(e => e.Id).HasName("PK__TipoPant__3213E83FD578F5C8");
 
             entity.ToTable("TipoPanteon");
 
@@ -1332,7 +1584,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TipoParcela>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TipoParc__3213E83FF62FF578");
+            entity.HasKey(e => e.Id).HasName("PK__TipoParc__3213E83F65DBF1DA");
 
             entity.ToTable("TipoParcela");
 
@@ -1344,7 +1596,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TipoTramite>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TipoTram__3213E83F684E8EE8");
+            entity.HasKey(e => e.Id).HasName("PK__TipoTram__3213E83F0E438BE4");
 
             entity.ToTable("TipoTramite");
 
@@ -1359,7 +1611,15 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Tramite>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Tramites__3213E83F4DD691AE");
+            entity.HasKey(e => e.Id).HasName("PK__Tramites__3213E83F22B90D9E");
+
+            entity.HasIndex(e => e.EstadoActualId, "IX_Tramites_EstadoActualId");
+
+            entity.HasIndex(e => e.FechaCreacion, "IX_Tramites_FechaCreacion").IsDescending();
+
+            entity.HasIndex(e => e.TipoTramiteId, "IX_Tramites_TipoTramiteId");
+
+            entity.HasIndex(e => e.UsuarioId, "IX_Tramites_UsuarioId");
 
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
@@ -1393,9 +1653,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TramitePersona>(entity =>
         {
-            entity.HasKey(e => new { e.TramiteId, e.PersonaId }).HasName("PK__TramiteP__770E40CA9CEFA5CB");
+            entity.HasKey(e => new { e.TramiteId, e.PersonaId }).HasName("PK__TramiteP__770E40CA33CEE459");
 
             entity.ToTable("TramitePersona");
+
+            entity.HasIndex(e => e.PersonaId, "IX_TramitePersona_PersonaId");
 
             entity.Property(e => e.TramiteId).HasColumnName("tramiteId");
             entity.Property(e => e.PersonaId).HasColumnName("personaId");
@@ -1416,7 +1678,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TramitesCosto>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Tramites__3213E83FFEBAAA92");
+            entity.HasKey(e => e.Id).HasName("PK__Tramites__3213E83FFEB87AFD");
+
+            entity.HasIndex(e => e.ConceptoTarifariaId, "IX_TramitesCostos_ConceptoTarifariaId");
+
+            entity.HasIndex(e => e.TramiteId, "IX_TramitesCostos_TramiteId");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ConceptoTarifariaId).HasColumnName("conceptoTarifariaId");
@@ -1445,9 +1711,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TramitesParcela>(entity =>
         {
-            entity.HasKey(e => new { e.TramiteId, e.ParcelaId }).HasName("PK__Tramites__47EF37ADAA207313");
+            entity.HasKey(e => new { e.TramiteId, e.ParcelaId }).HasName("PK__Tramites__47EF37AD3FEE8159");
 
             entity.ToTable("TramitesParcela");
+
+            entity.HasIndex(e => new { e.ParcelaId, e.FechaRegistro }, "IX_TramitesParcela_ParcelaId_FechaRegistro").IsDescending(false, true);
 
             entity.Property(e => e.TramiteId).HasColumnName("tramiteId");
             entity.Property(e => e.ParcelaId).HasColumnName("parcelaId");
@@ -1466,7 +1734,21 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Traslado>(entity =>
         {
-            entity.HasKey(e => e.TramiteId).HasName("PK__Traslado__3245354735AD0605");
+            entity.HasKey(e => e.TramiteId).HasName("PK__Traslado__324535473BBBD5CC");
+
+            entity.HasIndex(e => e.FechaFinalizacion, "IX_Traslados_Activos").HasFilter("([fechaFinalizacion] IS NULL)");
+
+            entity.HasIndex(e => e.CementerioId, "IX_Traslados_CementerioId");
+
+            entity.HasIndex(e => e.ConcesionId, "IX_Traslados_ConcesionId");
+
+            entity.HasIndex(e => e.DifuntoId, "IX_Traslados_DifuntoId");
+
+            entity.HasIndex(e => e.ParcelaDestinoId, "IX_Traslados_ParcelaDestinoId");
+
+            entity.HasIndex(e => e.ParcelaOrigenId, "IX_Traslados_ParcelaOrigenId");
+
+            entity.HasIndex(e => e.UsuarioId, "IX_Traslados_UsuarioId");
 
             entity.Property(e => e.TramiteId)
                 .ValueGeneratedNever()
@@ -1532,7 +1814,15 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Usuario>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Usuarios__3213E83F7FCFC59A");
+            entity.HasKey(e => e.Id).HasName("PK__Usuarios__3213E83F8388F70D");
+
+            entity.HasIndex(e => e.Correo, "IX_Usuarios_Correo");
+
+            entity.HasIndex(e => e.RolId, "IX_Usuarios_RolId");
+
+            entity.HasIndex(e => e.Usuario1, "IX_Usuarios_Usuario")
+                .IsUnique()
+                .HasFilter("([visibilidad]=(1))");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Apellido)

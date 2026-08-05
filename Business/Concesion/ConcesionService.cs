@@ -26,16 +26,18 @@ namespace CemSys3.Business.Concesion
         public readonly IHistorialEstados _historialEstadosService;
         public readonly IPersona _personaService;
         public readonly INotas _notasService;
+        public readonly IHistorialContratosService _historialContratosService;
 
 
         public ConcesionService(ITramite tramiteService, AppDbContext context,
-            IHistorialEstados estadoService, IPersona personaService, INotas notas)
+            IHistorialEstados estadoService, IPersona personaService, INotas notas, IHistorialContratosService historialContratosService)
         {
             _tramiteService = tramiteService;   
             _context = context;
             _historialEstadosService = estadoService;
             _personaService = personaService;
             _notasService = notas;
+            _historialContratosService = historialContratosService;
         }
 
         public async Task<GenericResultDTO> Add(ConcesionDTO dto)
@@ -222,6 +224,8 @@ namespace CemSys3.Business.Concesion
                 Models.Parcela parcela = await _context.Parcelas.FindAsync(dto.ParcelaId) ?? throw new Exception("Parcela no encontrada.");
                 parcela.InformacionAdicional += dto.MensajeParcela;
 
+                //3.1- registrar historial de contrato
+                await _historialContratosService.Add(dto.historialConcesionesRenovacion);
 
                 //4- generar nota
                 string descripcionNota = $"\n● El {DateTime.Now:dd/MM/yyyy} se realizó contrato de concesión ({dto.Concesion?.ToString("D5") ?? "-----"})";

@@ -32,5 +32,7 @@ namespace CemSys3.DTOs.Concesion
         public List<DifuntoContratoDTO> Difuntos { get; set; } = new List<DifuntoContratoDTO>();
 
         public string MensajeParcela { get; set; } = string.Empty;
+
+        public HistorialContratoDTO historialConcesionesRenovacion { get; set; } = new HistorialContratoDTO();
     }
 }

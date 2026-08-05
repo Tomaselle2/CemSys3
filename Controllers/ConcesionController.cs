@@ -1,4 +1,5 @@
-﻿using CemSys3.DTOs.Archivo;
+﻿using CemSys3.Business.Concesion;
+using CemSys3.DTOs.Archivo;
 using CemSys3.DTOs.Concesion;
 using CemSys3.DTOs.Generics;
 using CemSys3.DTOs.Paginacion;
@@ -41,9 +42,11 @@ namespace CemSys3.Controllers
         private readonly IDeudaConcesion _deudaConcesionService;
         private readonly ITemplateProcessor _processor;
         private readonly IRequisitos _requisitos;
+        private readonly IHistorialContratosService _historialContratosService;
 
         public ConcesionController(IConcesion concesion, IViewRenderService render, PlaywrightPdfGenerator pdfGenerator, IArchivo archivo,
-            IHistorialEstados historialEstados, IWebHostEnvironment env, IDeudaConcesion deudaConcesionService, ITemplateProcessor processor, IRequisitos requisitos)
+            IHistorialEstados historialEstados, IWebHostEnvironment env, IDeudaConcesion deudaConcesionService, ITemplateProcessor processor, IRequisitos requisitos,
+            IHistorialContratosService historialContratosService)
         {
             _concesionService = concesion;
             _viewRenderService = render;
@@ -54,6 +57,7 @@ namespace CemSys3.Controllers
             _deudaConcesionService = deudaConcesionService;
             _processor = processor;
             _requisitos = requisitos;
+            _historialContratosService = historialContratosService;
         }
 
         //tabla general de concesiones, con paginacion y filtro por estado
@@ -325,6 +329,21 @@ namespace CemSys3.Controllers
 
             //Update al contrato con los datos
             GenericResultDTO resultado = new GenericResultDTO();
+
+            var difuntosIds = dto.Difuntos?.Select(d => d.Id).ToList() ?? new List<int>();
+
+            HistorialContratoDTO historialContratoDTO = new HistorialContratoDTO
+            {
+                TramiteId = dto.TramiteId,
+                Concesion = dto.Concesion,
+                ParcelaId = dto.ParcelaId,
+                EsRenovacion = viewModel.contrato.EsRenovacion,
+                UsuarioId = dto.UsuarioId,
+                DifuntosIds = difuntosIds
+            };
+
+            dto.historialConcesionesRenovacion = historialContratoDTO;
+
             try
             {
                 resultado = await _concesionService.Update(dto);
@@ -1070,6 +1089,121 @@ namespace CemSys3.Controllers
             return Redirect($"https://wa.me/{numero}?text={mensaje}");
         }
 
+
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> TablaHistorialContratos(
+    DateOnly? fechaDesde = null, DateOnly? fechaHasta = null,
+    int pagina = 1, int porPagina = 10)
+        {
+            HistorialContratosVM viewModel = new HistorialContratosVM();
+            viewModel.SweetAlert = TempData.GetSweetAlert();
+
+            // Si no vino ningún filtro de fecha, default = mes actual
+            if (!fechaDesde.HasValue && !fechaHasta.HasValue)
+            {
+                var hoy = DateOnly.FromDateTime(DateTime.Today);
+                fechaDesde = new DateOnly(hoy.Year, hoy.Month, 1);
+                fechaHasta = fechaDesde.Value.AddMonths(1).AddDays(-1);
+            }
+
+            try
+            {
+                PaginadoResponse<HistorialContratoTablaDTO> resultado =
+                    await _historialContratosService.GetAllPaginado(pagina, porPagina, fechaDesde, fechaHasta);
+
+                viewModel.Listado = resultado.Items;
+                viewModel.Paginacion = resultado.Paginacion;
+                viewModel.Paginacion.Parametros = new Dictionary<string, string>();
+
+                viewModel.FechaDesde = fechaDesde;
+                viewModel.FechaHasta = fechaHasta;
+
+                viewModel.Paginacion.Parametros.Add("porPagina", porPagina.ToString());
+                viewModel.Paginacion.Parametros.Add("fechaDesde", fechaDesde?.ToString("yyyy-MM-dd") ?? "");
+                viewModel.Paginacion.Parametros.Add("fechaHasta", fechaHasta?.ToString("yyyy-MM-dd") ?? "");
+
+                if (viewModel.Listado.Count() == 0)
+                {
+                    viewModel.SweetAlert = new SweetAlertDTO
+                    {
+                        Titulo = "Advertencia",
+                        Mensaje = "No se encontraron resultados",
+                        Tipo = "warning"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                viewModel.SweetAlert = new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = $"Ocurrió un error al cargar el historial de contratos: {ex.Message}",
+                    Tipo = "error"
+                };
+            }
+
+            return View(viewModel);
+        }
+
+        // ─── Exportar Excel del Historial ──────────────────────────────────────
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Empleado)]
+        public async Task<IActionResult> ExportarExcelHistorial(
+            DateOnly? fechaDesde = null, DateOnly? fechaHasta = null)
+        {
+            var datos = await _historialContratosService.GetAllParaExportar(fechaDesde, fechaHasta);
+
+            using var wb = new XLWorkbook();
+            var ws = wb.Worksheets.Add("HistorialContratos");
+
+            string[] headers = { "Concesión", "Fecha Contrato", "Renovación", "Difuntos", "Sección", "Parcela" };
+            for (int i = 0; i < headers.Length; i++)
+            {
+                var cell = ws.Cell(1, i + 1);
+                cell.Value = headers[i];
+                cell.Style.Font.Bold = true;
+                cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#2E75B6");
+                cell.Style.Font.FontColor = XLColor.White;
+                cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            }
+
+            int fila = 2;
+            foreach (var item in datos)
+            {
+                string parcela = item.TipoParcelaId switch
+                {
+                    (int)TipoParcelaEnum.Nicho => $"Nicho {item.NroParcela} Fila {item.NroFila}",
+                    (int)TipoParcelaEnum.Fosa => $"Fosa {item.NroParcela}",
+                    (int)TipoParcelaEnum.Panteon => $"Lote {item.NroParcela}",
+                    _ => item.NroParcela.ToString() ?? ""
+                };
+
+                string difuntos = item.Difuntos?.Any() == true
+                    ? string.Join(" / ", item.Difuntos.Select(d => $"{d.Apellido.ToUpper()}, {d.Nombre.ToUpper()}"))
+                    : "---";
+
+                ws.Cell(fila, 1).Value = item.Concesion?.ToString("D5") ?? "---";
+                ws.Cell(fila, 2).Value = item.FechaContrato.ToString("dd/MM/yyyy HH:mm");
+                ws.Cell(fila, 3).Value = item.EsRenovacion ? "Sí" : "No";
+                ws.Cell(fila, 4).Value = difuntos;
+                ws.Cell(fila, 5).Value = item.NombreSeccion?.ToUpper() ?? "";
+                ws.Cell(fila, 6).Value = parcela;
+
+                fila++;
+            }
+
+            ws.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            wb.SaveAs(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            string fileName = $"HistorialContratos_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+            return File(stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                fileName);
+        }
 
 
         private async Task<byte[]> GenerarPdfContrato(GenerarContratoDTO contratoGenerado, string nombreVistaContrato)

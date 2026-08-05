@@ -53,6 +53,8 @@ public partial class Persona
 
     public virtual ICollection<FirmantesTramite> FirmantesTramites { get; set; } = new List<FirmantesTramite>();
 
+    public virtual ICollection<HistorialContratosConcesionDifunto> HistorialContratosConcesionDifuntos { get; set; } = new List<HistorialContratosConcesionDifunto>();
+
     public virtual ICollection<HistorialTitularesConcesione> HistorialTitularesConcesiones { get; set; } = new List<HistorialTitularesConcesione>();
 
     public virtual ICollection<Introduccione> Introducciones { get; set; } = new List<Introduccione>();

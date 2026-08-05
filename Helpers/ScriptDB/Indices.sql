@@ -329,4 +329,33 @@ CREATE INDEX IX_HistorialParcelasConcesion_ParcelaId_Activos
     ON dbo.HistorialParcelasConcesion(parcelaId, fechaFin)
     INCLUDE (concesionId, fechaInicio, tramiteOrigenId);
 CREATE INDEX IX_HistorialParcelasConcesion_TramiteOrigenId ON dbo.HistorialParcelasConcesion(tramiteOrigenId);
+
+-- ============================================================================
+-- HistorialContratosConcesion
+-- ============================================================================
+-- El filtro principal (y prácticamente único) de la vista es por rango de
+-- fechaContrato, ordenado DESC, filtrando siempre por visibilidad = 1.
+-- Índice filtrado + cubriente para no ir a la tabla base.
+CREATE INDEX IX_HistorialContratosConcesion_FechaContrato_Activos
+    ON dbo.HistorialContratosConcesion(fechaContrato DESC)
+    INCLUDE (tramiteId, concesion, parcelaId, esRenovacion, usuarioId)
+    WHERE visibilidad = 1;
+
+-- FKs (útiles para joins a Parcela/Tramites/Usuarios y por si después
+-- necesitás buscar el historial de un trámite puntual)
+CREATE INDEX IX_HistorialContratosConcesion_TramiteId ON dbo.HistorialContratosConcesion(tramiteId);
+CREATE INDEX IX_HistorialContratosConcesion_ParcelaId ON dbo.HistorialContratosConcesion(parcelaId);
+CREATE INDEX IX_HistorialContratosConcesion_UsuarioId ON dbo.HistorialContratosConcesion(usuarioId);
+
+-- ============================================================================
+-- HistorialContratosConcesionDifuntos
+-- ============================================================================
+-- Se consulta siempre "traer los difuntos de tal(es) historialContratoId"
+-- (Contains sobre una lista de ids de la página actual) -> clave.
+CREATE INDEX IX_HistorialContratosConcesionDifuntos_HistorialContratoId
+    ON dbo.HistorialContratosConcesionDifuntos(historialContratoId)
+    INCLUDE (difuntoId);
+
+CREATE INDEX IX_HistorialContratosConcesionDifuntos_DifuntoId
+    ON dbo.HistorialContratosConcesionDifuntos(difuntoId);
  

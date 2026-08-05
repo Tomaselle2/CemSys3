@@ -13,11 +13,30 @@
 <div class="accordion" id="accordionConcesiones">
     <div class="accordion-item">
         <h2 class="accordion-header" id="panelsStayOpen-headingConcesiones">
-            <button class="accordion-button nueva-seccion acordeon-fijo">
-                <i class="bi bi-table me-2"></i>
-                Tabla General de Concesiones
-            </button>
+
+                <button class="accordion-button nueva-seccion acordeon-fijo flex-grow-1"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#panelsStayOpen-collapseConcesiones"
+                        aria-expanded="true"
+                        aria-controls="panelsStayOpen-collapseConcesiones">
+
+                    <i class="bi bi-table me-2"></i>
+                    Tabla General de Concesiones
+
+                </button>
+
         </h2>
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-body py-2 d-flex justify-content-end">
+                <a href="@Url.Action("TablaHistorialContratos", "Concesion")"
+                   class="btn btn-outline-primary" target="_blank">
+                    <i class="bi bi-clock-history me-1"></i>
+                    Ver Historial de Contratos
+                </a>
+            </div>
+        </div>
         <div>
             <form asp-action="TablaGeneral" method="get" id="formBusqueda">
 

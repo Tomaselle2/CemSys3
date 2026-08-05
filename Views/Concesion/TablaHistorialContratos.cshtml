@@ -1,0 +1,203 @@
+﻿@using CemSys3.DTOs.Paginacion
+@using CemSys3.Enumerables
+@using CemSys3.Helpers.Enumerable
+@using CemSys3.ViewModels.Concesion
+@model HistorialContratosVM
+
+@{
+    ViewData["Title"] = "Tabla historial contratos";
+}
+
+<!-- Historial de Contratos -->
+<div class="accordion" id="accordionHistorialContratos">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-headingHistorial">
+            <button class="accordion-button nueva-seccion acordeon-fijo">
+                <i class="bi bi-clock-history me-2"></i>
+                Historial de Contratos
+            </button>
+        </h2>
+        <div>
+            <form asp-action="TablaHistorialContratos" method="get" id="formBusquedaHistorial">
+
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+
+                        <div class="row g-3 mb-4">
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">
+                                    Fecha Desde
+                                </label>
+                                <input type="date"
+                                       class="form-control"
+                                       asp-for="FechaDesde"
+                                       name="fechaDesde" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">
+                                    Fecha Hasta
+                                </label>
+                                <input type="date"
+                                       class="form-control"
+                                       asp-for="FechaHasta"
+                                       name="fechaHasta" />
+                            </div>
+
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="bi bi-search"></i>
+                                Buscar
+                            </button>
+
+                            <a asp-action="TablaHistorialContratos"
+                               asp-controller="Concesion"
+                               class="btn btn-outline-secondary">
+                                <i class="bi bi-eraser"></i>
+                                Limpiar filtros
+                            </a>
+
+                            <button type="button" class="btn btn-success" id="btnExportarExcelHistorial">
+                                <i class="bi bi-file-earmark-excel"></i> Excel
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <div id="panelsStayOpen-collapseHistorial" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingHistorial">
+
+            @if (Model.Paginacion.TotalRegistros > 0)
+            {
+                <div class="alert alert-primary d-flex align-items-center mb-3" role="alert">
+                    <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                    <div>
+                        Se realizaron <strong>@Model.Paginacion.TotalRegistros</strong> contrato(s)
+                        @if (Model.FechaDesde.HasValue || Model.FechaHasta.HasValue)
+                        {
+                            <text> en el rango de fechas seleccionado.</text>
+                        }
+                        else
+                        {
+                            <text> en total.</text>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (Model.Listado != null && Model.Listado.Count() > 0)
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body p-0 table-responsive">
+                        <table class="table table-hover align-middle mb-0 table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Concesión</th>
+                                    <th>Fecha Contrato</th>
+                                    <th>Renovación</th>
+                                    <th>Difunto/s</th>
+                                    <th>Sección</th>
+                                    <th>Parcela</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var h in Model.Listado)
+                                {
+                                    string parcela = "";
+
+                                    if (h.TipoParcelaId == (int)TipoParcelaEnum.Nicho)
+                                    {
+                                        parcela = $"Nicho {h.NroParcela} Fila {h.NroFila}";
+                                    }
+                                    else if (h.TipoParcelaId == (int)TipoParcelaEnum.Fosa)
+                                    {
+                                        parcela = $"Fosa {h.NroParcela}";
+                                    }
+                                    else if (h.TipoParcelaId == (int)TipoParcelaEnum.Panteon)
+                                    {
+                                        parcela = $"Lote {h.NroParcela}";
+                                    }
+
+                                    <tr>
+                                        <td>@(h.Concesion != null ? h.Concesion.Value.ToString("D5") : "---")</td>
+                                        <td>@h.FechaContrato.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            @if (h.EsRenovacion)
+                                            {
+                                                <span class="badge bg-info text-dark">Renovación</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Primer contrato</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @(h.Difuntos != null && h.Difuntos.Any()
+                                                                ? Html.Raw(string.Join("<br>",
+                                                                h.Difuntos.Select(d => $"{d.Apellido.ToUpper()}, {d.Nombre.ToUpper()}")))
+                                                                : "---")
+                                        </td>
+                                        <td>@h.NombreSeccion.ToUpper()</td>
+                                        <td class="text-nowrap">@parcela</td>
+                                        <td>
+                                            <a asp-action="Concesion"
+                                               asp-controller="Concesion"
+                                               asp-route-tramiteId="@h.TramiteId"
+                                               title="Ir a concesión"
+                                               target="_blank">
+                                                <i class="bi bi-box-arrow-in-right fs-3"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                @if (Model.Paginacion.TotalPaginas > 0)
+                {
+                    @await Html.PartialAsync("_Paginador", new PaginacionDTO
+                    {
+                        PaginaActual = Model.Paginacion.PaginaActual,
+                        TotalPaginas = Model.Paginacion.TotalPaginas,
+                        TotalRegistros = Model.Paginacion.TotalRegistros,
+                        RegistrosPorPagina = Model.Paginacion.RegistrosPorPagina,
+                        Accion = "TablaHistorialContratos",
+                        Controlador = "Concesion",
+                        Parametros = Model.Paginacion.Parametros
+                    })
+                }
+            }
+            else
+            {
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    No hay contratos registrados en el rango seleccionado
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('btnExportarExcelHistorial').addEventListener('click', function () {
+            const form = document.getElementById('formBusquedaHistorial');
+            const params = new URLSearchParams(new FormData(form)).toString();
+            window.location.href = '@Url.Action("ExportarExcelHistorial", "Concesion")?' + params;
+        });
+    </script>
+}
+
+@* Renderizamos el manejador pasándole el DTO del modelo *@
+<partial name="_SweetAlertHandler" model="Model.SweetAlert" />
+

@@ -31,6 +31,8 @@ public partial class Usuario
 
     public virtual ICollection<DocumentosTramite> DocumentosTramites { get; set; } = new List<DocumentosTramite>();
 
+    public virtual ICollection<HistorialContratosConcesion> HistorialContratosConcesions { get; set; } = new List<HistorialContratosConcesion>();
+
     public virtual ICollection<Introduccione> Introducciones { get; set; } = new List<Introduccione>();
 
     public virtual ICollection<PermisosIngreso> PermisosIngresos { get; set; } = new List<PermisosIngreso>();
