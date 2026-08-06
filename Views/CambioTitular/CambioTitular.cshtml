@@ -880,6 +880,7 @@ new ArchivoVM
 
 
         function eliminarTitular(id) {
+            if (@Model.Dto.EstadoTramiteId === 10) return;
         titularAEliminar = id;
         $('#confirmarEliminarModal').modal('show');
         }

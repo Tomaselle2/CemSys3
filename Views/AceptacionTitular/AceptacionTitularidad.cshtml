@@ -14,7 +14,7 @@
     string nroConcesion = Model.Dto.NroConcesion.HasValue ? Model.Dto.NroConcesion.Value.ToString("D5") : "-----";
     string estadoTramite = EnumHelper.GetDisplayNameByValue<EstadosCambioTitularEnum>(Model.Dto.EstadoTramiteId);
     string tipoParcela = Model.Dto.TipoParcela ?? "N/A";
-    string nombreSeccion = Model.Dto.NombreSeccion;
+    string nombreSeccion = Model.Dto.NombreSeccion ?? "";
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
 
 
@@ -29,7 +29,7 @@
         parcela = $"Fosa {Model.Dto.NroParcela.ToString()}";
     }
 
-    if (Model.Dto.TipoParcela == "Panteón")//panteon
+    if (Model.Dto.TipoParcela == "Panteon" || Model.Dto.TipoParcela == "Panteón")//panteon
     {
         parcela = $"Lote {Model.Dto.NroParcela.ToString()}";
     }
@@ -868,6 +868,7 @@ new ArchivoVM
 
 
         function eliminarTitular(id) {
+                if(@(Model.Dto.EstadoTramiteId) === 10) return;
         titularAEliminar = id;
         $('#confirmarEliminarModal').modal('show');
         }
@@ -876,6 +877,8 @@ new ArchivoVM
 
         document.getElementById('btnConfirmarEliminar').addEventListener('click', async function () {
         if (titularAEliminar === null) return;
+
+        
 
         const titular = titulares.find(t => t.id === titularAEliminar);
         console.log('Titular a eliminar:', titular);

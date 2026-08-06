@@ -32,9 +32,10 @@
         parcela = $"Fosa {Model.Dto.NroParcela.ToString()}";
     }
 
-    if (Model.Dto.TipoParcela == "Panteón")//panteon
+    if (Model.Dto.TipoParcela == "Panteon" || Model.Dto.TipoParcela == "Panteón")//panteon
     {
         parcela = $"Lote {Model.Dto.NroParcela.ToString()}";
+    }
     }
 }
 
@@ -1176,6 +1177,7 @@ new ArchivoVM
 
 
         function eliminarTitular(id) {
+                if (@Model.Dto.EstadoTramiteId === 10) return;
         titularAEliminar = id;
         $('#confirmarEliminarModal').modal('show');
         }

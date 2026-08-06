@@ -33,9 +33,9 @@
         parcela = $"Fosa {Model.Dto.NroParcela.ToString()}";
     }
 
-    if (Model.Dto.TipoParcela == "Panteón")//panteon
+    if (Model.Dto.TipoParcela == "Panteon" || Model.Dto.TipoParcela == "Panteón")//panteon
     {
-        parcela = $"Lote {Model.Dto.NroParcela.ToString()} ({EnumHelper.GetDisplayNameByValue<TipoNichoEnum>(Model.Dto.TipoPanteonId)})";
+        parcela = $"Lote {Model.Dto.NroParcela.ToString()} ({EnumHelper.GetDisplayNameByValue<TipoPanteonEnum>(Model.Dto.TipoPanteonId)})";
     }
 }
 
