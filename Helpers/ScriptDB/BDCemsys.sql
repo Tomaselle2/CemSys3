@@ -230,7 +230,7 @@ CREATE TABLE [dbo].[Parcelas] (
     [nroParcela] int NOT NULL,
     [nroFila] int NOT NULL,
     [cantidadDifuntos] int NOT NULL,
-    [nombrePanteon] nvarchar(50) NOT NULL,
+    [nombrePanteon] nvarchar(350) NOT NULL,
     [informacionAdicional] nvarchar(max) NOT NULL,
     [seccionId] int NOT NULL,
     [tipoNichoId] int,
