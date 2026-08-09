@@ -9,6 +9,7 @@ values
 
 update Secciones set nroParcelas = 35 where id = 66
 
+--// para saber cuantas concesiones no tiene difuntos
 
 SELECT
     c.Concesion,
@@ -27,3 +28,42 @@ LEFT JOIN ParcelaDifuntos pd
 WHERE pd.Id IS NULL
   AND c.FechaFin IS NULL      -- No está caducada
 ORDER BY c.Concesion;
+
+---------------------------------------------------
+
+--// para hacer backup manualmente
+BACKUP DATABASE cemsys
+TO DISK = 'D:\Backups\cemsys_Backup.bak'
+WITH
+    FORMAT,
+    INIT,
+    COMPRESSION,
+    STATS = 10;
+
+--// para saber donde estan los archivos de filestream
+RESTORE FILELISTONLY
+FROM DISK = 'D:\Backups\cemsys_Backup.bak';
+
+--// para restaurar un backup
+
+RESTORE DATABASE cemsys
+FROM DISK = 'D:\Backups\cemsys_Backup.bak'
+WITH
+    RECOVERY,
+    STATS = 10;
+
+--restaura la base de datos en otra carpeta el filestream
+RESTORE DATABASE CemSys
+FROM DISK = 'D:\Backups\cemsys_Backup.bak'
+WITH
+    MOVE 'CemSys'
+        TO 'C:\SQLData\cemsys.mdf',
+
+    MOVE 'CemSys_log'
+        TO 'C:\SQLData\cemsys_log.ldf',
+
+    MOVE 'CemSysFileStream'
+        TO 'C:\CemsysArchive3',
+
+    RECOVERY,
+    STATS = 10;

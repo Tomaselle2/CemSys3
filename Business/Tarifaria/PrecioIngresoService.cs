@@ -321,6 +321,80 @@ namespace CemSys3.Business.Tarifaria
             }
         }
 
-    
+
+
+        public async Task<List<CategoriaResumenDTO>> ObtenerResumenGeneralAsync()
+        {
+            var idsGeneral = new[]
+            {
+        (int)ConceptosTarifariaEnum.AperturaFosa,
+        (int)ConceptosTarifariaEnum.AperturaNichoConPlaca,
+        (int)ConceptosTarifariaEnum.AperturaNichoSinPlaca,
+        (int)ConceptosTarifariaEnum.Cremacion,
+        (int)ConceptosTarifariaEnum.PermisoRefaccion,
+        (int)ConceptosTarifariaEnum.PermisoParaColocarPlaca,
+        (int)ConceptosTarifariaEnum.Reduccion,
+    };
+
+            var idsInhumacion = new[]
+            {
+        (int)ConceptosTarifariaEnum.CierreFosa,
+        (int)ConceptosTarifariaEnum.CierreNicho,
+    };
+
+            var conceptos = await _context.ConceptosTarifaria
+                .Where(c => c.Visibilidad)
+                .ToDictionaryAsync(c => c.Id);
+
+            var precios = (await _context.PreciosTarifarias
+                .Where(p => p.Visibilidad == true)
+                .ToListAsync())
+                .ToLookup(p => p.ConceptoTarifariaId);
+
+            // Valores globales de fondo (ajustar si varían por sección)
+            decimal porcentajeFondo = precios[(int)ConceptosTarifariaEnum.PorcentajeFondoAyudaCentroSalud]
+                .FirstOrDefault(p => p.SeccionId == null)?.Precio ?? 0m;
+
+            decimal montoMinimo = precios[(int)ConceptosTarifariaEnum.MontoMinimoFondo]
+                .FirstOrDefault(p => p.SeccionId == null)?.Precio ?? 0m;
+
+            var resumen = new List<CategoriaResumenDTO>
+    {
+        ArmarCategoriaResumen("General", idsGeneral, precios, conceptos, porcentajeFondo, montoMinimo),
+        ArmarCategoriaResumen("Inhumación", idsInhumacion, precios, conceptos, porcentajeFondo, montoMinimo)
+    };
+
+            return resumen;
+        }
+
+        private CategoriaResumenDTO ArmarCategoriaResumen(
+            string nombreCategoria,
+            int[] ids,
+            ILookup<int, PreciosTarifaria> precios,
+            Dictionary<int, ConceptosTarifarium> conceptos,
+            decimal porcentajeFondo,
+            decimal montoMinimo)
+        {
+            var categoria = new CategoriaResumenDTO { Categoria = nombreCategoria };
+
+            foreach (var id in ids)
+            {
+                if (!conceptos.ContainsKey(id)) continue;
+
+                decimal precioBase = ObtenerPrecio(precios, id);
+                decimal fondoCalculado = precioBase * porcentajeFondo;
+                decimal fondoFinal = fondoCalculado < montoMinimo ? montoMinimo : fondoCalculado;
+
+                categoria.Conceptos.Add(new ConceptoResumenDTO
+                {
+                    Nombre = conceptos[id].Nombre,
+                    PrecioSinFondo = Math.Round(precioBase, 2),
+                    PrecioConFondo = Math.Round(precioBase + fondoFinal, 2)
+                });
+            }
+
+            return categoria;
+        }
+
     }
 }

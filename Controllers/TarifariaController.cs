@@ -125,9 +125,12 @@ namespace CemSys3.Controllers
         [AuthorizeRole(RolUsuario.Administrador)]
         public async Task<IActionResult> GetAllPreciosIngreso()
         {
-            IEnumerable<PrecioIngresoDTO> Listado = await _iprecioIngresoService.ObtenerTodasLasReglasAsync();
+            var reglas = (await _iprecioIngresoService.ObtenerTodasLasReglasAsync()).ToList();
+            var resumen = await _iprecioIngresoService.ObtenerResumenGeneralAsync();
 
-            string html = await _viewRenderService.RenderToStringAsync("Tarifaria/GetAllPreciosIngreso", Listado);
+            var reporte = new ReporteIngresoDTO { Reglas = reglas, Resumen = resumen };
+
+            string html = await _viewRenderService.RenderToStringAsync("Tarifaria/GetAllPreciosIngreso", reporte);
 
             var pdfBytes = await _pdfGenerator.GenerateFromHtmlAsync(
                    html,

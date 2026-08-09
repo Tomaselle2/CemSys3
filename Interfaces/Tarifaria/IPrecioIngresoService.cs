@@ -7,5 +7,6 @@ namespace CemSys3.Interfaces.Tarifaria
         Task<IEnumerable<PrecioIngresoDTO>> ObtenerTodasLasReglasAsync();
         Task<IEnumerable<PrecioIngresoDTO>> GetPreciosIngresoBy(int tipoParcelaId, int estadoDifuntoId);
         Task<IEnumerable<ConceptoIngresoDTO>> GetPreciosAperturas(int tipoParcelaId);
+        Task<List<CategoriaResumenDTO>> ObtenerResumenGeneralAsync();
     }
 }
