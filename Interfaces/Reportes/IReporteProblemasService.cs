@@ -6,5 +6,8 @@ namespace CemSys3.Interfaces.Reportes
     {
         // Concesiones vigentes (no caducadas) que no tienen ningún difunto activo
         Task<List<ReporteConcesionSinDifuntoDTO>> GetConcesionesSinDifuntos();
+
+        // Concesiones donde el titular activo es, a la vez, un difunto activo en esa misma parcela
+        Task<List<ReporteTitularEsDifuntoDTO>> GetConcesionesConTitularFallecido();
     }
 }

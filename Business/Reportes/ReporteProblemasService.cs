@@ -31,5 +31,31 @@ namespace CemSys3.Business.Reportes
                 })
                 .ToListAsync();
         }
+
+        public async Task<List<ReporteTitularEsDifuntoDTO>> GetConcesionesConTitularFallecido()
+        {
+            var query =
+                from c in _context.Concesiones.AsNoTracking()
+                where c.FechaFin == null
+                from h in c.HistorialTitularesConcesiones
+                where h.FechaFin == null
+                from pd in c.Parcela.ParcelaDifuntos
+                where pd.FechaRetiro == null && pd.DifuntoId == h.PersonaId
+                select new ReporteTitularEsDifuntoDTO
+                {
+                    Concesion = c.Concesion,
+                    Seccion = c.Parcela.Seccion.Nombre,
+                    NroFila = c.Parcela.NroFila,
+                    NroParcela = c.Parcela.NroParcela,
+                    PersonaId = h.PersonaId!.Value,
+                    Nombre = h.Persona.Nombre ?? "",
+                    Apellido = h.Persona.Apellido ?? "",
+                    Vencimiento = c.Vencimiento
+                };
+
+            return await query
+                .OrderBy(x => x.Concesion)
+                .ToListAsync();
+        }
     }
 }

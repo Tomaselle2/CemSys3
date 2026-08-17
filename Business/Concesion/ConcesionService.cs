@@ -343,7 +343,8 @@ namespace CemSys3.Business.Concesion
             resultado.Paginacion.TotalRegistros = total;
 
             var concesionesPagina = await query
-                .OrderByDescending(c => c.TramiteId)
+                .OrderBy(c => c.Tramite.EstadoActualId == (int)EstadosConcesionEnum.SinContrato)
+                .ThenByDescending(c => c.TramiteId)
                 .Skip((resultado.Paginacion.PaginaActual - 1) * porPagina)
                 .Take(porPagina)
                 .Select(c => new
