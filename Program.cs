@@ -1,5 +1,6 @@
 using CemSys3.Business.Arbol;
 using CemSys3.Business.Archivo;
+using CemSys3.Business.Backup;
 using CemSys3.Business.Calendario;
 using CemSys3.Business.CargaDifunto;
 using CemSys3.Business.CargaInicialCemSys;
@@ -30,6 +31,7 @@ using CemSys3.DTOs.TramitesConcesion.Traslado;
 using CemSys3.Helpers.PDF;
 using CemSys3.Interfaces;
 using CemSys3.Interfaces.Archivo;
+using CemSys3.Interfaces.Backup;
 using CemSys3.Interfaces.Calendario;
 using CemSys3.Interfaces.CargaDifunto;
 using CemSys3.Interfaces.CargaIncialCemSys;
@@ -75,6 +77,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 
 //Inyectar dependencias de servicios personalizados
+builder.Services.AddScoped<IBackupService, BackupService>();
 builder.Services.AddScoped<ILogin, LoginService>();
 builder.Services.AddScoped<IUsuario, UsuarioService>();
 builder.Services.AddScoped<IEmpresaSepelio, EmpresaSepelioService>();
