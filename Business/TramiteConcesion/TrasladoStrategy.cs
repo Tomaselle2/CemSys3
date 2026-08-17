@@ -342,16 +342,6 @@ namespace CemSys3.Business.TramiteConcesion
                         if (historialParcelaActual != null)
                             historialParcelaActual.FechaFin = traslado.FechaPendiente;
 
-                        // 2. Registrar nueva parcela en historial
-                        //_context.HistorialParcelasConcesions.Add(new HistorialParcelasConcesion
-                        //{
-                        //    ConcesionId = concesion.TramiteId,
-                        //    ParcelaId = parcelaDestino.Id,
-                        //    FechaInicio = traslado.FechaPendiente ?? DateTime.Now,
-                        //    FechaFin = null,
-                        //    TramiteOrigenId = tramiteId
-                        //});
-
                         await _historialEstadosService.CerrarHistorialParcelaConcesion(
                                 concesion.TramiteId,
                                 traslado.FechaPendiente ?? DateTime.Now);

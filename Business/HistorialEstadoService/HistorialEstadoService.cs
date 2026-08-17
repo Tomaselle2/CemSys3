@@ -363,6 +363,8 @@ namespace CemSys3.Business.HistorialEstadoService
                 historial.FechaFin = fechaFin;
             }
 
+            await _context.SaveChangesAsync();
+
         }
 
         public async Task CrearHistorialParcelaConcesion(int concesionId, int parcelaId, int tramiteId, DateTime fechaInicio)
@@ -388,6 +390,7 @@ namespace CemSys3.Business.HistorialEstadoService
                     TramiteOrigenId = tramiteId
                 });
 
+            await _context.SaveChangesAsync();
         }
     }
 }
