@@ -1,0 +1,63 @@
+﻿@model List<CemSys3.DTOs.Backup.BackupEjecucionDto>
+@{
+    ViewData["Title"] = "Backups CemSys";
+}
+<div class="page-header-container">
+    <a asp-action="Index" asp-controller="Configuracion" class="btn btn-secondary m-3" title="Configuración">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <h1 class="title-page">Últimas ejecuciones de backup - CemSys</h1>
+</div>
+
+@if (TempData["Exito"] != null)
+{
+    <div class="alert alert-success">@TempData["Exito"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<form asp-controller="Backup" asp-action="EjecutarManual" method="post" class="mb-3">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-primary"
+            onclick="return confirm('¿Ejecutar el backup de CemSys ahora?');">
+        Ejecutar backup manual
+    </button>
+    <a asp-controller="Backup" asp-action="Index" class="btn btn-outline-secondary">
+        Actualizar
+    </a>
+</form>
+
+<table class="table table-striped table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Fecha y hora</th>
+            <th>Origen</th>
+            <th>Estado</th>
+            <th>Duración</th>
+            <th>Mensaje</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="5">Todavía no hay ejecuciones registradas.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.FechaEjecucion.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                    <td>@item.Origen</td>
+                    <td><span class="badge @item.EstadoCss">@item.EstadoTexto</span></td>
+                    <td>@item.Duracion</td>
+                    <td>@item.Mensaje</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
