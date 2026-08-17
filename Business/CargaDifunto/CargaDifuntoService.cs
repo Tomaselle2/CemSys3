@@ -11,6 +11,7 @@ using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Models;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Cms;
 
 namespace CemSys3.Business.CargaDifunto
 {
@@ -63,7 +64,7 @@ namespace CemSys3.Business.CargaDifunto
                         NroSerie = dto.Difunto.NroSerie,
                         NroAge = dto.Difunto.NroAge,
                         EstadoDifuntoId = dto.Difunto.EstadoDifuntoId,
-                        FechaIngreso = dto.Difunto.FechaIngreso
+                        FechaIngreso = dto.Difunto.FechaIngreso ?? DateTime.Now
                     };
 
                     await _personaService.UpdateDatosIngresoTitularFallecido(difunto);
@@ -98,7 +99,7 @@ namespace CemSys3.Business.CargaDifunto
                 {
                     ParcelaId = dto.ParcelaId,
                     DifuntoId = difuntoId,
-                    FechaIngreso = dto.Difunto.FechaIngreso, // antes se seteaba en null y se "parchaba" después con un re-query
+                    FechaIngreso = dto.Difunto.FechaIngreso ?? DateTime.Now,
                     TramiteIngresoId = null
                 };
                 _context.ParcelaDifuntos.Add(parcelaDifunto);
@@ -137,7 +138,7 @@ namespace CemSys3.Business.CargaDifunto
                     concesion.UsuarioId = dto.UsuarioLogueadoId;
                     concesion.EstadoTramiteId = (int)EstadosConcesionEnum.SinContrato;
                     concesion.MensajeParcela = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} para difunto {difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} se genera concesión en estado '{EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>((int)EstadosConcesionEnum.SinContrato)}'.";
-                    concesion.FechaInicio = difunto.FechaIngreso;
+                    concesion.FechaInicio = difunto.FechaIngreso ?? DateTime.Now;
                     concesion.InformacionAdicional = $"\n● El {DateTime.Now.ToString("dd/MM/yyyy")} en {ubicacion} se genera concesión en estado '{EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>((int)EstadosConcesionEnum.SinContrato)}'.";
                     GenericResultDTO resultadoConcesion = await _concesionService.Add(concesion);
                 }
@@ -149,8 +150,9 @@ namespace CemSys3.Business.CargaDifunto
                     concesion.ParcelaId = parcela.Id;
                     concesion.TipoParcela = EnumHelper.GetDisplayNameByValue<TipoParcelaEnum>(parcela.TipoParcelaId ?? 0);
                     concesion.UsuarioId = dto.UsuarioLogueadoId;
-                    concesion.FechaInicio = difunto.FechaIngreso;
+                    concesion.FechaInicio = difunto.FechaIngreso ?? DateTime.Now;
                     concesion.EstadoTramiteId = (int)EstadosConcesionEnum.Vigente;
+                    concesion.Vencimiento = new DateOnly(9999,12,30);
                     GenericResultDTO resultadoConcesion = await _concesionService.Add(concesion);
                 }
 

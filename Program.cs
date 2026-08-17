@@ -18,6 +18,7 @@ using CemSys3.Business.Parcela;
 using CemSys3.Business.PDF;
 using CemSys3.Business.Persona;
 using CemSys3.Business.PlantillaTramite;
+using CemSys3.Business.Reportes;
 using CemSys3.Business.Seccion;
 using CemSys3.Business.Tarea;
 using CemSys3.Business.Tarifaria;
@@ -49,6 +50,7 @@ using CemSys3.Interfaces.Parcela;
 using CemSys3.Interfaces.PDF;
 using CemSys3.Interfaces.Persona;
 using CemSys3.Interfaces.PlantillaTramite;
+using CemSys3.Interfaces.Reportes;
 using CemSys3.Interfaces.Seccion;
 using CemSys3.Interfaces.Tarea;
 using CemSys3.Interfaces.Tarifaria;
@@ -112,6 +114,7 @@ builder.Services.AddScoped<ICalendario, CalendarioService>();
 builder.Services.AddScoped<IEstadistica, EstadisticaService>();
 builder.Services.AddScoped<IActualizarConcesionesAutomaticas, ActualizarConcesionesAutomaticas>();
 builder.Services.AddScoped<IHistorialContratosService, HistorialContratosService>();
+builder.Services.AddScoped<IReporteProblemasService, ReporteProblemasService>();
 
 // =========================
 // STRATEGIES
