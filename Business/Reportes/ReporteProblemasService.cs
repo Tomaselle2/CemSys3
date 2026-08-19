@@ -57,5 +57,32 @@ namespace CemSys3.Business.Reportes
                 .OrderBy(x => x.Concesion)
                 .ToListAsync();
         }
+
+        public async Task<List<ReporteParcelaConMultiplesConcesionesDTO>> GetParcelasConMultiplesConcesiones()
+        {
+            var parcelasConDuplicados = _context.Concesiones
+                .Where(c => c.Visibilidad == true && c.FechaFin == null)
+                .GroupBy(c => c.ParcelaId)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key);
+
+            return await _context.Concesiones
+                .AsNoTracking()
+                .Where(c => c.Visibilidad == true
+                    && c.FechaFin == null
+                    && parcelasConDuplicados.Contains(c.ParcelaId))
+                .OrderBy(c => c.ParcelaId)
+                .ThenBy(c => c.TramiteId)
+                .Select(c => new ReporteParcelaConMultiplesConcesionesDTO
+                {
+                    Concesion = c.Concesion,
+                    TipoParcelaId = c.Parcela.TipoParcelaId,
+                    Seccion = c.Parcela.Seccion.Nombre,
+                    NroFila = c.Parcela.NroFila,
+                    NroParcela = c.Parcela.NroParcela,
+                    Vencimiento = c.Vencimiento
+                })
+                .ToListAsync();
+        }
     }
 }

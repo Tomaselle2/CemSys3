@@ -65,5 +65,25 @@
             </div>
         </div>
 
+        <!-- Reporte: Parcelas con múltiples concesiones activas -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-diagram-3-fill fs-3 text-secondary me-2"></i>
+                        <h5 class="card-title mb-0">Parcelas con múltiples concesiones</h5>
+                    </div>
+                    <p class="card-text text-muted flex-grow-1">
+                        Parcelas que tienen más de una concesión vigente al mismo tiempo.
+                    </p>
+                    <a data-no-loader class="btn btn-success align-self-start"
+                       asp-action="ExportarExcelParcelasConMultiplesConcesiones"
+                       asp-controller="ReporteProblemas">
+                        <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>

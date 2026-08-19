@@ -9,5 +9,8 @@ namespace CemSys3.Interfaces.Reportes
 
         // Concesiones donde el titular activo es, a la vez, un difunto activo en esa misma parcela
         Task<List<ReporteTitularEsDifuntoDTO>> GetConcesionesConTitularFallecido();
+
+        // Parcelas con más de una concesión vigente simultáneamente
+        Task<List<ReporteParcelaConMultiplesConcesionesDTO>> GetParcelasConMultiplesConcesiones();
     }
 }
