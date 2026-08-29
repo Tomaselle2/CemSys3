@@ -12,5 +12,8 @@ namespace CemSys3.Interfaces.Reportes
 
         // Parcelas con más de una concesión vigente simultáneamente
         Task<List<ReporteParcelaConMultiplesConcesionesDTO>> GetParcelasConMultiplesConcesiones();
+
+        // Difuntos activos (sin retiro) vinculados a más de una concesión vigente
+        Task<List<ReporteDifuntoEnMultiplesConcesionesDTO>> GetDifuntosEnMultiplesConcesionesActivas();
     }
 }

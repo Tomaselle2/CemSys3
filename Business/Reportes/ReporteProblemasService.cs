@@ -84,5 +84,36 @@ namespace CemSys3.Business.Reportes
                 })
                 .ToListAsync();
         }
+
+        public async Task<List<ReporteDifuntoEnMultiplesConcesionesDTO>> GetDifuntosEnMultiplesConcesionesActivas()
+        {
+            var plano = await (
+                from pd in _context.ParcelaDifuntos.AsNoTracking()
+                where pd.FechaRetiro == null
+                join c in _context.Concesiones.AsNoTracking()
+                    on pd.ParcelaId equals c.ParcelaId
+                where c.Visibilidad == true && c.FechaFin == null
+                select new ReporteDifuntoEnMultiplesConcesionesDTO
+                {
+                    PersonaId = pd.DifuntoId,
+                    Nombre = pd.Difunto.Nombre ?? "",
+                    Apellido = pd.Difunto.Apellido ?? "",
+                    Concesion = c.Concesion,
+                    TipoParcelaId = pd.Parcela.TipoParcelaId,
+                    Seccion = pd.Parcela.Seccion.Nombre,
+                    NroFila = pd.Parcela.NroFila,
+                    NroParcela = pd.Parcela.NroParcela,
+                    Vencimiento = c.Vencimiento
+                }
+            ).ToListAsync();
+
+            return plano
+                .GroupBy(x => x.PersonaId)
+                .Where(g => g.Select(x => x.Concesion).Distinct().Count() > 1)
+                .SelectMany(g => g)
+                .OrderBy(x => x.PersonaId)
+                .ThenBy(x => x.Concesion)
+                .ToList();
+        }
     }
 }
