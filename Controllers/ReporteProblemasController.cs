@@ -210,5 +210,64 @@ namespace CemSys3.Controllers
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 fileName);
         }
+
+        // ─── Exportar Excel: Personas con DNI duplicado ────────────────────────────
+        [AuthorizeRole(RolUsuario.Administrador)]
+        [HttpGet]
+        public async Task<IActionResult> ExportarExcelPersonasDniDuplicado()
+        {
+            var datos = await _reporteProblemasService.GetPersonasConDniDuplicado();
+
+            using var wb = new XLWorkbook();
+            var ws = wb.Worksheets.Add("DniDuplicado");
+
+            string[] headers = { "DNI", "Nombre", "Categoría", "F. Nacimiento", "F. Defunción", "Correo", "Celular" };
+            for (int i = 0; i < headers.Length; i++)
+            {
+                var cell = ws.Cell(1, i + 1);
+                cell.Value = headers[i];
+                cell.Style.Font.Bold = true;
+                cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#2E75B6");
+                cell.Style.Font.FontColor = XLColor.White;
+                cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            }
+
+            int fila = 2;
+            string? dniAnterior = null;
+            foreach (var item in datos)
+            {
+                string categoria = item.CategoriaPersonaId.HasValue
+                    ? EnumHelper.GetDisplayNameByValue<CategoriaPersonaEnum>(item.CategoriaPersonaId.Value)
+                    : "---";
+
+                ws.Cell(fila, 1).Value = item.Dni;
+                ws.Cell(fila, 2).Value = $"{item.Apellido.ToUpper()}, {item.Nombre.ToUpper()}";
+                ws.Cell(fila, 3).Value = categoria;
+                ws.Cell(fila, 4).Value = item.FechaNacimiento?.ToString("dd/MM/yyyy") ?? "";
+                ws.Cell(fila, 5).Value = item.FechaDefuncion?.ToString("dd/MM/yyyy") ?? "";
+                ws.Cell(fila, 6).Value = item.Correo ?? "";
+                ws.Cell(fila, 7).Value = item.Celular ?? "";
+
+                // Separador visual entre grupos de DNI distintos
+                if (dniAnterior != null && dniAnterior != item.Dni)
+                {
+                    ws.Row(fila).Style.Border.TopBorder = XLBorderStyleValues.Medium;
+                }
+                dniAnterior = item.Dni;
+
+                fila++;
+            }
+
+            ws.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            wb.SaveAs(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            string fileName = $"PersonasDniDuplicado_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+            return File(stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                fileName);
+        }
     }
 }

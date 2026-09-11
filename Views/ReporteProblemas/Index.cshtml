@@ -106,5 +106,26 @@
             </div>
         </div>
 
+        <!-- Reporte: Personas con DNI duplicado -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-person-vcard-fill fs-3 text-secondary me-2"></i>
+                        <h5 class="card-title mb-0">Personas con DNI duplicado</h5>
+                    </div>
+                    <p class="card-text text-muted flex-grow-1">
+                        Personas (titulares y/o difuntos) que comparten el mismo número
+                        de DNI cargado en el sistema.
+                    </p>
+                    <a ata-no-loader class="btn btn-success align-self-start"
+                       asp-action="ExportarExcelPersonasDniDuplicado"
+                       asp-controller="ReporteProblemas">
+                        <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>

@@ -44,6 +44,11 @@ namespace CemSys3.Business.CargaInicialCemSys
         private static readonly DateOnly FechaPorDefecto1900 = new(1900, 1, 1);
         private static readonly DateOnly FechaVtoPanteon = new(9999, 12, 30);
 
+        // Umbral usado en BuscarOCrearPersonaAsync: números de documento por debajo de
+        // esto no se consideran "confiables" para hacer match entre filas. Ver comentario
+        // en ese método.
+        private const int UmbralDocumentoConfiable = 20000;
+
         public CargaInicialService(AppDbContext context, IHistorialEstados historialEstados, bool modoPrueba)
         {
             _context = context;
@@ -97,8 +102,25 @@ namespace CemSys3.Business.CargaInicialCemSys
                 // El encabezado termina con una coma extra -> columna fantasma al final, se ignora sola.
             };
 
-            using var stream = excel.OpenReadStream();
-            using var reader = new StreamReader(stream, EncodingCsvEntrada);
+            string textoCsv;
+            using (var stream = excel.OpenReadStream())
+            using (var streamReader = new StreamReader(stream, EncodingCsvEntrada))
+            {
+                // NUEVO: el csv que exporta el sistema viejo no encierra OBSERVACIONES entre
+                // comillas cuando el texto original tiene un salto de línea real. Sin comillas,
+                // ese salto de línea corta la fila en 2 (o hasta 3) líneas físicas -> CsvHelper
+                // la lee como filas separadas, una le falta el final y otra queda "fantasma"
+                // (sin Nro. ni Concesión válidos). Se reconstruye antes de parsear.
+                //
+                // OJO: esto asume que el csv de origen NUNCA usa comillas reales para encerrar
+                // campos multilínea (verificado en el archivo de ejemplo: 0 comillas en todo el
+                // archivo). Si en algún momento el exportador empieza a quotear bien, este
+                // preprocesamiento deja de hacer falta y no debería romper nada, pero convendría
+                // revisarlo.
+                textoCsv = ReconstruirLineasQuebradas(streamReader);
+            }
+
+            using var reader = new StringReader(textoCsv);
             using var csv = new CsvReader(reader, config);
 
             csv.Read();
@@ -116,6 +138,58 @@ namespace CemSys3.Business.CargaInicialCemSys
             }
 
             return filas;
+        }
+
+        /// <summary>
+        /// Vuelve a unir filas que quedaron partidas por un salto de línea real dentro de
+        /// OBSERVACIONES (sin comillas). Cualquier línea que NO empiece con un número seguido
+        /// de coma (la columna "Nro.", siempre numérica según el formato del csv) se considera
+        /// continuación de la fila anterior y se pega al final de esta, reemplazando el salto
+        /// de línea original por un espacio.
+        /// </summary>
+        private static string ReconstruirLineasQuebradas(TextReader reader)
+        {
+            var lineasReconstruidas = new List<string>();
+
+            string? encabezado = reader.ReadLine();
+            if (encabezado != null)
+                lineasReconstruidas.Add(encabezado);
+
+            var filaEnConstruccion = new StringBuilder();
+            string? linea;
+
+            while ((linea = reader.ReadLine()) != null)
+            {
+                if (EsInicioDeFila(linea))
+                {
+                    if (filaEnConstruccion.Length > 0)
+                        lineasReconstruidas.Add(filaEnConstruccion.ToString());
+
+                    filaEnConstruccion.Clear();
+                    filaEnConstruccion.Append(linea);
+                }
+                else if (filaEnConstruccion.Length > 0)
+                {
+                    // Continuación de OBSERVACIONES: se pega con un espacio en vez del salto
+                    // de línea original (que no se puede preservar tal cual sin volver a
+                    // quotear el campo).
+                    filaEnConstruccion.Append(' ').Append(linea);
+                }
+                // Si todavía no arrancó ninguna fila (línea rara antes de la primera fila
+                // válida), se descarta.
+            }
+
+            if (filaEnConstruccion.Length > 0)
+                lineasReconstruidas.Add(filaEnConstruccion.ToString());
+
+            return string.Join("\n", lineasReconstruidas);
+        }
+
+        private static bool EsInicioDeFila(string linea)
+        {
+            var indiceComa = linea.IndexOf(',');
+            var posibleNro = indiceComa >= 0 ? linea[..indiceComa] : linea;
+            return int.TryParse(posibleNro.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out _);
         }
 
         // ---------------------------------------------------------------
@@ -411,9 +485,25 @@ namespace CemSys3.Business.CargaInicialCemSys
                         celular: null,
                         categoriaPersonaId: (int)CategoriaPersonaEnum.Fallecido,
                         fechaDefuncion: fechaFallecimiento,
-                        estadoDifuntoId: (int)EstadoDifuntoEnum.CuerpoCompleto);
+                        estadoDifuntoId: (int)EstadoDifuntoEnum.CuerpoCompleto,
+                        // NUEVO: si OBSERVACIONES trae texto, queda como InformacionAdicional
+                        // de la persona recién creada.
+                        infoAdicional: NuloSiVacio(fila.Observaciones));
 
                     await _historialEstados.VincularTramiteAPersona(tramiteId, difuntoId);
+
+                    // NUEVO: UBICACION_ACTUAL=0 significa que ESTE difunto puntual ya no está
+                    // en la parcela (se trasladó/retiró en algún momento), sin importar si la
+                    // concesión en general sigue vigente. Igual que con la concesión caducada,
+                    // no hay una fecha real de retiro en el csv -> se usa FechaInicio + 1 día
+                    // (o se reutiliza la fecha de cierre de la concesión si además está caducada,
+                    // para no generar dos fechas distintas para lo que es, en la práctica, el
+                    // mismo evento de cierre).
+                    bool difuntoFueraDeParcela = string.Equals((fila.UbicacionActual ?? "").Trim(), "0", StringComparison.Ordinal);
+                    bool difuntoRetirado = esCaducada || difuntoFueraDeParcela;
+                    DateTime? fechaRetiroDifunto = difuntoRetirado
+                        ? (fechaCierre ?? fechaInicio.AddDays(1).ToDateTime(TimeOnly.MinValue))
+                        : null;
 
                     await _context.ParcelaDifuntos.AddAsync(new Models.ParcelaDifunto
                     {
@@ -421,12 +511,10 @@ namespace CemSys3.Business.CargaInicialCemSys
                         DifuntoId = difuntoId,
                         FechaIngreso = fechaInicio.ToDateTime(TimeOnly.MinValue),
                         TramiteIngresoId = null,
-                        // Si la concesión ya está caducada, este difunto también se marca
-                        // como retirado (no queda ocupando la parcela).
-                        FechaRetiro = esCaducada ? fechaCierre : null
+                        FechaRetiro = fechaRetiroDifunto
                     });
 
-                    if (!esCaducada)
+                    if (!difuntoRetirado)
                     {
                         var parcelaFresca = await _context.Parcelas.FindAsync(parcela.Id);
                         if (parcelaFresca != null)
@@ -498,11 +586,28 @@ namespace CemSys3.Business.CargaInicialCemSys
             string? celular,
             int categoriaPersonaId,
             DateOnly? fechaDefuncion,
-            int? estadoDifuntoId)
+            int? estadoDifuntoId,
+            string? infoAdicional = null) // NUEVO: default, así el llamado del titular (que no manda este parámetro) sigue compilando
         {
-            var existente = await _context.Personas.FirstOrDefaultAsync(p => p.Dni == dni);
-            if (existente != null)
-                return existente.Id;
+            // NUEVO: en el sistema viejo, el "documento" puede ser un DNI/CUIT real o una
+            // numeración interna corta (tipo "D" = número de difunto, número de cliente,
+            // etc.). Esas numeraciones internas se repiten entre sí y entre tipos distintos
+            // (el difunto Nº1000 y el cliente Nº1000 son personas distintas), así que no
+            // sirven para detectar "esta persona ya existe". Por debajo del umbral, se crea
+            // una persona nueva siempre, sin buscar coincidencia por dni.
+            //
+            // Umbral elegido en base al csv real: los documentos tipo "D" van de 1 a ~20000
+            // en el 96% de los casos; los pocos que superan eso resultaron ser DNIs reales
+            // cargados por error en ese campo, y esos sí conviene seguir deduplicando.
+            bool numeroConfiable = int.TryParse(dni, NumberStyles.Integer, CultureInfo.InvariantCulture, out var dniNumerico)
+                && dniNumerico >= UmbralDocumentoConfiable;
+
+            if (numeroConfiable)
+            {
+                var existente = await _context.Personas.FirstOrDefaultAsync(p => p.Dni == dni);
+                if (existente != null)
+                    return existente.Id;
+            }
 
             var nombreCompleto = $"{nombre} {apellido}".Trim();
             var sexo = SexoDetector.DesdeCsvOHeuristica(sexoCsv, nombre);
@@ -519,7 +624,8 @@ namespace CemSys3.Business.CargaInicialCemSys
                 FechaDefuncion = fechaDefuncion,
                 CategoriaPersonaId = categoriaPersonaId,
                 EstadoDifuntoId = estadoDifuntoId,
-                Domicilio = "Desconocido - Modificar"
+                Domicilio = "Desconocido - Modificar",
+                InformacionAdicional = infoAdicional == null ? null : infoAdicional + "\n"
             };
 
             await _context.Personas.AddAsync(nueva);

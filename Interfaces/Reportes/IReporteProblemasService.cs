@@ -15,5 +15,8 @@ namespace CemSys3.Interfaces.Reportes
 
         // Difuntos activos (sin retiro) vinculados a más de una concesión vigente
         Task<List<ReporteDifuntoEnMultiplesConcesionesDTO>> GetDifuntosEnMultiplesConcesionesActivas();
+
+        // Personas (titulares o difuntos) con el mismo DNI cargado
+        Task<List<ReportePersonaDniDuplicadoDTO>> GetPersonasConDniDuplicado();
     }
 }

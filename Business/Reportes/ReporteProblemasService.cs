@@ -115,5 +115,37 @@ namespace CemSys3.Business.Reportes
                 .ThenBy(x => x.Concesion)
                 .ToList();
         }
+
+        public async Task<List<ReportePersonaDniDuplicadoDTO>> GetPersonasConDniDuplicado()
+        {
+            var personasConDni = _context.Personas
+                .AsNoTracking()
+                .Where(p => p.Visibilidad == true
+                    && p.Dni != null
+                    && p.Dni.Trim() != "");
+
+            var dnisDuplicados = personasConDni
+                .GroupBy(p => p.Dni)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key);
+
+            return await personasConDni
+                .Where(p => dnisDuplicados.Contains(p.Dni))
+                .OrderBy(p => p.Dni)
+                .ThenBy(p => p.Id)
+                .Select(p => new ReportePersonaDniDuplicadoDTO
+                {
+                    Dni = p.Dni!,
+                    PersonaId = p.Id,
+                    Nombre = p.Nombre ?? "",
+                    Apellido = p.Apellido ?? "",
+                    CategoriaPersonaId = p.CategoriaPersonaId,
+                    FechaNacimiento = p.FechaNacimiento,
+                    FechaDefuncion = p.FechaDefuncion,
+                    Correo = p.Correo,
+                    Celular = p.Celular
+                })
+                .ToListAsync();
+        }
     }
 }

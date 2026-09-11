@@ -75,6 +75,12 @@ namespace CemSys3.DTOs.CargaInicial
         [Name("FECHA_FALLECIMIENTO")]
         public string? FechaFallecimiento { get; set; }
 
+        [Name("UBICACION_ACTUAL")]
+        public string? UbicacionActual { get; set; }
+
+        [Name("OBSERVACIONES")]
+        public string? Observaciones { get; set; }
+
         /// <summary>Número de línea real dentro del archivo (para trazabilidad en el log de errores).</summary>
         [Ignore]
         public int NumeroFilaOriginal { get; set; }

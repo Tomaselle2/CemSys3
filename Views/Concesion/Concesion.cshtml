@@ -12,7 +12,35 @@
 @await Html.PartialAsync("Concesion/_menuConcesion", Model.Dto.TramiteId)
 
 <style>
-    
+    .difunto-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .difunto-info-adicional {
+        min-width: 0;
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+        .difunto-info-adicional p {
+            margin-bottom: 0;
+        }
+
+    /* Pantallas chicas */
+    @@media (max-width: 768px) {
+        .difunto-info-grid {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .difunto-info-adicional {
+            margin-top: 0.5rem;
+        }
+    }
 </style>
 
 @{
@@ -153,32 +181,67 @@ new HistorialOffcanvasVM
     }
 </div>
 
-@foreach (var difunto in Model.Dto.Difuntos)
-{
-    <div class="cardConcesion mb-3 my-3">
-        <div class="cardConcesion-content">
-            <div class="d-flex justify-content-between align-items-center">
-                <h3 class="mb-0">
-                    <i class="bi bi-person-fill-x text-primary"></i> Difunto
-                </h3>
-                <a asp-action="HistorialPersona"
-                   asp-controller="Persona"
-                   asp-route-id="@difunto.Id"
-                   data-skip-loader="true"
-                   target="_blank"
-                   title="Historial difunto">
-                    <i class="bi bi-arrow-up-right-square-fill fs-2"></i>
-                </a>
+    @foreach (var difunto in Model.Dto.Difuntos)
+    {
+        <div class="cardConcesion mb-3 my-3">
+            <div class="cardConcesion-content">
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">
+                        <i class="bi bi-person-fill-x text-primary"></i> Difunto
+                    </h3>
+
+                    <a asp-action="HistorialPersona"
+                       asp-controller="Persona"
+                       asp-route-id="@difunto.Id"
+                       data-skip-loader="true"
+                       target="_blank"
+                       title="Historial difunto">
+                        <i class="bi bi-arrow-up-right-square-fill fs-2"></i>
+                    </a>
+                </div>
+
+                <div class="difunto-info-grid">
+
+                    <!-- Información principal -->
+                    <div>
+                        <p>
+                            <strong>Nombre:</strong>
+                            @difunto.Apellido?.ToUpper(), @difunto.Nombre?.ToUpper()
+                        </p>
+
+                        <p>
+                            <strong>DNI:</strong>
+                            @(!string.IsNullOrEmpty(difunto.DNI) ? difunto.DNI : "")
+                        </p>
+
+                        <p>
+                            <strong>Ingreso:</strong>
+                            @(!string.IsNullOrEmpty(difunto.FechaIngreso.ToString())
+                                ? difunto.FechaIngreso?.ToString("dd/MM/yyyy HH:mm")
+                                : "")
+                        </p>
+
+                        <p>
+                            <strong>Estado:</strong>
+                            @(EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(
+                                difunto.EstadoDifuntoId ?? 0))
+                        </p>
+                    </div>
+
+                    <!-- Información adicional -->
+                    <div class="difunto-info-adicional">
+                        <p>
+                            <strong>Información:</strong>
+                            @difunto?.InfoAdicional
+                        </p>
+                    </div>
+
+                </div>
+
             </div>
-            <p><strong>Nombre:</strong> @difunto.Apellido?.ToUpper(), @difunto.Nombre?.ToUpper()</p>
-            <p><strong>DNI:</strong> @(!string.IsNullOrEmpty(difunto.DNI) ? difunto.DNI : "")</p>
-            <p><strong>Ingreso:</strong> @(!string.IsNullOrEmpty(difunto.FechaIngreso.ToString()) ? difunto.FechaIngreso?.ToString("dd/MM/yyyy HH:mm") : "")</p>
-            <p>
-                <strong>Estado:</strong> @(EnumHelper.GetDisplayNameByValue<EstadoDifuntoEnum>(difunto.EstadoDifuntoId ?? 0))
-            </p>
         </div>
-    </div>
-}
+    }
     <div class="cardConcesion mb-3 my-3">
         <div class="cardConcesion-content">
             <div class="d-flex justify-content-between align-items-center">

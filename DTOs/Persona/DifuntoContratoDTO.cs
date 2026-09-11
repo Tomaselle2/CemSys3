@@ -8,5 +8,6 @@
         public string?Apellido { get; set; }
         public DateTime? FechaIngreso { get; set; }
         public int? EstadoDifuntoId { get; set; }
+        public string? InfoAdicional { get; set; }
     }
 }

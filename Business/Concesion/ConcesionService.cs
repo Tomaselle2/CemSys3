@@ -587,7 +587,8 @@ namespace CemSys3.Business.Concesion
                         Nombre = p.Difunto.Nombre,
                         Apellido = p.Difunto.Apellido,
                         FechaIngreso = p.FechaIngreso,
-                        EstadoDifuntoId = p.Difunto.EstadoDifuntoId
+                        EstadoDifuntoId = p.Difunto.EstadoDifuntoId,
+                        InfoAdicional = p.Difunto.InformacionAdicional
                     }).ToListAsync();
             }
             else
