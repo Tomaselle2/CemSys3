@@ -13,36 +13,47 @@
 
 <style>
     .difunto-info-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+        display: flex;
+        align-items: flex-start; /* Alinea ambas columnas arriba */
         gap: 2rem;
-        align-items: start;
     }
+
+        .difunto-info-grid > div {
+            flex: 1 1 0;
+            min-width: 0;
+            align-self: flex-start; /* Refuerza que cada columna empiece arriba */
+        }
 
     .difunto-info-adicional {
         min-width: 0;
         white-space: pre-line;
         overflow-wrap: anywhere;
         word-break: break-word;
+        align-self: flex-start;
     }
 
         .difunto-info-adicional p {
+            margin-top: 0;
             margin-bottom: 0;
         }
+
+    /* Forzar que el contenido de la tarjeta no se centre verticalmente */
+    .cardConcesion-content {
+        display: block !important;
+    }
 
     /* Pantallas chicas */
     @@media (max-width: 768px) {
         .difunto-info-grid {
-            grid-template-columns: 1fr;
+            flex-direction: column;
             gap: 0;
         }
 
         .difunto-info-adicional {
-            margin-top: 0.5rem;
+            margin-top: 5px;
         }
     }
 </style>
-
 @{
     string nroConcesion = Model.Dto.NroConcesion.HasValue ? Model.Dto.NroConcesion.Value.ToString("D5") : "-----";
     string estadoTramite = EnumHelper.GetDisplayNameByValue<EstadosConcesionEnum>(Model.Dto.EstadoTramiteId);
@@ -231,10 +242,7 @@ new HistorialOffcanvasVM
 
                     <!-- Información adicional -->
                     <div class="difunto-info-adicional">
-                        <p>
-                            <strong>Información:</strong>
-                            @difunto?.InfoAdicional
-                        </p>
+                        <p><strong>Información:</strong> @difunto?.InfoAdicional</p>
                     </div>
 
                 </div>

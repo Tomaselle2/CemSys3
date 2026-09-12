@@ -1,4 +1,5 @@
-﻿create database cemsys;
+﻿create database cemsys
+COLLATE SQL_Latin1_General_CP1_CI_AS;
 go
 use cemsys;
 go
