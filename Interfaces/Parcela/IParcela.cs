@@ -33,5 +33,9 @@ namespace CemSys3.Interfaces.Parcela
 
         Task<int> ImportarParcelas(List<ParcelaDTO> parcelas);
 
+        Task<IEnumerable<ParcelaSelectDTO>> GetParcelasEliminables(int seccionId);
+
+        Task<GenericResultDTO> EliminarParcela(int parcelaId);
+
     }
 }

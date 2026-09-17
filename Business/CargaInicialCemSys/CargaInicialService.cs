@@ -44,10 +44,6 @@ namespace CemSys3.Business.CargaInicialCemSys
         private static readonly DateOnly FechaPorDefecto1900 = new(1900, 1, 1);
         private static readonly DateOnly FechaVtoPanteon = new(9999, 12, 30);
 
-        // Umbral usado en BuscarOCrearPersonaAsync: números de documento por debajo de
-        // esto no se consideran "confiables" para hacer match entre filas. Ver comentario
-        // en ese método.
-        private const int UmbralDocumentoConfiable = 20000;
 
         public CargaInicialService(AppDbContext context, IHistorialEstados historialEstados, bool modoPrueba)
         {
@@ -509,7 +505,7 @@ namespace CemSys3.Business.CargaInicialCemSys
                     {
                         ParcelaId = parcela.Id,
                         DifuntoId = difuntoId,
-                        FechaIngreso = fechaInicio.ToDateTime(TimeOnly.MinValue),
+                        FechaIngreso = fechaFallecimiento != null ? fechaFallecimiento?.ToDateTime(TimeOnly.MinValue) : fechaInicio.ToDateTime(TimeOnly.MinValue),
                         TramiteIngresoId = null,
                         FechaRetiro = fechaRetiroDifunto
                     });
@@ -589,25 +585,10 @@ namespace CemSys3.Business.CargaInicialCemSys
             int? estadoDifuntoId,
             string? infoAdicional = null) // NUEVO: default, así el llamado del titular (que no manda este parámetro) sigue compilando
         {
-            // NUEVO: en el sistema viejo, el "documento" puede ser un DNI/CUIT real o una
-            // numeración interna corta (tipo "D" = número de difunto, número de cliente,
-            // etc.). Esas numeraciones internas se repiten entre sí y entre tipos distintos
-            // (el difunto Nº1000 y el cliente Nº1000 son personas distintas), así que no
-            // sirven para detectar "esta persona ya existe". Por debajo del umbral, se crea
-            // una persona nueva siempre, sin buscar coincidencia por dni.
-            //
-            // Umbral elegido en base al csv real: los documentos tipo "D" van de 1 a ~20000
-            // en el 96% de los casos; los pocos que superan eso resultaron ser DNIs reales
-            // cargados por error en ese campo, y esos sí conviene seguir deduplicando.
-            bool numeroConfiable = int.TryParse(dni, NumberStyles.Integer, CultureInfo.InvariantCulture, out var dniNumerico)
-                && dniNumerico >= UmbralDocumentoConfiable;
-
-            if (numeroConfiable)
-            {
-                var existente = await _context.Personas.FirstOrDefaultAsync(p => p.Dni == dni);
-                if (existente != null)
-                    return existente.Id;
-            }
+ 
+            var existente = await _context.Personas.FirstOrDefaultAsync(p => p.Dni == dni);
+            if (existente != null)
+                return existente.Id;
 
             var nombreCompleto = $"{nombre} {apellido}".Trim();
             var sexo = SexoDetector.DesdeCsvOHeuristica(sexoCsv, nombre);

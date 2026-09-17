@@ -182,11 +182,113 @@
 </div>
 
 
+@if (Context.Session.GetInt32("IdRol") == (int)RolUsuario.Administrador)
+{
+    <div class="accordion mt-4" id="accordionEliminarParcela">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingEliminarParcela">
+                <button class="accordion-button acordeon-fijo" type="button" data-bs-toggle="" data-bs-target="#collapseEliminarParcela" aria-expanded="false" aria-controls="collapseEliminarParcela">
+                    Eliminar lote individual
+                </button>
+            </h2>
+            <div id="collapseEliminarParcela" class="accordion-collapse collapse show" aria-labelledby="headingEliminarParcela">
+                <div class="accordion-body">
+                    <form asp-action="EliminarParcela" asp-controller="Seccion" method="get" class="form-box js-confirm"
+                          data-confirm-title="Confirmar eliminación"
+                          data-confirm-message="¿Está seguro de ELIMINAR DEFINITIVAMENTE el lote seleccionado? Esta acción no se puede deshacer, ni siquiera desde la base de datos."
+                          data-confirm-icon="warning">
+                        <input type="hidden" asp-for="TipoParcelaId" />
+
+                        <div class="form-columns-container3">
+                            <div>
+                                <label for="selectSeccionEliminar" class="form-label">Sección<span class="obligatorio"> * </span></label>
+                                <select class="form-select" id="selectSeccionEliminar" required>
+                                    <option value="">Seleccione una sección</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="selectParcelaEliminar" class="form-label">Lote<span class="obligatorio"> * </span></label>
+                                <select class="form-select" id="selectParcelaEliminar" name="parcelaId" required disabled>
+                                    <option value="">Seleccione primero una sección</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-button-registrar">
+                            <button type="submit" class="btn btn-danger" id="btnEliminarParcela" disabled>Eliminar lote</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @* Renderizamos el manejador pasándole el DTO del modelo *@
 <partial name="_SweetAlertHandler" model="Model.SweetAlert" />
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        (function() {
+            const tipoParcelaId = @Model.TipoParcelaId;
+            const selectSeccion = document.getElementById('selectSeccionEliminar');
+            const selectParcela = document.getElementById('selectParcelaEliminar');
+            const btnEliminar = document.getElementById('btnEliminarParcela');
+
+            if (!selectSeccion) return;
+
+            fetch(`/Seccion/ObtenerSeccionesPorTipo?tipoParcelaId=${tipoParcelaId}`)
+                .then(r => r.json())
+                .then(data => {
+                    data.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.id;
+                        opt.textContent = s.nombre;
+                        selectSeccion.appendChild(opt);
+                    });
+                });
+
+            selectSeccion.addEventListener('change', function() {
+                const seccionId = this.value;
+                selectParcela.innerHTML = '';
+                btnEliminar.disabled = true;
+
+                if (!seccionId) {
+                    selectParcela.innerHTML = '<option value="">Seleccione primero una sección</option>';
+                    selectParcela.disabled = true;
+                    return;
+                }
+
+                selectParcela.innerHTML = '<option value="">Cargando...</option>';
+
+                fetch(`/Seccion/ObtenerParcelasEliminables?seccionId=${seccionId}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        selectParcela.innerHTML = '';
+                        if (data.length === 0) {
+                            selectParcela.innerHTML = '<option value="">No hay parcelas disponibles para eliminar</option>';
+                            selectParcela.disabled = true;
+                        } else {
+                            selectParcela.innerHTML = '<option value="">Seleccione una parcela</option>';
+                            data.forEach(p => {
+                                const opt = document.createElement('option');
+                                opt.value = p.id;
+                                opt.textContent = p.descripcion;
+                                selectParcela.appendChild(opt);
+                            });
+                            selectParcela.disabled = false;
+                        }
+                    });
+            });
+
+            selectParcela.addEventListener('change', function() {
+                btnEliminar.disabled = !this.value;
+            });
+        })();
+    </script>
 }
 
 

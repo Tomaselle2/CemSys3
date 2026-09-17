@@ -315,7 +315,7 @@ namespace CemSys3.Controllers
 
         //para obtener las secciones por tipo de parcela (ajax) (se usa en ingreso)
         [HttpGet]
-        [AuthorizeRole(RolUsuario.Empleado)]
+        [AuthorizeRole(RolUsuario.Empleado, RolUsuario.Administrador)]
         public async Task<IActionResult> ObtenerSeccionesPorTipo(int tipoParcelaId)
         {
             try
@@ -350,7 +350,60 @@ namespace CemSys3.Controllers
 
         }
 
+        // AJAX: llena el segundo desplegable según la sección elegida
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> ObtenerParcelasEliminables(int seccionId)
+        {
+            try
+            {
+                var parcelas = await _parcelaService.GetParcelasEliminables(seccionId);
+                return Json(parcelas);
+            }
+            catch (Exception ex)
+            {
+                return Content($$"""
+            <script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: '{{ex.Message.Replace("'", "\\'")}}'
+                });
+            </script>
+        """);
+            }
+        }
 
+        // Elimina (lógicamente) una parcela puntual
+        [HttpGet]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public async Task<IActionResult> EliminarParcela(int parcelaId, int TipoParcelaId)
+        {
+            string vistaRedirigir = ObtenerVistaRedirigir(TipoParcelaId);
+
+            try
+            {
+                GenericResultDTO resultado = await _parcelaService.EliminarParcela(parcelaId);
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = resultado.Message,
+                    Tipo = "success"
+                });
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "Ocurrió un error al eliminar la parcela: " + ex.Message,
+                    Tipo = "error"
+                });
+            }
+
+            return RedirectToAction(vistaRedirigir);
+        }
 
 
         [HttpGet]

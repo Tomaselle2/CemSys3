@@ -428,5 +428,95 @@ namespace CemSys3.Business.Parcela
 
             return entidades.Count;
         }
+
+        public async Task<IEnumerable<ParcelaSelectDTO>> GetParcelasEliminables(int seccionId)
+        {
+            return await _context.Parcelas
+                .Where(p => p.SeccionId == seccionId
+                         && p.Visibilidad
+                         && p.CantidadDifuntos == 0
+                         && !_context.Concesiones.Any(c =>
+                                c.ParcelaId == p.Id &&
+                                c.Visibilidad == true &&
+                                c.TramiteRetiroId == null &&
+                                (c.FechaFin == null || c.FechaFin > DateTime.Now)))
+                .OrderBy(p => p.NroFila).ThenBy(p => p.NroParcela)
+                .Select(p => new ParcelaSelectDTO
+                {
+                    Id = p.Id,
+                    Descripcion = "N° " + p.NroParcela
+                })
+                .ToListAsync();
+        }
+
+        public async Task<GenericResultDTO> EliminarParcela(int parcelaId)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                Models.Parcela parcela = await _context.Parcelas.FindAsync(parcelaId)
+                    ?? throw new Exception("La parcela no existe.");
+
+                if (parcela.CantidadDifuntos > 0)
+                    throw new Exception("No se puede eliminar una parcela que tiene difuntos asignados.");
+
+                // Verifica que la parcela no tenga NINGÚN historial asociado.
+                // Si tiene aunque sea un registro viejo, SQL Server rechazaría el DELETE
+                // por las FK, así que lo chequeamos antes para dar un mensaje claro.
+                bool tieneHistorial =
+                    await _context.TramitesParcelas.AnyAsync(t => t.ParcelaId == parcelaId) ||
+                    await _context.Introducciones.AnyAsync(i => i.ParcelaId == parcelaId) ||
+                    await _context.ParcelaDifuntos.AnyAsync(p => p.ParcelaId == parcelaId) ||
+                    await _context.Concesiones.AnyAsync(c => c.ParcelaId == parcelaId) ||
+                    await _context.CambiosTitularidads.AnyAsync(c => c.ParcelaId == parcelaId) ||
+                    await _context.AceptacionTitularidads.AnyAsync(a => a.ParcelaId == parcelaId) ||
+                    await _context.Cremaciones.AnyAsync(c => c.ParcelaOrigenId == parcelaId || c.ParcelaDestinoId == parcelaId) ||
+                    await _context.Traslados.AnyAsync(t => t.ParcelaOrigenId == parcelaId || t.ParcelaDestinoId == parcelaId) ||
+                    await _context.Reducciones.AnyAsync(r => r.ParcelaOrigenId == parcelaId || r.ParcelaDestinoId == parcelaId) ||
+                    await _context.PermisosIngresos.AnyAsync(p => p.ParcelaId == parcelaId) ||
+                    await _context.PermisosRefacciones.AnyAsync(p => p.ParcelaId == parcelaId) ||
+                    await _context.HistorialParcelasConcesions.AnyAsync(h => h.ParcelaId == parcelaId) ||
+                    await _context.HistorialContratosConcesions.AnyAsync(h => h.ParcelaId == parcelaId);
+
+                if (tieneHistorial)
+                    throw new Exception("No se puede eliminar definitivamente la parcela: tiene trámites, concesiones o difuntos históricos asociados. Contacte al DBA si necesita depurarla.");
+
+                Seccione? seccion = await _context.Secciones.FindAsync(parcela.SeccionId)
+                    ?? throw new Exception("La sección asociada a la parcela no existe.");
+
+                // Eliminación física real
+                _context.Parcelas.Remove(parcela);
+
+                // Se actualiza el contador de la sección
+                if (seccion.NroParcelas > 0)
+                {
+                    seccion.NroParcelas -= 1;
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new GenericResultDTO
+                {
+                    Success = true,
+                    Message = "Parcela eliminada definitivamente.",
+                    Id = parcela.Id
+                };
+            }
+            catch (DbUpdateException)
+            {
+                // Red de seguridad: si por algún motivo el chequeo anterior no cubrió
+                // una referencia (ej. tabla nueva agregada a futuro), SQL Server
+                // rechaza el DELETE por FK antes de romper la integridad de datos.
+                await transaction.RollbackAsync();
+                throw new Exception("No se puede eliminar la parcela: tiene registros relacionados en la base de datos.");
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
     }
 }
