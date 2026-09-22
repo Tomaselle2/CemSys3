@@ -314,7 +314,9 @@ namespace CemSys3.Business.CargaInicialCemSys
 
             // --- Titular (ENCARGADO_PAGO) ---
 
-            var nombreApellidoTitular = DocumentoHelper.SepararNombreApellido(filaBase.EncargadoPago);
+            var nombreApellidoTitular = DocumentoHelper.DesdeColumnasSeparadas(
+                filaBase.ApellidoEncargadoPago, filaBase.NombreEncargadoPago);
+            
             var dniTitular = DocumentoHelper.ExtraerDni(filaBase.TipoDocEncargadoPago, filaBase.DocumentoEncargadoPago);
 
             if (string.IsNullOrWhiteSpace(dniTitular))
@@ -442,7 +444,7 @@ namespace CemSys3.Business.CargaInicialCemSys
             {
                 // Fila sin FALLECIDO: no es un error, simplemente esta fila del grupo no trae
                 // un difunto para vincular (la concesión ya se creó más arriba para el grupo).
-                if (string.IsNullOrWhiteSpace(fila.Fallecido))
+                if (string.IsNullOrWhiteSpace(fila.ApellidoFallecido) && string.IsNullOrWhiteSpace(fila.NombreFallecido))
                 {
                     resultados.Add(new ResultadoFilaCarga
                     {
@@ -463,11 +465,12 @@ namespace CemSys3.Business.CargaInicialCemSys
                     await transaccionGrupo.CreateSavepointAsync(savepoint);
                     savepointCreado = true;
 
-                    var nombreApellidoDifunto = DocumentoHelper.SepararNombreApellido(fila.Fallecido);
+                    var nombreApellidoDifunto = DocumentoHelper.DesdeColumnasSeparadas(fila.ApellidoFallecido, fila.NombreFallecido);
                     var dniDifunto = DocumentoHelper.ExtraerDni(fila.TipoDocumentoFallecido, fila.DocumentoFallecido);
 
                     if (string.IsNullOrWhiteSpace(dniDifunto))
-                        throw new InvalidOperationException($"El fallecido '{fila.Fallecido}' no tiene un documento válido.");
+                        throw new InvalidOperationException(
+                            $"El fallecido '{fila.ApellidoFallecido} {fila.NombreFallecido}' no tiene un documento válido.");
 
                     dniDifunto = dniDifunto.PadLeft(8, '0');
 
@@ -661,8 +664,10 @@ namespace CemSys3.Business.CargaInicialCemSys
                 r.Fila.Parcela,
                 r.Fila.Concesion,
                 r.Fila.Tipo,
-                r.Fila.EncargadoPago,
-                r.Fila.Fallecido,
+                r.Fila.ApellidoEncargadoPago,
+                r.Fila.NombreEncargadoPago,
+                r.Fila.ApellidoFallecido,
+                r.Fila.NombreFallecido,
                 TramiteConcesionId = r.TramiteConcesionId,
                 TitularPersonaId = r.TitularPersonaId,
                 DifuntoPersonaId = r.DifuntoPersonaId,
@@ -680,8 +685,10 @@ namespace CemSys3.Business.CargaInicialCemSys
                 r.Fila.Parcela,
                 r.Fila.Concesion,
                 r.Fila.Tipo,
-                r.Fila.EncargadoPago,
-                r.Fila.Fallecido,
+                r.Fila.ApellidoEncargadoPago,
+                r.Fila.NombreEncargadoPago,
+                r.Fila.ApellidoFallecido,
+                r.Fila.NombreFallecido,
                 Motivo = r.Motivo
             });
 

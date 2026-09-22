@@ -62,6 +62,26 @@ namespace CemSys3.Helpers.CargaInicial
             return resultado;
         }
 
+
+        /// <summary>
+        /// Para csv donde APELLIDO y NOMBRE ya vienen en columnas separadas
+        /// (a diferencia de SepararNombreApellido, que infiere el corte en un campo combinado).
+        /// </summary>
+        public static NombreApellido DesdeColumnasSeparadas(string? apellidoCrudo, string? nombreCrudo)
+        {
+            return new NombreApellido
+            {
+                Apellido = (apellidoCrudo ?? string.Empty).Trim().ToLowerInvariant(),
+                Nombre = (nombreCrudo ?? string.Empty).Trim().ToLowerInvariant()
+            };
+        }
+
+
+
+
+
+
+
         /// <summary>
         /// Extrae el DNI a partir del tipo de documento y el número crudo.
         /// - DNI / D / T -> se usa el número tal cual viene.

@@ -42,8 +42,11 @@ namespace CemSys3.DTOs.CargaInicial
         [Name("TIPO_PLAN")]
         public string? TipoPlan { get; set; } // se ignora siempre
 
-        [Name("ENCARGADO_PAGO")]
-        public string? EncargadoPago { get; set; }
+        [Name("APELLIDO_ENCARGADO_PAGO")]
+        public string? ApellidoEncargadoPago { get; set; }
+
+        [Name("NOMBRE_ENCARGADO_PAGO")]
+        public string? NombreEncargadoPago { get; set; }
 
         [Name("TIPO_DOC_ENCARGADO_PAGO")]
         public string? TipoDocEncargadoPago { get; set; }
@@ -63,8 +66,11 @@ namespace CemSys3.DTOs.CargaInicial
         [Name("MAIL_ENCARGADO")]
         public string? MailEncargado { get; set; }
 
-        [Name("FALLECIDO")]
-        public string? Fallecido { get; set; }
+        [Name("APELLIDO_FALLECIDO")]
+        public string? ApellidoFallecido { get; set; }
+
+        [Name("NOMBRE_FALLECIDO")]
+        public string? NombreFallecido { get; set; }
 
         [Name("TIPO_DOCUMENTO_FALLECIDO")]
         public string? TipoDocumentoFallecido { get; set; }
