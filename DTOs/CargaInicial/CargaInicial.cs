@@ -54,6 +54,9 @@ namespace CemSys3.DTOs.CargaInicial
         [Name("Num_celular")]
         public string? NumCelular { get; set; }
 
+        [Name("DIRECCION_CONTRIBUYENTE")]
+        public string? DireccionContribuyente { get; set; }
+
         [Name("SEXO_ENCARGADO")]
         public string? SexoEncargadoCsv { get; set; }
 
@@ -69,11 +72,16 @@ namespace CemSys3.DTOs.CargaInicial
         [Name("DOCUMENTO_FALLECIDO")]
         public string? DocumentoFallecido { get; set; }
 
+        [Name("DIRECCION_FALLECIDO")]
+        public string? DireccionFallecido { get; set; }
+
         [Name("SEXO_FALLECIDO")]
         public string? SexoFallecidoCsv { get; set; }
 
         [Name("FECHA_FALLECIMIENTO")]
         public string? FechaFallecimiento { get; set; }
+        [Name("FECHA_NAC_FALLECIDO")]
+        public string? FechaNacFallecido { get; set; }
 
         [Name("UBICACION_ACTUAL")]
         public string? UbicacionActual { get; set; }

@@ -343,7 +343,8 @@ namespace CemSys3.Business.CargaInicialCemSys
                     celular: NuloSiVacio(filaBase.NumCelular),
                     categoriaPersonaId: (int)CategoriaPersonaEnum.Titular,
                     fechaDefuncion: null,
-                    estadoDifuntoId: null);
+                    estadoDifuntoId: null,
+                    direccion: NuloSiVacio(filaBase.DireccionFallecido));
 
                 tramiteId = await ObtenerProximoIdTramiteAsync();
 
@@ -484,7 +485,9 @@ namespace CemSys3.Business.CargaInicialCemSys
                         estadoDifuntoId: (int)EstadoDifuntoEnum.CuerpoCompleto,
                         // NUEVO: si OBSERVACIONES trae texto, queda como InformacionAdicional
                         // de la persona recién creada.
-                        infoAdicional: NuloSiVacio(fila.Observaciones));
+                        infoAdicional: NuloSiVacio(fila.Observaciones),
+                        direccion: NuloSiVacio(fila.DireccionFallecido),
+                        fechaNacimiento: ParsearFechaNullable(fila.FechaNacFallecido));
 
                     await _historialEstados.VincularTramiteAPersona(tramiteId, difuntoId);
 
@@ -583,7 +586,9 @@ namespace CemSys3.Business.CargaInicialCemSys
             int categoriaPersonaId,
             DateOnly? fechaDefuncion,
             int? estadoDifuntoId,
-            string? infoAdicional = null) // NUEVO: default, así el llamado del titular (que no manda este parámetro) sigue compilando
+            string? infoAdicional = null,
+            string? direccion = null,
+            DateOnly? fechaNacimiento = null) // NUEVO: default, así el llamado del titular (que no manda este parámetro) sigue compilando
         {
  
             var existente = await _context.Personas.FirstOrDefaultAsync(p => p.Dni == dni);
@@ -605,8 +610,9 @@ namespace CemSys3.Business.CargaInicialCemSys
                 FechaDefuncion = fechaDefuncion,
                 CategoriaPersonaId = categoriaPersonaId,
                 EstadoDifuntoId = estadoDifuntoId,
-                Domicilio = "Desconocido - Modificar",
-                InformacionAdicional = infoAdicional == null ? null : infoAdicional + "\n"
+                Domicilio = direccion,
+                InformacionAdicional = infoAdicional == null ? null : infoAdicional + "\n",
+                FechaNacimiento = fechaNacimiento
             };
 
             await _context.Personas.AddAsync(nueva);
