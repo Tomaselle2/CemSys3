@@ -5,6 +5,7 @@ namespace CemSys3.ViewModels.Imagenes
     public class ImagenesVM
     {
        public string nombreIntendente { get; set; } = string.Empty;
+        public string nombreProgramaExterno { get; set; } = string.Empty;
         //manero de errores
         public SweetAlertDTO? SweetAlert { get; set; }
     }

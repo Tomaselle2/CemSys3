@@ -40,6 +40,8 @@ namespace CemSys3.Business.TramiteConcesion
         private readonly IFirmantes _firmantes;
         private readonly IConcesion _concesionService;
 
+        private readonly IWebHostEnvironment _env;
+
         public ReduccionStrategy(
             IPlantillaTramite plantillaService,
             IDocumentoTramiteService documentoService,
@@ -50,7 +52,8 @@ namespace CemSys3.Business.TramiteConcesion
             ITareaPlantilla tareaPlantilla,
             INotas notasService,
             IFirmantes firmantes,
-            IConcesion concesionService)
+            IConcesion concesionService,
+            IWebHostEnvironment env)
         {
             _plantillaService = plantillaService;
             _documentoService = documentoService;
@@ -61,6 +64,7 @@ namespace CemSys3.Business.TramiteConcesion
             _tareaPlantilla = tareaPlantilla;
             _notasService = notasService;
             _firmantes = firmantes;
+            _env = env;
             _concesionService = concesionService;
         }
 
@@ -352,15 +356,6 @@ namespace CemSys3.Business.TramiteConcesion
                         if (historialParcelaActual != null)
                             historialParcelaActual.FechaFin = reduccion.FechaPendiente;
 
-                        // 2. Registrar nueva parcela en historial
-                        //_context.HistorialParcelasConcesions.Add(new HistorialParcelasConcesion
-                        //{
-                        //    ConcesionId = concesion.TramiteId,
-                        //    ParcelaId = parcelaDestino.Id,
-                        //    FechaInicio = reduccion.FechaPendiente ?? DateTime.Now,
-                        //    FechaFin = null,
-                        //    TramiteOrigenId = tramiteId
-                        //});
 
                         await _historialEstadosService.CerrarHistorialParcelaConcesion(
                         concesion.TramiteId,
@@ -377,6 +372,8 @@ namespace CemSys3.Business.TramiteConcesion
                         concesion.TipoParcela = EnumHelper.GetDisplayNameByValue<TipoParcelaEnum>(parcelaDestino.TipoParcelaId ?? 0);
 
                         // 4. Log en concesión
+
+
                         concesion.InformacionAdicional +=
                             $"\n● El {reduccion.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} " +
                             $"se trasladó la concesión ({concesion.Concesion?.ToString("D5")}) " +
@@ -450,9 +447,18 @@ namespace CemSys3.Business.TramiteConcesion
                     }
                 }
 
+                var rutaProgramaExterno = Path.Combine(_env.WebRootPath, "config", "nombreProgramaExterno.txt");
+
+                string nombreProgramaExterno = "";
+
+                if (System.IO.File.Exists(rutaProgramaExterno))
+                {
+                    nombreProgramaExterno = System.IO.File.ReadAllText(rutaProgramaExterno);
+                }
+
                 // Nota de recordatorio (común a todos los casos)
                 string descripcionNota = $"\n● El {reduccion.FechaPendiente:dd/MM/yyyy HH:mm} se finalizó una reducción en la concesión ({concesion.Concesion?.ToString("D5")}) (trámite {tramiteId})";
-                string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
+                string nombreNota = $"Para {nombreProgramaExterno} (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
                 string mensajeDifunto = $"{difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} marcar como reducido";
                 string nuevoDestino = esNinguno
                     ? "Permanece en la misma parcela"

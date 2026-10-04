@@ -35,6 +35,9 @@ namespace CemSys3.Business.TramiteConcesion
         private readonly INotas _notasService;
         private readonly IFirmantes _firmantes;
 
+        private readonly IWebHostEnvironment _env;
+
+
         public CremacionStrategy(
             IPlantillaTramite plantillaService,
             IDocumentoTramiteService documentoService,
@@ -44,7 +47,8 @@ namespace CemSys3.Business.TramiteConcesion
             IHistorialEstados historialEstadosService,
             ITareaPlantilla tareaPlantilla, 
             INotas notasService,
-            IFirmantes firmantes)
+            IFirmantes firmantes,
+            IWebHostEnvironment env)
         {
             _plantillaService = plantillaService;
             _documentoService = documentoService;
@@ -55,6 +59,7 @@ namespace CemSys3.Business.TramiteConcesion
             _tareaPlantilla = tareaPlantilla;
             _notasService = notasService;
             _firmantes = firmantes;
+            _env = env;
         }
 
        
@@ -298,9 +303,18 @@ namespace CemSys3.Business.TramiteConcesion
                         cremacion.FechaPendiente ?? DateTime.Now);
                 }
 
+                var rutaProgramaExterno = Path.Combine(_env.WebRootPath, "config", "nombreProgramaExterno.txt");
+
+                string nombreProgramaExterno = "";
+
+                if (System.IO.File.Exists(rutaProgramaExterno))
+                {
+                    nombreProgramaExterno = System.IO.File.ReadAllText(rutaProgramaExterno);
+                }
+
                 //6 - generar la nota de recordatorio.
                 string descripcionNota = $"\n● El {cremacion.FechaPendiente:dd/MM/yyyy HH:mm} se finalizó una cremación en la concesión ({concesion.Concesion?.ToString("D5")}) (trámite {tramiteId})";
-                string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
+                string nombreNota = $"Para {nombreProgramaExterno} (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
                 string mensajeDifunto = $"{difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} marcar como cremado";
 
 

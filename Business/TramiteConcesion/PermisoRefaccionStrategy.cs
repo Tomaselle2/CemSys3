@@ -37,6 +37,9 @@ namespace CemSys3.Business.TramiteConcesion
         private readonly IFirmantes _firmantes;
         private readonly IConcesion _concesionService;
 
+        private readonly IWebHostEnvironment _env;
+
+
 
         public PermisoRefaccionStrategy(
            IPlantillaTramite plantillaService,
@@ -48,7 +51,8 @@ namespace CemSys3.Business.TramiteConcesion
            ITareaPlantilla tareaPlantilla,
            INotas notasService,
            IFirmantes firmantes,
-           IConcesion concesionService)
+           IConcesion concesionService,
+           IWebHostEnvironment env)
         {
             _plantillaService = plantillaService;
             _documentoService = documentoService;
@@ -59,6 +63,7 @@ namespace CemSys3.Business.TramiteConcesion
             _tareaPlantilla = tareaPlantilla;
             _notasService = notasService;
             _firmantes = firmantes;
+            _env = env;
             _concesionService = concesionService;
         }
         public async Task<int> AvanzarEstadoAsync(int tramiteId, int nuevoEstado, int usuarioId)
@@ -236,10 +241,18 @@ namespace CemSys3.Business.TramiteConcesion
                 Models.Parcela parcela = await _context.Parcelas.FirstOrDefaultAsync(p => p.Id == concesion.ParcelaId) ?? throw new Exception("Parcela no encontrada.");
                 parcela.InformacionAdicional += $"\n● El {permisosRefaccione.FechaPendiente?.ToString("dd/MM/yyyy HH:mm")} se finalizó el trámite de permiso de refacción (trámite {tramiteId}) en concesión ({concesion.Concesion?.ToString("D5")})";
 
+                var rutaProgramaExterno = Path.Combine(_env.WebRootPath, "config", "nombreProgramaExterno.txt");
+
+                string nombreProgramaExterno = "";
+
+                if (System.IO.File.Exists(rutaProgramaExterno))
+                {
+                    nombreProgramaExterno = System.IO.File.ReadAllText(rutaProgramaExterno);
+                }
 
                 //3 generar la nota de recordatorio.
                 string descripcionNota = $"\n● El {DateTime.Now:dd/MM/yyyy} se finalizó un permiso de refacción (trámite {tramiteId})";
-                string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
+                string nombreNota = $"Para {nombreProgramaExterno} (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
                 string titularNota = $"\n● El {DateTime.Now:dd/MM/yyyy} se finalizó un permiso de refacción (trámite {tramiteId})";
 
 

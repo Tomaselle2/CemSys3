@@ -28,9 +28,11 @@ namespace CemSys3.Business.Concesion
         public readonly INotas _notasService;
         public readonly IHistorialContratosService _historialContratosService;
 
+        private readonly IWebHostEnvironment _env;
+
 
         public ConcesionService(ITramite tramiteService, AppDbContext context,
-            IHistorialEstados estadoService, IPersona personaService, INotas notas, IHistorialContratosService historialContratosService)
+            IHistorialEstados estadoService, IPersona personaService, INotas notas, IHistorialContratosService historialContratosService, IWebHostEnvironment env)
         {
             _tramiteService = tramiteService;   
             _context = context;
@@ -38,6 +40,7 @@ namespace CemSys3.Business.Concesion
             _personaService = personaService;
             _notasService = notas;
             _historialContratosService = historialContratosService;
+            _env = env;
         }
 
         public async Task<GenericResultDTO> Add(ConcesionDTO dto)
@@ -227,9 +230,19 @@ namespace CemSys3.Business.Concesion
                 //3.1- registrar historial de contrato
                 await _historialContratosService.Add(dto.historialConcesionesRenovacion);
 
+
+                var rutaProgramaExterno = Path.Combine(_env.WebRootPath, "config", "nombreProgramaExterno.txt");
+
+                string nombreProgramaExterno = "";
+
+                if (System.IO.File.Exists(rutaProgramaExterno))
+                {
+                    nombreProgramaExterno = System.IO.File.ReadAllText(rutaProgramaExterno);
+                }
+
                 //4- generar nota
                 string descripcionNota = $"\n● El {DateTime.Now:dd/MM/yyyy} se realizó contrato de concesión ({dto.Concesion?.ToString("D5") ?? "-----"})";
-                string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
+                string nombreNota = $"Para {nombreProgramaExterno} (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
                 string vencimiento = $"Modificar vencimiento a {concesion.Vencimiento}";
                 string titularNota = $"El titular debe ser {dto.Titulares?[0].Apellido?.ToUpper()}, {dto.Titulares?[0].Nombre?.ToUpper()} DNI {dto.Titulares?[0].Dni}";
                 string pago = $"Generar cuotas concesión";
@@ -885,6 +898,16 @@ namespace CemSys3.Business.Concesion
 
         private async Task GenerarNotaRecordatorio(string descripcionNota, string nombreNota, string vencimiento, string titularNota, int usuarioId, string pago)
         {
+
+            var rutaProgramaExterno = Path.Combine(_env.WebRootPath, "config", "nombreProgramaExterno.txt");
+
+            string nombreProgramaExterno = "";
+
+            if (System.IO.File.Exists(rutaProgramaExterno))
+            {
+                nombreProgramaExterno = System.IO.File.ReadAllText(rutaProgramaExterno);
+            }
+
             NotaDTO nota = new NotaDTO();
             nota.Nombre = nombreNota;
             nota.TipoNotaId = (int)TipoNotaEnum.Recordatorio;
@@ -900,9 +923,8 @@ namespace CemSys3.Business.Concesion
                     new() { Descripcion = vencimiento, Estado = false },
                     new() { Descripcion = titularNota, Estado = false },
                     new() { Descripcion = pago, Estado = false },
-                    new() { Descripcion = "Modificar contribuyente en Program", Estado = false },
-                    new() { Descripcion = "Modificar deudo en Program", Estado = false },
-                    new() { Descripcion = "Modificar celular / mail en Program", Estado = false }
+                    new() { Descripcion = $"Modificar contribuyente / deudo en {nombreProgramaExterno}", Estado = false },
+                    new() { Descripcion = $"Modificar celular / mail en {nombreProgramaExterno}", Estado = false }
 
                 };
 

@@ -33,6 +33,9 @@ namespace CemSys3.Business.TramiteConcesion
         private readonly INotas _notasService;
         private readonly IFirmantes _firmantes;
 
+        private readonly IWebHostEnvironment _env;
+
+
 
         public CambioTitularStrategy(
             IPlantillaTramite plantillaService,
@@ -41,7 +44,7 @@ namespace CemSys3.Business.TramiteConcesion
             AppDbContext context,
             ITramite tramiteService, IFirmantes firmantes,
             IHistorialEstados historialEstadosService,
-            ITareaPlantilla tareaPlantilla, INotas notasService)
+            ITareaPlantilla tareaPlantilla, INotas notasService, IWebHostEnvironment env)
         {
             _plantillaService = plantillaService;
             _documentoService = documentoService;
@@ -52,6 +55,7 @@ namespace CemSys3.Business.TramiteConcesion
             _tareaPlantilla = tareaPlantilla;
             _notasService = notasService;
             _firmantes = firmantes;
+            _env = env;
         }
 
        
@@ -303,9 +307,18 @@ namespace CemSys3.Business.TramiteConcesion
                 };
                 await _historialEstadosService.Add(historial);
 
+                var rutaProgramaExterno = Path.Combine(_env.WebRootPath, "config", "nombreProgramaExterno.txt");
+
+                string nombreProgramaExterno = "";
+
+                if (System.IO.File.Exists(rutaProgramaExterno))
+                {
+                    nombreProgramaExterno = System.IO.File.ReadAllText(rutaProgramaExterno);
+                }
+
                 //3 generar la nota de recordatorio.
                 string descripcionNota = $"\n● El {DateTime.Now:dd/MM/yyyy} se realizó cambio de titular (trámite {tramiteId})";
-                string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
+                string nombreNota = $"Para {nombreProgramaExterno} (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
                 string titularNota = $"El nuevo titular debe ser {titularesNuevos?[0].Apellido?.ToUpper()}, {titularesNuevos?[0].Nombre?.ToUpper()} con DNI {titularesNuevos?[0].Dni}";
 
 

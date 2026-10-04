@@ -40,6 +40,8 @@ namespace CemSys3.Business.TramiteConcesion
         private readonly IFirmantes _firmantes;
         private readonly IConcesion _concesionService;
 
+        private readonly IWebHostEnvironment _env;
+
         public TrasladoStrategy(
             IPlantillaTramite plantillaService,
             IDocumentoTramiteService documentoService,
@@ -50,7 +52,8 @@ namespace CemSys3.Business.TramiteConcesion
             ITareaPlantilla tareaPlantilla,
             INotas notasService,
             IFirmantes firmantes,
-            IConcesion concesionService)
+            IConcesion concesionService,
+            IWebHostEnvironment env)
         {
             _plantillaService = plantillaService;
             _documentoService = documentoService;
@@ -62,6 +65,7 @@ namespace CemSys3.Business.TramiteConcesion
             _notasService = notasService;
             _firmantes = firmantes;
             _concesionService = concesionService;
+            _env = env;
         }
 
         public async Task<int> AvanzarEstadoAsync(int tramiteId, int nuevoEstado, int usuarioId)
@@ -427,9 +431,18 @@ namespace CemSys3.Business.TramiteConcesion
                         parcelaDestino.CantidadDifuntos += 1;
                     }
 
+                    var rutaProgramaExterno = Path.Combine(_env.WebRootPath, "config", "nombreProgramaExterno.txt");
+
+                    string nombreProgramaExterno = "";
+
+                    if (System.IO.File.Exists(rutaProgramaExterno))
+                    {
+                        nombreProgramaExterno = System.IO.File.ReadAllText(rutaProgramaExterno);
+                    }
+
                     // Nota de recordatorio (común a todos los casos internos)
                     string descripcionNota = $"\n● El {traslado.FechaPendiente:dd/MM/yyyy HH:mm} se finalizó un traslado en la concesión ({concesion.Concesion?.ToString("D5")}) (trámite {tramiteId})";
-                    string nombreNota = $"Para Program (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
+                    string nombreNota = $"Para {nombreProgramaExterno} (concesión {concesion.Concesion?.ToString("D5") ?? "-----"})";
                     string mensajeDifunto = $"{difunto.Apellido?.ToUpper()}, {difunto.Nombre?.ToUpper()} marcar como trasladado";
                     string nuevoDestino = $"Se traslado a {traslado.Destino?.ToUpper()}";
 

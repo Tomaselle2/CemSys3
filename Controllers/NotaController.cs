@@ -16,11 +16,14 @@ namespace CemSys3.Controllers
     {
         private readonly INotas _notaService;
         private readonly IHistorialEstados _historialEstados;
+        private readonly IWebHostEnvironment _env;
 
-        public NotaController(INotas notasService, IHistorialEstados historialEstados)
+
+        public NotaController(INotas notasService, IHistorialEstados historialEstados, IWebHostEnvironment env)
         {
             _notaService = notasService;
             _historialEstados = historialEstados;
+            _env = env;
         }
 
         [HttpGet]
@@ -82,6 +85,15 @@ namespace CemSys3.Controllers
         [AuthorizeRole(RolUsuario.Empleado)]
         public IActionResult ModalIngreso()
         {
+            var rutaProgramaExterno = Path.Combine(_env.WebRootPath, "config", "nombreProgramaExterno.txt");
+
+            string nombreProgramaExterno = "";
+
+            if (System.IO.File.Exists(rutaProgramaExterno))
+            {
+                nombreProgramaExterno = System.IO.File.ReadAllText(rutaProgramaExterno);
+            }
+
             var vm = new NotaModalVM
             {
                 TipoNotaId = (int)TipoNotaEnum.Ingreso,
@@ -94,7 +106,7 @@ namespace CemSys3.Controllers
                 Tareas = new List<TareaDTO>
                 {
                     new() { Descripcion = "Recibir acta de defunción", Estado = false },
-                    new() { Descripcion = "Cargar difunto en Progam (unid. catastral, deudo, contribuyente, difunto, impuestos)", Estado = false },
+                    new() { Descripcion = $"Cargar difunto en {nombreProgramaExterno} (unid. catastral, deudo, contribuyente, difunto, impuestos)", Estado = false },
                     new() { Descripcion = "Realizar contrato de concesión", Estado = false },
                     new() { Descripcion = "Cobrar ingreso", Estado = false },
                     new() { Descripcion = "Realizar ingreso en CemSys", Estado = false },

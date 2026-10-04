@@ -32,6 +32,19 @@ namespace CemSys3.Controllers
             }
 
             viewModel.nombreIntendente = nombre;
+
+
+
+            var rutaProgramaExterno = Path.Combine(_env.WebRootPath, "config", "nombreProgramaExterno.txt");
+
+            string nombreProgramaExterno = "";
+
+            if (System.IO.File.Exists(rutaProgramaExterno))
+            {
+                nombreProgramaExterno = System.IO.File.ReadAllText(rutaProgramaExterno);
+            }
+
+            viewModel.nombreProgramaExterno = nombreProgramaExterno;
             viewModel.SweetAlert = TempData.GetSweetAlert();
 
             return View(viewModel);
@@ -275,7 +288,51 @@ namespace CemSys3.Controllers
                 TempData.SetSweetAlert(new SweetAlertDTO
                 {
                     Titulo = "Error",
-                    Mensaje = "Error al modificar el nomrbe." + ex.Message,
+                    Mensaje = "Error al modificar el nombre." + ex.Message,
+                    Tipo = "error"
+                });
+
+            }
+
+            return RedirectToAction("Index");
+
+        }
+
+        [HttpPost]
+        [AuthorizeRole(RolUsuario.Administrador)]
+        public IActionResult GuardarNombreProgramaExterno(ImagenesVM viewModel)
+        {
+            if (string.IsNullOrEmpty(viewModel.nombreProgramaExterno))
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Advertencia",
+                    Mensaje = "Revise el nombre del programa externo. No puede estar vacio.",
+                    Tipo = "warning"
+                });
+
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                var ruta = Path.Combine(_env.WebRootPath, "config", "nombreProgramaExterno.txt");
+
+                System.IO.File.WriteAllText(ruta, viewModel.nombreProgramaExterno.Trim().ToUpper());
+
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Éxito",
+                    Mensaje = "Nombre del programa externo modificado correctamente",
+                    Tipo = "success"
+                });
+            }
+            catch (Exception ex)
+            {
+                TempData.SetSweetAlert(new SweetAlertDTO
+                {
+                    Titulo = "Error",
+                    Mensaje = "Error al modificar el nombre." + ex.Message,
                     Tipo = "error"
                 });
 
