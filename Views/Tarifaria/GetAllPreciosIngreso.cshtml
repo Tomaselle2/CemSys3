@@ -1,4 +1,5 @@
-﻿@using CemSys3.DTOs.Tarifaria
+﻿@using System.Globalization
+@using CemSys3.DTOs.Tarifaria
 @using CemSys3.Enumerables
 @using CemSys3.Helpers.Enumerable
 @using CemSys3.ViewModels.Tarifaria
@@ -187,7 +188,7 @@
 
                                 <td class="td-contenido">@concepto.Nombre</td>
                                 <td class="right td-importe">
-                                    @concepto.PrecioBase.ToString("C")
+                                    @concepto.PrecioBase.ToString("C", CultureInfo.GetCultureInfo("es-AR"))
                                 </td>
                             </tr>
                         }
@@ -197,7 +198,7 @@
                             <td></td>
                             <td class="bold">Total</td>
                             <td class="right bold">
-                                @totalTema.ToString("C")
+                                @totalTema.ToString("C", CultureInfo.GetCultureInfo("es-AR"))
                             </td>
                         </tr>
 
@@ -211,7 +212,7 @@
                     <tr class="total-ingreso">
                         <td colspan="2" class="bold">TOTAL INGRESO</td>
                         <td class="right bold">
-                            @regla.Temas.Sum(t => t.Conceptos.Sum(c => c.PrecioBase)).ToString("C")
+                            @regla.Temas.Sum(t => t.Conceptos.Sum(c => c.PrecioBase)).ToString("C", CultureInfo.GetCultureInfo("es-AR"))
                         </td>
                     </tr>
                 </table>
@@ -240,8 +241,8 @@
             {
                 <tr>
                     <td class="resumen-nombre">@concepto.Nombre</td>
-                    <td class="right">@concepto.PrecioSinFondo.ToString("C")</td>
-                    <td class="right">@concepto.PrecioConFondo.ToString("C")</td>
+                    <td class="right">@concepto.PrecioSinFondo.ToString("C", CultureInfo.GetCultureInfo("es-AR"))</td>
+                    <td class="right">@concepto.PrecioConFondo.ToString("C", CultureInfo.GetCultureInfo("es-AR"))</td>
                 </tr>
             }
         </table>
