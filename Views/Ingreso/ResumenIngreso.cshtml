@@ -3,6 +3,8 @@
 @using CemSys3.Helpers.Enumerable
 @using CemSys3.Enumerables
 @using CemSys3.ViewModels.Archivo
+@using System.Globalization;
+
 @model ResumenIngresoVM
 
 @{
@@ -410,7 +412,7 @@ new HistorialOffcanvasVM
                         string strPorcentaje = valorPorcentajeCapa.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
                         <option value="@apertura.ConceptoId" data-base="@strBase" data-porcentaje="@strPorcentaje">
-                            @apertura.Nombre (@total.ToString("C"))
+                            @apertura.Nombre (@total.ToString("C", CultureInfo.GetCultureInfo("es-AR")))
                         </option>
                     }
                 }
@@ -450,7 +452,7 @@ new HistorialOffcanvasVM
                         var totalRegla = regla.Temas.Sum(t => t.Conceptos.Sum(c => c.PrecioBase));
                         var tipoParcelaNombre = EnumHelper.GetDisplayNameByValue<TipoParcelaEnum>(regla.TipoParcelaId);
                         <option value="@indexRegla" class="form-control form-select">
-                            @regla.NombreRegla (@totalRegla.ToString("C"))
+                            @regla.NombreRegla (@totalRegla.ToString("C", CultureInfo.GetCultureInfo("es-AR")))
                         </option>
                         indexRegla++;
                     }
@@ -516,7 +518,7 @@ new HistorialOffcanvasVM
 
                                     <td class="td-contenido">@concepto.Nombre</td>
                                     <td class="right td-importe">
-                                        @concepto.PrecioBase.ToString("C")
+                                        @concepto.PrecioBase.ToString("C", CultureInfo.GetCultureInfo("es-AR"))
                                     </td>
                                 </tr>
                             }
@@ -526,7 +528,7 @@ new HistorialOffcanvasVM
                                 <td></td>
                                 <td class="bold">Total</td>
                                 <td class="right bold">
-                                    @totalTema.ToString("C")
+                                    @totalTema.ToString("C", CultureInfo.GetCultureInfo("es-AR"))
                                 </td>
                             </tr>
 
@@ -540,7 +542,7 @@ new HistorialOffcanvasVM
                         <tr class="total-ingreso">
                             <td colspan="2" class="bold">TOTAL INGRESO</td>
                             <td class="right bold">
-                                @regla.Temas.Sum(t => t.Conceptos.Sum(c => c.PrecioBase)).ToString("C")
+                                @regla.Temas.Sum(t => t.Conceptos.Sum(c => c.PrecioBase)).ToString("C", CultureInfo.GetCultureInfo("es-AR"))
                             </td>
                         </tr>
                     </table>
